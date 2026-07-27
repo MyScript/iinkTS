@@ -20,6 +20,40 @@ import type { IITranslateManager } from "./transform/IITranslateManager"
 
 /**
  * @group Manager
+ * @remarks Level of text selection granularity
+ */
+export type TTextSelectionLevel = "element" | "word" | "char"
+
+/**
+ * @group Manager
+ * @remarks Level of math selection granularity
+ */
+export type TMathSelectionLevel = "element" | "operand"
+
+/**
+ * @group Manager
+ * @remarks Level of shape (Node/Edge) selection granularity
+ */
+export type TShapeSelectionLevel = "element" | "stroke"
+
+/**
+ * @group Manager
+ * @remarks Level of symbol selection
+ */
+export type TSelectionConfig = {
+  textLevel: TTextSelectionLevel
+  mathLevel: TMathSelectionLevel
+  shapeLevel: TShapeSelectionLevel
+}
+
+export const DefaultSelectionConfig: TSelectionConfig = {
+  textLevel: "element",
+  mathLevel: "element",
+  shapeLevel: "element",
+}
+
+/**
+ * @group Manager
  */
 export class IISelectionManager extends IIAbstractManager {
   protected managerName = "IISelectionManager"
@@ -429,7 +463,7 @@ export class IISelectionManager extends IIAbstractManager {
    * merged into the selection rectangle even though ghost strokes aren't real model symbols.
    */
   private getGhostBoxesForSelectedMath(symbols: TSymbol[]): TBox[] {
-    if (this.canvas.configuration.mathSelectionLevel !== "element") {
+    if (this.canvas.configuration.selection.mathLevel !== "element") {
       return []
     }
     const jiixBlockIds = new Set<string>()
@@ -742,7 +776,7 @@ export class IISelectionManager extends IIAbstractManager {
     selected: Set<string>
     covered: Set<string>
   } | null {
-    const groups = this.canvas.jiix.getTextSelectionGroups(this.canvas.configuration.textSelectionLevel)
+    const groups = this.canvas.jiix.getTextSelectionGroups(this.canvas.configuration.selection.textLevel)
     if (groups.length === 0) {
       return null
     }
@@ -768,7 +802,7 @@ export class IISelectionManager extends IIAbstractManager {
     selected: Set<string>
     covered: Set<string>
   } | null {
-    const groups = this.canvas.jiix.getMathSelectionGroups(this.canvas.configuration.mathSelectionLevel)
+    const groups = this.canvas.jiix.getMathSelectionGroups(this.canvas.configuration.selection.mathLevel)
     if (groups.length === 0) {
       return null
     }
@@ -794,7 +828,7 @@ export class IISelectionManager extends IIAbstractManager {
     selected: Set<string>
     covered: Set<string>
   } | null {
-    const groups = this.canvas.jiix.getShapeSelectionGroups(this.canvas.configuration.shapeSelectionLevel)
+    const groups = this.canvas.jiix.getShapeSelectionGroups(this.canvas.configuration.selection.shapeLevel)
     if (groups.length === 0) {
       return null
     }
@@ -889,7 +923,7 @@ export class IISelectionManager extends IIAbstractManager {
    * In "operand" mode: a block qualifies only if ALL its strokes are selected.
    */
   private getQualifyingMathBlockIds(): string[] {
-    const mathLevel = this.canvas.configuration.mathSelectionLevel
+    const mathLevel = this.canvas.configuration.selection.mathLevel
     const selectedMathStrokes = this.model.symbolsSelected.filter(isRecognizedMath) as TStroke[]
 
     if (selectedMathStrokes.length === 0) {
@@ -946,7 +980,7 @@ export class IISelectionManager extends IIAbstractManager {
    * frozen draw result stroke (if any). No-op in "operand" mode.
    */
   expandSelectionForMathBlocks(): void {
-    if (this.canvas.configuration.mathSelectionLevel !== "element") {
+    if (this.canvas.configuration.selection.mathLevel !== "element") {
       return
     }
 

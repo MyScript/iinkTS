@@ -125,6 +125,27 @@ const inputMap = {
       value: v,
     })),
   },
+  "selection.textLevel": {
+    type: "select",
+    values: ["element", "word", "char"].map((v) => ({
+      label: v,
+      value: v,
+    })),
+  },
+  "selection.mathLevel": {
+    type: "select",
+    values: ["element", "operand"].map((v) => ({
+      label: v,
+      value: v,
+    })),
+  },
+  "selection.shapeLevel": {
+    type: "select",
+    values: ["element", "stroke"].map((v) => ({
+      label: v,
+      value: v,
+    })),
+  },
 }
 
 Object.keys(iink.LoggerCategory).forEach((loggerKey) => {
@@ -238,7 +259,7 @@ function buildSelect(path, name, values, options, multiple = false) {
 
 function loadCanvasType() {
   ;["INTERACTIVE_INK", "INTERACTIVE_INK_SSR", "INK_V1", "INK_V2"].forEach((type) => {
-    const selected = type === (canvas?.type || "INTERACTIVE_INK_SSR")
+    const selected = type === (canvas?.type || "INTERACTIVE_INK")
     canvasTypeSelect.appendChild(new Option(type, type, selected, selected))
   })
   canvasTypeSelect.addEventListener("input", () => {
@@ -247,6 +268,7 @@ function loadCanvasType() {
 }
 
 function renderPartialConfiguration(conf, currentPath = "") {
+  if (!conf) return
   const fragment = document.createDocumentFragment()
   Object.keys(conf).forEach((key) => {
     if (key === "server") return
@@ -272,7 +294,8 @@ function renderPartialConfiguration(conf, currentPath = "") {
           if (Array.isArray(value)) {
             fragment.appendChild(buildSelect(localPath, key, value, value))
           } else {
-            fragment.appendChild(createCard(key, renderPartialConfiguration(value, localPath)))
+            const child = renderPartialConfiguration(value, localPath)
+            if (child) fragment.appendChild(createCard(key, child))
           }
           break
         case "number":
@@ -318,7 +341,8 @@ function renderConfiguration(configuration) {
     .filter((key) => key !== "server")
     .forEach((key) => {
       const conf = configuration[key]
-      configurationContent.appendChild(createCard(key, renderPartialConfiguration(conf, key)))
+      const child = renderPartialConfiguration(conf, key)
+      if (child) configurationContent.appendChild(createCard(key, child))
     })
 }
 

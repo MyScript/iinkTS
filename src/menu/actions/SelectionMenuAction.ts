@@ -33,9 +33,9 @@ export class SelectionMenuAction extends SubMenuItem {
           { label: "Word", value: "word" },
           { label: "Character", value: "char" },
         ],
-        getValue: (canvas: TInteractiveInkCanvas) => canvas.configuration.textSelectionLevel,
+        getValue: (canvas: TInteractiveInkCanvas) => canvas.configuration.selection.textLevel,
         setValue: (canvas: TInteractiveInkCanvas, value: string) => {
-          canvas.configuration.textSelectionLevel = value as "element" | "word" | "char"
+          canvas.configuration.selection.textLevel = value as "element" | "word" | "char"
         },
       })
     }
@@ -49,9 +49,9 @@ export class SelectionMenuAction extends SubMenuItem {
           { label: "Element", value: "element" },
           { label: "Operand", value: "operand" },
         ],
-        getValue: (canvas: TInteractiveInkCanvas) => canvas.configuration.mathSelectionLevel,
+        getValue: (canvas: TInteractiveInkCanvas) => canvas.configuration.selection.mathLevel,
         setValue: (canvas: TInteractiveInkCanvas, value: string) => {
-          canvas.configuration.mathSelectionLevel = value as "element" | "operand"
+          canvas.configuration.selection.mathLevel = value as "element" | "operand"
         },
       })
     }
@@ -65,9 +65,9 @@ export class SelectionMenuAction extends SubMenuItem {
           { label: "Element", value: "element" },
           { label: "Stroke", value: "stroke" },
         ],
-        getValue: (canvas: TInteractiveInkCanvas) => canvas.configuration.shapeSelectionLevel,
+        getValue: (canvas: TInteractiveInkCanvas) => canvas.configuration.selection.shapeLevel,
         setValue: (canvas: TInteractiveInkCanvas, value: string) => {
-          canvas.configuration.shapeSelectionLevel = value as "element" | "stroke"
+          canvas.configuration.selection.shapeLevel = value as "element" | "stroke"
         },
       })
     }
