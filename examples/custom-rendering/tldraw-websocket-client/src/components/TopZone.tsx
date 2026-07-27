@@ -18,7 +18,7 @@ export function TopZone() {
       style={{ backgroundColor: activeAutoConvert ? "#4caf50" : "#4caf5075", color: "white", borderRadius: "4px", padding: "8px 16px" }}
       onClick={onActiveAutoConvert}
     >
-      <TldrawUiButtonLabel>Auto conversion {activeAutoConvert ? "activée" : "désactivée"}</TldrawUiButtonLabel>
+      <TldrawUiButtonLabel>Auto conversion {activeAutoConvert ? "enabled" : "disabled"}</TldrawUiButtonLabel>
     </TldrawUiButton>
 	)
 }
