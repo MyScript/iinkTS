@@ -1,6 +1,6 @@
 import { LoggerCategory, LoggerLevel, LoggerManager } from "@/logger"
 import type { TPointer } from "@/symbol"
-import { getSvgTransformVersion } from "@/utils"
+import { bumpSvgTransformVersion, getSvgTransformVersion } from "@/utils"
 
 import type { TGrabberConfiguration } from "./GrabberConfiguration"
 
@@ -30,6 +30,22 @@ export class PointerEventGrabber {
   protected capturing: boolean = false
   protected pointerType?: string
   protected prevent = (e: Event) => e.preventDefault()
+
+  /**
+   * Scrolling any ancestor moves the capture SVG on screen without touching its own
+   * pan/zoom/resize, so `getCachedScreenCTM`'s version-keyed cache never sees it happen on its
+   * own - left unhandled, every point captured after a scroll would map to the pre-scroll
+   * screen position, offsetting the whole stroke. `scroll` doesn't bubble, so this is
+   * registered on `window` with `capture: true` to still observe it from any scrollable
+   * ancestor between `window` and `layerCapture`.
+   */
+  #scrollHandler = () => {
+    const svgElement =
+      this.layerCapture instanceof SVGSVGElement ? this.layerCapture : this.layerCapture.querySelector("svg")
+    if (svgElement) {
+      bumpSvgTransformVersion(svgElement)
+    }
+  }
 
   onPointerDown?: (info: TPointerInfo) => void
   onPointerMove?: (info: TPointerInfo) => void
@@ -244,10 +260,12 @@ export class PointerEventGrabber {
     this.layerCapture.addEventListener("pointerleave", this.pointerUpHandler, this.configuration.listenerOptions)
     this.layerCapture.addEventListener("pointerout", this.pointerOutHandler, this.configuration.listenerOptions)
     this.layerCapture.addEventListener("contextmenu", this.contextMenuHandler)
+    window.addEventListener("scroll", this.#scrollHandler, { capture: true, passive: true })
   }
 
   detach() {
     this.#logger.info("detach")
+    window.removeEventListener("scroll", this.#scrollHandler, { capture: true })
     this.layerCapture?.style.removeProperty("touch-action")
     this.layerCapture?.removeEventListener("pointerdown", this.pointerDownHandler, this.configuration.listenerOptions)
     this.layerCapture?.removeEventListener("pointermove", this.pointerMoveHandler, this.configuration.listenerOptions)
