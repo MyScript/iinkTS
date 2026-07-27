@@ -1,16 +1,16 @@
-import { createCanvasMock, asEditor } from "../../../__mocks__/createCanvasMock"
+import { createCanvasMock, asCanvas } from "../../../__mocks__/createCanvasMock"
 import { buildIIStroke, buildIIText } from "../../../helpers"
 import { SurroundGestureHandler, GestureHelpers, TGesture, SurroundAction, StrokeOps } from "@/iink"
 
 describe("SurroundGestureHandler.ts", () => {
-  let editor: ReturnType<typeof createCanvasMock>
+  let canvas: ReturnType<typeof createCanvasMock>
   let helpers: GestureHelpers
   let handler: SurroundGestureHandler
 
   beforeEach(() => {
-    editor = createCanvasMock()
-    helpers = new GestureHelpers(asEditor(editor))
-    handler = new SurroundGestureHandler(asEditor(editor), helpers)
+    canvas = createCanvasMock()
+    helpers = new GestureHelpers(asCanvas(canvas))
+    handler = new SurroundGestureHandler(asCanvas(canvas), helpers)
   })
 
   test("should instantiate", () => {
@@ -24,7 +24,7 @@ describe("SurroundGestureHandler.ts", () => {
       StrokeOps.addPointer(stroke, { x: 10, y: 10, p: 1, t: 100 })
       StrokeOps.addPointer(stroke, { x: 20, y: 20, p: 1, t: 200 })
 
-      editor.model.addSymbol(stroke)
+      canvas.model.addSymbol(stroke)
 
       const gestureStroke = buildIIStroke()
       StrokeOps.addPointer(gestureStroke, { x: 5, y: 5, p: 1, t: 300 })
@@ -39,7 +39,7 @@ describe("SurroundGestureHandler.ts", () => {
       }
 
       // Set surround action to Select
-      editor.gesture.surroundAction = SurroundAction.Select
+      canvas.gesture.surroundAction = SurroundAction.Select
 
       await handler.apply(gestureStroke, gesture)
 
@@ -62,7 +62,7 @@ describe("SurroundGestureHandler.ts", () => {
         boundingBox: { x: 10, y: 10, width: 20, height: 16 },
       })
 
-      editor.model.addSymbol(text)
+      canvas.model.addSymbol(text)
 
       const gestureStroke = buildIIStroke()
       StrokeOps.addPointer(gestureStroke, { x: 5, y: 5, p: 1, t: 100 })
@@ -77,7 +77,7 @@ describe("SurroundGestureHandler.ts", () => {
       }
 
       // Set surround action to Highlight
-      editor.gesture.surroundAction = SurroundAction.Highlight
+      canvas.gesture.surroundAction = SurroundAction.Highlight
 
       await handler.apply(gestureStroke, gesture)
 
@@ -91,7 +91,7 @@ describe("SurroundGestureHandler.ts", () => {
       StrokeOps.addPointer(stroke, { x: 20, y: 20, p: 1, t: 200 })
       stroke.jiixBlockType = "Text"
 
-      editor.model.addSymbol(stroke)
+      canvas.model.addSymbol(stroke)
 
       const gestureStroke = buildIIStroke()
       StrokeOps.addPointer(gestureStroke, { x: 5, y: 5, p: 1, t: 300 })
@@ -106,7 +106,7 @@ describe("SurroundGestureHandler.ts", () => {
       }
 
       // Set surround action to Surround
-      editor.gesture.surroundAction = SurroundAction.Surround
+      canvas.gesture.surroundAction = SurroundAction.Surround
 
       await handler.apply(gestureStroke, gesture)
 
@@ -127,7 +127,7 @@ describe("SurroundGestureHandler.ts", () => {
         strokeAfterIds: [],
       }
 
-      editor.gesture.surroundAction = SurroundAction.Select
+      canvas.gesture.surroundAction = SurroundAction.Select
 
       await handler.apply(gestureStroke, gesture)
 
@@ -148,7 +148,7 @@ describe("SurroundGestureHandler.ts", () => {
       }
 
       // Set an invalid surround action (cast to bypass type check for testing)
-      editor.gesture.surroundAction = "UNKNOWN" as any
+      canvas.gesture.surroundAction = "UNKNOWN" as any
 
       await handler.apply(gestureStroke, gesture)
 
@@ -167,8 +167,8 @@ describe("SurroundGestureHandler.ts", () => {
       StrokeOps.addPointer(stroke2, { x: 100, y: 100, p: 1, t: 300 })
       StrokeOps.addPointer(stroke2, { x: 105, y: 105, p: 1, t: 400 })
 
-      editor.model.addSymbol(stroke1)
-      editor.model.addSymbol(stroke2)
+      canvas.model.addSymbol(stroke1)
+      canvas.model.addSymbol(stroke2)
 
       const gestureStroke = buildIIStroke()
       StrokeOps.addPointer(gestureStroke, { x: 5, y: 5, p: 1, t: 500 })
@@ -182,7 +182,7 @@ describe("SurroundGestureHandler.ts", () => {
         strokeAfterIds: [],
       }
 
-      editor.gesture.surroundAction = SurroundAction.Select
+      canvas.gesture.surroundAction = SurroundAction.Select
 
       await handler.apply(gestureStroke, gesture)
 

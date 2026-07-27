@@ -43,7 +43,7 @@
         margin: 0;
       }
 
-      #editorBox {
+      #canvasBox {
         border: none;
         background-color: lightgrey;
         visibility: hidden;
@@ -88,7 +88,7 @@
         transition-duration: var(--animation-duration);
       }
 
-      .editorPosition {
+      .canvasPosition {
         position: absolute;
         left: 10vw !important;
         top: calc(20% - 64px);
@@ -217,7 +217,7 @@
             </button>
           </nav>
           <div id="rootEl"></div>
-          <div id="editorBox"></div>
+          <div id="canvasBox"></div>
         </div>
       </div>
     </div>
@@ -264,9 +264,9 @@
         document.querySelector('#canvas-modal').classList.toggle('visible')
         document.querySelector('nav').classList.toggle('visible')
         document.querySelector('#rootEl').classList.toggle('visible')
-        editorBox.classList.toggle('visible')
-        editorBox.classList.toggle('editorPosition')
-        editorBox.classList.toggle('animateResize')
+        canvasBox.classList.toggle('visible')
+        canvasBox.classList.toggle('canvasPosition')
+        canvasBox.classList.toggle('animateResize')
       }
 
       function getUrlParameter(name) {
@@ -279,7 +279,7 @@
       }
 
       let canvas
-      const editorOptions = {
+      const canvasOptions = {
         configuration: {
           recognition: {
             type: 'MATH',
@@ -302,7 +302,7 @@
         }
       }
 
-      async function loadEditor(options) {
+      async function loadCanvas(options) {
         showMainLoader()
         await canvas?.destroy()
         /**
@@ -324,7 +324,7 @@
         e.preventDefault()
         e.stopPropagation()
         const srcMathContentElement = e.currentTarget
-        const editorBox = document.querySelector('#editorBox')
+        const canvasBox = document.querySelector('#canvasBox')
         currentMathElement = srcMathContentElement
 
         const currentJiix = currentMathElement.getAttribute('data-jiix')
@@ -342,13 +342,13 @@
         document.querySelector('nav').classList.toggle('visible')
         document.querySelector('#rootEl').classList.toggle('visible')
 
-        editorBox.style = `left: ${ srcElementLeft }px; top: ${ srcElementTop }px; height: ${ srcElementHeight }px; width: ${ srcElementWidth }px; `
-        editorBox.classList.toggle('visible')
-        editorBox.classList.toggle('animateResize')
+        canvasBox.style = `left: ${ srcElementLeft }px; top: ${ srcElementTop }px; height: ${ srcElementHeight }px; width: ${ srcElementWidth }px; `
+        canvasBox.classList.toggle('visible')
+        canvasBox.classList.toggle('animateResize')
 
         setTimeout(() => {
-          editorBox.classList.toggle('editorPosition')
-          editorBox.style = ''
+          canvasBox.classList.toggle('canvasPosition')
+          canvasBox.style = ''
         }, 0)
       }
 
@@ -368,7 +368,7 @@
         canvas?.convert()
       })
       showModalBtn.addEventListener('click', () => {
-        ModalCanvasOptions.show(loadEditor, editorOptions)
+        ModalCanvasOptions.show(loadCanvas, canvasOptions)
       })
 
       closeElement.addEventListener('click', () => {
@@ -389,13 +389,13 @@
         toggleView()
       })
 
-      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
 
       /**
        * We expose these objects to the window use it in test
        */
-      window.editorOptions = editorOptions
-      window.loadEditor = loadEditor
+      window.canvasOptions = canvasOptions
+      window.loadCanvas = loadCanvas
     </script>
     <script type="module" src="../components/code-viewer/code-viewer.js"></script>
     <script src="../assets/js/theme.js"></script>

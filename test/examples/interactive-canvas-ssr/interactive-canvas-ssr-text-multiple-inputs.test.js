@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test"
 import {
-  callEditorIdle,
+  callCanvasIdle,
   writePointers,
   waitForExportedEvent,
   passModalKey
@@ -13,7 +13,7 @@ const switchToOtherQuestion = async (page, inputId) => {
   await page.locator(`#${ inputId }`).scrollIntoViewIfNeeded()
   await page.locator(`#${ inputId }`).click()
   await page.locator(`#${ inputId } #rootEl`).waitFor("attached")
-  await callEditorIdle(page)
+  await callCanvasIdle(page)
 }
 
 test.describe("Interactive Canvas SSR Text Multiple Inputs", () => {

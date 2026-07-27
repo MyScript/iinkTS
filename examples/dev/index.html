@@ -47,7 +47,7 @@
        * we use an asynchronous function to be able to wait for the end of the initialization of the canvas
        * before connecting the different event listeners
        */
-      async function loadEditor(options) {
+      async function loadCanvas(options) {
         /**
          * get canvas instance from type
          * @param {Element} The DOM element to attach the ink paper
@@ -80,7 +80,7 @@
         });
       }
 
-      loadEditor(options).catch((error) => console.error(error));
+      loadCanvas(options).catch((error) => console.error(error));
     </script>
   </body>
 

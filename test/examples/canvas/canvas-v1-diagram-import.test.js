@@ -1,8 +1,8 @@
 import { test, expect } from "@playwright/test"
 import {
   waitForExportedEvent,
-  getEditorExports,
-  getEditorSymbols,
+  getCanvasExports,
+  getCanvasSymbols,
   passModalKey
 } from "../helper"
 
@@ -22,7 +22,7 @@ test.describe("Ink Canvas Diagram Import", () => {
       page.locator("#import-btn").click(),
     ])
     expect(Object.keys(exportedDatas["application/vnd.myscript.jiix"].elements)).toHaveLength(12)
-    expect(await getEditorSymbols(page)).toHaveLength(40)
+    expect(await getCanvasSymbols(page)).toHaveLength(40)
   })
 
   test("Nav actions", async ({ page }) => {
@@ -40,7 +40,7 @@ test.describe("Ink Canvas Diagram Import", () => {
         page.locator("#clear").click(),
       ])
       expect(promisesResult[0]).toBeFalsy()
-      expect(await getEditorExports(page)).toBeFalsy()
+      expect(await getCanvasExports(page)).toBeFalsy()
     })
 
     await test.step("should undo", async () => {
@@ -50,7 +50,7 @@ test.describe("Ink Canvas Diagram Import", () => {
       ])
       expect(Object.keys(exportedDatas["application/vnd.myscript.jiix"].elements)).toHaveLength(12)
 
-      expect(await getEditorSymbols(page)).toHaveLength(40)
+      expect(await getCanvasSymbols(page)).toHaveLength(40)
     })
 
     await test.step("should redo", async () => {
@@ -58,7 +58,7 @@ test.describe("Ink Canvas Diagram Import", () => {
         waitForExportedEvent(page),
         page.locator("#redo").click(),
       ])
-      expect(await getEditorSymbols(page)).toHaveLength(0)
+      expect(await getCanvasSymbols(page)).toHaveLength(0)
     })
   })
 })

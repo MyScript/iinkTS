@@ -10,7 +10,7 @@ import type { TPartialDeep } from "@/utils"
  * @remarks Menu action Import - Import de fichiers JSON
  */
 export class ImportMenuAction extends SubMenuItem {
-  constructor(editor: TInteractiveInkCanvas, idPrefix = "ms-menu-action") {
+  constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-action") {
     const config: TMenuSubMenu = {
       type: "submenu",
       id: `${idPrefix}-import`,
@@ -26,18 +26,18 @@ export class ImportMenuAction extends SubMenuItem {
           accept: ".json",
           multiple: false,
           buttonLabel: "Import",
-          action: async (editor, files) => {
+          action: async (canvas, files) => {
             if (files.length) {
               const fileString = await this.readFileAsText(files[0])
               const symbols = JSON.parse(fileString) as TPartialDeep<TSymbol>[]
-              await editor.createSymbols(symbols)
+              await canvas.createSymbols(symbols)
             }
           },
         },
       ],
     }
 
-    super(config, editor)
+    super(config, canvas)
   }
 
   private async readFileAsText(file: File): Promise<string> {

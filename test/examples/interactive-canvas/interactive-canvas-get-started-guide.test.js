@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test"
 import {
   passModalKey,
-  getEditorConfiguration,
+  getCanvasConfiguration,
   waitForUIUpdatedEvent
 } from "../helper"
 

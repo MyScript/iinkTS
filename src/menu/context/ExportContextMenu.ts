@@ -17,7 +17,7 @@ export type TContextExportConfig = boolean | TContextExportItemsConfig
  * @remarks Menu contextuel Export - Exporte les symboles sélectionnés
  */
 export class ExportContextMenu extends SubMenuItem {
-  constructor(editor: TInteractiveInkCanvas, idPrefix = "ms-menu-context", itemsConfig?: TContextExportItemsConfig) {
+  constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-context", itemsConfig?: TContextExportItemsConfig) {
     const enabled = (key: keyof TContextExportItemsConfig) => itemsConfig?.[key] !== false
 
     const config: TMenuSubMenu = {
@@ -33,7 +33,7 @@ export class ExportContextMenu extends SubMenuItem {
         id: `${idPrefix}-export-json`,
         type: "button",
         label: "json",
-        action: () => editor.downloadAsJson(editor.model.symbolsSelected.length > 0),
+        action: () => canvas.downloadAsJson(canvas.model.symbolsSelected.length > 0),
       })
     }
     if (enabled("svg")) {
@@ -41,7 +41,7 @@ export class ExportContextMenu extends SubMenuItem {
         id: `${idPrefix}-export-svg`,
         type: "button",
         label: "svg",
-        action: () => editor.downloadAsSVG(editor.model.symbolsSelected.length > 0),
+        action: () => canvas.downloadAsSVG(canvas.model.symbolsSelected.length > 0),
       })
     }
     if (enabled("png")) {
@@ -49,7 +49,7 @@ export class ExportContextMenu extends SubMenuItem {
         id: `${idPrefix}-export-png`,
         type: "button",
         label: "png",
-        action: () => editor.downloadAsPNG(editor.model.symbolsSelected.length > 0),
+        action: () => canvas.downloadAsPNG(canvas.model.symbolsSelected.length > 0),
       })
     }
     if (enabled("text")) {
@@ -57,10 +57,10 @@ export class ExportContextMenu extends SubMenuItem {
         id: `${idPrefix}-export-text`,
         type: "button",
         label: "text",
-        action: () => editor.downloadAsText(editor.model.symbolsSelected.length > 0),
+        action: () => canvas.downloadAsText(canvas.model.symbolsSelected.length > 0),
       })
     }
 
-    super(config, editor)
+    super(config, canvas)
   }
 }

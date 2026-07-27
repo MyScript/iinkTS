@@ -1,13 +1,13 @@
 import { test, expect } from '@playwright/test'
 import {
-  waitForEditorInit,
+  waitForCanvasInit,
   writeStrokes,
   waitForExportedEvent,
-  getEditorExportsType,
-  getEditorConfiguration,
-  callEditorIdle,
-  getEditorExports,
-  loadEditor,
+  getCanvasExportsType,
+  getCanvasConfiguration,
+  callCanvasIdle,
+  getCanvasExports,
+  loadCanvas,
   passModalKey
 } from '../helper'
 
@@ -34,7 +34,7 @@ test.describe('Interactive Canvas SSR Text', () => {
     })
 
     await expect(page.locator('#result')).toHaveText(h.exports['text/plain'].at(-1))
-    const exports = await getEditorExports(page)
+    const exports = await getCanvasExports(page)
     const jiixExpected = h.exports['application/vnd.myscript.jiix']
     const jiixReceived = exports['application/vnd.myscript.jiix']
     expect(jiixReceived).toEqual(jiixExpected)
@@ -69,7 +69,7 @@ test.describe('Interactive Canvas SSR Text', () => {
 
   test('SmartGuide', async ({ page }) => {
     await test.step('should not display', async () => {
-      const configuration = await getEditorConfiguration(page)
+      const configuration = await getCanvasConfiguration(page)
       const options = {
         configuration: {
           server: configuration.server,
@@ -81,13 +81,13 @@ test.describe('Interactive Canvas SSR Text', () => {
           }
         }
       }
-      await loadEditor(page, options)
-      await waitForEditorInit(page)
+      await loadCanvas(page, options)
+      await waitForCanvasInit(page)
       await expect(page.locator('.smartguide')).toBeHidden()
     })
 
     await test.step('should display', async () => {
-      const configuration = await getEditorConfiguration(page)
+      const configuration = await getCanvasConfiguration(page)
       const options = {
         configuration: {
           server: configuration.server,
@@ -99,8 +99,8 @@ test.describe('Interactive Canvas SSR Text', () => {
           }
         }
       }
-      await loadEditor(page, options)
-      await waitForEditorInit(page)
+      await loadCanvas(page, options)
+      await waitForCanvasInit(page)
       await expect(page.locator('.smartguide')).toBeVisible()
     })
 
@@ -109,13 +109,13 @@ test.describe('Interactive Canvas SSR Text', () => {
         waitForExportedEvent(page),
         writeStrokes(page, h.strokes)
       ])
-      await callEditorIdle(page)
+      await callCanvasIdle(page)
       await expect(page.locator('.prompter-text')).toBeVisible()
       await expect(page.locator('.prompter-text')).toHaveText(h.exports['text/plain'].at(-1))
     })
 
     await test.step('should select candidate', async () => {
-      const jiixExport = await getEditorExportsType(page, 'application/vnd.myscript.jiix')
+      const jiixExport = await getCanvasExportsType(page, 'application/vnd.myscript.jiix')
       await expect(page.locator('.prompter-text')).toHaveText(jiixExport.label)
       await expect(page.locator('.candidates')).toBeHidden()
 
@@ -145,7 +145,7 @@ test.describe('Interactive Canvas SSR Text', () => {
         page.locator(`.more-menu > button >> text=Convert`).click()
       ])
 
-      const convert = await getEditorExports(page)
+      const convert = await getCanvasExports(page)
       expect(convert).toBeDefined()
 
       await expect(page.locator('svg[data-layer="MODEL"] path').first()).not.toHaveAttribute('d', wrotePath)

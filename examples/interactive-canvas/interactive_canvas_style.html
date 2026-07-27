@@ -96,7 +96,7 @@
 
       <aside id="guide-panel" class="ex-panel">
         <p class="ex-panel-heading">CSS custom properties</p>
-        <p class="ex-panel-intro">Pass a <code>Record&lt;string, string&gt;</code> as <code>cssVars</code> in <code>editorOptions.configuration</code> to override any <code>--ms-ink-*</code> token on the canvas root element.</p>
+        <p class="ex-panel-intro">Pass a <code>Record&lt;string, string&gt;</code> as <code>cssVars</code> in <code>canvasOptions.configuration</code> to override any <code>--ms-ink-*</code> token on the canvas root element.</p>
 
         <div class="ex-panel-divider"></div>
 
@@ -529,13 +529,13 @@ Canvas.load(el, "INTERACTIVE_INK", {
       const codeDisplay = document.getElementById("codeDisplay")
       const themeBtns = document.querySelectorAll(".theme-btn")
 
-      const editorOptions = {}
+      const canvasOptions = {}
 
       function renderCode(themeKey) {
         codeDisplay.textContent = THEMES[themeKey].code
       }
 
-      async function loadEditor(options) {
+      async function loadCanvas(options) {
         if (options?.configuration?.server) {
           serverConfig = options.configuration.server
         }
@@ -578,15 +578,15 @@ Canvas.load(el, "INTERACTIVE_INK", {
         })
       })
       showModalBtn.addEventListener("click", () => {
-        ModalCanvasOptions.show(loadEditor, editorOptions)
+        ModalCanvasOptions.show(loadCanvas, canvasOptions)
       })
 
-      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
 
       renderCode(currentTheme)
 
-      window.editorOptions = editorOptions
-      window.loadEditor = loadEditor
+      window.canvasOptions = canvasOptions
+      window.loadCanvas = loadCanvas
     </script>
     <script type="module" src="../components/code-viewer/code-viewer.js"></script>
     <script src="../assets/js/theme.js"></script>

@@ -18,7 +18,7 @@ import { CanvasEventMock } from "./CanvasEventMock"
  * Returns a jest.fn()-backed stub that satisfies any interface structurally.
  * Memoizes on first access so call counts are consistent across multiple gets.
  * Supports property assignment so tests can override specific methods:
- *   `editor.selector.removeSelectedGroup = jest.fn()`
+ *   `canvas.selector.removeSelectedGroup = jest.fn()`
  */
 function stubManager<T>(): T {
   const store: Record<string | symbol, unknown> = {}
@@ -124,37 +124,37 @@ function createRendererStub(): TRendererStub {
 }
 
 /**
- * TEditorMock replaces the concrete SVGRenderer with a lightweight stub.
+ * TCanvasMock replaces the concrete SVGRenderer with a lightweight stub.
  * SVGRenderer has private fields so plain objects can't satisfy its type.
- * Pass TEditorMock to managers via `asEditor(editor)`.
+ * Pass TCanvasMock to managers via `asCanvas(canvas)`.
  */
-export type TEditorMock = Omit<TInteractiveInkCanvas, "renderer"> & {
+export type TCanvasMock = Omit<TInteractiveInkCanvas, "renderer"> & {
   renderer: TRendererStub
-  /** init() is public API but not yet in TInteractiveInkCanvas — exposed here for tests that call editor.init() */
+  /** init() is public API but not yet in TInteractiveInkCanvas — exposed here for tests that call canvas.init() */
   init: jest.Mock<Promise<void>>
 }
 
 /**
  * Lightweight factory returning a plain object satisfying TInteractiveInkCanvas.
- * No real editor is instantiated — all methods are jest.fn().
+ * No real canvas is instantiated — all methods are jest.fn().
  *
  * Note: the return type exposes `renderer` as `TRendererStub` (not `SVGRenderer`)
- * because SVGRenderer has private fields. Pass to managers with `asEditor(editor)`.
+ * because SVGRenderer has private fields. Pass to managers with `asCanvas(canvas)`.
  * When a `TRenderer` interface is extracted from SVGRenderer the cast goes away.
  *
  * @param overrides - Partial overrides merged on top of defaults.
  *
  * @example
- * const editor = createCanvasMock()
- * const manager = new IIMoveManager(asEditor(editor))
- * // introspect: editor.renderer.drawSymbol.mock.calls
+ * const canvas = createCanvasMock()
+ * const manager = new IIMoveManager(asCanvas(canvas))
+ * // introspect: canvas.renderer.drawSymbol.mock.calls
  *
  * @example with model pre-populated
  * const model = new IIModel()
  * model.addSymbol(buildIIStroke())
- * const editor = createCanvasMock({ model })
+ * const canvas = createCanvasMock({ model })
  */
-export function createCanvasMock(overrides: Partial<TEditorMock> = {}): TEditorMock {
+export function createCanvasMock(overrides: Partial<TCanvasMock> = {}): TCanvasMock {
   const configuration =
     overrides.configuration ??
     new InteractiveInkCanvasConfiguration(JSON.parse(JSON.stringify(DefaultInteractiveInkCanvasConfiguration)))
@@ -349,13 +349,13 @@ export function createCanvasMock(overrides: Partial<TEditorMock> = {}): TEditorM
 
   Object.assign(base, overrides)
 
-  return base as unknown as TEditorMock
+  return base as unknown as TCanvasMock
 }
 
 /**
- * Casts TEditorMock to TInteractiveInkCanvas for passing to managers.
- * The cast is necessary because TEditorMock uses TRendererStub instead of SVGRenderer.
+ * Casts TCanvasMock to TInteractiveInkCanvas for passing to managers.
+ * The cast is necessary because TCanvasMock uses TRendererStub instead of SVGRenderer.
  */
-export function asEditor(mock: TEditorMock): TInteractiveInkCanvas {
+export function asCanvas(mock: TCanvasMock): TInteractiveInkCanvas {
   return mock as unknown as TInteractiveInkCanvas
 }

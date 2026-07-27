@@ -1,10 +1,10 @@
 import { test, expect } from "@playwright/test"
 import {
   writeStrokes,
-  getEditorExports,
+  getCanvasExports,
   waitForImportedEvent,
   waitForExportedEvent,
-  callEditorIdle,
+  callCanvasIdle,
   passModalKey,
 } from "../helper"
 
@@ -217,8 +217,8 @@ test.describe("Interactive Canvas SSR Math Inside Page", () => {
       })
 
       await test.step(`should import data-jiix`, async () => {
-        await callEditorIdle(page)
-        const currentExport = await getEditorExports(page)
+        await callCanvasIdle(page)
+        const currentExport = await getCanvasExports(page)
         expect(currentExport["application/x-latex"]).toEqual(mc.latex)
       })
 
@@ -227,21 +227,21 @@ test.describe("Interactive Canvas SSR Math Inside Page", () => {
           waitForExportedEvent(page),
           writeStrokes(page, mc.strokesToWrite),
         ])
-        await callEditorIdle(page)
-        const currentExport = await getEditorExports(page)
+        await callCanvasIdle(page)
+        const currentExport = await getCanvasExports(page)
         expect(currentExport["application/x-latex"]).toEqual(
           mc.latexAfterWriting
         )
       })
 
       await test.step(`should close modal canvas`, async () => {
-        await callEditorIdle(page)
+        await callCanvasIdle(page)
         await page.locator("#close").click()
         await expect(page.locator("#canvas-modal")).toBeHidden()
       })
 
       await test.step(`should update math content`, async () => {
-        await callEditorIdle(page)
+        await callCanvasIdle(page)
         await expect(page.locator(`#${mc.id} .katex-html`)).not.toHaveText(
           mc.textContent
         )
@@ -253,8 +253,8 @@ test.describe("Interactive Canvas SSR Math Inside Page", () => {
           page.locator(`#${mc.id}`).click(),
         ])
         await expect(page.locator("#canvas-modal")).toBeVisible()
-        await callEditorIdle(page)
-        const currentExport = await getEditorExports(page)
+        await callCanvasIdle(page)
+        const currentExport = await getCanvasExports(page)
         expect(currentExport["application/x-latex"]).toEqual(
           mc.latexAfterWriting
         )

@@ -1,13 +1,13 @@
-import { createCanvasMock, asEditor } from "../__mocks__/createCanvasMock"
+import { createCanvasMock, asCanvas } from "../__mocks__/createCanvasMock"
 import { MathContextMenu } from "@/iink"
 
 describe("MathContextMenu.ts", () => {
-  let editor: ReturnType<typeof createCanvasMock>
+  let canvas: ReturnType<typeof createCanvasMock>
   let mathMenu: MathContextMenu
 
   beforeEach(() => {
-    editor = createCanvasMock()
-    mathMenu = new MathContextMenu(asEditor(editor))
+    canvas = createCanvasMock()
+    mathMenu = new MathContextMenu(asCanvas(canvas))
     document.body.innerHTML = ""
   })
 
@@ -26,7 +26,7 @@ describe("MathContextMenu.ts", () => {
     })
 
     test("should create with custom id prefix", () => {
-      const customMenu = new MathContextMenu(asEditor(editor), "custom-prefix")
+      const customMenu = new MathContextMenu(asCanvas(canvas), "custom-prefix")
       expect(customMenu.id).toBe("custom-prefix-math")
       expect(customMenu.idEditVariables).toBe("custom-prefix-math-variables")
       expect(customMenu.idNumericalComputation).toBe("custom-prefix-math-numerical-computation")
@@ -142,37 +142,37 @@ describe("MathContextMenu.ts", () => {
     })
   })
 
-  describe("editor math methods", () => {
+  describe("canvas math methods", () => {
     test("should have math.getVariables method available", () => {
-      expect(editor.math.getVariables).toBeDefined()
-      expect(typeof editor.math.getVariables).toBe("function")
+      expect(canvas.math.getVariables).toBeDefined()
+      expect(typeof canvas.math.getVariables).toBe("function")
     })
 
     test("should have math.setListVariableValue method available", () => {
-      expect(editor.math.setListVariableValue).toBeDefined()
-      expect(typeof editor.math.setListVariableValue).toBe("function")
+      expect(canvas.math.setListVariableValue).toBeDefined()
+      expect(typeof canvas.math.setListVariableValue).toBe("function")
     })
 
     test("should have math.computeNumericalResult method available", () => {
-      expect(editor.math.computeNumericalResult).toBeDefined()
-      expect(typeof editor.math.computeNumericalResult).toBe("function")
+      expect(canvas.math.computeNumericalResult).toBeDefined()
+      expect(typeof canvas.math.computeNumericalResult).toBe("function")
     })
 
     test("should have math.getEvaluables method available", () => {
-      expect(editor.math.getEvaluables).toBeDefined()
-      expect(typeof editor.math.getEvaluables).toBe("function")
+      expect(canvas.math.getEvaluables).toBeDefined()
+      expect(typeof canvas.math.getEvaluables).toBe("function")
     })
 
     test("should have math.evaluateFunction method available", () => {
-      expect(editor.math.evaluateFunction).toBeDefined()
-      expect(typeof editor.math.evaluateFunction).toBe("function")
+      expect(canvas.math.evaluateFunction).toBeDefined()
+      expect(typeof canvas.math.evaluateFunction).toBe("function")
     })
 
     test("math.getVariables returns a promise", async () => {
-      editor.math.getVariables = jest.fn().mockResolvedValue([])
-      const result = await editor.math.getVariables("test-id")
+      canvas.math.getVariables = jest.fn().mockResolvedValue([])
+      const result = await canvas.math.getVariables("test-id")
       expect(result).toEqual([])
-      expect(editor.math.getVariables).toHaveBeenCalledWith("test-id")
+      expect(canvas.math.getVariables).toHaveBeenCalledWith("test-id")
     })
 
     test("getEvaluables returns evaluable functions", async () => {
@@ -180,10 +180,10 @@ describe("MathContextMenu.ts", () => {
         { inputName: "x", outputName: "f" },
         { inputName: "t", outputName: "g" },
       ]
-      editor.math.getEvaluables = jest.fn().mockResolvedValue(evaluables)
-      const result = await editor.math.getEvaluables("test-id")
+      canvas.math.getEvaluables = jest.fn().mockResolvedValue(evaluables)
+      const result = await canvas.math.getEvaluables("test-id")
       expect(result).toEqual(evaluables)
-      expect(editor.math.getEvaluables).toHaveBeenCalledWith("test-id")
+      expect(canvas.math.getEvaluables).toHaveBeenCalledWith("test-id")
     })
   })
 
@@ -200,7 +200,7 @@ describe("MathContextMenu.ts", () => {
     })
 
     test("should not use default prefix with custom prefix", () => {
-      const customMenu = new MathContextMenu(asEditor(editor), "test")
+      const customMenu = new MathContextMenu(asCanvas(canvas), "test")
       expect(customMenu.id).toBe("test-math")
       expect(customMenu.id).not.toContain("ms-menu-context")
     })

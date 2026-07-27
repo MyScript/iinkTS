@@ -8,15 +8,15 @@ import { ButtonMenuItem } from "@/menu/items/ButtonMenuItem"
  * @remarks Menu action Convert
  */
 export class ConvertMenuAction extends ButtonMenuItem {
-  constructor(editor: TInteractiveInkCanvas, idPrefix = "ms-menu-action") {
+  constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-action") {
     const config: TMenuButton = {
       type: "button",
       id: `${idPrefix}-convert`,
       label: "Convert",
       icon: translateIcon,
-      action: (editor) => editor.convert(),
-      disabled: (editor) => !editor.extractStrokesFromSymbols(editor.model.symbols).length,
+      action: (canvas) => canvas.convert(),
+      disabled: (canvas) => !canvas.extractStrokesFromSymbols(canvas.model.symbols).length,
     }
-    super(config, editor)
+    super(config, canvas)
   }
 }

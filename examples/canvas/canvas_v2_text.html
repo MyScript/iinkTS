@@ -71,7 +71,7 @@
       redoElement.addEventListener("click", () => {
         canvas?.redo()
       })
-      const editorOptions = {
+      const canvasOptions = {
         configuration: {
           recognition: {
             type: "TEXT",
@@ -91,15 +91,15 @@
       let languageList
 
       showModalBtn.addEventListener("click", () => {
-        ModalCanvasOptions.show(loadEditor, editorOptions)
+        ModalCanvasOptions.show(loadCanvas, canvasOptions)
       })
 
       languageElement.addEventListener("change", (e) => {
-        editorOptions.configuration.recognition.lang = e.target.value
-        loadEditor(editorOptions)
+        canvasOptions.configuration.recognition.lang = e.target.value
+        loadCanvas(canvasOptions)
       })
 
-      async function loadEditor(options) {
+      async function loadCanvas(options) {
         resultElement.innerHTML = ""
         await canvas?.destroy()
 
@@ -133,13 +133,13 @@
         })
       }
 
-      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
 
       /**
        * We expose these objects to the window use it in test
        */
-      window.editorOptions = editorOptions
-      window.loadEditor = loadEditor
+      window.canvasOptions = canvasOptions
+      window.loadCanvas = loadCanvas
     </script>
     <script type="module" src="../components/code-viewer/code-viewer.js"></script>
     <script src="../assets/js/theme.js"></script>

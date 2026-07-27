@@ -54,7 +54,7 @@
   --ms-ink-section-bg: #f5f5f5;
   --ms-ink-border-color: #e0e0e0;
 
-  /* Modal tokens — fallback to editor tokens, overridable independently */
+  /* Modal tokens — fallback to canvas tokens, overridable independently */
   --ms-ink-modal-backdrop: rgba(0, 0, 0, 0.3);
   --ms-ink-modal-bg: var(--ms-ink-section-bg);
   --ms-ink-modal-radius: var(--ms-ink-radius-lg);
@@ -79,7 +79,7 @@
   height: 100%;
   touch-action: none;
   container-type: inline-size;
-  container-name: editor;
+  container-name: canvas;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -200,7 +200,7 @@
   }
 }
 
-/** editor state **/
+/** canvas state **/
 .ms-ink .ms-ink-state {
   z-index: 99;
   position: absolute;
@@ -1123,8 +1123,8 @@
   color: var(--ms-ink-text-muted);
 }
 
-/** variable editor components **/
-.ms-ink .ms-var-editor-content {
+/** variable canvas components **/
+.ms-ink .ms-var-canvas-content {
   display: flex;
   flex-direction: column;
   gap: var(--ms-ink-spacing-lg);

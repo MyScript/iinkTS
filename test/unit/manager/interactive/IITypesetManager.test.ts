@@ -1,5 +1,5 @@
 import { buildIICircle, buildIIStroke, buildIIText } from "../../helpers"
-import { createCanvasMock, asEditor } from "../../__mocks__/createCanvasMock"
+import { createCanvasMock, asCanvas } from "../../__mocks__/createCanvasMock"
 import { IITypesetManager, OBBOps, TSymbolChar, SVGBuilder } from "@/iink"
 
 describe("IITypesetManager.ts", () => {
@@ -40,14 +40,14 @@ describe("IITypesetManager.ts", () => {
   })
 
   test("should create", () => {
-    const editor = createCanvasMock()
-    const manager = new IITypesetManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new IITypesetManager(asCanvas(canvas))
     expect(manager).toBeDefined()
   })
 
   test("should set chars BoundingBox", () => {
-    const editor = createCanvasMock()
-    const manager = new IITypesetManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new IITypesetManager(asCanvas(canvas))
     const text = buildIIText({ chars })
     const textEl = manager.renderer.buildElementFromSymbol(text) as SVGGElement
     manager.setCharsBounds(text, textEl)
@@ -57,16 +57,16 @@ describe("IITypesetManager.ts", () => {
   })
 
   test("should get element BoundingBox", () => {
-    const editor = createCanvasMock()
-    const manager = new IITypesetManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new IITypesetManager(asCanvas(canvas))
     const text = buildIIText({ chars })
     const textEl = manager.renderer.buildElementFromSymbol(text) as SVGGElement
     expect(manager.getElementBoundingBox(textEl)).toEqual({ x: 0, y: 0, width: 10, height: 10 })
   })
 
   test("should get BoundingBox", () => {
-    const editor = createCanvasMock()
-    const manager = new IITypesetManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new IITypesetManager(asCanvas(canvas))
     manager.renderer.layer = SVGBuilder.createLayer({ x: 0, y: 0, width: 100, height: 100 })
     manager.renderer.prependElement = jest.fn()
     const text = buildIIText({ chars })
@@ -76,16 +76,16 @@ describe("IITypesetManager.ts", () => {
   })
 
   test("shoud get Space Width", () => {
-    const editor = createCanvasMock()
-    const manager = new IITypesetManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new IITypesetManager(asCanvas(canvas))
     manager.getBoundingBox = jest.fn(() => ({ height: 12, width: 42, x: 0, y: 0 }))
     expect(manager.getSpaceWidth(12)).toEqual(42)
     expect(manager.getBoundingBox).toHaveBeenCalledTimes(1)
   })
 
   test("should update Text BoundingBox", () => {
-    const editor = createCanvasMock()
-    const manager = new IITypesetManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new IITypesetManager(asCanvas(canvas))
     manager.renderer.layer = SVGBuilder.createLayer({ x: 0, y: 0, width: 100, height: 100 })
     manager.renderer.prependElement = jest.fn()
     manager.getElementBoundingBox = jest.fn(() => ({ x: 1989, y: 27, width: 5, height: 42 }))
@@ -99,30 +99,30 @@ describe("IITypesetManager.ts", () => {
 
   describe("get symbols with row index", () => {
     const rowHeight = 10
-    const editor = createCanvasMock()
-    editor.configuration.rendering.guides.gap = rowHeight
-    const manager = new IITypesetManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    canvas.configuration.rendering.guides.gap = rowHeight
+    const manager = new IITypesetManager(asCanvas(canvas))
 
     const stroke51 = buildIIStroke({ box: { height: 9, width: 10, x: 0, y: 4.6 * rowHeight } })
-    editor.model.addSymbol(stroke51)
+    canvas.model.addSymbol(stroke51)
 
     const stroke12 = buildIIStroke({ box: { height: 9, width: 100, x: 50, y: rowHeight / 2 } })
-    editor.model.addSymbol(stroke12)
+    canvas.model.addSymbol(stroke12)
 
     const circle13 = buildIICircle({ center: { x: 200, y: rowHeight * 1.4 }, radius: 5 })
-    editor.model.addSymbol(circle13)
+    canvas.model.addSymbol(circle13)
 
     const circle22 = buildIICircle({ center: { x: 200, y: rowHeight * 2.25 }, radius: 5 })
-    editor.model.addSymbol(circle22)
+    canvas.model.addSymbol(circle22)
 
     const stroke21 = buildIIStroke({ box: { height: 9, width: 10, x: 0, y: 1.6 * rowHeight } })
-    editor.model.addSymbol(stroke21)
+    canvas.model.addSymbol(stroke21)
 
     const stroke11 = buildIIStroke({ box: { height: 9, width: 10, x: 0, y: rowHeight / 2 } })
-    editor.model.addSymbol(stroke11)
+    canvas.model.addSymbol(stroke11)
 
     const stroke31 = buildIIStroke({ box: { height: 9, width: 10, x: 0, y: 2.6 * rowHeight } })
-    editor.model.addSymbol(stroke31)
+    canvas.model.addSymbol(stroke31)
 
     test("shoud get rowIndex for each symbols", () => {
       expect(manager.getSymbolRowIndex(stroke11)).toEqual(1)

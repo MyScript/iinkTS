@@ -28,7 +28,7 @@ export class ThemeMenuAction extends SubMenuItem {
       items: [],
     }
     super(config, canvas)
-    this.themes = themes ?? CanvasThemes.EDITOR_THEMES
+    this.themes = themes ?? CanvasThemes.THEMES
     this.currentThemeId = CanvasThemes.getSavedThemeId()
   }
 

@@ -18,7 +18,7 @@ export type TExportActionConfig = boolean | TExportActionItemsConfig
  * @remarks Menu action Export - Export en différents formats
  */
 export class ExportMenuAction extends SubMenuItem {
-  constructor(editor: TInteractiveInkCanvas, idPrefix = "ms-menu-action", itemsConfig?: TExportActionItemsConfig) {
+  constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-action", itemsConfig?: TExportActionItemsConfig) {
     const enabled = (key: keyof TExportActionItemsConfig) => itemsConfig?.[key] !== false
 
     const config: TMenuSubMenu = {
@@ -64,6 +64,6 @@ export class ExportMenuAction extends SubMenuItem {
       })
     }
 
-    super(config, editor)
+    super(config, canvas)
   }
 }

@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test"
 import {
   writeStrokes,
   waitForExportedEvent,
-  callEditorIdle,
+  callCanvasIdle,
   passModalKey,
 } from "../helper"
 import ponyErase from "../__dataset__/ponyErase"
@@ -33,7 +33,7 @@ test.describe("Interactive Canvas SSR Text erase", () => {
   })
 
   test("should erase stroke", async ({ page }) => {
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
     await Promise.all([
       waitForExportedEvent(page),
       writeStrokes(page, [ponyErase.strokes[0]]),
@@ -44,7 +44,7 @@ test.describe("Interactive Canvas SSR Text erase", () => {
     await expect(page.locator(".prompter-text")).toHaveText(ponyLabelExpected)
 
     await page.locator("#eraser").click()
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
 
     await Promise.all([
       waitForExportedEvent(page),
@@ -77,7 +77,7 @@ test.describe("Interactive Canvas SSR Text erase", () => {
     await expect(page.locator(".prompter-text")).toHaveText(labelExpected)
 
     await page.locator("#eraser").click()
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
 
     await Promise.all([
       waitForExportedEvent(page),

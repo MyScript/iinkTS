@@ -1,8 +1,8 @@
 import { test, expect } from "@playwright/test"
 import {
   writeStrokes,
-  getEditorExports,
-  callEditorIdle,
+  getCanvasExports,
+  callCanvasIdle,
   passModalKey
 } from "../helper"
 import TextNavAction from "../_partials/text-nav-actions"
@@ -20,8 +20,8 @@ test.describe("Interactive Canvas SSR Text Custom Lexicon", () => {
 
   test("should not recognize 'covfefe'", async ({ page }) => {
     await writeStrokes(page, covfefe.strokes)
-    await callEditorIdle(page)
-    const exports = await getEditorExports(page)
+    await callCanvasIdle(page)
+    const exports = await getCanvasExports(page)
     const jiixReceived = exports["application/vnd.myscript.jiix"]
     expect(jiixReceived.label).not.toEqual(covfefe.exports["text/plain"].at(-1))
   })
@@ -30,8 +30,8 @@ test.describe("Interactive Canvas SSR Text Custom Lexicon", () => {
     await page.locator("#lexicon").fill("covfefe")
     await page.locator("#reinit").click()
     await writeStrokes(page, covfefe.strokes)
-    await callEditorIdle(page)
-    const exports = await getEditorExports(page)
+    await callCanvasIdle(page)
+    const exports = await getCanvasExports(page)
     const jiixReceived = exports["application/vnd.myscript.jiix"]
     expect(jiixReceived.label).toEqual(covfefe.exports["text/plain"].at(-1))
   })

@@ -1,11 +1,11 @@
-import { createCanvasMock, asEditor } from "../__mocks__/createCanvasMock"
+import { createCanvasMock, asCanvas } from "../__mocks__/createCanvasMock"
 import { type IIJiixQueryManager, IIMathDiagnosticChecker } from "@/iink"
 
 describe("IIMathDiagnosticChecker.ts", () => {
-  let editor: ReturnType<typeof createCanvasMock>
+  let canvas: ReturnType<typeof createCanvasMock>
 
   beforeEach(() => {
-    editor = createCanvasMock({
+    canvas = createCanvasMock({
       jiix: {
         getBlockLabel: jest.fn().mockImplementation((id: string) => {
           if (id === "block-1") return "x + 1"
@@ -16,7 +16,7 @@ describe("IIMathDiagnosticChecker.ts", () => {
     })
 
     // Mock getDiagnostic method
-    editor.math.getDiagnostic = jest.fn().mockImplementation((_id: string, type: string) => {
+    canvas.math.getDiagnostic = jest.fn().mockImplementation((_id: string, type: string) => {
       if (type === "numerical-computation") {
         return Promise.resolve("compute_ok")
       }
@@ -31,17 +31,17 @@ describe("IIMathDiagnosticChecker.ts", () => {
     document.body.innerHTML = ""
   })
 
-  test("should instantiate with editor and jiixBlockIds", () => {
+  test("should instantiate with canvas and jiixBlockIds", () => {
     const jiixBlockIds = ["block-1", "block-2"]
 
-    const checker = new IIMathDiagnosticChecker(asEditor(editor), jiixBlockIds)
+    const checker = new IIMathDiagnosticChecker(asCanvas(canvas), jiixBlockIds)
     expect(checker).toBeDefined()
   })
 
   test("should deduplicate jiixBlockIds in constructor", () => {
     const jiixBlockIds = ["block-1", "block-1", "block-2"]
 
-    const checker = new IIMathDiagnosticChecker(asEditor(editor), jiixBlockIds)
+    const checker = new IIMathDiagnosticChecker(asCanvas(canvas), jiixBlockIds)
     expect(checker).toBeDefined()
   })
 
@@ -49,7 +49,7 @@ describe("IIMathDiagnosticChecker.ts", () => {
     test("should fetch diagnostics for all blocks", async () => {
       const jiixBlockIds = ["block-1", "block-2"]
 
-      const checker = new IIMathDiagnosticChecker(asEditor(editor), jiixBlockIds)
+      const checker = new IIMathDiagnosticChecker(asCanvas(canvas), jiixBlockIds)
 
       // Mock modal to prevent actual DOM operations
       const showSpy = jest.spyOn(checker as any, "createModalContent")
@@ -57,10 +57,10 @@ describe("IIMathDiagnosticChecker.ts", () => {
 
       await checker.show()
 
-      expect(editor.math.getDiagnostic).toHaveBeenCalledWith("block-1", "numerical-computation")
-      expect(editor.math.getDiagnostic).toHaveBeenCalledWith("block-1", "evaluation")
-      expect(editor.math.getDiagnostic).toHaveBeenCalledWith("block-2", "numerical-computation")
-      expect(editor.math.getDiagnostic).toHaveBeenCalledWith("block-2", "evaluation")
+      expect(canvas.math.getDiagnostic).toHaveBeenCalledWith("block-1", "numerical-computation")
+      expect(canvas.math.getDiagnostic).toHaveBeenCalledWith("block-1", "evaluation")
+      expect(canvas.math.getDiagnostic).toHaveBeenCalledWith("block-2", "numerical-computation")
+      expect(canvas.math.getDiagnostic).toHaveBeenCalledWith("block-2", "evaluation")
 
       showSpy.mockRestore()
     })
@@ -68,7 +68,7 @@ describe("IIMathDiagnosticChecker.ts", () => {
     test("should skip empty block ids", async () => {
       const jiixBlockIds = ["", "block-2"]
 
-      const checker = new IIMathDiagnosticChecker(asEditor(editor), jiixBlockIds)
+      const checker = new IIMathDiagnosticChecker(asCanvas(canvas), jiixBlockIds)
 
       const showSpy = jest.spyOn(checker as any, "createModalContent")
       showSpy.mockReturnValue(document.createElement("div"))
@@ -76,8 +76,8 @@ describe("IIMathDiagnosticChecker.ts", () => {
       await checker.show()
 
       // Only block-2 should be called
-      expect(editor.math.getDiagnostic).toHaveBeenCalledWith("block-2", "numerical-computation")
-      expect(editor.math.getDiagnostic).toHaveBeenCalledWith("block-2", "evaluation")
+      expect(canvas.math.getDiagnostic).toHaveBeenCalledWith("block-2", "numerical-computation")
+      expect(canvas.math.getDiagnostic).toHaveBeenCalledWith("block-2", "evaluation")
 
       showSpy.mockRestore()
     })
@@ -87,7 +87,7 @@ describe("IIMathDiagnosticChecker.ts", () => {
     test("should close and destroy modal", () => {
       const jiixBlockIds = ["block-1"]
 
-      const checker = new IIMathDiagnosticChecker(asEditor(editor), jiixBlockIds)
+      const checker = new IIMathDiagnosticChecker(asCanvas(canvas), jiixBlockIds)
 
       // Create a mock modal
       const mockModal = {
@@ -104,7 +104,7 @@ describe("IIMathDiagnosticChecker.ts", () => {
     test("should handle close when no modal exists", () => {
       const jiixBlockIds = ["block-1"]
 
-      const checker = new IIMathDiagnosticChecker(asEditor(editor), jiixBlockIds)
+      const checker = new IIMathDiagnosticChecker(asCanvas(canvas), jiixBlockIds)
 
       expect(() => checker.close()).not.toThrow()
     })

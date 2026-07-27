@@ -1,18 +1,18 @@
 import { test, expect } from '@playwright/test'
 import {
-  waitForEditorInit,
+  waitForCanvasInit,
   writeStrokes,
   waitForExportedEvent,
-  getEditorExportsType,
-  getEditorConfiguration,
-  getEditorConverts,
-  getEditorExports,
+  getCanvasExportsType,
+  getCanvasConfiguration,
+  getCanvasConverts,
+  getCanvasExports,
   waitForConvertedEvent,
-  callEditorIdle,
-  loadEditor,
+  callCanvasIdle,
+  loadCanvas,
   passModalKey,
   waitForChangedEvent,
-  callEditorExport
+  callCanvasExport
 } from '../helper'
 
 import one from '../__dataset__/1'
@@ -36,18 +36,18 @@ test.describe('Interactive Canvas SSR Math', function () {
       waitForExportedEvent(page),
       writeStrokes(page, one.strokes)
     ])
-    const jiix = await getEditorExportsType(page, 'application/vnd.myscript.jiix')
+    const jiix = await getCanvasExportsType(page, 'application/vnd.myscript.jiix')
     expect(jiix).toBeUndefined()
-    const latex = await getEditorExportsType(page, 'application/x-latex')
+    const latex = await getCanvasExportsType(page, 'application/x-latex')
     expect(latex).toBeDefined()
-    const mathml = await getEditorExportsType(page, 'application/mathml+xml')
+    const mathml = await getCanvasExportsType(page, 'application/mathml+xml')
     expect(mathml).toBeUndefined()
   })
 
   test.describe('Nav actions', () => {
     test('should undo/redo in mode "stroke" by default', async ({ page }) => {
       await test.step('should have undo/redo mode set to "stroke" by default', async () => {
-        const config = await getEditorConfiguration(page)
+        const config = await getCanvasConfiguration(page)
         expect(config.recognition.math['undo-redo'].mode).toEqual('stroke')
       })
 
@@ -56,11 +56,11 @@ test.describe('Interactive Canvas SSR Math', function () {
           waitForExportedEvent(page),
           writeStrokes(page, equation.strokes)
         ])
-        await callEditorIdle(page)
+        await callCanvasIdle(page)
         await expect(page.locator('#result .katex-html')).toHaveText(
           equation.exports.LATEX.at(-1)
         )
-        const latex = await getEditorExportsType(page, 'application/x-latex')
+        const latex = await getCanvasExportsType(page, 'application/x-latex')
         expect(latex).toEqual(equation.exports.LATEX.at(-1))
       })
 
@@ -70,7 +70,7 @@ test.describe('Interactive Canvas SSR Math', function () {
           page.locator('#clear').click()
         ])
         await expect(page.locator('#result')).toBeEmpty()
-        const latex = await getEditorExportsType(page, 'application/x-latex')
+        const latex = await getCanvasExportsType(page, 'application/x-latex')
         expect(latex).toEqual('')
         expect(clearExport['application/x-latex']).toEqual('')
       })
@@ -86,7 +86,7 @@ test.describe('Interactive Canvas SSR Math', function () {
         await expect(page.locator('#result .katex-html')).toHaveText(
           equation.exports.LATEX.at(-1)
         )
-        const latex = await getEditorExportsType(page, 'application/x-latex')
+        const latex = await getCanvasExportsType(page, 'application/x-latex')
         expect(latex).toEqual(equation.exports.LATEX.at(-1))
       })
 
@@ -101,7 +101,7 @@ test.describe('Interactive Canvas SSR Math', function () {
         await expect(page.locator('#result .katex-html')).toHaveText(
           equation.exports.LATEX.at(-2)
         )
-        const latex = await getEditorExportsType(page, 'application/x-latex')
+        const latex = await getCanvasExportsType(page, 'application/x-latex')
         expect(latex).toEqual(equation.exports.LATEX.at(-2))
       })
 
@@ -116,7 +116,7 @@ test.describe('Interactive Canvas SSR Math', function () {
         await expect(page.locator('#result .katex-html')).toHaveText(
           equation.exports.LATEX.at(-3).replace('-', '−')
         )
-        const latex = await getEditorExportsType(page, 'application/x-latex')
+        const latex = await getCanvasExportsType(page, 'application/x-latex')
         expect(latex).toEqual(equation.exports.LATEX.at(-3))
       })
 
@@ -131,7 +131,7 @@ test.describe('Interactive Canvas SSR Math', function () {
         await expect(page.locator('#result .katex-html')).toHaveText(
           equation.exports.LATEX.at(-2)
         )
-        const latex = await getEditorExportsType(page, 'application/x-latex')
+        const latex = await getCanvasExportsType(page, 'application/x-latex')
         expect(latex).toEqual(equation.exports.LATEX.at(-2))
       })
     })
@@ -143,7 +143,7 @@ test.describe('Interactive Canvas SSR Math', function () {
       test.setTimeout(5 * 60 * 1000)
 
       await test.step('should set undo/redo mode set to "session"', async () => {
-        const config = await getEditorConfiguration(page)
+        const config = await getCanvasConfiguration(page)
         const options = {
           configuration: {
             server: config.server,
@@ -168,8 +168,8 @@ test.describe('Interactive Canvas SSR Math', function () {
             }
           }
         }
-        await loadEditor(page, options)
-        await waitForEditorInit(page)
+        await loadCanvas(page, options)
+        await waitForCanvasInit(page)
       })
 
       await test.step('should write stroke', async () => {
@@ -177,47 +177,47 @@ test.describe('Interactive Canvas SSR Math', function () {
           waitForChangedEvent(page, 60000),
           writeStrokes(page, equation.strokes)
         ])
-        await callEditorIdle(page)
+        await callCanvasIdle(page)
         const expected = equation.exports.LATEX.at(-1)
         
         await expect(page.locator('#result .katex-html')).toHaveText(expected)
-        const latex = await getEditorExportsType(page, 'application/x-latex')
+        const latex = await getCanvasExportsType(page, 'application/x-latex')
         expect(latex).toEqual(expected)
       })
 
       await test.step('should undo all stroke written during session time', async () => {
-        await callEditorIdle(page)
+        await callCanvasIdle(page)
         await Promise.all([
           waitForChangedEvent(page, 60000),
           page.locator('#undo').click()
         ])
         await expect(page.locator('#result')).toBeEmpty()
-        const latex = await getEditorExportsType(page, 'application/x-latex')
+        const latex = await getCanvasExportsType(page, 'application/x-latex')
         expect(latex).toEqual('')
       })
 
       await test.step('should redo all stroke written during session time', async () => {
-        await callEditorIdle(page)
+        await callCanvasIdle(page)
         await Promise.all([
           waitForChangedEvent(page, 60000),
           page.locator('#redo').click()
         ])
         const expected = equation.exports.LATEX.at(-1)
         await expect(page.locator('#result .katex-html')).toHaveText(expected)
-        const latex = await getEditorExportsType(page, 'application/x-latex')
+        const latex = await getCanvasExportsType(page, 'application/x-latex')
         expect(latex).toEqual(expected)
       })
     })
 
     test('should work after gesture then undo-redo', async ({ page }) => {
       await writeStrokes(page, threeScratchOut.strokes)
-      await callEditorIdle(page)
-      const exports = await getEditorExports(page)
+      await callCanvasIdle(page)
+      const exports = await getCanvasExports(page)
       const latex = exports['application/x-latex']
       expect(latex).toEqual('')
 
       await page.locator('#undo').click()
-      await callEditorIdle(page)
+      await callCanvasIdle(page)
       const [undoRedoModelExport] = await Promise.all([
         waitForExportedEvent(page),
         page.locator('#redo').click()
@@ -235,8 +235,8 @@ test.describe('Interactive Canvas SSR Math', function () {
 
     test('should convert svg path', async ({ page }) => {
       await writeStrokes(page, equation.strokes)
-      await callEditorIdle(page)
-      const emptyConvert = await getEditorConverts(page)
+      await callCanvasIdle(page)
+      const emptyConvert = await getCanvasConverts(page)
       expect(emptyConvert).toBeUndefined()
       await expect(page.locator('#rootEl svg[data-layer="MODEL"] path')).toHaveCount(
         equation.strokes.length
@@ -244,12 +244,12 @@ test.describe('Interactive Canvas SSR Math', function () {
 
       await Promise.all([waitForConvertedEvent(page), page.locator('#convert').click()])
 
-      await callEditorIdle(page)
+      await callCanvasIdle(page)
       await expect(page.locator('#rootEl svg[data-layer="MODEL"] path'))
         .toHaveCount(equation.exports.LATEX.at(-1).length)
 
-      const convert = await getEditorConverts(page)
-      const latexExport = await getEditorExportsType(
+      const convert = await getCanvasConverts(page)
+      const latexExport = await getCanvasExportsType(
         page,
         'application/x-latex'
       )
@@ -258,7 +258,7 @@ test.describe('Interactive Canvas SSR Math', function () {
     })
 
     test('should convert and solve sum by default', async ({ page }) => {
-      const config = await getEditorConfiguration(page)
+      const config = await getCanvasConfiguration(page)
       expect(config.recognition.math.solver.enable).toEqual(true)
       let numStroke = 0
       for (const s of sum.strokes) {
@@ -271,11 +271,11 @@ test.describe('Interactive Canvas SSR Math', function () {
         )
         numStroke++
       }
-      const emptyConvert = await getEditorConverts(page)
+      const emptyConvert = await getCanvasConverts(page)
       expect(emptyConvert).toBeUndefined()
 
       await Promise.all([waitForConvertedEvent(page), page.locator('#convert').click()])
-      const convert = await getEditorConverts(page)
+      const convert = await getCanvasConverts(page)
       expect(convert['application/x-latex']).toEqual(sum.exports.LATEX.at(-1))
       await expect(page.locator('#result .katex-html')).toHaveText(
         sum.exports.LATEX.at(-1)
@@ -283,7 +283,7 @@ test.describe('Interactive Canvas SSR Math', function () {
     })
 
     test('should convert and not solve sum', async ({ page }) => {
-      const config = await getEditorConfiguration(page)
+      const config = await getCanvasConfiguration(page)
       const options = {
         configuration: {
           server: config.server,
@@ -298,8 +298,8 @@ test.describe('Interactive Canvas SSR Math', function () {
           }
         }
       }
-      await loadEditor(page, options)
-      await waitForEditorInit(page)
+      await loadCanvas(page, options)
+      await waitForCanvasInit(page)
 
       let numStroke = 0
       for (const s of sum.strokes) {
@@ -312,12 +312,12 @@ test.describe('Interactive Canvas SSR Math', function () {
         )
         numStroke++
       }
-      const emptyConvert = await getEditorConverts(page)
+      const emptyConvert = await getCanvasConverts(page)
       expect(emptyConvert).toBeUndefined()
 
       await Promise.all([waitForConvertedEvent(page), page.locator('#convert').click()])
-      const convert = await getEditorConverts(page)
-      const latexExport = await getEditorExportsType(
+      const convert = await getCanvasConverts(page)
+      const latexExport = await getCanvasExportsType(
         page,
         'application/x-latex'
       )

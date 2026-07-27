@@ -2,10 +2,10 @@
  * @group Manager
  * @summary Managers orchestrate user interactions and model updates
  *
- * Managers are organized by editor variant:
+ * Managers are organized by canvas variant:
  *
  * **Base Managers** (`./base`)
- * - Used by all editor variants
+ * - Used by all canvas variants
  * - {@link AbstractWriterManager} - Base class for writing/drawing
  * - {@link EraseManager} - Handles erasing strokes/symbols
  * - {@link ColorPaletteManager} - Color palette manager (key-to-color mapping)
@@ -37,10 +37,10 @@
 // Core abstractions
 export * from "./base"
 
-// Simple editor managers
+// Simple canvas managers
 export * from "./simple"
 
-// Interactive editor managers
+// Interactive canvas managers
 export * from "./interactive"
 
 // Debug managers

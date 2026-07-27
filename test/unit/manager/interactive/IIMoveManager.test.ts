@@ -1,19 +1,19 @@
-import { createCanvasMock, asEditor } from "../../__mocks__/createCanvasMock"
+import { createCanvasMock, asCanvas } from "../../__mocks__/createCanvasMock"
 import { DefaultIIRendererConfiguration, IIMoveManager, TPointerInfo } from "@/iink"
 
 describe("IIMoveManager.ts", () => {
   test("should instanciate", () => {
-    const editor = createCanvasMock()
-    const manager = new IIMoveManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new IIMoveManager(asCanvas(canvas))
     expect(manager).toBeDefined()
     expect(manager.origin).toBeUndefined()
   })
 
   describe("move process", () => {
-    const editor = createCanvasMock()
-    editor.init()
+    const canvas = createCanvasMock()
+    canvas.init()
 
-    const manager = new IIMoveManager(asEditor(editor))
+    const manager = new IIMoveManager(asCanvas(canvas))
 
     test("should init origin on start", async () => {
       const info = {

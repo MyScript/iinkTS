@@ -49,11 +49,11 @@ declare global {
  * @group Canvas
  */
 export abstract class AbstractCanvas {
-  /** Logger instance for this editor. */
+  /** Logger instance for this canvas. */
   logger = LoggerManager.getLogger(LoggerCategory.CANVAS)
   /** DOM layer manager handling rendering, UI, and modal elements. */
   layers: CanvasLayer
-  /** Event bus for subscribing to editor lifecycle and content events. */
+  /** Event bus for subscribing to canvas lifecycle and content events. */
   event: CanvasEvent
   /** Server API information (version, etc.) loaded on first connection. */
   info?: TApiInfos
@@ -89,7 +89,7 @@ export abstract class AbstractCanvas {
   }
 
   /**
-   * Derived, UI-oriented editor state — see {@link TCanvasConnectionState}.
+   * Derived, UI-oriented canvas state — see {@link TCanvasConnectionState}.
    * Listen to `event.addConnectionStateChangedListener` for change notifications.
    */
   get connectionState(): TCanvasConnectionState {
@@ -97,7 +97,7 @@ export abstract class AbstractCanvas {
   }
 
   /**
-   * Run `fn`, marking `label` as an active operation for the duration (shown on the editor
+   * Run `fn`, marking `label` as an active operation for the duration (shown on the canvas
    * state badge tooltip). Safe against overlapping/concurrent calls with the same or different
    * labels, and against `fn` throwing (the operation is always ended).
    */
@@ -148,13 +148,13 @@ export abstract class AbstractCanvas {
     this.#recomputeConnectionState()
   }
 
-  /** Called once the editor has connected to its backend for the first time. */
+  /** Called once the canvas has connected to its backend for the first time. */
   protected markConnectedOnce(): void {
     this.#hasConnectedOnce = true
     this.#recomputeConnectionState()
   }
 
-  /** Only relevant for WebSocket-backed editors; other variants never call this. */
+  /** Only relevant for WebSocket-backed canvas; other variants never call this. */
   protected manageConnectionStatus(status: TConnectionStatus, offlineQueueLength = 0): void {
     this.event.emitConnectionStatusChanged(status)
     this.#connectionStatus = status

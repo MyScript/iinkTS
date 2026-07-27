@@ -340,7 +340,7 @@
       const rootElement = document.getElementById('rootEl')
       const showModalBtn = document.getElementById('showModalBtn')
 
-      const editorOptions = {
+      const canvasOptions = {
         configuration: {
           recognition: {
             lang: 'en_US',
@@ -355,7 +355,7 @@
 
       let canvas
 
-      async function loadEditor(options) {
+      async function loadCanvas(options) {
         await canvas?.destroy()
         canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK', options)
         window.canvas = canvas
@@ -520,9 +520,9 @@
       })
 
       showModalBtn.addEventListener('click', () => {
-        ModalCanvasOptions.show(loadEditor, editorOptions)
+        ModalCanvasOptions.show(loadCanvas, canvasOptions)
       })
-      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
 
       const panelToggleBtn = document.getElementById('panelToggleBtn')
       const infoPanel = document.getElementById('info-panel')

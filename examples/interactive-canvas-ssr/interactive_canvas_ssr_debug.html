@@ -124,7 +124,7 @@
         specificLggerLevel.appendChild(li)
       })
 
-      const editorOptions = {
+      const canvasOptions = {
         configuration: {
           recognition: {
             type: 'TEXT'
@@ -133,7 +133,7 @@
         }
       }
 
-      async function loadEditor(options) {
+      async function loadCanvas(options) {
         /**
          * get canvas instance from type
          * @param {Element} The DOM element to attach the ink paper
@@ -180,10 +180,10 @@
         canvas?.redo()
       })
       showModalBtn.addEventListener('click', () => {
-        ModalCanvasOptions.show(loadEditor, editorOptions)
+        ModalCanvasOptions.show(loadCanvas, canvasOptions)
       })
 
-      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
     </script>
       <script type="module" src="../components/code-viewer/code-viewer.js"></script>
     <script src="../assets/js/theme.js"></script>

@@ -1,11 +1,11 @@
 import { test, expect } from "@playwright/test"
 import TextNavActions from "../_partials/text-nav-actions"
-import { waitForEditorInit, passModalKey } from "../helper"
+import { waitForCanvasInit, passModalKey } from "../helper"
 // import {
 //   writeStrokes,
 //   waitForExportedEvent,
-//   waitForEditorInit,
-//   callEditorIdle
+//   waitForCanvasInit,
+//   callCanvasIdle
 // } from "../helper"
 // import abrausorus from "../__dataset__/abrausorus"
 

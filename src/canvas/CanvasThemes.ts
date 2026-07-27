@@ -1,5 +1,5 @@
 /**
- * Predefined editor themes — passed to `editor.setCssVars()`.
+ * Predefined canvas themes — passed to `canvas.setCssVars()`.
  * `vars: undefined` resets to the stylesheet defaults.
  * @group Canvas
  */
@@ -137,11 +137,11 @@ const CANVAS_THEMES: TCanvasTheme[] = [
 ]
 
 /** @group Canvas */
-export const THEME_STORAGE_KEY = "iink-editor-theme"
+export const THEME_STORAGE_KEY = "iink-canvas-theme"
 
 /** @group Canvas */
 export class CanvasThemes {
-  static EDITOR_THEMES = CANVAS_THEMES
+  static THEMES = CANVAS_THEMES
   static THEME_STORAGE_KEY = THEME_STORAGE_KEY
   static getSavedThemeId(): string {
     try {

@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test"
-import { writeStrokes, getEditorExports, waitForChangedEvent, getEditorConfiguration, waitForExportedEvent, waitForEditorInit } from "../helper"
+import { writeStrokes, getCanvasExports, waitForChangedEvent, getCanvasConfiguration, waitForExportedEvent, waitForCanvasInit } from "../helper"
 import h from "../__dataset__/h"
 import hello from "../__dataset__/helloMultipleStrokes"
 
@@ -7,7 +7,7 @@ export default {
   test({ skipClear, skipUndoRedo, resultLocator } = { resultLocator: "#result"}) {
     test.describe("Nav actions", () => {
       test.beforeEach(async ({ page }) => {
-        await waitForEditorInit(page)
+        await waitForCanvasInit(page)
       })
 
       !skipClear && test("should clear", async ({ page }) => {
@@ -29,7 +29,7 @@ export default {
       !skipUndoRedo && test('should undo/redo', async ({ page }) => {
 
         await test.step("should have undo/redo mode set to \"stroke\" by default", async () => {
-          const config = await getEditorConfiguration(page)
+          const config = await getCanvasConfiguration(page)
           expect(config.recognition.math["undo-redo"].mode).toEqual("stroke")
         })
 
@@ -39,7 +39,7 @@ export default {
             writeStrokes(page, hello.strokes)
           ])
           await expect(page.locator(resultLocator)).toHaveText(hello.exports["text/plain"].at(-1))
-          const exports = await getEditorExports(page)
+          const exports = await getCanvasExports(page)
           expect(exports['application/vnd.myscript.jiix'].label).toStrictEqual(hello.exports['text/plain'].at(-1))
         })
 

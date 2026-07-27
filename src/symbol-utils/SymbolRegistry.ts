@@ -7,8 +7,8 @@ import type { SymbolUtil } from "./SymbolUtil"
  * @summary Registry for SymbolUtil implementations.
  *
  * Built-in types are registered via `registerBuiltinSymbolUtils()`, which the
- * editor calls on initialisation. External consumers may register additional
- * types before or after editor creation:
+ * canvas calls on initialisation. External consumers may register additional
+ * types before or after canvas creation:
  *
  * @example
  * import { symbolRegistry } from "iink-ts"

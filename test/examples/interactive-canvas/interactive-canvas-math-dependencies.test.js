@@ -3,8 +3,8 @@ import {
   passModalKey,
   writeStrokes,
   writePointers,
-  callEditorIdle,
-  getEditorSymbols,
+  callCanvasIdle,
+  getCanvasSymbols,
   boundsOf,
   buildEraseSweepPointers,
   pollJiix,
@@ -35,11 +35,11 @@ const overrideReplacementStrokes = overridingSource.strokes.slice(10, 12)
 // Follows "Try it" steps 1-2: write the source definition, then the dependent expression.
 const writeSourceThenDependent = async (page) => {
   await writeStrokes(page, sourceStrokes)
-  await callEditorIdle(page)
+  await callCanvasIdle(page)
   await pollJiix(page, 1)
 
   await writeStrokes(page, dependentStrokes)
-  await callEditorIdle(page)
+  await callCanvasIdle(page)
   const jiix = await pollJiix(page, 2)
 
   const sourceId = await getBlockIdByLabel(page, jiix, SOURCE_LABEL)
@@ -48,7 +48,7 @@ const writeSourceThenDependent = async (page) => {
 }
 
 const getSolverOutputIds = async (page, jiixBlockId) => {
-  const symbols = await getEditorSymbols(page)
+  const symbols = await getCanvasSymbols(page)
   return symbols
     .filter((s) => s.isSolverOutput && s.jiixBlockId === jiixBlockId)
     .map((s) => s.id)
@@ -65,7 +65,7 @@ test.describe("Math Dependencies", () => {
   // expression yet, it shows up as an isolated block in the side panel.
   test('Try it — 1. Write a source variable definition (x=2) → shows as an isolated block', async ({ page }) => {
     await writeStrokes(page, sourceStrokes)
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
     await pollJiix(page, 1)
 
     const dependencyList = page.locator("#dependency-list")
@@ -109,11 +109,11 @@ test.describe("Math Dependencies", () => {
     await page.locator("#ms-menu-action").click()
 
     await writeStrokes(page, overrideSourceStrokes)
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
     await pollJiix(page, 1)
 
     await writeStrokes(page, overrideDependentStrokes)
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
     const jiix = await pollJiix(page, 2)
 
     const sourceId = await getBlockIdByLabel(page, jiix, SOURCE_LABEL)
@@ -130,7 +130,7 @@ test.describe("Math Dependencies", () => {
     await page.locator("#ms-menu-tool-erase").click()
     await page.locator("#ms-menu-tool-erase-20").click()
     await writePointers(page, buildEraseSweepPointers(boundsOf(overrideReplacementStrokes, -20)))
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
     await expect
       .poll(async () => {
         const label = await page.evaluate((id) => rootEl.iink.jiix.getBlockLabel(id), sourceId)
@@ -140,7 +140,7 @@ test.describe("Math Dependencies", () => {
 
     await page.locator("#ms-menu-tool-write-pencil").click()
     await writeStrokes(page, overrideReplacementStrokes)
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
 
     await expect
       .poll(async () => {
@@ -150,7 +150,7 @@ test.describe("Math Dependencies", () => {
       .toBe(true)
 
     await page.evaluate(() => rootEl.iink.math.tryAutoCompute())
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
 
     await expect
       .poll(async () => {
