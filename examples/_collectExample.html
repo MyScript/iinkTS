@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Send Data to Support</title>
+
+    <link rel="stylesheet" href="./assets/style/reset.css" />
+    <link rel="stylesheet" href="./assets/style/components.css" />
+    <link rel="stylesheet" href="./assets/style/examples.css" />
+    <link rel="stylesheet" href="./assets/style/inputs.css" />
+    <link rel="stylesheet" href="./assets/style/panel.css" />
+    <link rel="stylesheet" href="./components/code-viewer/code-viewer.css" />
+
+    <style>
+      #collect-fields {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 8px;
+      }
+
+      .collect-field-row {
+        display: flex;
+        gap: 6px;
+      }
+
+      .collect-field-row input {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .collect-field-row button {
+        flex-shrink: 0;
+      }
+
+      #collect-log {
+        margin-top: 8px;
+        max-height: 220px;
+        overflow-y: auto;
+        font-size: 11px;
+        color: var(--ex-text-muted, #888);
+      }
+
+      #collect-log div {
+        padding: 4px 0;
+        border-bottom: 1px solid var(--ex-border);
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      #collect-log div.ack {
+        color: #4caf50;
+      }
+    </style>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+  </head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="collect-panel">
+        📨 Support
+      </button>
+      <button id="showModalBtn" class="btn-keys">Change server configuration</button>
+      <h1 class="header-title">Offscreen Interactivity - Send Data to Support</h1>
+    </header>
+
+    <div class="ex-page-layout">
+
+      <aside id="collect-panel" class="ex-panel">
+        <p class="ex-panel-heading">Collect &amp; send data to support</p>
+        <p class="ex-panel-intro">
+          This example shows how to attach arbitrary key/value data to a WebSocket session using <code>canvas.client.sendToSupport(data)</code>. The server acknowledges the message with an <code>ack</code>, which resolves the returned promise.
+        </p>
+
+        <div class="ex-panel-divider"></div>
+
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">
+            Add one or more key/value pairs below, then click "Send to support". Each call is queued and resolved in the order it was sent, matching the order the server acknowledges them.
+          </div>
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <p class="ex-panel-subtitle">Data to send</p>
+        <div id="collect-fields"></div>
+        <div class="buttons-wrapper" style="padding: 12px 0; display: flex; gap: 8px;">
+          <button id="add-field-btn" class="classic-btn">+ Field</button>
+          <button id="send-support-btn" class="classic-btn success">Send to support</button>
+        </div>
+
+        <p class="ex-panel-subtitle">Log</p>
+        <div id="collect-log"></div>
+      </aside>
+
+      <div id="rootEl"></div>
+
+    </div>
+
+    <script type="module">
+      import { Canvas } from '../dist/iink.esm.js'
+      import { ModalCanvasOptions } from './components/modal/modalCanvasOptions.js'
+
+      const rootElement = document.getElementById('rootEl')
+      const showModalBtn = document.getElementById('showModalBtn')
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const collectPanel = document.getElementById('collect-panel')
+      const fieldsContainer = document.getElementById('collect-fields')
+      const addFieldBtn = document.getElementById('add-field-btn')
+      const sendSupportBtn = document.getElementById('send-support-btn')
+      const logElement = document.getElementById('collect-log')
+
+      panelToggleBtn.addEventListener('click', () => {
+        const open = collectPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      let canvas
+
+      const canvasOptions = {
+        configuration: {}
+      }
+
+      function addFieldRow(key = '', value = '') {
+        const row = document.createElement('div')
+        row.className = 'collect-field-row'
+
+        const keyInput = document.createElement('input')
+        keyInput.className = 'input-inline collect-field-key'
+        keyInput.placeholder = 'key'
+        keyInput.value = key
+
+        const valueInput = document.createElement('input')
+        valueInput.className = 'input-inline collect-field-value'
+        valueInput.placeholder = 'value'
+        valueInput.value = value
+
+        const removeBtn = document.createElement('button')
+        removeBtn.className = 'classic-btn reset'
+        removeBtn.textContent = '✕'
+        removeBtn.addEventListener('click', () => row.remove())
+
+        row.append(keyInput, valueInput, removeBtn)
+        fieldsContainer.append(row)
+      }
+
+      function collectFieldsData() {
+        const data = {}
+        fieldsContainer.querySelectorAll('.collect-field-row').forEach((row) => {
+          const key = row.querySelector('.collect-field-key').value.trim()
+          const value = row.querySelector('.collect-field-value').value
+          if (key) {
+            data[key] = value
+          }
+        })
+        return data
+      }
+
+      function logEntry(message, isAck = false) {
+        const entry = document.createElement('div')
+        if (isAck) entry.classList.add('ack')
+        entry.textContent = `${new Date().toLocaleTimeString()} — ${message}`
+        logElement.prepend(entry)
+      }
+
+      addFieldBtn.addEventListener('click', () => addFieldRow())
+
+      sendSupportBtn.addEventListener('click', async () => {
+        if (!canvas) {
+          logEntry('Canvas not loaded yet')
+          return
+        }
+        const data = collectFieldsData()
+        if (Object.keys(data).length === 0) {
+          logEntry('Nothing to send: add at least one key/value field')
+          return
+        }
+        logEntry(`Sending: ${JSON.stringify(data)}`)
+        try {
+          await canvas.client.sendToSupport(data)
+          logEntry(`Ack received for: ${JSON.stringify(data)}`, true)
+        } catch (error) {
+          logEntry(`Error: ${error.message}`)
+        }
+      })
+
+      async function loadCanvas(options) {
+        await canvas?.destroy()
+
+        canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK', options)
+      }
+
+      window.addEventListener('resize', () => {
+        canvas?.resize()
+      })
+
+      showModalBtn.addEventListener('click', () => {
+        ModalCanvasOptions.show(loadCanvas, canvasOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
+
+      addFieldRow('ticketId', 'TICKET-123')
+
+      window.canvasOptions = canvasOptions
+      window.loadCanvas = loadCanvas
+    </script>
+    <script type="module" src="./components/code-viewer/code-viewer.js"></script>
+    <script src="./assets/js/theme.js"></script>
+  </body>
+
+</html>

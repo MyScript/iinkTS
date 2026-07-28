@@ -42,6 +42,8 @@ import { TWebSocketClientMessageType } from "./WebSocketClientMessage"
  *                                                    <==================       { type: "authenticated" }
  * { type: "initSession" | "restoreSession" }         ==================>
  *                                                    <==================       { type: "sessionDescription" }
+ * { type: "sendToSupport", [key]:[value] }        ==================>
+ *                                                    <==================        { type: "ack" }
  * { type: "newContentPart" | "openContentPart" }     ==================>
  *                                                    <==================       { type: "partChanged" }
  * { type: "addStrokes" }                             ==================>
@@ -85,6 +87,7 @@ export class WebSocketClient {
   protected getVariableDefinitionsDeferred: DeferredPromise<TMathVariableDefinitions[]>[]
   protected getEvaluablesDeferred: Map<string, DeferredPromise<TMathEvaluable[]>[]>
   protected evaluateDeferred: Map<string, DeferredPromise<number[][]>[]>
+  protected sendToSupportDeferred: DeferredPromise<void>[]
 
   // Resolved once the queued message is actually sent (post-reconnect), not once any server ack
   // arrives — mutating calls (addStrokes, undo, etc.) never wait for a server ack; there's no
@@ -135,6 +138,7 @@ export class WebSocketClient {
     this.getVariableDefinitionsDeferred = []
     this.getEvaluablesDeferred = new Map()
     this.evaluateDeferred = new Map()
+    this.sendToSupportDeferred = []
   }
 
   get mimeTypes(): string[] {
@@ -210,6 +214,7 @@ export class WebSocketClient {
     this.getVariableDefinitionsDeferred.forEach((deferred) => deferred.resolve([]))
     this.resolveAllInQueue(this.getEvaluablesDeferred, [])
     this.resolveAllInQueue(this.evaluateDeferred, [])
+    this.sendToSupportDeferred.forEach((deferred) => deferred.resolve())
   }
 
   /** Resolve every still-pending deferred in every queue of `map` with the same neutral `value`. */
@@ -236,6 +241,7 @@ export class WebSocketClient {
     this.getVariableDefinitionsDeferred = []
     this.getEvaluablesDeferred.clear()
     this.evaluateDeferred.clear()
+    this.sendToSupportDeferred = []
   }
 
   #isDisconnected(): boolean {
@@ -495,6 +501,10 @@ export class WebSocketClient {
     }
   }
 
+  protected manageAck(): void {
+    this.sendToSupportDeferred.shift()?.resolve()
+  }
+
   protected manageGestureDetected(gestureMessage: TWebSocketClientMessageGesture): void {
     this.event.emitGestureDetected(gestureMessage)
   }
@@ -618,6 +628,9 @@ export class WebSocketClient {
           break
         case TWebSocketClientMessageType.Idle:
           this.manageWaitForIdle()
+          break
+        case TWebSocketClientMessageType.Ack:
+          this.manageAck()
           break
         default:
           this.#logger.warn("messageCallback", `Message type unknown: "${websocketMessage}".`)
@@ -1182,6 +1195,16 @@ export class WebSocketClient {
     await this.send({
       type: "clear",
     })
+  }
+
+  async sendToSupport(data: Record<string, unknown>): Promise<void> {
+    const deferred = new DeferredPromise<void>()
+    this.sendToSupportDeferred.push(deferred)
+    await this.send({
+      type: "sendToSupport",
+      metadata: { ...data },
+    })
+    return deferred.promise
   }
 
   async close(code: number, reason: string): Promise<void> {
