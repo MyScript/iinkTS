@@ -1,5 +1,5 @@
-import type { TCanvasOptionsBase } from "@/canvas/AbstractCanvas"
-import { AbstractCanvas } from "@/canvas/AbstractCanvas"
+import type { TCanvasOperationLabel, TCanvasOptionsBase } from "@/canvas/AbstractCanvas"
+import { AbstractCanvas, GESTURE_OPERATION_LABELS } from "@/canvas/AbstractCanvas"
 import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { WebSocketClient } from "@/client"
 import { DOMFactory } from "@/components/dom"
@@ -86,6 +86,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
   #configuration: InteractiveInkCanvasConfiguration
   #model: IIModel
   #tool: CanvasTool = CanvasTool.Write
+  #readOnly = false
   #layerUITimer?: ReturnType<typeof setTimeout>
   #recognizeStrokeTimer?: ReturnType<typeof setTimeout>
   #exportRetryTimer?: ReturnType<typeof setTimeout>
@@ -252,6 +253,22 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
     this.event.emitToolChanged(i)
   }
 
+  /** Whether real pointer input (write/erase/select/move) is currently blocked - see `readOnly` setter. */
+  get readOnly(): boolean {
+    return this.#readOnly
+  }
+
+  /**
+   * Block or restore real pointer input across every tool at once (write/erase/select/move all
+   * attach through `layers.rendering`), and reflect it with a "not-allowed" cursor. Used e.g. by
+   * `canvas.playback` so a replayed stroke can't race the user's own input.
+   */
+  set readOnly(value: boolean) {
+    this.#readOnly = value
+    this.layers.rendering.style.pointerEvents = value ? "none" : ""
+    this.layers.root.classList.toggle("read-only", value)
+  }
+
   /**
    * Current symbol model containing all ink, text, math, and shape symbols.
    */
@@ -346,6 +363,19 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
         this.layers.root.classList.remove("select")
         this.layers.root.classList.remove("move")
         break
+    }
+  }
+
+  /**
+   * On top of the base badge tracking, cancels the pending debounced `synchronize()` as soon
+   * as a new gesture starts - so a stroke/transform beginning right as the debounce timer would
+   * otherwise fire never races it (it'll be rescheduled once that gesture's own content change
+   * comes in).
+   */
+  override startOperation(label: TCanvasOperationLabel): void {
+    super.startOperation(label)
+    if (GESTURE_OPERATION_LABELS.includes(label)) {
+      clearTimeout(this.#recognizeStrokeTimer)
     }
   }
 

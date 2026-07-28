@@ -127,6 +127,7 @@ describe("IITranslateManager.ts", () => {
 
         expect(manager.interactElementsGroup).toEqual(group)
         expect(manager.transformOrigin).toEqual(translationOrigin)
+        expect(canvas.startOperation).toHaveBeenCalledWith("Translating")
       })
       test(`shoud continu with tx: "${data.tx} & ty ${data.ty}`, () => {
         expect(manager.continue(data.translateToPoint)).toEqual({ tx: data.tx, ty: data.ty })
@@ -145,7 +146,11 @@ describe("IITranslateManager.ts", () => {
         )
       })
       test(`shoud end with tx: "${data.tx} & ty ${data.ty}`, async () => {
-        await manager.end(data.translateToPoint)
+        const endPromise = manager.end(data.translateToPoint)
+        // Must be ended synchronously, before the backend round-trip below even resolves -
+        // IISynchronizerManager's write-idle gate polls this same flag.
+        expect(canvas.endOperation).toHaveBeenCalledWith("Translating")
+        await endPromise
 
         expect(manager.applyToSymbol).toHaveBeenCalledTimes(1)
         expect(canvas.renderer.drawSymbol).toHaveBeenCalledTimes(1)

@@ -354,6 +354,7 @@ describe("IIResizeManager.ts", () => {
           "transform-origin",
           `${data.transformOrigin.x}px ${data.transformOrigin.y}px`
         )
+        expect(canvas.startOperation).toHaveBeenCalledWith("Resizing")
       })
       test(`shoud continu with direction: "${data.direction}"`, () => {
         expect(manager.continue(resizeToPoint)).toEqual({ scaleX: data.scale.x, scaleY: data.scale.y })
@@ -371,7 +372,9 @@ describe("IIResizeManager.ts", () => {
         )
       })
       test(`shoud end with direction: "${data.direction}"`, async () => {
-        await manager.end(resizeToPoint)
+        const endPromise = manager.end(resizeToPoint)
+        expect(canvas.endOperation).toHaveBeenCalledWith("Resizing")
+        await endPromise
         expect(manager.applyToSymbol).toHaveBeenCalledTimes(1)
         expect(canvas.renderer.drawSymbol).toHaveBeenCalledTimes(1)
         expect(canvas.renderer.drawSymbol).toHaveBeenCalledWith(stroke)

@@ -29,6 +29,7 @@ import type { TBaseSymbol, TBox, TStroke, TSymbol } from "@/symbol"
 import type { SymbolUtil } from "@/symbol-utils/SymbolUtil"
 import type { TPartialDeep } from "@/utils"
 
+import type { TCanvasOperationLabel } from "./AbstractCanvas"
 import type { CanvasEvent, TCanvasConnectionState } from "./CanvasEvent"
 import type { CanvasLayer } from "./CanvasLayer"
 import type { InteractiveInkCanvasConfiguration } from "./variants/InteractiveInkCanvasConfiguration"
@@ -51,13 +52,15 @@ export type TInteractiveInkCanvas = {
   get penStyle(): TStyle
   set penStyle(v: TPartialDeep<TStyle>)
   tool: CanvasTool
+  readOnly: boolean
   set renderingConfiguration(v: TIIRendererConfiguration)
 
   // ── Canvas state (busy/connection badge) ───────────────────────────
   get connectionState(): TCanvasConnectionState
-  trackOperation<T>(label: string, fn: () => Promise<T>): Promise<T>
-  startOperation(label: string): void
-  endOperation(label: string): void
+  trackOperation<T>(label: TCanvasOperationLabel, fn: () => Promise<T>): Promise<T>
+  startOperation(label: TCanvasOperationLabel): void
+  endOperation(label: TCanvasOperationLabel): void
+  hasOperation(label: TCanvasOperationLabel): boolean
 
   // ── Sub-managers ───────────────────────────────────────────────────
   readonly history: IIHistoryManager

@@ -103,13 +103,48 @@ describe("IISynchronizerManager.ts", () => {
 
     test("should wait for an in-progress stroke to finish before processing synchronized data", async () => {
       const { canvas, manager, strokes, restoreRaf } = setup(3)
-      canvas.writer.currentSymbol = buildIIStroke()
+      canvas.startOperation("Writing")
 
       const syncPromise = manager.synchronize()
       await new Promise((resolve) => setTimeout(resolve, 20))
       strokes.forEach((stroke) => expect(stroke.jiixBlockId).toBeUndefined())
 
-      canvas.writer.currentSymbol = undefined
+      canvas.endOperation("Writing")
+      await syncPromise
+
+      strokes.forEach((stroke, i) => expect(stroke.jiixBlockId).toBe(`block-${i}`))
+      restoreRaf()
+    })
+
+    test("should wait for an in-progress transform gesture (e.g. translating) to finish too", async () => {
+      const { canvas, manager, strokes, restoreRaf } = setup(3)
+      canvas.startOperation("Translating")
+
+      const syncPromise = manager.synchronize()
+      await new Promise((resolve) => setTimeout(resolve, 20))
+      strokes.forEach((stroke) => expect(stroke.jiixBlockId).toBeUndefined())
+
+      canvas.endOperation("Translating")
+      await syncPromise
+
+      strokes.forEach((stroke, i) => expect(stroke.jiixBlockId).toBe(`block-${i}`))
+      restoreRaf()
+    })
+
+    test("should re-check gesture-idle right after export() resolves, before processing JIIX elements (closes a race where a stroke starts mid round-trip)", async () => {
+      const { canvas, manager, strokes, restoreRaf } = setup(3)
+      const originalExport = canvas.export
+      canvas.export = jest.fn().mockImplementation(async (...args: unknown[]) => {
+        // Simulate a new stroke starting while export()'s own network round-trip was in flight.
+        canvas.startOperation("Writing")
+        return (originalExport as (...a: unknown[]) => Promise<unknown>)(...args)
+      })
+
+      const syncPromise = manager.synchronize()
+      await new Promise((resolve) => setTimeout(resolve, 20))
+      strokes.forEach((stroke) => expect(stroke.jiixBlockId).toBeUndefined())
+
+      canvas.endOperation("Writing")
       await syncPromise
 
       strokes.forEach((stroke, i) => expect(stroke.jiixBlockId).toBe(`block-${i}`))
