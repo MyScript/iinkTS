@@ -73,4 +73,5 @@ export type TJIIXLine = {
   "first-char"?: number
   "last-char"?: number
   "x-height": number
+  "bounding-box"?: TBox
 }

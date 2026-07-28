@@ -121,5 +121,36 @@ describe("JoinGestureHandler.ts", () => {
       // Should complete without errors
       expect(true).toBe(true)
     })
+
+    test("does not translate a stroke from another row even when the server reports it in strokeAfterIds", async () => {
+      canvas.configuration.rendering.guides.gap = 10
+      const translateSpy = jest.fn()
+      ;(canvas.gesture as unknown as Record<string, unknown>).translator = { translate: translateSpy }
+
+      // Gesture sits in row 3 (center.y = 27.5 -> round(27.5/10) = 3), nothing before/above it
+      const gestureStroke = buildIIStroke({ box: { height: 5, width: 0, x: 10, y: 25 } })
+
+      // Legitimately in the same row, to the right of the gesture -> should be translated
+      const legitAfter = buildIIStroke({ box: { height: 5, width: 5, x: 50, y: 25 } })
+      canvas.model.addSymbol(legitAfter)
+
+      // Geometrically in row 0 (above the gesture's row), NOT the gesture's row, but
+      // (bogusly) reported by the server in strokeAfterIds -> must NOT be translated
+      const strayStroke = buildIIStroke({ box: { height: 5, width: 5, x: 50, y: 0 } })
+      canvas.model.addSymbol(strayStroke)
+
+      const gesture: TGesture = {
+        gestureType: "JOIN",
+        gestureStrokeId: gestureStroke.id,
+        strokeIds: [],
+        strokeBeforeIds: [],
+        strokeAfterIds: [strayStroke.id],
+      }
+
+      await handler.apply(gestureStroke, gesture)
+
+      const translatedSymbols = translateSpy.mock.calls.flatMap((call) => call[0])
+      expect(translatedSymbols).not.toContain(strayStroke)
+    })
   })
 })

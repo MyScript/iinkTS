@@ -3,6 +3,7 @@ import { LoggerCategory } from "@/logger"
 import type {
   TJIIXEdgeElement,
   TJIIXElement,
+  TJIIXLine,
   TJIIXMathElement,
   TJIIXMathExpression,
   TJIIXNodeElement,
@@ -424,20 +425,10 @@ export class IIJiixQueryManager extends IIAbstractManager {
     // Find the line containing this word via first-char/last-char indices
     let baseline: number | null = null
     let xHeight: number | null = null
-    if (textElement.lines && textElement.chars) {
-      const chars = textElement.chars
-      const firstCharIndex = chars.findIndex((c) => c.word === wordIndex)
-      if (firstCharIndex !== -1) {
-        const line = textElement.lines.find(
-          (l) =>
-            (l["first-char"] === undefined || l["first-char"] <= firstCharIndex) &&
-            (l["last-char"] === undefined || l["last-char"] >= firstCharIndex)
-        )
-        if (line) {
-          baseline = convertMillimeterToPixel(line["baseline-y"])
-          xHeight = convertMillimeterToPixel(line["x-height"])
-        }
-      }
+    const line = this.#findLineForWord(textElement, wordIndex)
+    if (line) {
+      baseline = convertMillimeterToPixel(line["baseline-y"])
+      xHeight = convertMillimeterToPixel(line["x-height"])
     }
 
     return {
@@ -447,6 +438,48 @@ export class IIJiixQueryManager extends IIAbstractManager {
       baseline,
       xHeight,
     }
+  }
+
+  /**
+   * Get the pixel-space vertical center of the JIIX line containing the given stroke.
+   * Uses the line's bounding-box center, not baseline-y (baseline sits low within a
+   * line, not comparable to a symbol's bounds.center.y — mixing the two anchors
+   * misclassifies strokes near a line boundary as belonging to the wrong row).
+   * Returns null when the stroke isn't (yet) part of a recognized text word,
+   * so callers can fall back to a geometric row calculation.
+   */
+  getLineCenterYForStroke(strokeId: string): number | null {
+    this.ensureIndexValid()
+    const info = this.getStrokeInfo(strokeId)
+    if (!info?.context?.word) {
+      return null
+    }
+    const textElement = info.element as TJIIXTextElement
+    const line = this.#findLineForWord(textElement, info.context.word.index)
+    if (!line?.["bounding-box"]) {
+      return null
+    }
+    const bounds = convertBoundingBoxMillimeterToPixel(line["bounding-box"])
+    return bounds.y + bounds.height / 2
+  }
+
+  /**
+   * Find the JIIX line whose first-char/last-char range covers the given word's
+   * first character
+   */
+  #findLineForWord(textElement: TJIIXTextElement, wordIndex: number): TJIIXLine | undefined {
+    if (!textElement.lines || !textElement.chars) {
+      return undefined
+    }
+    const firstCharIndex = textElement.chars.findIndex((c) => c.word === wordIndex)
+    if (firstCharIndex === -1) {
+      return undefined
+    }
+    return textElement.lines.find(
+      (l) =>
+        (l["first-char"] === undefined || l["first-char"] <= firstCharIndex) &&
+        (l["last-char"] === undefined || l["last-char"] >= firstCharIndex)
+    )
   }
 
   /**
