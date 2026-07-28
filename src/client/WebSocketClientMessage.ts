@@ -18,6 +18,7 @@ export enum TWebSocketClientMessageType {
   ContextlessGesture = "contextlessGesture",
   MathSolverResult = "mathSolverResult",
   Error = "error",
+  Ack = "ack",
 }
 
 /**
@@ -298,6 +299,11 @@ export type TWebSocketClientMessageError = TWebSocketClientMessage<TWebSocketCli
 /**
  * @group Client
  */
+export type TWebSocketClientMessageAck = TWebSocketClientMessage<TWebSocketClientMessageType.Ack>
+
+/**
+ * @group Client
+ */
 export type TWebSocketClientMessageReceived =
   | TWebSocketClientMessageAuthenticated
   | TWebSocketClientMessageHMACChallenge
@@ -312,3 +318,4 @@ export type TWebSocketClientMessageReceived =
   | TWebSocketClientMessageIdle
   | TWebSocketClientMessageMathSolverResult
   | TWebSocketClientMessageError
+  | TWebSocketClientMessageAck

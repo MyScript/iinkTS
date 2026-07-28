@@ -79,6 +79,10 @@ export const idleMessage = {
   type: "idle",
 }
 
+export const ackMessage = {
+  type: "ack",
+}
+
 export const errorNotGrantedMessage = {
   type: "error",
   message: "Access not granted",
@@ -159,6 +163,10 @@ export class ServerWebSocketMock extends Server {
 
   sendNotGrantedErrorMessage() {
     this.send(JSON.stringify(errorNotGrantedMessage))
+  }
+
+  sendAckMessage() {
+    this.send(JSON.stringify(ackMessage))
   }
 
   getMessages(type: string): DeserializedMessage<object>[] {
