@@ -1,3 +1,4 @@
+import { GESTURE_OPERATION_LABELS } from "@/canvas/AbstractCanvas"
 import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { CanvasTool } from "@/Constants"
 import { LoggerCategory } from "@/logger"
@@ -111,9 +112,9 @@ export class IISynchronizerManager extends IIAbstractManager {
     throw lastError || new Error(`Synchronization failed after ${IISynchronizerManager.MAX_RETRY_ATTEMPTS} attempts`)
   }
 
-  /** Resolves once no stroke is being actively drawn — writing always wins over sync. */
-  async #waitForWriteIdle(): Promise<void> {
-    while (this.canvas.writer.currentSymbol) {
+  /** Never contend with an in-progress gesture (writing, translating, resizing, rotating) for the main thread. */
+  async #waitForGestureIdle(): Promise<void> {
+    while (GESTURE_OPERATION_LABELS.some((label) => this.canvas.hasOperation(label))) {
       await new Promise((resolve) => requestAnimationFrame(resolve))
     }
   }
@@ -132,8 +133,8 @@ export class IISynchronizerManager extends IIAbstractManager {
   }
 
   async #doSynchronize(): Promise<void> {
-    // Never contend with an in-progress stroke for the main thread.
-    await this.#waitForWriteIdle()
+    // Never contend with an in-progress gesture for the main thread.
+    await this.#waitForGestureIdle()
 
     try {
       await this.canvas.export(["application/vnd.myscript.jiix"])
@@ -142,6 +143,11 @@ export class IISynchronizerManager extends IIAbstractManager {
       this.logger.error("#doSynchronize", "Failed to export JIIX:", error)
       throw error
     }
+
+    // export() is a network round-trip - a gesture can start while it was in flight. Re-check
+    // before processing its result, since a small document (fewer elements than one yield chunk)
+    // would otherwise run the whole loop below in one synchronous pass without ever checking again.
+    await this.#waitForGestureIdle()
 
     const jiix = this.model.exports?.["application/vnd.myscript.jiix"]
     this.logger.debug("synchronize", "JIIX elements:", jiix?.elements)
@@ -186,7 +192,7 @@ export class IISynchronizerManager extends IIAbstractManager {
         // running synchronously for one long stretch, delaying any pointer input
         // (e.g. a new stroke) queued up behind it until the whole loop is done.
         await new Promise((resolve) => requestAnimationFrame(resolve))
-        await this.#waitForWriteIdle()
+        await this.#waitForGestureIdle()
       }
     }
 

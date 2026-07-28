@@ -168,6 +168,7 @@ describe("IIRotationManager.ts", () => {
           "transform-origin",
           `${rotateCenter.x}px ${rotateCenter.y}px`
         )
+        expect(canvas.startOperation).toHaveBeenCalledWith("Rotating")
       })
       test(`shoud continu with angle: "${data.angle}°`, () => {
         expect(manager.continue(data.rotateToPoint)).toEqual(data.angle)
@@ -176,7 +177,9 @@ describe("IIRotationManager.ts", () => {
         expect(canvas.renderer.setAttribute).toHaveBeenNthCalledWith(2, stroke.id, "transform", `rotate(${data.angle})`)
       })
       test(`shoud end with angle: "${data.angle}°`, async () => {
-        await manager.end(data.rotateToPoint)
+        const endPromise = manager.end(data.rotateToPoint)
+        expect(canvas.endOperation).toHaveBeenCalledWith("Rotating")
+        await endPromise
 
         expect(manager.applyToSymbol).toHaveBeenCalledTimes(1)
         expect(canvas.renderer.drawSymbol).toHaveBeenCalledTimes(1)

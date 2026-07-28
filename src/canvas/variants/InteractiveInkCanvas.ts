@@ -1,5 +1,5 @@
-import type { TCanvasOptionsBase } from "@/canvas/AbstractCanvas"
-import { AbstractCanvas } from "@/canvas/AbstractCanvas"
+import type { TCanvasOperationLabel, TCanvasOptionsBase } from "@/canvas/AbstractCanvas"
+import { AbstractCanvas, GESTURE_OPERATION_LABELS } from "@/canvas/AbstractCanvas"
 import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { WebSocketClient } from "@/client"
 import { DOMFactory } from "@/components/dom"
@@ -346,6 +346,19 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
         this.layers.root.classList.remove("select")
         this.layers.root.classList.remove("move")
         break
+    }
+  }
+
+  /**
+   * On top of the base badge tracking, cancels the pending debounced `synchronize()` as soon
+   * as a new gesture starts - so a stroke/transform beginning right as the debounce timer would
+   * otherwise fire never races it (it'll be rescheduled once that gesture's own content change
+   * comes in).
+   */
+  override startOperation(label: TCanvasOperationLabel): void {
+    super.startOperation(label)
+    if (GESTURE_OPERATION_LABELS.includes(label)) {
+      clearTimeout(this.#recognizeStrokeTimer)
     }
   }
 

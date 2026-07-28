@@ -176,9 +176,10 @@ export class IIResizeManager extends IIAbstractTransformManager {
 
   start(target: Element, origin: TPoint): void {
     this.logger.info("start", { target })
-    // Optimistic: reflects "working" on the state badge as soon as the drag starts. Cleared by
-    // the debounced synchronize() triggered by onContentChanged once the transform is acked.
-    this.canvas.startOperation("Recognizing")
+    // Reflects "working" on the state badge as soon as the drag starts. Also the signal
+    // IISynchronizerManager's write-idle gate polls to avoid contending with an in-progress
+    // gesture. Ended synchronously in `end()`.
+    this.canvas.startOperation("Resizing")
     this.interactElementsGroup = this.resolveInteractGroup(target)
     this.direction = target.getAttribute("resize-direction") as ResizeDirection
 
@@ -266,6 +267,10 @@ export class IIResizeManager extends IIAbstractTransformManager {
 
   async end(point: TPoint): Promise<void> {
     this.logger.info("end", { point })
+    // Gesture is over now, synchronously - IISynchronizerManager's write-idle gate polls this
+    // same flag, so leaving it set until the backend round-trip below resolves would delay
+    // (or, if a sync is already waiting on it, deadlock) the debounced synchronize().
+    this.canvas.endOperation("Resizing")
     const { scaleX, scaleY } = this.continue(point)
     this.canvas.snaps.clearSnapToElementLines()
     const oldSymbols = this.model.symbolsSelected.map((s) => cloneSymbol(s))

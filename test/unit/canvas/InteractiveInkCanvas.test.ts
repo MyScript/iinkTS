@@ -15,6 +15,7 @@ import {
   DecoratorKind,
   TSymbolChar,
   TText,
+  getInitialHistoryContext,
 } from "@/iink"
 
 describe("CanvasOffscreen.ts", () => {
@@ -161,6 +162,14 @@ describe("CanvasOffscreen.ts", () => {
       expect(canvas.connectionState).toEqual("online-idle")
     })
 
+    test("hasOperation() reflects whether a label is currently active", () => {
+      expect(canvas.hasOperation("Recognizing")).toBe(false)
+      canvas.startOperation("Recognizing")
+      expect(canvas.hasOperation("Recognizing")).toBe(true)
+      canvas.endOperation("Recognizing")
+      expect(canvas.hasOperation("Recognizing")).toBe(false)
+    })
+
     test("should become offline when disconnected with nothing queued", () => {
       canvas.client.event.emitEndInitialization()
       stubOfflineQueueLength(0)
@@ -209,6 +218,40 @@ describe("CanvasOffscreen.ts", () => {
       const spyStatus: jest.SpyInstance = jest.spyOn(canvas.event, "emitConnectionStatusChanged")
       canvas.client.event.emitConnectionStatusChanged("offline")
       expect(spyStatus).toHaveBeenCalledWith("offline")
+    })
+  })
+
+  describe("gesture start cancels the pending debounced synchronize", () => {
+    let canvas: InteractiveInkCanvas
+
+    beforeEach(() => {
+      jest.useFakeTimers()
+      canvas = new InteractiveInkCanvas(document.createElement("div"), CanvasOptions)
+    })
+
+    afterEach(() => {
+      jest.useRealTimers()
+    })
+
+    test("startOperation('Writing') clears the debounce so the scheduled synchronize() never fires", () => {
+      const synchronizeSpy = jest.spyOn(canvas.synchronizer, "synchronize").mockResolvedValue(undefined)
+
+      canvas.client.event.emitContentChanged(getInitialHistoryContext())
+      // A new stroke starts before the 500ms debounce elapses.
+      canvas.startOperation("Writing")
+
+      jest.advanceTimersByTime(500)
+      expect(synchronizeSpy).not.toHaveBeenCalled()
+    })
+
+    test("a non-gesture operation label does not clear the pending debounce", () => {
+      const synchronizeSpy = jest.spyOn(canvas.synchronizer, "synchronize").mockResolvedValue(undefined)
+
+      canvas.client.event.emitContentChanged(getInitialHistoryContext())
+      canvas.startOperation("Converting")
+
+      jest.advanceTimersByTime(500)
+      expect(synchronizeSpy).toHaveBeenCalledTimes(1)
     })
   })
 

@@ -38,6 +38,7 @@ describe("IIWriterManager.ts", () => {
         pointer: { t: 1, p: 0.5, x: 1, y: 1 },
       } as TPointerInfo
       manager.start(info)
+      expect(canvas.startOperation).toHaveBeenCalledWith("Writing")
       expect(manager.model.creationTime).toStrictEqual(manager.model.modificationDate)
       expect(manager.currentSymbol).toBeDefined()
       expect(manager.currentSymbol?.type).toEqual(SymbolType.Stroke)
@@ -220,6 +221,36 @@ describe("IIWriterManager.ts", () => {
       expect(manager.model.symbols).toHaveLength(1)
       expect(canvas.client.addStrokes).toHaveBeenCalledTimes(1)
       expect(canvas.client.addStrokes).toHaveBeenCalledWith([manager.model.symbols[0]], true)
+    })
+
+    test("should end the 'Writing' operation synchronously on end(), even for a stroke whose backend round-trip is still pending", () => {
+      manager.model.clear()
+      manager.currentSymbol = undefined
+      const point: TPointer = { t: 25, p: 25, x: 25, y: 25 }
+      const info = {
+        pointer: { t: 1, p: 0.5, x: 1, y: 1 },
+      } as TPointerInfo
+      manager.start(info)
+      manager.continue({ pointer: point } as TPointerInfo)
+      // Not awaited on purpose: endOperation("Writing") must happen before the backend
+      // round-trip (interactWithBackend) resolves, not after.
+      void manager.end({ pointer: point } as TPointerInfo)
+      expect(canvas.endOperation).toHaveBeenCalledWith("Writing")
+    })
+
+    test("should end the 'Writing' operation immediately for a non-stroke symbol (e.g. a shape)", async () => {
+      const shapeCanvas = createCanvasMock()
+      shapeCanvas.client.init = jest.fn(() => Promise.resolve())
+      const shapeManager = new IIWriterManager(asCanvas(shapeCanvas))
+      shapeManager.renderer.drawSymbol = jest.fn()
+      shapeManager.tool = CanvasWriteTool.Rectangle
+
+      const point: TPointer = { t: 25, p: 25, x: 25, y: 25 }
+      shapeManager.start({ pointer: { t: 1, p: 0.5, x: 1, y: 1 } } as TPointerInfo)
+      await shapeManager.end({ pointer: point } as TPointerInfo)
+
+      expect(shapeCanvas.startOperation).toHaveBeenCalledWith("Writing")
+      expect(shapeCanvas.endOperation).toHaveBeenCalledWith("Writing")
     })
   })
 
