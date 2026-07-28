@@ -31,11 +31,7 @@ export class JoinGestureHandler extends GestureHandler {
 
     const symbolsAbove = this.model.symbols.filter((s) => this.isSymbolAbove(gestureStroke, s))
     const symbolsRow = this.model.symbols.filter(
-      (s) =>
-        gestureStroke.id !== s.id &&
-        (this.isSymbolInRow(gestureStroke, s) ||
-          gesture.strokeAfterIds.includes(s.id) ||
-          gesture.strokeBeforeIds.includes(s.id))
+      (s) => gestureStroke.id !== s.id && this.isSymbolInRow(gestureStroke, s)
     )
 
     const symbolsBeforeGestureInRow = symbolsRow.filter(

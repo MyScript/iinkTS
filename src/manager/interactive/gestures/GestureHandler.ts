@@ -7,7 +7,7 @@ import type { IITypesetManager } from "@/manager/interactive/IITypesetManager"
 import type { IITranslateManager } from "@/manager/interactive/transform/IITranslateManager"
 import type { IIModel } from "@/model"
 import type { SVGRenderer } from "@/renderer"
-import type { TStroke, TSymbol } from "@/symbol"
+import { isDecorator, isStroke, type TStroke, type TSymbol } from "@/symbol"
 
 import type { IIGestureManager } from "../IIGestureManager"
 import { IIGestureAnnotationProcessor } from "./GestureAnnotation"
@@ -109,8 +109,13 @@ export abstract class GestureHandler implements TGestureHandler {
   }
 
   private getSymbolRowIndex(symbol: TSymbol): number {
-    // Use symbol bounds yMid for row calculation
-    return Math.round(symbol.bounds.center.y / this.rowHeight)
+    // Strokes (and decorators targeting a stroke) prefer the JIIX line's center-y,
+    // which is stable across a word's strokes; raw bounds.center.y is noisy per-stroke
+    // (ascenders/descenders/slant) and can misclassify a stroke's row near boundaries.
+    const strokeId = isStroke(symbol) ? symbol.id : isDecorator(symbol) ? symbol.targetIds[0] : undefined
+    const lineCenterY = strokeId ? this.canvas.jiix.getLineCenterYForStroke(strokeId) : null
+    const y = lineCenterY ?? symbol.bounds.center.y
+    return Math.round(y / this.rowHeight)
   }
 
   protected isSymbolAbove(source: TSymbol, target: TSymbol): boolean {

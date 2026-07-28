@@ -43,7 +43,7 @@ export abstract class IIAbstractTransformManager extends IIAbstractManager {
       this.canvas.renderer.drawSymbol(s)
       this.model.updateSymbol(s)
     })
-    this.updateDecoratorsForTargets(symbols)
+    this.updateDecoratorsForTargets(symbols, matrix)
   }
 
   /**
@@ -52,7 +52,7 @@ export abstract class IIAbstractTransformManager extends IIAbstractManager {
    * a translate/resize/rotate of the target symbols leaves the decorator's bounds stale.
    * Recompute them here from the (already transformed) target symbols.
    */
-  private updateDecoratorsForTargets(symbols: TSymbol[]): void {
+  private updateDecoratorsForTargets(symbols: TSymbol[], matrix: MatrixTransform): void {
     const movedIds = new Set(symbols.map((s) => s.id))
     this.model.symbols.forEach((sym) => {
       if (!isDecorator(sym) || !sym.targetIds.some((id) => movedIds.has(id))) {
@@ -61,6 +61,11 @@ export abstract class IIAbstractTransformManager extends IIAbstractManager {
       const targetSyms = sym.targetIds.map((id) => this.model.getRootSymbol(id)).filter((s): s is TSymbol => !!s)
       if (targetSyms.length) {
         DecoratorOps.setBounds(sym, OBBOps.createFromOBBs(targetSyms.map((s) => s.bounds)))
+        // baseline is an absolute y-coordinate (used by Underline/Strikethrough rendering
+        // in place of bounds), so it must follow the same transform as the target symbols.
+        if (sym.baseline !== undefined) {
+          sym.baseline = +matrix.applyToPoint({ x: 0, y: sym.baseline }).y.toFixed(3)
+        }
         this.model.updateSymbol(sym)
         this.canvas.renderer.drawSymbol(sym)
       }
