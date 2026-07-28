@@ -434,6 +434,12 @@ export class IIMathManager extends IIAbstractManager {
   async #tryAutoComputeInternal(): Promise<void> {
     this.logger.info("tryAutoCompute")
 
+    // A prior ink mutation (e.g. erasing/rewriting a BLOCK variable's defining stroke) clears
+    // model.exports, and nothing else guarantees it's been refreshed by the time this runs -
+    // without this, model.mathBlocks can be stale/empty and a dependent block silently never
+    // gets recomputed. export() is a no-op if the jiix export is already current.
+    await this.canvas.export(["application/vnd.myscript.jiix"])
+
     const mathBlocks = this.canvas.model.mathBlocks
     for (const mb of mathBlocks) {
       if (!mb.id) {
