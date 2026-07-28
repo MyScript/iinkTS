@@ -36,6 +36,7 @@ See [MIGRATION.md](./MIGRATION.md) for step-by-step upgrade instructions.
 
 ### Stroke Playback (IIC-1688)
 - feat(canvas): add `canvas.playback` (`IIPlaybackManager`) — replays a recorded set of strokes point by point, honoring their original relative timing, via `canvas.writer.start/continue/end`; `play(strokes, speed?)`, `pause()`, `resume()`, `stop()`, `setSpeed()`; `state`/`progress` getters and `onProgress`/`onStateChange`/`onEnd` callbacks
+- feat(canvas): add `canvas.readOnly` — blocks real pointer input across all tools (write/erase/select/move) and shows a "not-allowed" cursor (`.read-only` class on the canvas root); used by `canvas.playback` for the duration of a playback, cleared on pause/stop/end, so the user can't fight over the writer's state with the strokes being replayed (IIC-1731)
 - feat(examples): rework "Import Pointers" example into a "Stroke Playback" demo with play/pause/stop/speed controls, replaying `demo.json`
 
 ### Math (IIC-1633)

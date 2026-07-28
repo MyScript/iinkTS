@@ -112,6 +112,10 @@
   cursor: context-menu;
 }
 
+.ms-ink.read-only {
+  cursor: not-allowed;
+}
+
 .ms-ink .ms-layer-rendering {
   position: relative;
   display: block;

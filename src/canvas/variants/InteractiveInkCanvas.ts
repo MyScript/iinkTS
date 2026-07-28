@@ -86,6 +86,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
   #configuration: InteractiveInkCanvasConfiguration
   #model: IIModel
   #tool: CanvasTool = CanvasTool.Write
+  #readOnly = false
   #layerUITimer?: ReturnType<typeof setTimeout>
   #recognizeStrokeTimer?: ReturnType<typeof setTimeout>
   #exportRetryTimer?: ReturnType<typeof setTimeout>
@@ -250,6 +251,22 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
         break
     }
     this.event.emitToolChanged(i)
+  }
+
+  /** Whether real pointer input (write/erase/select/move) is currently blocked - see `readOnly` setter. */
+  get readOnly(): boolean {
+    return this.#readOnly
+  }
+
+  /**
+   * Block or restore real pointer input across every tool at once (write/erase/select/move all
+   * attach through `layers.rendering`), and reflect it with a "not-allowed" cursor. Used e.g. by
+   * `canvas.playback` so a replayed stroke can't race the user's own input.
+   */
+  set readOnly(value: boolean) {
+    this.#readOnly = value
+    this.layers.rendering.style.pointerEvents = value ? "none" : ""
+    this.layers.root.classList.toggle("read-only", value)
   }
 
   /**

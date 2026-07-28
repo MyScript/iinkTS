@@ -127,6 +127,35 @@ describe("CanvasOffscreen.ts", () => {
     })
   })
 
+  describe("readOnly", () => {
+    let canvas: InteractiveInkCanvas
+
+    beforeEach(() => {
+      canvas = new InteractiveInkCanvas(document.createElement("div"), CanvasOptions)
+    })
+
+    test("should default to false, with pointer input allowed", () => {
+      expect(canvas.readOnly).toBe(false)
+      expect(canvas.layers.rendering.style.pointerEvents).not.toBe("none")
+      expect(canvas.layers.root.classList.contains("read-only")).toBe(false)
+    })
+
+    test("should block pointer input and add the 'read-only' class when set to true", () => {
+      canvas.readOnly = true
+      expect(canvas.readOnly).toBe(true)
+      expect(canvas.layers.rendering.style.pointerEvents).toBe("none")
+      expect(canvas.layers.root.classList.contains("read-only")).toBe(true)
+    })
+
+    test("should restore pointer input and remove the 'read-only' class when set back to false", () => {
+      canvas.readOnly = true
+      canvas.readOnly = false
+      expect(canvas.readOnly).toBe(false)
+      expect(canvas.layers.rendering.style.pointerEvents).not.toBe("none")
+      expect(canvas.layers.root.classList.contains("read-only")).toBe(false)
+    })
+  })
+
   describe("connectionState", () => {
     let canvas: InteractiveInkCanvas
 
