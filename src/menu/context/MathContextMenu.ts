@@ -149,13 +149,15 @@ export class MathContextMenu extends SubMenuItem {
         type: "button",
         label: "Select result strokes",
         action: () => {
-          const jiixBlockId = canvas.jiix
+          const jiixBlockIds = canvas.jiix
             .getBlocksForSymbols(canvas.model.symbolsSelected)
-            .find((s) => s.type === "Math")?.id
-          if (!jiixBlockId) {
+            .filter((s) => s.type === "Math")
+            .map((s) => s.id)
+          if (jiixBlockIds.length === 0) {
+            this.logger.warn("No block math selected")
             return
           }
-          const ids = canvas.math.getStoredSolverOutputs(jiixBlockId) ?? []
+          const ids = jiixBlockIds.flatMap((jiixBlockId) => canvas.math.getStoredSolverOutputs(jiixBlockId) ?? [])
           if (ids.length > 0) {
             canvas.select(ids)
           }
@@ -167,13 +169,15 @@ export class MathContextMenu extends SubMenuItem {
         type: "button",
         label: "Delete result strokes",
         action: async () => {
-          const jiixBlockId = canvas.jiix
+          const jiixBlockIds = canvas.jiix
             .getBlocksForSymbols(canvas.model.symbolsSelected)
-            .find((s) => s.type === "Math")?.id
-          if (!jiixBlockId) {
+            .filter((s) => s.type === "Math")
+            .map((s) => s.id)
+          if (jiixBlockIds.length === 0) {
+            this.logger.warn("No block math selected")
             return
           }
-          await canvas.math.clearSolverOutputs(jiixBlockId)
+          await Promise.all(jiixBlockIds.map((jiixBlockId) => canvas.math.clearSolverOutputs(jiixBlockId)))
         },
       })
     }
