@@ -1380,6 +1380,24 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
     )
   }
 
+  #extractJIIXBlockIdFromBackendActions(actions: TIIHistoryBackendChanges): string[] {
+    const strokes = [
+      ...(actions.added || []),
+      ...(actions.erased || []),
+      ...(actions.replaced?.newStrokes || []),
+      ...(actions.replaced?.oldStrokes || []),
+      ...(actions.matrix?.strokes || []),
+      ...(actions.translate?.flatMap((s) => s.strokes) || []),
+      ...(actions.scale?.flatMap((s) => s.strokes) || []),
+      ...(actions.rotate?.flatMap((s) => s.strokes) || []),
+    ]
+
+    return new Set(strokes.map((s) => s.jiixBlockId))
+      .values()
+      .toArray()
+      .filter((a) => !!a) as string[]
+  }
+
   #applyHistoryStackItem(stackItem: TIIHistoryStackItem): TIIHistoryBackendChanges {
     this.manageIdleState(false)
     this.unselectAll()
@@ -1395,8 +1413,12 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
     this.logger.debug("undo", {
       previousStackItem,
     })
+
     const actionsToBackend = this.#applyHistoryStackItem(previousStackItem)
     if (this.#hasBackendActions(actionsToBackend)) {
+      this.#extractJIIXBlockIdFromBackendActions(actionsToBackend).forEach((jiixBlockId) => {
+        this.math.clearGhostStrokes(jiixBlockId)
+      })
       this.startOperation("Recognizing")
       await this.client.undo(actionsToBackend)
     }
@@ -1422,6 +1444,9 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
     this.logger.debug("redo", { nextStackItem })
     const actionsToBackend = this.#applyHistoryStackItem(nextStackItem)
     if (this.#hasBackendActions(actionsToBackend)) {
+      this.#extractJIIXBlockIdFromBackendActions(actionsToBackend).forEach((jiixBlockId) => {
+        this.math.clearGhostStrokes(jiixBlockId)
+      })
       this.startOperation("Recognizing")
       await this.client.redo(actionsToBackend)
     }
