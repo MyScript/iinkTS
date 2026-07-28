@@ -172,6 +172,7 @@ export function createCanvasMock(overrides: Partial<TCanvasMock> = {}): TCanvasM
 
   let _penStyle: TStyle = { ...DefaultStyle }
   let _tool: CanvasTool = CanvasTool.Write
+  let _readOnly = false
   const _activeOperations = new Map<string, number>()
 
   const base = {
@@ -280,6 +281,12 @@ export function createCanvasMock(overrides: Partial<TCanvasMock> = {}): TCanvasM
     },
     set tool(v: CanvasTool) {
       _tool = v
+    },
+    get readOnly(): boolean {
+      return _readOnly
+    },
+    set readOnly(v: boolean) {
+      _readOnly = v
     },
 
     init: jest.fn().mockImplementation(() => {

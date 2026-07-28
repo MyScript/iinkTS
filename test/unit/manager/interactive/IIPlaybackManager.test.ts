@@ -189,4 +189,86 @@ describe("IIPlaybackManager.ts", () => {
     jest.advanceTimersByTime(2000)
     expect(canvas.writer.start).toHaveBeenCalledTimes(1)
   })
+
+  describe("blocking real user pointer input during playback (via canvas.readOnly)", () => {
+    test("should set canvas.readOnly once playback starts", () => {
+      const canvas = createCanvasMock()
+      const manager = new IIPlaybackManager(asCanvas(canvas))
+
+      expect(canvas.readOnly).toBe(false)
+      manager.play([buildPartialStroke(0, 2)])
+      expect(canvas.readOnly).toBe(true)
+    })
+
+    test("should clear canvas.readOnly on immediate pause (not mid-stroke)", () => {
+      const canvas = createCanvasMock()
+      const manager = new IIPlaybackManager(asCanvas(canvas))
+
+      manager.play([buildPartialStroke(0, 2), buildPartialStroke(500, 2)])
+      jest.advanceTimersByTime(15) // first stroke fully fired (start + end), idle between strokes
+      manager.pause()
+
+      expect(canvas.readOnly).toBe(false)
+    })
+
+    test("should keep canvas.readOnly set until a mid-stroke pause request completes, then clear it", () => {
+      const canvas = createCanvasMock()
+      const manager = new IIPlaybackManager(asCanvas(canvas))
+
+      manager.play([buildPartialStroke(0, 3), buildPartialStroke(500, 2)])
+      jest.advanceTimersByTime(0) // stroke's first point only - mid-stroke
+      manager.pause() // deferred: stroke still in progress
+
+      expect(canvas.readOnly).toBe(true)
+
+      jest.advanceTimersByTime(30) // remaining points of the stroke fire, completing it
+      expect(canvas.readOnly).toBe(false)
+    })
+
+    test("should set canvas.readOnly again on resume", () => {
+      const canvas = createCanvasMock()
+      const manager = new IIPlaybackManager(asCanvas(canvas))
+
+      manager.play([buildPartialStroke(0, 2), buildPartialStroke(500, 2)])
+      jest.advanceTimersByTime(15)
+      manager.pause()
+      expect(canvas.readOnly).toBe(false)
+
+      manager.resume()
+      expect(canvas.readOnly).toBe(true)
+    })
+
+    test("should clear canvas.readOnly once playback ends naturally", () => {
+      const canvas = createCanvasMock()
+      const manager = new IIPlaybackManager(asCanvas(canvas))
+
+      manager.play([buildPartialStroke(0, 2)])
+      jest.advanceTimersByTime(15)
+
+      expect(manager.state).toEqual("idle")
+      expect(canvas.readOnly).toBe(false)
+    })
+
+    test("should clear canvas.readOnly on stop", () => {
+      const canvas = createCanvasMock()
+      const manager = new IIPlaybackManager(asCanvas(canvas))
+
+      manager.play([buildPartialStroke(0, 2), buildPartialStroke(500, 2)])
+      jest.advanceTimersByTime(0)
+      manager.stop()
+
+      expect(canvas.readOnly).toBe(false)
+    })
+
+    test("should clear canvas.readOnly on destroy", () => {
+      const canvas = createCanvasMock()
+      const manager = new IIPlaybackManager(asCanvas(canvas))
+
+      manager.play([buildPartialStroke(0, 2), buildPartialStroke(500, 2)])
+      jest.advanceTimersByTime(0)
+      manager.destroy()
+
+      expect(canvas.readOnly).toBe(false)
+    })
+  })
 })

@@ -52,6 +52,7 @@ export type TInteractiveInkCanvas = {
   get penStyle(): TStyle
   set penStyle(v: TPartialDeep<TStyle>)
   tool: CanvasTool
+  readOnly: boolean
   set renderingConfiguration(v: TIIRendererConfiguration)
 
   // ── Canvas state (busy/connection badge) ───────────────────────────
