@@ -112,6 +112,42 @@ describe("IIJiixQueryManager.ts", () => {
     })
   })
 
+  describe("getStrokeIdsForBlock", () => {
+    test("returns the stroke ids belonging to the given block", () => {
+      const canvas = createCanvasMock()
+      const jiix = new IIJiixQueryManager(asCanvas(canvas))
+      const stroke1 = buildIIStroke()
+      const stroke2 = buildIIStroke()
+      canvas.model.addSymbol(stroke1)
+      canvas.model.addSymbol(stroke2)
+      canvas.model.mergeExport({
+        "application/vnd.myscript.jiix": {
+          type: "Math",
+          id: "MainBlock",
+          version: "3",
+          elements: [
+            {
+              id: "block-1",
+              type: "Math" as never,
+              items: [
+                { type: "stroke", id: "s1", "full-id": stroke1.id },
+                { type: "stroke", id: "s2", "full-id": stroke2.id },
+              ],
+            },
+          ],
+        },
+      })
+      jiix.invalidateIndex()
+      expect(jiix.getStrokeIdsForBlock("block-1")).toEqual([stroke1.id, stroke2.id])
+    })
+
+    test("returns an empty array for an unknown block id", () => {
+      const canvas = createCanvasMock()
+      const jiix = new IIJiixQueryManager(asCanvas(canvas))
+      expect(jiix.getStrokeIdsForBlock("unknown-block")).toEqual([])
+    })
+  })
+
   describe("getBlocksForSymbols with selected symbols", () => {
     test("should return blocks for selected symbols", () => {
       const canvas = createCanvasMock()

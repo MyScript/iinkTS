@@ -17,10 +17,13 @@ describe("IIMathCapabilitiesTable.ts", () => {
       } as unknown as IIJiixQueryManager,
     })
 
-    // Mock methods for capabilities checking
-    canvas.math.getAvailableActions = jest.fn().mockResolvedValue(["numerical-computation", "evaluation"])
-    canvas.math.getVariables = jest.fn().mockResolvedValue([{ name: "x", value: 1, sourceType: "UNDEFINED" }])
-    canvas.math.getEvaluables = jest.fn().mockResolvedValue([{ inputName: "x", outputName: "f(x)" }])
+    // Mock capabilities lookup (delegated to canvas.math.getBlockCapabilities)
+    canvas.math.getBlockCapabilities = jest.fn().mockResolvedValue({
+      canEditVariables: true,
+      canCompute: true,
+      canEvaluate: true,
+      hasDrawSolverOutputs: false,
+    })
   })
 
   afterEach(() => {
@@ -46,9 +49,7 @@ describe("IIMathCapabilitiesTable.ts", () => {
       expect(capabilities.canCompute).toBe(true)
       expect(capabilities.canEvaluate).toBe(true)
 
-      expect(canvas.math.getAvailableActions).toHaveBeenCalledWith("block-1")
-      expect(canvas.math.getVariables).toHaveBeenCalledWith("block-1")
-      expect(canvas.math.getEvaluables).toHaveBeenCalledWith("block-1")
+      expect(canvas.math.getBlockCapabilities).toHaveBeenCalledWith("block-1")
     })
 
     test("should handle symbol without id", async () => {
@@ -67,10 +68,7 @@ describe("IIMathCapabilitiesTable.ts", () => {
       const table = new IIMathCapabilitiesTable(asCanvas(canvas))
       const jiixBlockId = "block-1"
 
-      // Mock methods to throw errors
-      canvas.math.getAvailableActions = jest.fn().mockRejectedValue(new Error("API error"))
-      canvas.math.getVariables = jest.fn().mockRejectedValue(new Error("API error"))
-      canvas.math.getEvaluables = jest.fn().mockRejectedValue(new Error("API error"))
+      canvas.math.getBlockCapabilities = jest.fn().mockRejectedValue(new Error("API error"))
 
       const capabilities = await (table as any).fetchSymbolCapabilities(jiixBlockId)
 
@@ -85,7 +83,9 @@ describe("IIMathCapabilitiesTable.ts", () => {
       const table = new IIMathCapabilitiesTable(asCanvas(canvas))
       const jiixBlockId = "block-2"
 
-      canvas.math.getVariables = jest.fn().mockResolvedValue([])
+      canvas.math.getBlockCapabilities = jest
+        .fn()
+        .mockResolvedValue({ canEditVariables: false, canCompute: true, canEvaluate: true, hasDrawSolverOutputs: false })
 
       const capabilities = await (table as any).fetchSymbolCapabilities(jiixBlockId)
 
@@ -96,7 +96,9 @@ describe("IIMathCapabilitiesTable.ts", () => {
       const table = new IIMathCapabilitiesTable(asCanvas(canvas))
       const jiixBlockId = "block-3"
 
-      canvas.math.getEvaluables = jest.fn().mockResolvedValue([])
+      canvas.math.getBlockCapabilities = jest
+        .fn()
+        .mockResolvedValue({ canEditVariables: true, canCompute: true, canEvaluate: false, hasDrawSolverOutputs: false })
 
       const capabilities = await (table as any).fetchSymbolCapabilities(jiixBlockId)
 
@@ -107,7 +109,9 @@ describe("IIMathCapabilitiesTable.ts", () => {
       const table = new IIMathCapabilitiesTable(asCanvas(canvas))
       const jiixBlockId = "block-4"
 
-      canvas.math.getAvailableActions = jest.fn().mockResolvedValue(["evaluation"])
+      canvas.math.getBlockCapabilities = jest
+        .fn()
+        .mockResolvedValue({ canEditVariables: true, canCompute: false, canEvaluate: true, hasDrawSolverOutputs: false })
 
       const capabilities = await (table as any).fetchSymbolCapabilities(jiixBlockId)
 

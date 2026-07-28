@@ -133,43 +133,46 @@ export class IIMenuContext {
     return this.canvas.jiix.getBlocksForSymbols(this.canvas.model.symbolsSelected).filter((s) => s.type === "Math")
   }
 
+  /**
+   * True when the current selection is made up of one or more fully-selected Math blocks,
+   * and nothing else (no other fully-selected block type, no stroke left outside any block).
+   */
+  get isOnlyMathBlocksSelected(): boolean {
+    const symbolsSelected = this.canvas.model.symbolsSelected
+    if (symbolsSelected.length === 0) {
+      return false
+    }
+    const blocksSelected = this.canvas.jiix.getBlocksForSymbols(symbolsSelected)
+    if (blocksSelected.length === 0 || blocksSelected.some((block) => block.type !== "Math")) {
+      return false
+    }
+    const coveredStrokeIds = new Set(blocksSelected.flatMap((block) => this.canvas.jiix.getStrokeIdsForBlock(block.id)))
+    return symbolsSelected.every((symbol) => coveredStrokeIds.has(symbol.id))
+  }
+
   protected async updateMathMenu(): Promise<void> {
     const mathMenuInstance = this.contextMenus.get("math") as MathContextMenu | undefined
-    if (mathMenuInstance) {
-      if (this.mathBlocksSelected.length === 1) {
-        const mathBlock = this.mathBlocksSelected[0]
-        if (!mathBlock.id) {
-          mathMenuInstance.setMenuVisibility(false, {
-            canEditVariables: false,
-            canCompute: false,
-            canEvaluate: false,
-          })
-          return
-        }
-        const [actions, variables, evaluables] = await Promise.all([
-          this.canvas.math.getAvailableActions(mathBlock.id),
-          this.canvas.math.getVariables(mathBlock.id),
-          this.canvas.math.getEvaluables(mathBlock.id),
-        ])
-
-        const canEditVariables = Object.keys(variables).length > 0
-        const canCompute = actions?.includes("numerical-computation")
-        const canEvaluate = evaluables?.length ? true : false
-        const hasDrawSolverOutputs = this.canvas.math.hasDrawSolverOutputs(mathBlock.id)
-        mathMenuInstance.setMenuVisibility(true, {
-          canEditVariables,
-          canCompute,
-          canEvaluate,
-          hasDrawSolverOutputs,
-        })
-      } else {
-        mathMenuInstance.setMenuVisibility(false, {
-          canEditVariables: false,
-          canCompute: false,
-          canEvaluate: false,
-        })
-      }
+    if (!mathMenuInstance) {
+      return
     }
+
+    const mathBlocks = this.mathBlocksSelected
+    if (!this.isOnlyMathBlocksSelected || mathBlocks.some((block) => !block.id)) {
+      mathMenuInstance.setMenuVisibility(false, {
+        canEditVariables: false,
+        canCompute: false,
+        canEvaluate: false,
+      })
+      return
+    }
+
+    const capabilities = await Promise.all(mathBlocks.map((block) => this.canvas.math.getBlockCapabilities(block.id)))
+    mathMenuInstance.setMenuVisibility(true, {
+      canEditVariables: capabilities.every((c) => c.canEditVariables),
+      canCompute: capabilities.every((c) => c.canCompute),
+      canEvaluate: capabilities.every((c) => c.canEvaluate),
+      hasDrawSolverOutputs: capabilities.every((c) => c.hasDrawSolverOutputs),
+    })
   }
 
   update(): void {

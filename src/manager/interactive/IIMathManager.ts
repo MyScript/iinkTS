@@ -12,6 +12,7 @@ import type { MatrixTransform } from "@/transform"
 
 import { IIAbstractManager } from "./IIAbstractManager"
 import type {
+  TMathBlockCapabilities,
   TMathBlockComputation,
   TMathComputationConfig,
   TMathDependencies,
@@ -19,7 +20,12 @@ import type {
   TMathResultMode,
   TMathVariableUsage,
 } from "./math"
-import { IIMathComputationSubManager, IIMathFunctionEvaluationSubManager, IIMathVariableSubManager } from "./math"
+import {
+  IIMathCapabilitiesSubManager,
+  IIMathComputationSubManager,
+  IIMathFunctionEvaluationSubManager,
+  IIMathVariableSubManager,
+} from "./math"
 
 /**
  * Configuration passed to {@link IIMathManager} at load time.
@@ -50,6 +56,7 @@ export class IIMathManager extends IIAbstractManager {
   #computation: IIMathComputationSubManager
   #variables: IIMathVariableSubManager
   #evaluation: IIMathFunctionEvaluationSubManager
+  #capabilities: IIMathCapabilitiesSubManager
 
   #isHandlingSynchronized = false
 
@@ -59,6 +66,7 @@ export class IIMathManager extends IIAbstractManager {
     this.#computation = new IIMathComputationSubManager(canvas, config?.computation)
     this.#variables = new IIMathVariableSubManager(canvas, config?.interaction)
     this.#evaluation = new IIMathFunctionEvaluationSubManager(canvas)
+    this.#capabilities = new IIMathCapabilitiesSubManager(canvas, this.#variables, this.#computation, this.#evaluation)
 
     canvas.event.addSynchronizedListener(() => {
       this.#onSynchronized()
@@ -95,9 +103,11 @@ export class IIMathManager extends IIAbstractManager {
     wasRecomputed: boolean
   }> {
     try {
-      return this.canvas.trackOperation("Computing", async () =>
+      const computation = await this.canvas.trackOperation("Computing", async () =>
         this.#computation.computeNumericalResult(jiixBlockId, mode)
       )
+      this.#capabilities.invalidateCache(jiixBlockId)
+      return computation
     } catch (error) {
       this.canvas.manageError(error as Error)
       throw error
@@ -176,6 +186,7 @@ export class IIMathManager extends IIAbstractManager {
         await this.#computation.clearSolverOutputs(jiixBlockId)
       }
       await this.#variables.setVariableValue(jiixBlockId, variableName, variableValue)
+      this.#capabilities.invalidateCache(jiixBlockId)
       if (jiixBlockId) {
         await this.recalculateDependentBlocks(jiixBlockId)
       }
@@ -249,9 +260,10 @@ export class IIMathManager extends IIAbstractManager {
   }
 
   async enrichMathDependencies(jiixBlockId: string, isStale?: () => boolean): Promise<void> {
-    return this.canvas.trackOperation("Loading variables", async () =>
+    await this.canvas.trackOperation("Loading variables", async () =>
       this.#variables.enrichMathDependencies(jiixBlockId, isStale)
     )
+    this.#capabilities.invalidateCache(jiixBlockId)
   }
 
   cleanupMathDependencies(jiixBlockIds: string[]): void {
@@ -404,6 +416,23 @@ export class IIMathManager extends IIAbstractManager {
       })
       return await this.canvas.trackOperation("Checking", async () =>
         this.canvas.client.getAvailableActions(jiixBlockId)
+      )
+    } catch (error) {
+      this.canvas.manageError(error as Error)
+      throw error
+    }
+  }
+
+  /**
+   * Get which math operations (edit variables, compute, evaluate, manage solver output strokes)
+   * are available for a math block. Result is cached per block until the block's variables,
+   * computation state, or diagnostics change.
+   * @param jiixBlockId - The ID of the math block
+   */
+  async getBlockCapabilities(jiixBlockId: string): Promise<TMathBlockCapabilities> {
+    try {
+      return await this.canvas.trackOperation("Checking", async () =>
+        this.#capabilities.getBlockCapabilities(jiixBlockId)
       )
     } catch (error) {
       this.canvas.manageError(error as Error)

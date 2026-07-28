@@ -365,6 +365,16 @@ export class IIJiixQueryManager extends IIAbstractManager {
   }
 
   /**
+   * Get the ids of the strokes that make up a given block
+   * @param blockId - The id of the JIIX element (block)
+   * @returns Array of stroke ids, or an empty array if the block is unknown
+   */
+  getStrokeIdsForBlock(blockId: string): string[] {
+    this.ensureIndexValid()
+    return this.#index?.elementToStrokes.get(blockId) ?? []
+  }
+
+  /**
    * Get the precise label for a stroke
    * For text: returns char label if available, word label otherwise
    * For math: returns expression label or type
