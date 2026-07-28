@@ -100,7 +100,7 @@ test.describe("Math Computation Modes", () => {
             (id) => rootEl.iink.math.getGhostBounds(id),
             jiixBlockId
           )
-          return boundsBefore.x === bounds.x && boundsBefore.y === bounds.y
+          return boundsBefore.x === bounds?.x && boundsBefore?.y === bounds.y
         })
         .toBe(true)
     })
