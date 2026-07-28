@@ -120,6 +120,7 @@ export class IIPlaybackManager extends IIAbstractManager {
   #run(): void {
     this.#scheduledAt = performance.now()
     this.#disableGestureDetection()
+    this.canvas.readOnly = true
     this.#setState("playing")
     for (let i = this.#firedIndex; i < this.#schedule.length; i++) {
       const entry = this.#schedule[i]
@@ -151,6 +152,7 @@ export class IIPlaybackManager extends IIAbstractManager {
     }
     if (this.#firedIndex === this.#schedule.length) {
       this.#restoreGestureDetection()
+      this.canvas.readOnly = false
       this.#setState("idle")
       this.onEnd?.()
     } else if (this.#pauseRequested && entry.isLastOfStroke) {
@@ -176,6 +178,7 @@ export class IIPlaybackManager extends IIAbstractManager {
     this.#elapsedOffset += (performance.now() - this.#scheduledAt) * this.#speed
     this.#clearTimers()
     this.#restoreGestureDetection()
+    this.canvas.readOnly = false
     if (this.#firedIndex === this.#schedule.length) {
       this.#setState("idle")
       this.onEnd?.()
@@ -250,6 +253,7 @@ export class IIPlaybackManager extends IIAbstractManager {
     this.#clearTimers()
     this.#finalizeStrokeInProgress()
     this.#restoreGestureDetection()
+    this.canvas.readOnly = false
     this.#schedule = []
     this.#totalStrokes = 0
     this.#firedIndex = 0
@@ -277,5 +281,6 @@ export class IIPlaybackManager extends IIAbstractManager {
   protected onDestroy(): void {
     this.#clearTimers()
     this.#restoreGestureDetection()
+    this.canvas.readOnly = false
   }
 }

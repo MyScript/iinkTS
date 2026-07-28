@@ -27,6 +27,46 @@ export type TCanvasConfiguration = {
 export type TCanvasType = "INTERACTIVE_INK" | "INK_V1" | "INTERACTIVE_INK_SSR" | "INK_V2"
 
 /**
+ * Every label ever passed to `startOperation`/`endOperation`/`trackOperation` (shown on the
+ * canvas state badge tooltip). `Writing`/`Translating`/`Resizing`/`Rotating` additionally
+ * identify an in-progress user gesture — see {@link GESTURE_OPERATION_LABELS}.
+ * @group Canvas
+ */
+export type TCanvasOperationLabel =
+  | "Recognizing"
+  | "Writing"
+  | "Translating"
+  | "Resizing"
+  | "Rotating"
+  | "Synchronizing"
+  | "Applying gesture"
+  | "Converting"
+  | "Computing"
+  | "Updating variables"
+  | "Loading variables"
+  | "Evaluating"
+  | "Checking"
+  | "Exporting"
+  | "Importing"
+  | "Undoing"
+  | "Redoing"
+  | "Clearing"
+  | "Removing strokes"
+
+/**
+ * Operation labels that identify an in-progress user gesture (pointer down through pointer up).
+ * While any of these is active, synchronizing with the backend should be deferred so it never
+ * contends with the gesture for the main thread.
+ * @group Canvas
+ */
+export const GESTURE_OPERATION_LABELS: readonly TCanvasOperationLabel[] = [
+  "Writing",
+  "Translating",
+  "Resizing",
+  "Rotating",
+] as const
+
+/**
  * @hidden
  * @group Canvas
  */
@@ -62,7 +102,7 @@ export abstract class AbstractCanvas {
   #resizeObserver?: ResizeObserver
   #resizeDebounceTimer?: ReturnType<typeof setTimeout>
 
-  #activeOperations = new Map<string, number>()
+  #activeOperations = new Map<TCanvasOperationLabel, number>()
   #hasConnectedOnce = false
   #connectionStatus: TConnectionStatus = "connected"
   #offlineQueueLength = 0
@@ -101,7 +141,7 @@ export abstract class AbstractCanvas {
    * state badge tooltip). Safe against overlapping/concurrent calls with the same or different
    * labels, and against `fn` throwing (the operation is always ended).
    */
-  async trackOperation<T>(label: string, fn: () => Promise<T>): Promise<T> {
+  async trackOperation<T>(label: TCanvasOperationLabel, fn: () => Promise<T>): Promise<T> {
     this.startOperation(label)
     try {
       return await fn()
@@ -122,13 +162,13 @@ export abstract class AbstractCanvas {
   }
 
   /** Mark `label` as active. Prefer `trackOperation` unless the operation isn't promise-shaped. */
-  startOperation(label: string): void {
+  startOperation(label: TCanvasOperationLabel): void {
     this.#activeOperations.set(label, (this.#activeOperations.get(label) ?? 0) + 1)
     this.#recomputeConnectionState()
   }
 
   /** Mark one occurrence of `label` as finished. Must be paired with a prior `startOperation`. */
-  endOperation(label: string): void {
+  endOperation(label: TCanvasOperationLabel): void {
     const count = this.#activeOperations.get(label) ?? 0
     if (count <= 1) {
       this.#activeOperations.delete(label)
@@ -143,9 +183,14 @@ export abstract class AbstractCanvas {
    * For level-triggered signals with a single external "done" event (e.g. the client's
    * `idle` event) rather than one end call per start call.
    */
-  protected clearOperation(label: string): void {
+  protected clearOperation(label: TCanvasOperationLabel): void {
     this.#activeOperations.delete(label)
     this.#recomputeConnectionState()
+  }
+
+  /** Whether `label` is currently active (at least one unmatched `startOperation` call). */
+  hasOperation(label: TCanvasOperationLabel): boolean {
+    return this.#activeOperations.has(label)
   }
 
   /** Called once the canvas has connected to its backend for the first time. */
