@@ -172,6 +172,7 @@ export function createCanvasMock(overrides: Partial<TCanvasMock> = {}): TCanvasM
 
   let _penStyle: TStyle = { ...DefaultStyle }
   let _tool: CanvasTool = CanvasTool.Write
+  const _activeOperations = new Map<string, number>()
 
   const base = {
     model,
@@ -338,8 +339,18 @@ export function createCanvasMock(overrides: Partial<TCanvasMock> = {}): TCanvasM
     manageError: jest.fn(),
     connectionState: "online-idle",
     trackOperation: jest.fn().mockImplementation((_label: string, fn: () => Promise<unknown>) => fn()),
-    startOperation: jest.fn(),
-    endOperation: jest.fn(),
+    startOperation: jest.fn().mockImplementation((label: string) => {
+      _activeOperations.set(label, (_activeOperations.get(label) ?? 0) + 1)
+    }),
+    endOperation: jest.fn().mockImplementation((label: string) => {
+      const count = _activeOperations.get(label) ?? 0
+      if (count <= 1) {
+        _activeOperations.delete(label)
+      } else {
+        _activeOperations.set(label, count - 1)
+      }
+    }),
+    hasOperation: jest.fn().mockImplementation((label: string) => _activeOperations.has(label)),
   }
 
   Object.defineProperty(base, "renderingConfiguration", {

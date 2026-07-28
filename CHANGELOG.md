@@ -29,6 +29,7 @@ See [MIGRATION.md](./MIGRATION.md) for step-by-step upgrade instructions.
 - feat(canvas): the state badge tooltip opens on click (positioned beside the badge) instead of on hover, and lists the active operation label(s) when busy
 - feat(canvas): `online-working` badge icon changed from a pencil to a 3-dot "typing" indicator (pulses per-dot); `online-working`/`syncing` badges now also pulse a colored ring around the badge itself
 - feat(canvas): "Recognizing" busy tracking reworked to an optimistic model — writer/transform managers mark it active on pointerDown/drag-start (immediate UI feedback, no network round-trip), and it's cleared once per debounced `synchronize()` cycle rather than per network call. Avoids serializing every stroke/transform send behind its individual server ack (previous approach added real latency to fast writing, scratch-out gestures, and multi-stroke imports)
+- feat(canvas): writer/transform gestures now use dedicated busy labels (`Writing`/`Translating`/`Resizing`/`Rotating`) instead of sharing `Recognizing`, ended synchronously as soon as the gesture itself ends; add `canvas.hasOperation(label)` query, `TCanvasOperationLabel` type, and `GESTURE_OPERATION_LABELS` (IIC-1731)
 - feat(canvas): **BREAKING** `CanvasLayer.updateState()`/`showState()`/`hideState()`/`createState()`/`createBusy()` removed — replaced by `updateCanvasState()` driven by `canvas.connectionState`. `CanvasLayer.ui.state` shape changed (`{ root, icon, count }` instead of `{ root, busy }`)
 - feat(client): `WebSocketClient` proactively detects unexpected disconnects and starts reconnecting immediately (previously only reactive, on the next `addStrokes()` call); `TConnectionStatus` gains an `"error"` value once reconnection attempts are exhausted, with the retry budget reset for the next attempt
 - feat(examples): add "Connection Status" example demonstrating `canvas.connectionState` and reconnect handling
@@ -105,6 +106,7 @@ See [MIGRATION.md](./MIGRATION.md) for step-by-step upgrade instructions.
 - fix(BaseMenuItem): remove replaceWith(cloneNode) causing DOM node leak on destroy
 - fix(smartguide): correct event listener removal in removeListeners
 - fix(security): force js-yaml ≥4.2.0 to fix CVE DoS audit
+- fix(manager): IISynchronizerManager could start a JIIX resync while a stroke/transform gesture was in progress — for small documents (fewer JIIX elements than one yield chunk) the whole resync could run synchronously mid-gesture; write-idle gate now also re-checks right after the network export resolves, and starting a gesture cancels any pending debounced `synchronize()` (IIC-1731)
 
 ## Refactor
 - refactor(transform): unify transform managers under IITransformManager orchestrator (canvas.transform.translate/.resize/.rotation)

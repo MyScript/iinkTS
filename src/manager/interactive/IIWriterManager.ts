@@ -245,10 +245,10 @@ export class IIWriterManager extends AbstractWriterManager {
   }
 
   start(info: TPointerInfo): void {
-    // Optimistic: reflects "working" on the state badge as soon as the user starts drawing,
-    // without waiting for a server round-trip. Cleared either right away in `end()` (nothing sent
-    // to the client, e.g. a shape) or by the debounced synchronize() triggered by onContentChanged.
-    this.canvas.startOperation("Recognizing")
+    // Reflects "working" on the state badge as soon as the user starts drawing, without waiting
+    // for a server round-trip. Also the signal IISynchronizerManager's write-idle gate polls to
+    // avoid contending with an in-progress gesture. Ended synchronously in `end()`.
+    this.canvas.startOperation("Writing")
     const localPointer = info.pointer
     if (this.tool !== CanvasWriteTool.Pencil) {
       const { x, y } = this.snaps.snapResize(localPointer)
@@ -302,6 +302,11 @@ export class IIWriterManager extends AbstractWriterManager {
     this.currentSymbol = undefined
     this.currentSymbolOrigin = undefined
     this.snaps.clearSnapToElementLines()
+    // Gesture is over as soon as the pointer lifts - end it now, synchronously, rather than
+    // waiting for the backend round-trip below. IISynchronizerManager's write-idle gate waits
+    // on this same flag, so leaving it set until the round-trip resolves would deadlock the
+    // debounced synchronize() that triggers said round-trip in the first place.
+    this.canvas.endOperation("Writing")
 
     this.renderer.drawSymbol(localSymbol!)
     this.renderer.clearCurrentSymbolLayer()
@@ -314,10 +319,6 @@ export class IIWriterManager extends AbstractWriterManager {
 
     if (isStroke(localSymbol)) {
       await this.interactWithBackend(localSymbol)
-    } else {
-      // Nothing sent to the client (e.g. a shape) — nothing will ever trigger the
-      // debounced synchronize() that clears the optimistic "Recognizing" started in start().
-      this.canvas.endOperation("Recognizing")
     }
   }
 }
