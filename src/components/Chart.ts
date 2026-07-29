@@ -145,7 +145,7 @@ export class Chart {
       className: "ms-chart-zoom-label",
     })
     const info = DOMFactory.span({
-      text: "Use mouse wheel to zoom, drag to pan",
+      text: "Use ctrl+mouse wheel to zoom, drag to pan",
       className: "ms-chart-info",
     })
 
@@ -174,6 +174,7 @@ export class Chart {
     })
 
     this.canvas.addEventListener("mousedown", (e) => {
+      this.isDragging = true
       this.lastMousePos = {
         x: e.offsetX,
         y: e.offsetY,
@@ -242,15 +243,18 @@ export class Chart {
     const { chartWidth, chartHeight, margin } = this.getChartDimensions()
 
     let centerX: number, centerY: number
+    let relX: number, relY: number
 
     if (center) {
       // Zoom towards mouse position
-      const relX = (center.x - margin.left) / chartWidth
-      const relY = (center.y - margin.top) / chartHeight
+      relX = (center.x - margin.left) / chartWidth
+      relY = (center.y - margin.top) / chartHeight
       centerX = this.viewport.xMin + relX * (this.viewport.xMax - this.viewport.xMin)
       centerY = this.viewport.yMax - relY * (this.viewport.yMax - this.viewport.yMin)
     } else {
       // Zoom towards center
+      relX = 0.5
+      relY = 0.5
       centerX = (this.viewport.xMin + this.viewport.xMax) / 2
       centerY = (this.viewport.yMin + this.viewport.yMax) / 2
     }
@@ -258,11 +262,12 @@ export class Chart {
     const xRange = (this.viewport.xMax - this.viewport.xMin) / factor
     const yRange = (this.viewport.yMax - this.viewport.yMin) / factor
 
+    // Keep the point under the cursor (relX/relY) fixed on screen after zoom
     this.viewport = {
-      xMin: centerX - xRange / 2,
-      xMax: centerX + xRange / 2,
-      yMin: centerY - yRange / 2,
-      yMax: centerY + yRange / 2,
+      xMin: centerX - relX * xRange,
+      xMax: centerX + (1 - relX) * xRange,
+      yMin: centerY - (1 - relY) * yRange,
+      yMax: centerY + relY * yRange,
     }
 
     this.draw()
