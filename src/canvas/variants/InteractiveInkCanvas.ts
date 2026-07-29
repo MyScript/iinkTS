@@ -464,7 +464,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
       const strokes = this.extractStrokesFromSymbols(this.model.symbols)
       if (strokes.length > 0) {
         this.startOperation("Recognizing")
-        this.client.addStrokes(strokes, false)
+        await this.client.addStrokes(strokes, false)
       }
       this.layers.hideLoader()
       this.event.emitLoaded()
