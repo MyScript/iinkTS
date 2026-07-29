@@ -1,5 +1,10 @@
 import { createCanvasMock, asCanvas } from "../__mocks__/createCanvasMock"
+import { LeftClickEventMock } from "../__mocks__/EventMock"
 import { MathContextMenu } from "@/iink"
+
+function clickButton(button: HTMLButtonElement) {
+  button.dispatchEvent(new LeftClickEventMock("pointerup", { pointerType: "pen", clientX: 0, clientY: 0, pressure: 1 }))
+}
 
 describe("MathContextMenu.ts", () => {
   let canvas: ReturnType<typeof createCanvasMock>
@@ -184,6 +189,45 @@ describe("MathContextMenu.ts", () => {
       const result = await canvas.math.getEvaluables("test-id")
       expect(result).toEqual(evaluables)
       expect(canvas.math.getEvaluables).toHaveBeenCalledWith("test-id")
+    })
+  })
+
+  describe("select/delete result strokes actions - multi-block aggregation", () => {
+    test("select result strokes selects the union of stored solver outputs from all selected Math blocks", async () => {
+      canvas.jiix.getBlocksForSymbols = jest.fn().mockReturnValue([
+        { id: "block-1", type: "Math", expressions: [] },
+        { id: "block-2", type: "Math", expressions: [] },
+      ])
+      canvas.math.getStoredSolverOutputs = jest
+        .fn()
+        .mockImplementation((id: string) => (id === "block-1" ? ["s1a", "s1b"] : ["s2a"]))
+      const element = mathMenu.getElement()
+      document.body.appendChild(element)
+
+      const button = element.querySelector(`#${mathMenu.idSelectResultStrokes}`) as HTMLButtonElement
+      clickButton(button)
+      await Promise.resolve()
+
+      expect(canvas.select).toHaveBeenCalledWith(["s1a", "s1b", "s2a"])
+    })
+
+    test("delete result strokes clears solver outputs on every selected Math block", async () => {
+      canvas.jiix.getBlocksForSymbols = jest.fn().mockReturnValue([
+        { id: "block-1", type: "Math", expressions: [] },
+        { id: "block-2", type: "Math", expressions: [] },
+      ])
+      canvas.math.clearSolverOutputs = jest.fn().mockResolvedValue(undefined)
+      const element = mathMenu.getElement()
+      document.body.appendChild(element)
+
+      const button = element.querySelector(`#${mathMenu.idDeleteResultStrokes}`) as HTMLButtonElement
+      clickButton(button)
+      await Promise.resolve()
+      await Promise.resolve()
+
+      expect(canvas.math.clearSolverOutputs).toHaveBeenCalledWith("block-1")
+      expect(canvas.math.clearSolverOutputs).toHaveBeenCalledWith("block-2")
+      expect(canvas.math.clearSolverOutputs).toHaveBeenCalledTimes(2)
     })
   })
 

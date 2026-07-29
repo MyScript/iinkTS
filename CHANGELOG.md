@@ -47,6 +47,7 @@ See [MIGRATION.md](./MIGRATION.md) for step-by-step upgrade instructions.
 - feat(math): add auto variable management option in menu (IIC-1660)
 - feat(math): include math equations in downloadAsText export (IIC-1652)
 - feat(math): add Power and Underoverscript expression types
+- feat(menu): Math context menu now shows for a multi-block selection when every selected block is a fully-selected Math block (previously only shown for exactly one selected Math block); `canEditVariables`/`canCompute`/`canEvaluate`/solver-output actions are enabled only when every selected block supports them; add `canvas.math.getBlockCapabilities(blockId)` (cached, `IIMathCapabilitiesSubManager`) and `IIJiixQueryManager.getStrokeIdsForBlock(blockId)`
 
 ### Chart (IIC-1639 / IIC-1640 / IIC-1642)
 - feat(chart): support multiple data series with per-series colors
