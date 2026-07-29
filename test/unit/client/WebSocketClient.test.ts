@@ -1303,9 +1303,11 @@ describe("WebSocketClient.ts", () => {
       await delay(100)
       const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       expect(messageSent).toEqual({
-        type: "ackSendToSupport",
-        ticketId: "TICKET-123",
-        comment: "help",
+        type: "sendToSupport",
+        metadata: {
+          ticketId: "TICKET-123",
+          comment: "help",
+        },
       })
     })
     test("should resolve when receiving ack", async () => {
