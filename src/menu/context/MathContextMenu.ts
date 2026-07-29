@@ -10,7 +10,7 @@ export type TContextMathItemsConfig = {
   editVariables?: boolean
   compute?: boolean
   evaluate?: boolean
-  manageResultStrokes?: boolean
+  forceCompute?: boolean
 }
 /** @group Menu */
 export type TContextMathConfig = boolean | TContextMathItemsConfig
@@ -27,8 +27,7 @@ export class MathContextMenu extends SubMenuItem {
   readonly idNumericalComputation: string
   readonly idCheckDiagnostic: string
   readonly idEvaluate: string
-  readonly idSelectResultStrokes: string
-  readonly idDeleteResultStrokes: string
+  readonly idForceCompute: string
 
   constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-context", itemsConfig?: TContextMathItemsConfig) {
     const enabled = (key: keyof TContextMathItemsConfig) => itemsConfig?.[key] !== false
@@ -38,8 +37,7 @@ export class MathContextMenu extends SubMenuItem {
     const idNumericalComputation = `${id}-numerical-computation`
     const idCheckDiagnostic = `${id}-check-diagnostic`
     const idEvaluate = `${id}-evaluate`
-    const idSelectResultStrokes = `${id}-select-result-strokes`
-    const idDeleteResultStrokes = `${id}-delete-result-strokes`
+    const idForceCompute = `${id}-force-compute`
 
     const config: TMenuSubMenu = {
       id: id,
@@ -143,32 +141,13 @@ export class MathContextMenu extends SubMenuItem {
       })
     }
 
-    if (enabled("manageResultStrokes")) {
+    if (enabled("forceCompute")) {
       config.items.push({
-        id: idSelectResultStrokes,
+        id: idForceCompute,
         type: "button",
-        label: "Select result strokes",
-        action: () => {
-          const jiixBlockIds = canvas.jiix
-            .getBlocksForSymbols(canvas.model.symbolsSelected)
-            .filter((s) => s.type === "Math")
-            .map((s) => s.id)
-          if (jiixBlockIds.length === 0) {
-            this.logger.warn("No block math selected")
-            return
-          }
-          const ids = jiixBlockIds.flatMap((jiixBlockId) => canvas.math.getStoredSolverOutputs(jiixBlockId) ?? [])
-          if (ids.length > 0) {
-            canvas.select(ids)
-          }
-        },
-      })
-
-      config.items.push({
-        id: idDeleteResultStrokes,
-        type: "button",
-        label: "Delete result strokes",
+        label: "Force compute",
         action: async () => {
+          this.logger.info("Force compute clicked")
           const jiixBlockIds = canvas.jiix
             .getBlocksForSymbols(canvas.model.symbolsSelected)
             .filter((s) => s.type === "Math")
@@ -177,7 +156,7 @@ export class MathContextMenu extends SubMenuItem {
             this.logger.warn("No block math selected")
             return
           }
-          await Promise.all(jiixBlockIds.map((jiixBlockId) => canvas.math.clearSolverOutputs(jiixBlockId)))
+          await canvas.math.forceCompute(jiixBlockIds)
         },
       })
     }
@@ -188,8 +167,7 @@ export class MathContextMenu extends SubMenuItem {
     this.idNumericalComputation = idNumericalComputation
     this.idCheckDiagnostic = idCheckDiagnostic
     this.idEvaluate = idEvaluate
-    this.idSelectResultStrokes = idSelectResultStrokes
-    this.idDeleteResultStrokes = idDeleteResultStrokes
+    this.idForceCompute = idForceCompute
   }
 
   setMenuVisibility(
@@ -213,8 +191,7 @@ export class MathContextMenu extends SubMenuItem {
       const numericalComputationButton = mathMenu.querySelector(`#${this.idNumericalComputation}`) as HTMLButtonElement
       const checkDiagnosticButton = mathMenu.querySelector(`#${this.idCheckDiagnostic}`) as HTMLButtonElement
       const evaluateButton = mathMenu.querySelector(`#${this.idEvaluate}`) as HTMLButtonElement
-      const selectResultStrokesButton = mathMenu.querySelector(`#${this.idSelectResultStrokes}`) as HTMLButtonElement
-      const deleteResultStrokesButton = mathMenu.querySelector(`#${this.idDeleteResultStrokes}`) as HTMLButtonElement
+      const forceComputeButton = mathMenu.querySelector(`#${this.idForceCompute}`) as HTMLButtonElement
 
       if (editVariablesButton) {
         editVariablesButton.style.setProperty("display", canEditVariables ? "inline-block" : "none")
@@ -228,11 +205,8 @@ export class MathContextMenu extends SubMenuItem {
       if (evaluateButton) {
         evaluateButton.style.setProperty("display", canEvaluate ? "inline-block" : "none")
       }
-      if (selectResultStrokesButton) {
-        selectResultStrokesButton.style.setProperty("display", hasDrawSolverOutputs ? "inline-block" : "none")
-      }
-      if (deleteResultStrokesButton) {
-        deleteResultStrokesButton.style.setProperty("display", hasDrawSolverOutputs ? "inline-block" : "none")
+      if (forceComputeButton) {
+        forceComputeButton.style.setProperty("display", canCompute || hasDrawSolverOutputs ? "inline-block" : "none")
       }
     } else {
       mathMenu.style.setProperty("display", "none")

@@ -126,6 +126,10 @@ export class IIMathManager extends IIAbstractManager {
     return this.canvas.trackOperation("Computing", async () => this.#computation.clearAllSolverOutputs())
   }
 
+  async forceCompute(jiixBlockIds?: string[]): Promise<void> {
+    return this.canvas.trackOperation("Computing", async () => this.#computation.forceCompute(jiixBlockIds))
+  }
+
   getComputation(jiixBlockId: string): TMathBlockComputation | undefined {
     return this.#computation.getMathBlock(jiixBlockId)
   }

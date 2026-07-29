@@ -28,6 +28,7 @@ describe("MathContextMenu.ts", () => {
       expect(mathMenu.idEditVariables).toBe("ms-menu-context-math-variables")
       expect(mathMenu.idNumericalComputation).toBe("ms-menu-context-math-numerical-computation")
       expect(mathMenu.idEvaluate).toBe("ms-menu-context-math-evaluate")
+      expect(mathMenu.idForceCompute).toBe("ms-menu-context-math-force-compute")
     })
 
     test("should create with custom id prefix", () => {
@@ -36,10 +37,17 @@ describe("MathContextMenu.ts", () => {
       expect(customMenu.idEditVariables).toBe("custom-prefix-math-variables")
       expect(customMenu.idNumericalComputation).toBe("custom-prefix-math-numerical-computation")
       expect(customMenu.idEvaluate).toBe("custom-prefix-math-evaluate")
+      expect(customMenu.idForceCompute).toBe("custom-prefix-math-force-compute")
     })
 
     test("should have unique IDs for all actions", () => {
-      const ids = [mathMenu.id, mathMenu.idEditVariables, mathMenu.idNumericalComputation, mathMenu.idEvaluate]
+      const ids = [
+        mathMenu.id,
+        mathMenu.idEditVariables,
+        mathMenu.idNumericalComputation,
+        mathMenu.idEvaluate,
+        mathMenu.idForceCompute,
+      ]
       const uniqueIds = new Set(ids)
       expect(uniqueIds.size).toBe(ids.length)
     })
@@ -192,42 +200,36 @@ describe("MathContextMenu.ts", () => {
     })
   })
 
-  describe("select/delete result strokes actions - multi-block aggregation", () => {
-    test("select result strokes selects the union of stored solver outputs from all selected Math blocks", async () => {
+  describe("force compute action - multi-block aggregation", () => {
+    test("force compute recomputes every selected Math block", async () => {
       canvas.jiix.getBlocksForSymbols = jest.fn().mockReturnValue([
         { id: "block-1", type: "Math", expressions: [] },
         { id: "block-2", type: "Math", expressions: [] },
       ])
-      canvas.math.getStoredSolverOutputs = jest
-        .fn()
-        .mockImplementation((id: string) => (id === "block-1" ? ["s1a", "s1b"] : ["s2a"]))
+      canvas.math.forceCompute = jest.fn().mockResolvedValue(undefined)
       const element = mathMenu.getElement()
       document.body.appendChild(element)
 
-      const button = element.querySelector(`#${mathMenu.idSelectResultStrokes}`) as HTMLButtonElement
+      const button = element.querySelector(`#${mathMenu.idForceCompute}`) as HTMLButtonElement
       clickButton(button)
       await Promise.resolve()
+      await Promise.resolve()
 
-      expect(canvas.select).toHaveBeenCalledWith(["s1a", "s1b", "s2a"])
+      expect(canvas.math.forceCompute).toHaveBeenCalledWith(["block-1", "block-2"])
+      expect(canvas.math.forceCompute).toHaveBeenCalledTimes(1)
     })
 
-    test("delete result strokes clears solver outputs on every selected Math block", async () => {
-      canvas.jiix.getBlocksForSymbols = jest.fn().mockReturnValue([
-        { id: "block-1", type: "Math", expressions: [] },
-        { id: "block-2", type: "Math", expressions: [] },
-      ])
-      canvas.math.clearSolverOutputs = jest.fn().mockResolvedValue(undefined)
+    test("force compute does nothing when no Math block is selected", async () => {
+      canvas.jiix.getBlocksForSymbols = jest.fn().mockReturnValue([])
+      canvas.math.forceCompute = jest.fn().mockResolvedValue(undefined)
       const element = mathMenu.getElement()
       document.body.appendChild(element)
 
-      const button = element.querySelector(`#${mathMenu.idDeleteResultStrokes}`) as HTMLButtonElement
+      const button = element.querySelector(`#${mathMenu.idForceCompute}`) as HTMLButtonElement
       clickButton(button)
       await Promise.resolve()
-      await Promise.resolve()
 
-      expect(canvas.math.clearSolverOutputs).toHaveBeenCalledWith("block-1")
-      expect(canvas.math.clearSolverOutputs).toHaveBeenCalledWith("block-2")
-      expect(canvas.math.clearSolverOutputs).toHaveBeenCalledTimes(2)
+      expect(canvas.math.forceCompute).not.toHaveBeenCalled()
     })
   })
 
@@ -237,6 +239,7 @@ describe("MathContextMenu.ts", () => {
       expect(mathMenu.idEditVariables).toContain("variables")
       expect(mathMenu.idNumericalComputation).toContain("numerical-computation")
       expect(mathMenu.idEvaluate).toContain("evaluate")
+      expect(mathMenu.idForceCompute).toContain("force-compute")
     })
 
     test("should use default prefix when not specified", () => {
@@ -254,6 +257,7 @@ describe("MathContextMenu.ts", () => {
       expect(typeof mathMenu.idEditVariables).toBe("string")
       expect(typeof mathMenu.idNumericalComputation).toBe("string")
       expect(typeof mathMenu.idEvaluate).toBe("string")
+      expect(typeof mathMenu.idForceCompute).toBe("string")
     })
   })
 })

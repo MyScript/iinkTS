@@ -17,8 +17,7 @@ describe("MathMenuAction.ts", () => {
 
   test("clicking Force Compute all clears then recomputes all math blocks", async () => {
     const canvas = createCanvasMock()
-    canvas.math.clearAllSolverOutputs = jest.fn().mockResolvedValue(undefined)
-    canvas.math.computeAllNumericalResults = jest.fn().mockResolvedValue(undefined)
+    canvas.math.forceCompute = jest.fn().mockResolvedValue(undefined)
     const action = new MathMenuAction(asCanvas(canvas))
     const element = action.getElement()
     document.body.appendChild(element)
@@ -31,8 +30,8 @@ describe("MathMenuAction.ts", () => {
     await Promise.resolve()
     await Promise.resolve()
 
-    expect(canvas.math.clearAllSolverOutputs).toHaveBeenCalledTimes(1)
-    expect(canvas.math.computeAllNumericalResults).toHaveBeenCalledTimes(1)
+    expect(canvas.math.forceCompute).toHaveBeenCalledTimes(1)
+    expect(canvas.math.forceCompute).toHaveBeenCalledWith()
   })
 
   test("does not build the Force Compute all button when disabled via config", () => {
