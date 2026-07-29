@@ -482,10 +482,14 @@ export const buildSurroundPointers = (strokes, { padding = 40, steps = 32 } = {}
 export const selectBlockViaSurround = async (page, surroundPointers) => {
   await Promise.all([
     waitForGesturedEvent(page),
+    // onGestured (InteractiveInkCanvas) forces an immediate synchronize() right after the
+    // gesture, which rebuilds every overlay via IIOverlayManager.refresh() — wait for it too,
+    // not just "gestured", or a caller that interacts with an overlay right after this resolves
+    // can race a still-in-flight overlay rebuild.
+    waitForSynchronizedEvent(page),
     writePointers(page, surroundPointers),
   ])
   await expect(page.locator('.ms-layer-rendering g[role="interact-elements-group"]')).toBeAttached()
-    
 }
 
 export const passModalKey = async (page, waitLoader = true) => {
