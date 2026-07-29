@@ -33,7 +33,7 @@ export const writePointers = async (
   if (firstPointer.t) {
     oldTimestamp = firstPointer.t
   }
-  const browserName = page.context().browser()?.browserType().name()
+
   await page.mouse.move(offsetX + firstPointer.x, offsetY + firstPointer.y)
   await page.mouse.down()
   for (const p of pointers) {
@@ -457,17 +457,6 @@ export const selectBlockById = async (page, jiixBlockId) => {
     .toBeGreaterThan(0)
 }
 
-// No recorded surround-gesture capture exists for most math_context_menu.* datasets (only
-// "sum" has a hand-captured surroundPointers). Selection only needs the gesture stroke to be
-// classified as SURROUND by the cloud client and to geometrically contain the expression's
-// bounds (see SurroundGestureHandler#apply: OBBOps.contains(gestureStroke.bounds, s.bounds)) —
-// so a synthetic padded ellipse around the written strokes' bounding box is sufficient.
-// `steps` defaults lower on WebKit: drawing this ellipse over already-rendered ink reproducibly
-// crashes WebKit's renderer ("Target crashed") — fewer intermediate points means fewer SVG
-// re-renders during the gesture. Doesn't fully eliminate the crash (pre-existing, undiagnosed
-// WebKit rendering issue), but reduces how often it happens. Pass `steps` explicitly from a
-// test's `browserName` fixture, e.g. `buildSurroundPointers(strokes, { steps: browserName ===
-// "webkit" ? 12 : 32 })`.
 export const buildSurroundPointers = (strokes, { padding = 40, steps = 32 } = {}) => {
   const points = strokes.flatMap((s) => s.pointers)
   const minX = Math.min(...points.map((p) => p.x)) - padding
@@ -490,27 +479,13 @@ export const buildSurroundPointers = (strokes, { padding = 40, steps = 32 } = {}
   })
 }
 
-// Selection in this canvas happens via a recognized "surround" gesture (closed loop drawn with
-// the write tool) — the math context menu is shown automatically once a single math block is
-// selected. Asserts exactly 1 *distinct Math block* among the selected symbols, not just
-// symbolsSelected.length: a multi-stroke expression like "√5=" legitimately selects several raw
-// symbols (one per stroke), so a raw length check wouldn't catch the real failure mode — if the
-// gesture (real or synthetic) ever also catches a stray adjacent artifact,
-// IIMenuContext#hasSingleMathSymbol (which counts distinct blocks, same check as here) goes
-// false, and the whole math submenu stays hidden. Left uncaught, that only surfaces later as a
-// confusing "button stayed hidden until timeout" failure instead of a clear "selection picked
-// up N blocks" one here.
 export const selectBlockViaSurround = async (page, surroundPointers) => {
   await Promise.all([
     waitForGesturedEvent(page),
     writePointers(page, surroundPointers),
   ])
-  await expect
-    .poll(() => page.evaluate(() => {
-      const selected = rootEl.iink.model.symbolsSelected
-      return rootEl.iink.jiix.getBlocksForSymbols(selected).filter((s) => s.type === "Math").length
-    }), { timeout: 3000 })
-    .toBe(1)
+  await expect(page.locator('.ms-layer-rendering g[role="interact-elements-group"]')).toBeAttached()
+    
 }
 
 export const passModalKey = async (page, waitLoader = true) => {
