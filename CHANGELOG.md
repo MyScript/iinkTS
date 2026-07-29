@@ -48,6 +48,7 @@ See [MIGRATION.md](./MIGRATION.md) for step-by-step upgrade instructions.
 - feat(math): include math equations in downloadAsText export (IIC-1652)
 - feat(math): add Power and Underoverscript expression types
 - feat(menu): Math context menu now shows for a multi-block selection when every selected block is a fully-selected Math block (previously only shown for exactly one selected Math block); `canEditVariables`/`canCompute`/`canEvaluate`/solver-output actions are enabled only when every selected block supports them; add `canvas.math.getBlockCapabilities(blockId)` (cached, `IIMathCapabilitiesSubManager`) and `IIJiixQueryManager.getStrokeIdsForBlock(blockId)`
+- feat(math): Math context menu gains a "Force compute" button (`TContextMathItemsConfig.forceCompute`) that clears then recomputes numerical results for the selected blocks; add `canvas.math.forceCompute(jiixBlockIds?)` (clears+recomputes given blocks, or all blocks if omitted), now also used by the global "Force Compute all" menu action
 
 ### Chart (IIC-1639 / IIC-1640 / IIC-1642)
 - feat(chart): support multiple data series with per-series colors
