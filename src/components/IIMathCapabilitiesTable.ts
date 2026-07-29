@@ -55,18 +55,11 @@ export class IIMathCapabilitiesTable {
 
     if (jiixBlockId) {
       try {
-        const [actions, variables, evaluables] = await Promise.all([
-          this.canvas.math.getAvailableActions(jiixBlockId),
-          this.canvas.math.getVariables(jiixBlockId),
-          this.canvas.math.getEvaluables(jiixBlockId),
-        ])
-
+        const capabilities = await this.canvas.math.getBlockCapabilities(jiixBlockId)
         canCheckDiagnostic = true // Always available if jiixId exists
-        canEditVariables = Object.keys(variables).length > 0
-        // Check if numerical computation is available
-        // Note: Could also check if block has solver outputs via canvas.math.computation.getStoredSolverOutputs(jiixBlock.id)
-        canCompute = actions?.includes("numerical-computation")
-        canEvaluate = evaluables?.length ? true : false
+        canEditVariables = capabilities.canEditVariables
+        canCompute = capabilities.canCompute
+        canEvaluate = capabilities.canEvaluate
       } catch (error) {
         this.logger.error("Error fetching capabilities for blockId:", jiixBlockId, error)
       }
