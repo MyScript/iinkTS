@@ -164,6 +164,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
     this.client.event.addErrorListener(this.manageError.bind(this))
     this.client.event.addExportedListener(this.event.emitExported.bind(this.event))
     this.client.event.addContentChangedListener(this.onContentChanged.bind(this))
+    this.event.addGesturedListener(this.onGestured.bind(this))
     this.client.event.addSessionOpenedListener(this.event.emitSessionOpened.bind(this.event))
     this.client.event.addEndInitialization(this.layers.clearModal.bind(this.layers))
     this.client.event.addEndInitialization(this.markConnectedOnce.bind(this))
@@ -393,6 +394,19 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
       this.updateLayerUI(0)
       this.event.emitChanged(undoRedoContext)
     }, 500)
+  }
+
+  /**
+   * With `ignoreGestureStrokes` the backend never emits a `contentChanged` for a gesture stroke,
+   * so the debounced synchronize scheduled by `onContentChanged` has nothing left to reschedule it -
+   * force one here instead of relying on that mechanism.
+   */
+  protected async onGestured(): Promise<void> {
+    if (!this.client.configuration.recognition.gesture.ignoreGestureStrokes) {
+      return
+    }
+    await this.synchronize()
+    this.updateLayerUI(0)
   }
 
   /**
