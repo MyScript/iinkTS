@@ -192,7 +192,7 @@ test.describe("Interactive ink canvas Get Started Menu Action", () => {
       await callCanvasIdle(page)
       await expect
         .poll(async () => {
-          const jiix = await getCanvasExportsType(page, "application/vnd.myscript.jiix")
+          const jiix = await callCanvasExport(page, "application/vnd.myscript.jiix")
           return jiix?.elements?.[0]?.label
         }, { timeout: 10000 })
         .toEqual(lecon.exports["application/vnd.myscript.jiix"].elements[0].label)
