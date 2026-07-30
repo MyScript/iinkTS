@@ -23,10 +23,15 @@ const dragSelectionBy = async (page, dx, dy) => {
   const ys = surroundSumStrokes.map((p) => p.y)
   const cx = (Math.min(...xs) + Math.max(...xs)) / 2
   const cy = (Math.min(...ys) + Math.max(...ys)) / 2
-  await writePointers(page, [
-    { x: cx, y: cy, t: 0, p: 0.5 },
-    { x: cx + dx, y: cy + dy, t: 300, p: 0.5 },
-  ])
+  const distance = Math.hypot(dx, dy)
+  const steps = Math.max(1, Math.round(distance / 5))
+  const pointers = Array.from({ length: steps + 1 }, (_, i) => ({
+    x: cx + (dx * i) / steps,
+    y: cy + (dy * i) / steps,
+    t: i * (100 / steps),
+    p: 0.5,
+  }))
+  await writePointers(page, pointers)
 }
 
 const writeSumExpressionAndGetBlockId = async (page) => {

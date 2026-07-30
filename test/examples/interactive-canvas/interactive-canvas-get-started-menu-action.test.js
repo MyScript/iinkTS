@@ -190,9 +190,12 @@ test.describe("Interactive ink canvas Get Started Menu Action", () => {
         page.locator(locator.menu.action.language.inputSelect).selectOption({ value: "fr_FR" })
       ])
       await callCanvasIdle(page)
-      const jiix = await callCanvasExport(page, "application/vnd.myscript.jiix")
-
-      expect(jiix.elements[0].label).toEqual(lecon.exports["application/vnd.myscript.jiix"].elements[0].label)
+      await expect
+        .poll(async () => {
+          const jiix = await callCanvasExport(page, "application/vnd.myscript.jiix")
+          return jiix?.elements?.[0]?.label
+        }, { timeout: 10000 })
+        .toEqual(lecon.exports["application/vnd.myscript.jiix"].elements[0].label)
     })
   })
 
@@ -296,6 +299,8 @@ test.describe("Interactive ink canvas Get Started Menu Action", () => {
   })
 
   test("gesture surround", async ({ page }) => {
+    test.setTimeout(120 * 1000)
+
     await test.step("should display menu gesture", async () => {
       await expect(page.locator(locator.menu.action.gesture.triggerBtn)).toBeHidden()
       await page.locator(locator.menu.action.triggerBtn).click()

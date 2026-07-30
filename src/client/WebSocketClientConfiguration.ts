@@ -69,7 +69,7 @@ export const DefaultRecognitionWebSocketConfiguration: TRecognitionWebSocketConf
   alwaysConnected: true,
   gesture: {
     enable: true,
-    ignoreGestureStrokes: false,
+    ignoreGestureStrokes: true,
   },
   math: {
     solver: {
