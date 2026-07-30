@@ -6,128 +6,95 @@
 
 See [MIGRATION.md](./MIGRATION.md) for step-by-step upgrade instructions.
 
-### Class/API renaming (IIC-1716)
+### Class/API renaming
 - refactor: **BREAKING** `Editor` class renamed to `Canvas` (`Editor.load()` → `Canvas.load()`); `Canvas.load()` type constants renamed: `"INTERACTIVEINK"` → `"INTERACTIVE_INK"`, `"INTERACTIVEINKSSR"` → `"INTERACTIVE_INK_SSR"`, `"INKV1"` → `"INK_V1"`, `"INKV2"` → `"INK_V2"`
 - refactor: **BREAKING** editor variants renamed: `InteractiveInkEditor` → `InteractiveInkCanvas`, `InteractiveInkSSREditor` → `InteractiveInkSSRCanvas`, `InkEditor` → `InkCanvas`, `InkEditorDeprecated` → `InkCanvasDeprecated` (and their `*Configuration`/`*Options` companion types)
 - refactor: **BREAKING** network layer renamed from `Recognizer*` to `*Client`: `RecognizerHTTPV1` → `HTTPClientV1`, `RecognizerHTTPV2` → `HTTPClientV2`, `RecognizerWebSocket` → `WebSocketClient`, `RecognizerWebSocketSSR` → `WebSocketSSRClient` (and their `Configuration`/`Message`/`Event`/`Error` companion types)
 - refactor: source layout mirrors the new naming — `src/editor/` → `src/canvas/`, `src/recognizer/` → `src/client/`
 - refactor(examples): directories renamed to match — `examples/rest/` → `examples/canvas/` (files split `canvas_v1_*`/`canvas_v2_*`), `examples/websocket/` → `examples/interactive-canvas-ssr/`, `examples/offscreen-interactivity/` → `examples/interactive-canvas/`; new `examples/custom-rendering/` hosts the tldraw + `WebSocketClient` demo (`examples/custom-rendering/tldraw-websocket-client/`)
-- refactor: **BREAKING** remove II-prefix from all symbol types — IIStroke→TStroke, IIText→TText, IIMath→TMath, IIDecorator→TDecorator, IIEraser→TEraser, IIShapeCircle→TShapeCircle, IIEdgeLine→TEdgeLine, etc. (IIC-1703)
-- refactor: **BREAKING** convert all symbol interfaces to type aliases with T* naming convention (IIC-1703)
-- refactor: **BREAKING** remove SymbolFactory — creation dispatchers moved to SymbolHelpers (IIC-1703)
-- refactor: **BREAKING** the canvas instance attached to the root DOM element is now exposed as `rootElement.iink` (was `rootElement.editor`/`.canvas`) — decoupled from the class name since it collided with the real `<canvas>` elements rendered inside that same root element
+- refactor: **BREAKING** remove II-prefix from all symbol types — IIStroke→TStroke, IIText→TText, IIMath→TMath, IIDecorator→TDecorator, IIEraser→TEraser, IIShapeCircle→TShapeCircle, IIEdgeLine→TEdgeLine, etc.
+- refactor: **BREAKING** convert all symbol interfaces to type aliases with T* naming convention
+- refactor: **BREAKING** remove SymbolFactory — creation dispatchers moved to SymbolHelpers
+- refactor: **BREAKING** the canvas instance attached to the root DOM element is now exposed as `rootElement.iink` (was `rootElement.editor`) — decoupled from the class name since it collided with the real `<canvas>` elements rendered inside that same root element
 - refactor: **BREAKING** `EditorTool`/`EditorWriteTool` renamed to `CanvasTool`/`CanvasWriteTool`
 - refactor: **BREAKING** `LoggerCategory.EDITOR`/`EDITOR_EVENT` renamed to `LoggerCategory.CANVAS`/`CANVAS_EVENT`
 - refactor: **BREAKING** default/public CSS hook `.ms-editor` renamed to `.ms-ink`; state badge classes `.editor-state*` renamed to `.ms-ink-state*`
 - refactor: **BREAKING** CSS custom property prefix `--iink-*` renamed to `--ms-ink-*` (e.g. `--iink-primary` → `--ms-ink-primary`); `--iink-editor-bg` also renamed to `--ms-ink-canvas-bg`
 
+### Gestures
+- feat(gesture): **BREAKING** `join` and `insert` gestures are now disabled by default (previously enabled) — re-enable them explicitly via the `gestures` configuration if your integration relies on them
+
 ## Features
 
-### Canvas state (IIC-1681 / IIC-1706)
-- feat(canvas): add `canvas.connectionState` (initializing/online-idle/online-working/syncing/offline/error) + `connectionStateChanged` event, computed centrally in `AbstractCanvas` for all 4 canvas variants
-- feat(canvas): add `canvas.trackOperation()`/`startOperation()`/`endOperation()` — named, ref-counted busy tracking; wired into recognition, conversion, synchronization, math computation/evaluation, transforms, gestures, and export/undo/redo/clear/import across all canvas variants
-- feat(canvas): the state badge tooltip opens on click (positioned beside the badge) instead of on hover, and lists the active operation label(s) when busy
-- feat(canvas): `online-working` badge icon changed from a pencil to a 3-dot "typing" indicator (pulses per-dot); `online-working`/`syncing` badges now also pulse a colored ring around the badge itself
-- feat(canvas): "Recognizing" busy tracking reworked to an optimistic model — writer/transform managers mark it active on pointerDown/drag-start (immediate UI feedback, no network round-trip), and it's cleared once per debounced `synchronize()` cycle rather than per network call. Avoids serializing every stroke/transform send behind its individual server ack (previous approach added real latency to fast writing, scratch-out gestures, and multi-stroke imports)
-- feat(canvas): writer/transform gestures now use dedicated busy labels (`Writing`/`Translating`/`Resizing`/`Rotating`) instead of sharing `Recognizing`, ended synchronously as soon as the gesture itself ends; add `canvas.hasOperation(label)` query, `TCanvasOperationLabel` type, and `GESTURE_OPERATION_LABELS` (IIC-1731)
+### Canvas state
+- feat(canvas): add `canvas.connectionState` (initializing/online-idle/online-working/syncing/offline/error) + `connectionStateChanged` event
+- feat(canvas): add `canvas.trackOperation()`/`startOperation()`/`endOperation()`/`hasOperation(label)` — named, ref-counted busy tracking surfaced through the state badge, covering recognition, conversion, synchronization, math, transforms, gestures, and export/undo/redo/clear/import
+- feat(canvas): state badge tooltip now opens on click and lists the active operation(s); new pulsing "typing" indicator for working/syncing states
+- feat(canvas): "Recognizing" busy state now reacts immediately on pointer-down/drag-start instead of waiting for a server round-trip, removing perceived lag on fast writing and multi-stroke imports
 - feat(canvas): **BREAKING** `CanvasLayer.updateState()`/`showState()`/`hideState()`/`createState()`/`createBusy()` removed — replaced by `updateCanvasState()` driven by `canvas.connectionState`. `CanvasLayer.ui.state` shape changed (`{ root, icon, count }` instead of `{ root, busy }`)
-- feat(client): `WebSocketClient` proactively detects unexpected disconnects and starts reconnecting immediately (previously only reactive, on the next `addStrokes()` call); `TConnectionStatus` gains an `"error"` value once reconnection attempts are exhausted, with the retry budget reset for the next attempt
-- feat(examples): add "Connection Status" example demonstrating `canvas.connectionState` and reconnect handling
+- feat(client): `WebSocketClient` now proactively detects unexpected disconnects and reconnects immediately (previously only reactive); `TConnectionStatus` gains an `"error"` value once reconnection attempts are exhausted
 
-### Stroke Playback (IIC-1688)
-- feat(canvas): add `canvas.playback` (`IIPlaybackManager`) — replays a recorded set of strokes point by point, honoring their original relative timing, via `canvas.writer.start/continue/end`; `play(strokes, speed?)`, `pause()`, `resume()`, `stop()`, `setSpeed()`; `state`/`progress` getters and `onProgress`/`onStateChange`/`onEnd` callbacks
-- feat(canvas): add `canvas.readOnly` — blocks real pointer input across all tools (write/erase/select/move) and shows a "not-allowed" cursor (`.read-only` class on the canvas root); used by `canvas.playback` for the duration of a playback, cleared on pause/stop/end, so the user can't fight over the writer's state with the strokes being replayed (IIC-1731)
-- feat(examples): rework "Import Pointers" example into a "Stroke Playback" demo with play/pause/stop/speed controls, replaying `demo.json`
+### Stroke Playback
+- feat(canvas): add `canvas.playback` — replays a recorded set of strokes point by point, honoring their original relative timing; `play(strokes, speed?)`, `pause()`, `resume()`, `stop()`, `setSpeed()`, with `state`/`progress` getters and `onProgress`/`onStateChange`/`onEnd` callbacks
+- feat(canvas): add `canvas.readOnly` — blocks pointer input across all tools and shows a "not-allowed" cursor; used by `canvas.playback` for the duration of a playback
 
-### Math (IIC-1633)
-- feat(math): implement comprehensive math dependencies visualization (variables, overlays, computation, evaluation)
-- feat(math): add Math Diagnostic menu and function evaluator UI component
-- feat(math): introduce TMathVariableUsage and variable cache layer
-- feat(math): add numerical computation result display with graph rendering
-- feat(math): add auto variable management option in menu (IIC-1660)
-- feat(math): include math equations in downloadAsText export (IIC-1652)
-- feat(math): add Power and Underoverscript expression types
-- feat(menu): Math context menu now shows for a multi-block selection when every selected block is a fully-selected Math block (previously only shown for exactly one selected Math block); `canEditVariables`/`canCompute`/`canEvaluate`/solver-output actions are enabled only when every selected block supports them; add `canvas.math.getBlockCapabilities(blockId)` (cached, `IIMathCapabilitiesSubManager`) and `IIJiixQueryManager.getStrokeIdsForBlock(blockId)`
+### Math
+- feat(math): add comprehensive math dependencies visualization (variables, overlays, computation, evaluation) and a Math Diagnostic menu with function evaluator
+- feat(math): add numerical computation result display with graph rendering, and an auto variable management option
+- feat(math): include math equations in `downloadAsText` export
+- feat(menu): Math context menu now shows for multi-block selections when every selected block is a fully-selected Math block; add `canvas.math.getBlockCapabilities(blockId)` and `IIJiixQueryManager.getStrokeIdsForBlock(blockId)`
+- feat(math): Math context menu gains a "Force compute" button that clears and recomputes numerical results for the selected blocks; add `canvas.math.forceCompute(jiixBlockIds?)` (all blocks if omitted), also used by the global "Force Compute all" action
 
-### Chart (IIC-1639 / IIC-1640 / IIC-1642)
+### Chart
 - feat(chart): support multiple data series with per-series colors
-- feat(chart): add zoom and pan functionality with control buttons
-- feat(chart): add toggle button for graph points visibility
+- feat(chart): add zoom/pan controls and a toggle for graph point visibility
 
 ### Canvas
-- feat(keyboard): add keyboard shortcuts — copy/paste/cut (Ctrl+C/V/X), undo/redo (Ctrl+Z/Y), zoom (Ctrl+±), pan (Ctrl+Arrows), fit (Ctrl+0) (IIC-1679)
-- feat(canvas): add zoomToFit(symbols?) to center view on content (IIC-1680)
-- feat(minimap): add Minimap component with MutationObserver sync and click/drag navigation
-- feat(menu): add minimap toggle button in action menu bar (shown in canvas UI layer)
+- feat(keyboard): add shortcuts — copy/paste/cut, undo/redo, zoom, pan, fit
+- feat(canvas): add `zoomToFit(symbols?)` to center view on content
+- feat(minimap): add Minimap component with click/drag navigation
+- feat(menu): add minimap toggle button in the action menu bar
 
 ### Gestures & Input
-- feat(gesture): add underline action options and integrate into gesture menu
+- feat(gesture): add underline action options and integrate into the gesture menu
 - feat(gesture): enhance insert action for line breaks and horizontal inserts
 - feat(erase): enhance stroke and character deletion logic
-- feat(writer): add margin parameter to ensurePointVisible
+- feat(writer): add margin parameter to `ensurePointVisible`
 
 ### Other
-- feat(selection): add selection granularity configuration (block/element)
-- feat(jiix): add getBlocksForSymbols to IIJiixQueryManager
+- feat(selection): add selection granularity configuration (`element` level, for text/math/shape selections)
+- feat(jiix): add `getBlocksForSymbols` to `IIJiixQueryManager`
 - feat(menu): add text export option to menu actions and context menu
-- feat(dev-env): implement dev environment auto-loader for examples
-- feat(gesture): join and insert gestures disabled by default
+- feat(history): expose `extractStrokes(symbols)` (`@/symbol`) and `extractIIBackendChanges(changes)` (`@/history`) as new pure helper exports
 
 ## Performance
-- perf(chart): fix O(n²) spread accumulation in Chart
-- perf(snap): use Set.has() for id lookup and coordinate bucketing
-- perf(symbol): replace unbounded Map cache with single-value cache for bounds
-- perf(synchronizer): parallelize math enrichment with per-block timeout
-- perf(renderer): eliminate double indexOf call in SVGRendererMathUtil
-- perf(model): remove unused symbolsToDelete getter
+- perf(snap): faster id lookup and coordinate bucketing during snapping
+- perf(symbol): faster bounds computation for symbols
 
 ## Bugs fix
-- fix(history): undo is no-op for style, order, and updated changes
+- fix(history): undo is no-op for style, order, and updated changes; fix rotation reversal sign
 - fix(history): carry through updated symbols in reverseChanges for undo
-- fix(history): use -angle for rotation reversal
-- fix(client): HMAC challenge and computation errors surfaced via emitError
-- fix(client): undoDeferred and redoDeferred not reset after connection reset
+- fix(client): HMAC challenge and computation errors now surfaced via `emitError`
+- fix(client): `undoDeferred`/`redoDeferred` not reset after a connection reset
 - fix(client): WebSocketSSR listeners never removed on reconnect
-- fix(client): emit EndInitialization after WebSocket handshake completes
-- fix(renderer): canvas transform accumulates on each resize
-- fix(renderer): remove spurious context2d.save() unbalancing canvas state
-- fix(math): arrow SVG elements leak on each overlay refresh
-- fix(math): hover zone not created if showOverlay is disabled
-- fix(math): reset jiixId and variableValues on symbol duplication
-- fix(math): remove unneeded parentheses around fraction numerator/denominator when converting math blocks to text (IIC-1717)
-- fix(menu): context menu positioning within rendering layer bounds (IIC-1659)
-- fix(menu): refresh context menu after editing variables
+- fix(client): emit `EndInitialization` after the WebSocket handshake completes
+- fix(renderer): canvas transform accumulating on each resize
+- fix(renderer): remove spurious `context2d.save()` unbalancing canvas state
+- fix(menu): context menu positioning within rendering layer bounds
 - fix(menu): remove document/scroll listener leaks on destroy
-- fix(symbol): IIStroke.split() leaves length=0 on result strokes
-- fix(symbol): IIEdgePolyLine.create validation never fired
-- fix(utils): isDeepEqual incorrectly treats arrays as plain objects
+- fix(symbol): `TStroke.split()` leaves length=0 on result strokes
+- fix(symbol): `TEdgePolyLine.create` validation never fired
+- fix(utils): `isDeepEqual` incorrectly treats arrays as plain objects
 - fix(utils): correct segment intersection endpoint guard
-- fix(grabber): contextMenuHandler unsafe cast MouseEvent to PointerEvent
+- fix(grabber): unsafe cast of `MouseEvent` to `PointerEvent` in context menu handler
 - fix(canvas): destroy all existing instances before creating a new canvas
-- fix(canvas): filter invalid strokes in importPointEvents
-- fix(BaseMenuItem): remove replaceWith(cloneNode) causing DOM node leak on destroy
-- fix(smartguide): correct event listener removal in removeListeners
-- fix(security): force js-yaml ≥4.2.0 to fix CVE DoS audit
-- fix(manager): IISynchronizerManager could start a JIIX resync while a stroke/transform gesture was in progress — for small documents (fewer JIIX elements than one yield chunk) the whole resync could run synchronously mid-gesture; write-idle gate now also re-checks right after the network export resolves, and starting a gesture cancels any pending debounced `synchronize()` (IIC-1731)
+- fix(canvas): filter invalid strokes in `importPointEvents`
+- fix(BaseMenuItem): remove DOM node leak on destroy (`replaceWith(cloneNode)`)
+- fix(smartguide): correct event listener removal
+- fix(security): force `js-yaml` ≥4.2.0 (CVE DoS)
 
 ## Refactor
-- refactor(transform): unify transform managers under IITransformManager orchestrator (canvas.transform.translate/.resize/.rotation)
-- refactor(transform): rewrite AbstractTransformManager — drop TParams generics, all apply*() take MatrixTransform; add applyMatrixToPoints, setTransformOrigin, resolveInteractGroup, applyAndDraw, finalizeTransform helpers
-- refactor(transform): move sub-managers to src/manager/interactive/transform/ (mirrors math/ structure)
-- refactor(gesture): implement Strategy Pattern for IIGestureManager with GestureHandler base
-- refactor(core): extract IIKeyboardManager, MathDependencyService, SymbolFactory from InteractiveInkCanvas
-- refactor(canvas): move canvas variants to dedicated folder
-- refactor(selection): rename selection granularity levels from "block" to "element"
-- refactor(symbol): remove group symbol handling and related utilities (IIC-1647)
-- refactor(utils): centralize coordinate validation and constants
-- refactor(renderer): remove duplicate SVG utility files
-- refactor(client): extract resolveDeferredByBlockId, mapCloseCodeToMessage
-- refactor(chart): centralize dimension and range calculations
-- refactor(symbol): reorganize src/symbol/ into logical categories — stroke/, text/, math/, typeset/, decorator/, eraser/, shape/, edge/, primitives/, legacy/ (IIC-1703)
-- refactor(symbol): apply TBaseSymbol intersection to all full symbol types (IIC-1703)
-- refactor(symbol): rename convertPartialStrokesToIIStrokes → convertLegacyStrokesToStrokes (internal)
-- refactor(history): `HistoryManager`, `IHistoryManager`, `IIHistoryManager` now share stack/context bookkeeping via a common internal `AbstractHistoryStack` base class — no behavior change, all three keep their existing public API
-- refactor(history): add `extractStrokes(symbols)` (in `@/symbol`) and `extractIIBackendChanges(changes)` (in `@/history`) as new exported pure helpers, extracted from `InteractiveInkCanvas` internals
+- refactor: internal reorganization of transform, gesture, symbol, and history code (managers, file layout, dead code removal) — no public API impact
 
 # [v3.3.0](https://github.com/MyScript/iinkTS/tree/v3.3.0)
 
