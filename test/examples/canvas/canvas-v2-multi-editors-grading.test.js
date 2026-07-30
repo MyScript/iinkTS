@@ -72,21 +72,21 @@ test.describe("Ink Canvas v2 Multiple Canvas (Grading table)", () => {
       await expect(page.locator("#total-2")).toHaveText("16.00", { timeout: 10000 })
     })
 
-    await test.step("Charlie - Content = 4 (running total 8)", async () => {
-      await writeStrokesInField(page, "grade-2-1", numbers[5].strokes)
-      await expect(page.locator("#total-2")).toHaveText("21.00", { timeout: 10000 })
+    await test.step("Charlie - Content = 4 (running total 32)", async () => {
+      await writeStrokesInField(page, "grade-2-1", numbers[16].strokes)
+      await expect(page.locator("#total-2")).toHaveText("32.00", { timeout: 10000 })
     })
 
-    await test.step("Charlie - Style = 4 (running total 12)", async () => {
+    await test.step("Charlie - Style = 4 (running total 42)", async () => {
       await writeStrokesInField(page, "grade-2-2", numbers[10].strokes)
-      await expect(page.locator("#total-2")).toHaveText("31.00", { timeout: 10000 })
+      await expect(page.locator("#total-2")).toHaveText("42.00", { timeout: 10000 })
     })
 
     await test.step("Get summary reflects the same totals in the report", async () => {
       await page.locator("#compute-btn").click()
       await expect(page.locator("#report li").nth(0)).toContainText("Alice: 26.00 / 60", { timeout: 10000 })
       await expect(page.locator("#report li").nth(1)).toContainText("Bob: 24.00 / 60", { timeout: 10000 })
-      await expect(page.locator("#report li").nth(2)).toContainText("Charlie: 31.00 / 60", { timeout: 10000 })
+      await expect(page.locator("#report li").nth(2)).toContainText("Charlie: 42.00 / 60", { timeout: 10000 })
     })
   })
 
