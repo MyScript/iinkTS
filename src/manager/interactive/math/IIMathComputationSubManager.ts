@@ -412,6 +412,25 @@ export class IIMathComputationSubManager extends IIAbstractManager {
     }
   }
 
+  /**
+   * Clear then recompute numerical results for the given math blocks, or all blocks if none given.
+   */
+  async forceCompute(jiixBlockIds?: string[]): Promise<void> {
+    this.logger.info("forceCompute", { jiixBlockIds })
+
+    const ids = jiixBlockIds ?? this.canvas.model.mathBlocks.map((mathSymbol) => mathSymbol.id)
+    const { resultMode: mode } = this.#config
+
+    for (const jiixBlockId of ids) {
+      try {
+        await this.clearSolverOutputs(jiixBlockId)
+        await this.computeNumericalResult(jiixBlockId, mode)
+      } catch (error) {
+        this.logger.error("forceCompute", `Error force computing block ${jiixBlockId}:`, error)
+      }
+    }
+  }
+
   protected extractSolverOutputStrokesFromExpression(expression: TJIIXMathExpression): Array<{
     X: number[]
     Y: number[]

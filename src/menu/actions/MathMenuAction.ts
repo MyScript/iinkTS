@@ -54,8 +54,7 @@ export class MathMenuAction extends SubMenuItem {
         id: `${idPrefix}-math-force-compute-all`,
         label: "Force Compute all",
         action: async (canvas: TInteractiveInkCanvas) => {
-          await canvas.math.clearAllSolverOutputs()
-          await canvas.math.computeAllNumericalResults()
+          await canvas.math.forceCompute()
         },
       })
     }
