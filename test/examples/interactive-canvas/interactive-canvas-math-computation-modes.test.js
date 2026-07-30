@@ -10,12 +10,28 @@ import {
   selectBlockViaSurround,
   GHOST_STROKE_SELECTOR,
   buildSurroundPointers,
+  boundsOf,
+  buildEraseSweepPointers,
 } from "../helper"
 import locator from "../locators"
 import sum from "../__dataset__/sum"
+import numbers from "../__dataset__/numbers"
 
 const sumStrokes = sum.strokes
 const surroundSumStrokes = buildSurroundPointers(sum.strokes)
+
+// Repositions a stroke dataset so its bounding box starts at the same top-left corner
+// as `strokes` — used to drop a replacement digit exactly where an erased one used to be.
+const translateStrokesOnto = (strokesToMove, strokes) => {
+  const target = boundsOf(strokes, 0)
+  const source = boundsOf(strokesToMove, 0)
+  const dx = target.minX - source.minX
+  const dy = target.minY - source.minY
+  return strokesToMove.map((s) => ({
+    ...s,
+    pointers: s.pointers.map((p) => ({ ...p, x: p.x + dx, y: p.y + dy })),
+  }))
+}
 
 // Once selected, dragging from within the selection's bounding box moves the block.
 const dragSelectionBy = async (page, dx, dy) => {
@@ -188,6 +204,38 @@ test.describe("Math Computation Modes", () => {
     })
 
     await test.step('5. "Force Compute all" → wipes and recomputes every block fresh', async () => {
+      // A draw result is frozen once computed (step 3): re-running compute on the same
+      // "3+1=" wouldn't produce a different result, so first change the expression itself —
+      // erase the "3" and draw a "6" in its place, turning the block into "6+1=". The
+      // frozen "4" result is left untouched by this edit; "Force Compute all" is what wipes
+      // it and recomputes fresh, this time picking up the new expression.
+      // The expression was dragged in step 4, so its strokes no longer sit at the dataset's
+      // original coordinates — read the "3" stroke's current position from the model instead
+      // (leftmost non-result stroke of the block).
+      const canvasSymbols = await getCanvasSymbols(page)
+      const expressionStrokes = canvasSymbols.filter(
+        (s) => s.jiixBlockId === jiixBlockId && !s.isSolverOutput
+      )
+      const threeStroke = [
+        expressionStrokes.reduce((leftmost, s) =>
+          boundsOf([s], 0).minX < boundsOf([leftmost], 0).minX ? s : leftmost
+        ),
+      ]
+      const sixReplacementStrokes = translateStrokesOnto(numbers[6].strokes, threeStroke)
+
+      await page.locator("#ms-menu-tool-erase").click()
+      await page.locator("#ms-menu-tool-erase-20").click()
+      await writePointers(page, buildEraseSweepPointers(boundsOf(threeStroke)))
+      await callCanvasIdle(page)
+
+      await page.locator("#ms-menu-tool-write-pencil").click()
+      await writeStrokes(page, sixReplacementStrokes)
+      await callCanvasIdle(page)
+      // getBlockLabel reads from the cached JIIX export on the model, which only refreshes
+      // on an actual export round-trip — pollJiix forces that refresh so the label reflects
+      // "6+1=" before Force Compute all runs.
+      await pollJiix(page, 1)
+
       await openMathActionMenu(page)
       await page.locator("#ms-menu-action-math-force-compute-all").click()
       await page.locator("#ms-menu-action").click()
