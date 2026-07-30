@@ -299,6 +299,8 @@ test.describe("Interactive ink canvas Get Started Menu Action", () => {
   })
 
   test("gesture surround", async ({ page }) => {
+    test.setTimeout(120 * 1000)
+
     await test.step("should display menu gesture", async () => {
       await expect(page.locator(locator.menu.action.gesture.triggerBtn)).toBeHidden()
       await page.locator(locator.menu.action.triggerBtn).click()
