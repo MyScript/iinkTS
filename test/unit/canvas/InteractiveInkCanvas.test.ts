@@ -284,6 +284,34 @@ describe("CanvasOffscreen.ts", () => {
     })
   })
 
+  describe("onGestured forces a synchronize when the backend won't emit a contentChange for it", () => {
+    let canvas: InteractiveInkCanvas
+
+    beforeEach(() => {
+      canvas = new InteractiveInkCanvas(document.createElement("div"), CanvasOptions)
+    })
+
+    test("calls synchronize() immediately when ignoreGestureStrokes is true", async () => {
+      canvas.client.configuration.recognition.gesture.ignoreGestureStrokes = true
+      const synchronizeSpy = jest.spyOn(canvas.synchronizer, "synchronize").mockResolvedValue(undefined)
+
+      canvas.event.emitGestured({ gestureType: "SURROUND", stroke: buildIIStroke() })
+      await Promise.resolve()
+
+      expect(synchronizeSpy).toHaveBeenCalledTimes(1)
+    })
+
+    test("does nothing when ignoreGestureStrokes is false, since the backend's own contentChange already covers it", async () => {
+      canvas.client.configuration.recognition.gesture.ignoreGestureStrokes = false
+      const synchronizeSpy = jest.spyOn(canvas.synchronizer, "synchronize").mockResolvedValue(undefined)
+
+      canvas.event.emitGestured({ gestureType: "SURROUND", stroke: buildIIStroke() })
+      await Promise.resolve()
+
+      expect(synchronizeSpy).not.toHaveBeenCalled()
+    })
+  })
+
   describe("init", () => {
     const canvas = new InteractiveInkCanvas(document.createElement("div"), CanvasOptions)
     canvas.menu.render = jest.fn()

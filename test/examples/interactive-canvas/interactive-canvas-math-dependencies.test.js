@@ -4,6 +4,7 @@ import {
   writeStrokes,
   writePointers,
   callCanvasIdle,
+  waitForSynchronizedEvent,
   getCanvasSymbols,
   boundsOf,
   buildEraseSweepPointers,
@@ -38,7 +39,14 @@ const writeSourceThenDependent = async (page) => {
   await callCanvasIdle(page)
   await pollJiix(page, 1)
 
-  await writeStrokes(page, dependentStrokes)
+  // Races the write against "synchronized" (not just callCanvasIdle, which only tracks the
+  // backend recognition queue): IIOverlayManager.refresh() runs as part of the local
+  // synchronize pass and rebuilds every hover-zone overlay, so a caller that proceeds to
+  // hover() one right after callCanvasIdle can race a still-pending overlay rebuild.
+  await Promise.all([
+    waitForSynchronizedEvent(page),
+    writeStrokes(page, dependentStrokes),
+  ])
   await callCanvasIdle(page)
   const jiix = await pollJiix(page, 2)
 

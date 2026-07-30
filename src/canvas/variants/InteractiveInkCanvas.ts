@@ -164,6 +164,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
     this.client.event.addErrorListener(this.manageError.bind(this))
     this.client.event.addExportedListener(this.event.emitExported.bind(this.event))
     this.client.event.addContentChangedListener(this.onContentChanged.bind(this))
+    this.event.addGesturedListener(this.onGestured.bind(this))
     this.client.event.addSessionOpenedListener(this.event.emitSessionOpened.bind(this.event))
     this.client.event.addEndInitialization(this.layers.clearModal.bind(this.layers))
     this.client.event.addEndInitialization(this.markConnectedOnce.bind(this))
@@ -396,6 +397,19 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
   }
 
   /**
+   * With `ignoreGestureStrokes` the backend never emits a `contentChanged` for a gesture stroke,
+   * so the debounced synchronize scheduled by `onContentChanged` has nothing left to reschedule it -
+   * force one here instead of relying on that mechanism.
+   */
+  protected async onGestured(): Promise<void> {
+    if (!this.client.configuration.recognition.gesture.ignoreGestureStrokes) {
+      return
+    }
+    await this.synchronize()
+    this.updateLayerUI(0)
+  }
+
+  /**
    * Initialize the canvas: render layers, attach input handlers, connect to the
    * WebSocket client, and load the initial session.
    * Called automatically by `Canvas.load()` — do not call manually.
@@ -450,7 +464,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
       const strokes = this.extractStrokesFromSymbols(this.model.symbols)
       if (strokes.length > 0) {
         this.startOperation("Recognizing")
-        this.client.addStrokes(strokes, false)
+        await this.client.addStrokes(strokes, false)
       }
       this.layers.hideLoader()
       this.event.emitLoaded()

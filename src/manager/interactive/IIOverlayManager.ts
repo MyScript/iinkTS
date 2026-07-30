@@ -319,6 +319,12 @@ export class IIOverlayManager extends IIAbstractManager {
     this.clearAll()
 
     this.model.mathBlocks.forEach((mathBlock) => {
+      // A selected block's own interact-elements-group (translate/resize/rotate handles) is
+      // appended before this refresh runs; recreating the hover zone on top of it here would
+      // swallow pointerdown events meant for those handles (e.g. dragging the block).
+      if (this.canvas.selector.isMathBlockSelected(mathBlock.id)) {
+        return
+      }
       const bounds = this.getMathBlockBounds(mathBlock)
       if (bounds) {
         this.createHoverZone(bounds, mathBlock.id)
