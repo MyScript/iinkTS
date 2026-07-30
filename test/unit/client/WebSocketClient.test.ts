@@ -1279,6 +1279,70 @@ describe("WebSocketClient.ts", () => {
     })
   })
 
+  describe("sendToSupport", () => {
+    const conf = structuredClone(configuration)
+    conf.server.host = "send-to-support-test"
+    let mockServer: ServerWebSocketMock
+    let wsClient: WebSocketClient
+
+    beforeEach(() => {
+      wsClient = new WebSocketClient(conf)
+      mockServer = new ServerWebSocketMock(wsClient.url)
+      mockServer.init()
+    })
+    afterEach(async () => {
+      await wsClient.destroy()
+      mockServer.close()
+    })
+
+    test("should send ackSendToSupport message with given data", async () => {
+      expect.assertions(1)
+      await wsClient.init()
+      wsClient.sendToSupport({ ticketId: "TICKET-123", comment: "help" })
+      //¯\_(ツ)_/¯  required to wait server received message
+      await delay(100)
+      const messageSent = JSON.parse(mockServer.getLastMessage() as string)
+      expect(messageSent).toEqual({
+        type: "sendToSupport",
+        metadata: {
+          ticketId: "TICKET-123",
+          comment: "help",
+        },
+      })
+    })
+    test("should resolve when receiving ack", async () => {
+      expect.assertions(1)
+      await wsClient.init()
+      const promise = wsClient.sendToSupport({ ticketId: "TICKET-123" })
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the client
+      await delay(100)
+      mockServer.sendAckMessage()
+      await expect(promise).toResolve()
+    })
+    test("should resolve concurrent calls in the order they were sent", async () => {
+      expect.assertions(3)
+      await wsClient.init()
+      const firstPromise = wsClient.sendToSupport({ ticketId: "FIRST" })
+      const secondPromise = wsClient.sendToSupport({ ticketId: "SECOND" })
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the client
+      await delay(100)
+
+      const order: string[] = []
+      firstPromise.then(() => order.push("first"))
+      secondPromise.then(() => order.push("second"))
+
+      mockServer.sendAckMessage()
+      await delay(50)
+      expect(order).toEqual(["first"])
+
+      mockServer.sendAckMessage()
+      await delay(50)
+      expect(order).toEqual(["first", "second"])
+
+      await expect(Promise.all([firstPromise, secondPromise])).toResolve()
+    })
+  })
+
   describe("Connection lost", () => {
     const conf = structuredClone(configuration)
     conf.server.host = "close-test"
