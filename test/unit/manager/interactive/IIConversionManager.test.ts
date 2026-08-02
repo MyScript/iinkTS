@@ -105,6 +105,60 @@ describe("IIConversionManager.ts", () => {
       expect(result[0].strokes).toEqual([helloStroke])
       expect(TextOps.getLabel(result[0].symbol)).toEqual("h")
     })
+    test("should skip a word that only references an embedded element (e.g. inline math) instead of building a degenerate zero-bounds text symbol", async () => {
+      const helloStroke = buildIIStroke()
+      helloStroke.id = "stroke-hello"
+      const mathStroke = buildIIStroke()
+      mathStroke.id = "stroke-math"
+      manager.model.symbols.push(helloStroke, mathStroke)
+
+      const textWithMathRef: TJIIXTextElement = {
+        id: "raw-content/142",
+        type: JIIXElementType.Text,
+        label: "hello\n$3+1=$",
+        "bounding-box": { x: 115, y: 93, width: 52, height: 54 },
+        words: [
+          {
+            label: "hello",
+            "first-char": 0,
+            "last-char": 4,
+            "bounding-box": { x: 119, y: 93, width: 48, height: 24 },
+            items: [{ type: "stroke", id: "stroke-hello", "full-id": "stroke-hello" }],
+          },
+          {
+            label: "\n$3+1=$",
+            refs: ["raw-content/139"],
+            "first-char": 5,
+            "last-char": 6,
+            "bounding-box": { x: 115, y: 131, width: 45, height: 17 },
+            items: [{ type: "stroke", id: "stroke-math", "full-id": "stroke-math" }],
+          },
+        ],
+        chars: [
+          { label: "h", word: 0, grid: [], items: [{ type: "stroke", id: "stroke-hello", "full-id": "stroke-hello" }] },
+          { label: "e", word: 0, grid: [], items: [{ type: "stroke", id: "stroke-hello", "full-id": "stroke-hello" }] },
+          { label: "l", word: 0, grid: [], items: [{ type: "stroke", id: "stroke-hello", "full-id": "stroke-hello" }] },
+          { label: "l", word: 0, grid: [], items: [{ type: "stroke", id: "stroke-hello", "full-id": "stroke-hello" }] },
+          { label: "o", word: 0, grid: [], items: [{ type: "stroke", id: "stroke-hello", "full-id": "stroke-hello" }] },
+          // Placeholder chars for the embedded math reference - no items/bounding-box of their own.
+          { label: "\n", word: 1, grid: [] },
+          { label: "", word: 1, grid: [] },
+        ],
+        lines: [
+          {
+            "first-char": 0,
+            "last-char": 6,
+            "baseline-y": 117,
+            "x-height": 10,
+            "bounding-box": { x: 119, y: 93, width: 48, height: 24 },
+          },
+        ],
+      }
+
+      const result = manager.convertText(textWithMathRef, [helloStroke, mathStroke], false)!
+      expect(result).toHaveLength(1)
+      expect(TextOps.getLabel(result[0].symbol)).toEqual("hello")
+    })
   })
 
   describe("convertNode", () => {
