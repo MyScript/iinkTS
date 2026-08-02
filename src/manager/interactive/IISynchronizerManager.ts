@@ -165,12 +165,15 @@ export class IISynchronizerManager extends IIAbstractManager {
     let processedSinceYield = 0
     for (const el of jiix.elements || []) {
       const snapshotKey = this.#elementSnapshotKey(el)
-      if (this.#lastElementSnapshots.get(el.id) !== snapshotKey) {
-        this.#lastElementSnapshots.set(el.id, snapshotKey)
-        try {
-          const items = this.#getElementItems(el)
-
-          const strokes = this.#getStrokesFromItems(items)
+      try {
+        const items = this.#getElementItems(el)
+        const strokes = this.#getStrokesFromItems(items)
+        // Even when the element's content fingerprint is unchanged, the live strokes may have
+        // lost their jiixBlockId (e.g. a history snapshot restored by undo()/redo() after clear())
+        // — re-annotate whenever the metadata itself is missing, not only on content changes.
+        const needsMetadata = strokes.some((s) => s.jiixBlockId !== el.id)
+        if (needsMetadata || this.#lastElementSnapshots.get(el.id) !== snapshotKey) {
+          this.#lastElementSnapshots.set(el.id, snapshotKey)
           for (const stroke of strokes) {
             this.#updateBlockMetadata(stroke, el)
 
@@ -180,9 +183,9 @@ export class IISynchronizerManager extends IIAbstractManager {
 
             stroke.modificationDate = now
           }
-        } catch (error) {
-          this.logger.error("#doSynchronize", `Failed to synchronize element of type ${el.type}:`, error)
         }
+      } catch (error) {
+        this.logger.error("#doSynchronize", `Failed to synchronize element of type ${el.type}:`, error)
       }
 
       processedSinceYield++
