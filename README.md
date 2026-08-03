@@ -27,11 +27,13 @@ It integrates all you need:
 - [Installation](#installation)
 - [Usage](#usage)
 - [Documentation](#documentation)
+- [Architecture](#architecture)
 - [Migration](#migration)
 - [Development](#development)
 - [Support](#getting-support)
 - [Feedback](#sharing-your-feedback)
 - [Contributing](#contributing)
+- [Troubleshooting](#troubleshooting)
 - [License](#license)
 
 ## Features
@@ -108,7 +110,7 @@ yarn add iink-ts
 ```javascript
     const canvasElement = document.getElementById('canvas');
     const options = {
-      configuration = {
+      configuration: {
         server: {
           scheme: "https",
           host: "cloud.myscript.com",
@@ -238,6 +240,14 @@ You can find a complete documentation with the following sections on our Develop
 
 We also provide a complete [API Reference](https://myscript.github.io/iinkTS/docs/).
 
+## Architecture
+
+If you're integrating iinkTS or rebuilding your own client from scratch, these diagrams cover the class organization and the WebSocket protocol:
+
+- [architecture/interactive-ink-canvas.md](./architecture/interactive-ink-canvas.md) — class diagram of the `INTERACTIVE_INK` (WebSocket, real-time) variant and its managers.
+- [architecture/ink-canvas.md](./architecture/ink-canvas.md) — class diagram of the `INK_V2` (HTTP batch) variant and the deprecated `INK_V1`.
+- [architecture/websocket-protocol.md](./architecture/websocket-protocol.md) — sequence diagram of the messages exchanged between the WebSocket client and the MyScript backend (auth, session, strokes, recognition, export, undo/redo, errors/reconnection).
+
 ## Migration
 
 Upgrading from an earlier major version? See [MIGRATION.md](./MIGRATION.md) for breaking changes and step-by-step instructions.
@@ -253,7 +263,7 @@ You can get support and ask your questions on the [dedicated section](https://de
 ## Sharing your feedback
 
 Made a cool app with iinkTS? We would love to hear about you!
-We’re planning to showcase apps using it so let us know by sending a quick mail to [myapp@myscript.com](mailto://myapp@myscript.com).
+We’re planning to showcase apps using it so let us know by sending a quick mail to [myapp@myscript.com](mailto:myapp@myscript.com).
 
 ## Contributing
 
