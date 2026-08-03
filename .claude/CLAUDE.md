@@ -1,0 +1,3 @@
+# iinkTS
+
+@../.agent/AGENTS.md
