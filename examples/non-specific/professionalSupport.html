@@ -10,12 +10,12 @@
 
     <title>Send Data to Support</title>
 
-    <link rel="stylesheet" href="./assets/style/reset.css" />
-    <link rel="stylesheet" href="./assets/style/components.css" />
-    <link rel="stylesheet" href="./assets/style/examples.css" />
-    <link rel="stylesheet" href="./assets/style/inputs.css" />
-    <link rel="stylesheet" href="./assets/style/panel.css" />
-    <link rel="stylesheet" href="./components/code-viewer/code-viewer.css" />
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
 
     <style>
       #collect-fields {
@@ -104,8 +104,8 @@
     </div>
 
     <script type="module">
-      import { Canvas } from '../dist/iink.esm.js'
-      import { ModalCanvasOptions } from './components/modal/modalCanvasOptions.js'
+      import { Canvas } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
 
       const rootElement = document.getElementById('rootEl')
       const showModalBtn = document.getElementById('showModalBtn')
@@ -211,8 +211,8 @@
       window.canvasOptions = canvasOptions
       window.loadCanvas = loadCanvas
     </script>
-    <script type="module" src="./components/code-viewer/code-viewer.js"></script>
-    <script src="./assets/js/theme.js"></script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
   </body>
 
 </html>
