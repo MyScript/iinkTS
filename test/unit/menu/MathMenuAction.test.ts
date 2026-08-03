@@ -1,5 +1,5 @@
 import { createCanvasMock, asCanvas } from "../__mocks__/createCanvasMock"
-import { MathMenuAction } from "@/menu/actions/MathMenuAction"
+import { MathMenuAction } from "@/iink"
 
 describe("MathMenuAction.ts", () => {
   afterEach(() => {
