@@ -165,6 +165,25 @@ describe("IISynchronizerManager.ts", () => {
       restoreRaf()
     })
 
+    test("should reprocess a block whose stroke lost its jiixBlockId even though content is unchanged (e.g. a history snapshot restored by undo() after clear())", async () => {
+      const { canvas, manager, strokes, restoreRaf } = setup(3)
+      await manager.synchronize()
+      expect(canvas.jiix.updateTextMetadata).toHaveBeenCalledTimes(3)
+
+      // Simulate undo() swapping in strokes cloned from a history snapshot taken before
+      // this block's jiixBlockId was ever assigned - same export content as before.
+      strokes[0].jiixBlockId = undefined
+      strokes[0].jiixBlockType = undefined
+
+      await manager.synchronize()
+
+      expect(canvas.jiix.updateTextMetadata).toHaveBeenCalledTimes(4)
+      strokes.forEach((stroke, i) => {
+        expect(stroke.jiixBlockId).toBe(`block-${i}`)
+      })
+      restoreRaf()
+    })
+
     test("should reprocess a block whose content actually changed since the last sync", async () => {
       const { canvas, manager, restoreRaf } = setup(3)
       await manager.synchronize()

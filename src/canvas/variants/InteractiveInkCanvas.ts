@@ -1417,6 +1417,11 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
     this.unselectAll()
     const modifications = stackItem.model.extractDifferenceSymbols(this.model)
     this.#model = stackItem.model.clone()
+    // The restored snapshot's `exports` (deep-cloned by `IIModel#clone`) reflects whatever the
+    // model looked like when it was pushed to history, which predates this undo/redo - if left
+    // in place, the next `export()` call sees a non-empty cache and skips re-fetching the JIIX
+    // entirely, so the backend's actual current block ids/content are never picked up.
+    this.#model.invalidateExports()
     modifications.removed.forEach((s) => this.renderer.removeSymbol(s.id))
     modifications.added.forEach((s) => this.renderer.drawSymbol(s))
     return extractIIBackendChanges(stackItem.changes)
