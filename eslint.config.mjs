@@ -31,6 +31,7 @@ export default [
       "examples/custom-rendering/tldraw-websocket-client/**",
       "*.config.mjs",
       "*.config.js",
+      ".local/*"
     ],
   },
   ...compat.extends("eslint:recommended", "plugin:@typescript-eslint/recommended"),
