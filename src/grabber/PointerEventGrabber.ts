@@ -153,6 +153,12 @@ export class PointerEventGrabber {
   }
 
   protected pointerDownHandler = (evt: PointerEvent) => {
+    // Reparenting layerCapture (e.g. moving one editor's DOM between several
+    // inputs) changes the svg's screen position without touching its transform
+    // (pan/zoom/resize) or firing a scroll event, so the version-keyed cache
+    // can't detect it. Force a fresh getScreenCTM read at the start of every
+    // gesture so a stale value never survives across a reparent.
+    this.#cachedCTMSvg = undefined
     const pointerInfo = this.getPointerInfos(evt)
     this.#logger.debug("pointerDownHandler", pointerInfo)
 

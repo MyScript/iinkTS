@@ -357,5 +357,22 @@ describe("PointerEventGrabber.ts", () => {
       expect(svg.getScreenCTM).toHaveBeenCalledTimes(1)
       grabber.detach()
     })
+
+    test("should recompute the CTM when the layer capture is reparented without a version bump", () => {
+      // Simulates moving the same layerCapture/svg to a different container
+      // (e.g. switching between multiple inputs sharing one editor instance).
+      // The svg reference and its transform version are unchanged, so the
+      // version-keyed cache alone can't detect this move.
+      const otherContainer = document.createElement("div")
+      document.body.appendChild(otherContainer)
+      otherContainer.appendChild(wrapperHTML)
+      grabber.attach(wrapperHTML)
+
+      const downEvt = new LeftClickEventMock("pointerdown", { pointerType: "pen", clientX: 4, clientY: 4, pressure: 1 })
+      wrapperHTML.dispatchEvent(downEvt)
+
+      expect(svg.getScreenCTM).toHaveBeenCalledTimes(1)
+      grabber.detach()
+    })
   })
 })

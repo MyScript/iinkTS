@@ -202,6 +202,13 @@ export class IIConversionManager extends IIAbstractManager {
         currentX += this.canvas.typeset.getSpaceWidth(result.at(-1)?.symbol.chars[0].fontSize || this.rowHeight / 2)
         return
       }
+      if (word.refs?.length) {
+        // Placeholder word referencing an embedded child element (e.g. inline math "$3+1=$")
+        // - its chars carry no items/bounding-box of their own, so building a text symbol from
+        // them would produce a degenerate zero-bounds one. The referenced element (raw-content/139
+        // here) is already converted on its own via convertMath/buildMath - nothing to do here.
+        return
+      }
       const wordStrokes = strokes.filter((s) => word.items?.some((i) => i["full-id"] === s.id))
       if (wordStrokes.length) {
         const chars = jiixChars.slice(word["first-char"] as number, (word["last-char"] || 0) + 1)

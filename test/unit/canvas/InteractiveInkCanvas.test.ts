@@ -732,6 +732,16 @@ describe("CanvasOffscreen.ts", () => {
       expect(canvas.renderer.drawSymbol).toHaveBeenCalledTimes(0)
       expect(canvas.renderer.removeSymbol).toHaveBeenCalledTimes(0)
     })
+    test("should invalidate the restored model's exports so the next synchronize re-fetches JIIX instead of reusing the pre-undo snapshot", async () => {
+      const stroke1 = buildIIStroke()
+      const firstModel = canvas.model.clone()
+      firstModel.addSymbol(stroke1)
+      firstModel.mergeExport({ "application/vnd.myscript.jiix": jiixText } as never)
+      canvas.history.undo = jest.fn(() => ({ model: firstModel, changes: { added: [stroke1] } }))
+      canvas.history.context.canUndo = true
+      await canvas.undo()
+      expect(canvas.model.exports).toBeUndefined()
+    })
     test("should call client.undo & renderer.drawSymbol when history.undo return added stroke", async () => {
       const stroke1 = buildIIStroke()
       const firstModel = canvas.model.clone()
