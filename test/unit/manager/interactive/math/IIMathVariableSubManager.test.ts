@@ -1,11 +1,7 @@
 import { createCanvasMock, asCanvas } from "../../../__mocks__/createCanvasMock"
 import { buildIIStroke } from "../../../helpers"
-import { ColorPaletteManager } from "@/iink"
-import { IIMathVariableSubManager } from "@/manager/interactive/math/IIMathVariableSubManager"
-import { JIIXMathExpressionType } from "@/model/ExportMath"
-import type { TJIIXMathExpression } from "@/model/ExportMath"
-import type { TMathVariable } from "@/client"
-import type { TStroke } from "@/symbol"
+import { ColorPaletteManager, IIMathVariableSubManager, JIIXMathExpressionType } from "@/iink"
+import type { TJIIXMathExpression, TMathVariable, TStroke } from "@/iink"
 
 describe("IIMathVariableSubManager.ts", () => {
   beforeEach(() => {

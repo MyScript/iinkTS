@@ -1,8 +1,10 @@
 import { buildIIStroke } from "../helpers"
 import { createCanvasMock, asCanvas } from "../__mocks__/createCanvasMock"
-import { IIMenuContext } from "@/menu/IIMenuContext"
-import { IIJiixQueryManager } from "@/manager/interactive/IIJiixQueryManager"
-import { IIMathManager } from "@/manager/interactive/IIMathManager"
+import {
+  IIMenuContext,
+  IIJiixQueryManager,
+  IIMathManager
+} from "@/iink"
 
 const ONLY_MATH_MENU_CONFIG = {
   edit: false,

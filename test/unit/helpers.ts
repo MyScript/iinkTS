@@ -18,7 +18,7 @@ import {
   TMath,
   TMathElement,
   TPartialDeep,
-} from "../../src/iink"
+} from "@/iink"
 import { DecoratorOps } from "../../src/symbol/decorator/Decorator"
 import { TextOps } from "../../src/symbol/text/Text"
 import { MathOps } from "../../src/symbol/math/Math"
