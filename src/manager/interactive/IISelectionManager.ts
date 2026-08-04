@@ -46,6 +46,10 @@ export type TSelectionConfig = {
   shapeLevel: TShapeSelectionLevel
 }
 
+/**
+ * @group Manager
+ * @remarks Default values of symbol selection
+ */
 export const DefaultSelectionConfig: TSelectionConfig = {
   textLevel: "element",
   mathLevel: "element",
