@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../../src/lib/ui/components/primitives/menus/TldrawUiMenuToolItem.tsx"],
+  "sourcesContent": ["import { useTools } from '../../../hooks/useTools'\nimport { TldrawUiMenuItem, TLUiMenuItemProps } from './TldrawUiMenuItem'\n\n/** @public */\nexport type TLUiMenuToolItemProps = {\n\ttoolId?: string\n} & Pick<TLUiMenuItemProps, 'isSelected' | 'disabled'>\n\n/** @public @react */\nexport function TldrawUiMenuToolItem({ toolId = '', ...rest }: TLUiMenuToolItemProps) {\n\tconst tools = useTools()\n\tconst tool = tools[toolId]\n\tif (!tool) return null\n\treturn <TldrawUiMenuItem {...tool} {...rest} />\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAaQ;AAbR,sBAAyB;AACzB,8BAAoD;AAQ7C,SAAS,qBAAqB,EAAE,SAAS,IAAI,GAAG,KAAK,GAA0B;AACrF,QAAM,YAAQ,0BAAS;AACvB,QAAM,OAAO,MAAM,MAAM;AACzB,MAAI,CAAC,KAAM,QAAO;AAClB,SAAO,4CAAC,4CAAkB,GAAG,MAAO,GAAG,MAAM;AAC9C;",
+  "names": []
+}

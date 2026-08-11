@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/shapes/shared/useForceSolid.ts"],
+  "sourcesContent": ["import { useEditor, useValue } from '@tldraw/editor'\n\nexport function useForceSolid() {\n\tconst editor = useEditor()\n\treturn useValue('zoom', () => editor.getZoomLevel() < 0.35, [editor])\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,oBAAoC;AAE7B,SAAS,gBAAgB;AAC/B,QAAM,aAAS,yBAAU;AACzB,aAAO,wBAAS,QAAQ,MAAM,OAAO,aAAa,IAAI,MAAM,CAAC,MAAM,CAAC;AACrE;",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/utils/sync/alerts.ts"],
+  "sourcesContent": ["/** @internal */\nexport function showCantWriteToIndexDbAlert() {\n\twindow.alert(\n\t\t`Oops! We could not save changes to your browser's storage. We now need to reload the page and try again.\n\nKeep seeing this message?\n\u2022 If you're using tldraw in a private or \"incognito\" window, try loading tldraw in a regular window or in a different browser.\n\u2022 If your hard disk is full, try clearing up some space and then reload the page.`\n\t)\n}\n\n/** @internal */\nexport function showCantReadFromIndexDbAlert() {\n\twindow.alert(\n\t\t`Oops! We could not access your browser's storage\u2014and the app won't work correctly without that. We now need to reload the page and try again.\n\nKeep seeing this message?\n\u2022 If you're using tldraw in a private or \"incognito\" window, try loading tldraw in a regular window or in a different browser.`\n\t)\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AACO,SAAS,8BAA8B;AAC7C,SAAO;AAAA,IACN;AAAA;AAAA;AAAA;AAAA;AAAA,EAKD;AACD;AAGO,SAAS,+BAA+B;AAC9C,SAAO;AAAA,IACN;AAAA;AAAA;AAAA;AAAA,EAID;AACD;",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../src/misc/TLColor.ts"],
+  "sourcesContent": ["import { T } from '@tldraw/validate'\nimport { SetValue } from '../util-types'\n\n/**\n * The colors used by tldraw's default shapes.\n *\n *  @public */\nexport const TL_CANVAS_UI_COLOR_TYPES = new Set([\n\t'accent',\n\t'white',\n\t'black',\n\t'selection-stroke',\n\t'selection-fill',\n\t'laser',\n\t'muted-1',\n] as const)\n\n/**\n * A type for the colors used by tldraw's default shapes.\n *\n *  @public */\nexport type TLCanvasUiColor = SetValue<typeof TL_CANVAS_UI_COLOR_TYPES>\n\n/**\n * A validator for the colors used by tldraw's default shapes.\n *\n * @public */\nexport const canvasUiColorTypeValidator = T.setEnum(TL_CANVAS_UI_COLOR_TYPES)\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,sBAAkB;AAOX,MAAM,2BAA2B,oBAAI,IAAI;AAAA,EAC/C;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AACD,CAAU;AAYH,MAAM,6BAA6B,kBAAE,QAAQ,wBAAwB;",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/utils/hardResetEditor.ts"],
+  "sourcesContent": ["import { runtime } from './runtime'\n\n/** @public */\nexport function hardResetEditor() {\n\truntime.hardReset()\n}\n"],
+  "mappings": "AAAA,SAAS,eAAe;AAGjB,SAAS,kBAAkB;AACjC,UAAQ,UAAU;AACnB;",
+  "names": []
+}

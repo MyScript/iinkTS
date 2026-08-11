@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../src/index.ts"],
+  "sourcesContent": ["import { registerTldrawLibraryVersion } from '@tldraw/utils'\nexport { track } from './lib/track'\nexport { useAtom } from './lib/useAtom'\nexport { useComputed } from './lib/useComputed'\nexport { useQuickReactor } from './lib/useQuickReactor'\nexport { useReactor } from './lib/useReactor'\nexport { useStateTracking } from './lib/useStateTracking'\nexport { useValue } from './lib/useValue'\n\nregisterTldrawLibraryVersion(\n\t(globalThis as any).TLDRAW_LIBRARY_NAME,\n\t(globalThis as any).TLDRAW_LIBRARY_VERSION,\n\t(globalThis as any).TLDRAW_LIBRARY_MODULES\n)\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,mBAA6C;AAC7C,mBAAsB;AACtB,qBAAwB;AACxB,yBAA4B;AAC5B,6BAAgC;AAChC,wBAA2B;AAC3B,8BAAiC;AACjC,sBAAyB;AAAA,IAEzB;AAAA,EACE;AAAA,EACA;AAAA,EACA;AACF;",
+  "names": []
+}

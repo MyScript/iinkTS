@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/shapes/shared/usePrefersReducedMotion.tsx"],
+  "sourcesContent": ["import { useEffect, useState } from 'react'\n\n/** @public */\nexport function usePrefersReducedMotion() {\n\tconst [prefersReducedMotion, setPrefersReducedMotion] = useState(false)\n\n\tuseEffect(() => {\n\t\tif (typeof window === 'undefined' || !('matchMedia' in window)) return\n\t\tconst mql = window.matchMedia('(prefers-reduced-motion: reduce)')\n\t\tconst handler = () => {\n\t\t\tsetPrefersReducedMotion(mql.matches)\n\t\t}\n\t\thandler()\n\t\tmql.addEventListener('change', handler)\n\t\treturn () => mql.removeEventListener('change', handler)\n\t}, [])\n\n\treturn prefersReducedMotion\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,mBAAoC;AAG7B,SAAS,0BAA0B;AACzC,QAAM,CAAC,sBAAsB,uBAAuB,QAAI,uBAAS,KAAK;AAEtE,8BAAU,MAAM;AACf,QAAI,OAAO,WAAW,eAAe,EAAE,gBAAgB,QAAS;AAChE,UAAM,MAAM,OAAO,WAAW,kCAAkC;AAChE,UAAM,UAAU,MAAM;AACrB,8BAAwB,IAAI,OAAO;AAAA,IACpC;AACA,YAAQ;AACR,QAAI,iBAAiB,UAAU,OAAO;AACtC,WAAO,MAAM,IAAI,oBAAoB,UAAU,OAAO;AAAA,EACvD,GAAG,CAAC,CAAC;AAEL,SAAO;AACR;",
+  "names": []
+}

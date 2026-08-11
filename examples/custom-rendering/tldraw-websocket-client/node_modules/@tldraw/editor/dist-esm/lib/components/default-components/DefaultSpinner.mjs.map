@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/components/default-components/DefaultSpinner.tsx"],
+  "sourcesContent": ["import classNames from 'classnames'\n\n/** @public @react */\nexport function DefaultSpinner(props: React.SVGProps<SVGSVGElement>) {\n\treturn (\n\t\t<svg\n\t\t\twidth={16}\n\t\t\theight={16}\n\t\t\tviewBox=\"0 0 16 16\"\n\t\t\taria-hidden=\"false\"\n\t\t\t{...props}\n\t\t\tclassName={classNames('tl-spinner', props.className)}\n\t\t>\n\t\t\t<g strokeWidth={2} fill=\"none\" fillRule=\"evenodd\">\n\t\t\t\t<circle strokeOpacity={0.25} cx={8} cy={8} r={7} stroke=\"currentColor\" />\n\t\t\t\t<path strokeLinecap=\"round\" d=\"M15 8c0-4.5-4.5-7-7-7\" stroke=\"currentColor\" />\n\t\t\t</g>\n\t\t</svg>\n\t)\n}\n"],
+  "mappings": "AAaG,SACC,KADD;AAbH,OAAO,gBAAgB;AAGhB,SAAS,eAAe,OAAsC;AACpE,SACC;AAAA,IAAC;AAAA;AAAA,MACA,OAAO;AAAA,MACP,QAAQ;AAAA,MACR,SAAQ;AAAA,MACR,eAAY;AAAA,MACX,GAAG;AAAA,MACJ,WAAW,WAAW,cAAc,MAAM,SAAS;AAAA,MAEnD,+BAAC,OAAE,aAAa,GAAG,MAAK,QAAO,UAAS,WACvC;AAAA,4BAAC,YAAO,eAAe,MAAM,IAAI,GAAG,IAAI,GAAG,GAAG,GAAG,QAAO,gBAAe;AAAA,QACvE,oBAAC,UAAK,eAAc,SAAQ,GAAE,yBAAwB,QAAO,gBAAe;AAAA,SAC7E;AAAA;AAAA,EACD;AAEF;",
+  "names": []
+}

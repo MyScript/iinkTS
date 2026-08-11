@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/primitives/geometry/geometry-constants.ts"],
+  "sourcesContent": ["const SPACING = 20\nconst MIN_COUNT = 8\n\n/** @internal */\nexport function getVerticesCountForArcLength(length: number, spacing = SPACING) {\n\treturn Math.max(MIN_COUNT, Math.ceil(length / spacing))\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,MAAM,UAAU;AAChB,MAAM,YAAY;AAGX,SAAS,6BAA6B,QAAgB,UAAU,SAAS;AAC/E,SAAO,KAAK,IAAI,WAAW,KAAK,KAAK,SAAS,OAAO,CAAC;AACvD;",
+  "names": []
+}

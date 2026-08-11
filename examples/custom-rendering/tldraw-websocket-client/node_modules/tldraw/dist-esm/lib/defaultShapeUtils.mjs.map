@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../src/lib/defaultShapeUtils.ts"],
+  "sourcesContent": ["import { ArrowShapeUtil } from './shapes/arrow/ArrowShapeUtil'\nimport { BookmarkShapeUtil } from './shapes/bookmark/BookmarkShapeUtil'\nimport { DrawShapeUtil } from './shapes/draw/DrawShapeUtil'\nimport { EmbedShapeUtil } from './shapes/embed/EmbedShapeUtil'\nimport { FrameShapeUtil } from './shapes/frame/FrameShapeUtil'\nimport { GeoShapeUtil } from './shapes/geo/GeoShapeUtil'\nimport { HighlightShapeUtil } from './shapes/highlight/HighlightShapeUtil'\nimport { ImageShapeUtil } from './shapes/image/ImageShapeUtil'\nimport { LineShapeUtil } from './shapes/line/LineShapeUtil'\nimport { NoteShapeUtil } from './shapes/note/NoteShapeUtil'\nimport { TextShapeUtil } from './shapes/text/TextShapeUtil'\nimport { VideoShapeUtil } from './shapes/video/VideoShapeUtil'\n\n/** @public */\nexport const defaultShapeUtils = [\n\tTextShapeUtil,\n\tBookmarkShapeUtil,\n\tDrawShapeUtil,\n\tGeoShapeUtil,\n\tNoteShapeUtil,\n\tLineShapeUtil,\n\tFrameShapeUtil,\n\tArrowShapeUtil,\n\tHighlightShapeUtil,\n\tEmbedShapeUtil,\n\tImageShapeUtil,\n\tVideoShapeUtil,\n] as const\n"],
+  "mappings": "AAAA,SAAS,sBAAsB;AAC/B,SAAS,yBAAyB;AAClC,SAAS,qBAAqB;AAC9B,SAAS,sBAAsB;AAC/B,SAAS,sBAAsB;AAC/B,SAAS,oBAAoB;AAC7B,SAAS,0BAA0B;AACnC,SAAS,sBAAsB;AAC/B,SAAS,qBAAqB;AAC9B,SAAS,qBAAqB;AAC9B,SAAS,qBAAqB;AAC9B,SAAS,sBAAsB;AAGxB,MAAM,oBAAoB;AAAA,EAChC;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AACD;",
+  "names": []
+}

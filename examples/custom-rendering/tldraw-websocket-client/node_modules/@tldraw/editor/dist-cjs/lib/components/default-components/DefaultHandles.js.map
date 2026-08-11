@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/components/default-components/DefaultHandles.tsx"],
+  "sourcesContent": ["import { ReactNode } from 'react'\n\n/** @public */\nexport interface TLHandlesProps {\n\tchildren: ReactNode\n}\n\n/** @public @react */\nexport const DefaultHandles = ({ children }: TLHandlesProps) => {\n\treturn (\n\t\t<svg className=\"tl-user-handles tl-overlays__item\" aria-hidden=\"true\">\n\t\t\t{children}\n\t\t</svg>\n\t)\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAUE;AAFK,MAAM,iBAAiB,CAAC,EAAE,SAAS,MAAsB;AAC/D,SACC,4CAAC,SAAI,WAAU,qCAAoC,eAAY,QAC7D,UACF;AAEF;",
+  "names": []
+}

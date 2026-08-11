@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/hooks/useEditor.tsx"],
+  "sourcesContent": ["import React, { createContext } from 'react'\nimport { Editor } from '../editor/Editor'\nimport { IdProvider } from './useSafeId'\n\n/** @public */\nexport const EditorContext = createContext<Editor | null>(null)\n\n/** @public */\nexport function useEditor(): Editor {\n\tconst editor = React.useContext(EditorContext)\n\tif (!editor) {\n\t\tthrow new Error(\n\t\t\t'useEditor must be used inside of the <Tldraw /> or <TldrawEditor /> components'\n\t\t)\n\t}\n\treturn editor\n}\n\n/** @public */\nexport function useMaybeEditor(): Editor | null {\n\treturn React.useContext(EditorContext)\n}\n\n/** @public */\nexport interface EditorProviderProps {\n\teditor: Editor\n\tchildren: React.ReactNode\n}\n\n/** @public @react */\nexport function EditorProvider({ editor, children }: EditorProviderProps) {\n\treturn (\n\t\t<EditorContext.Provider value={editor}>\n\t\t\t<IdProvider>{children}</IdProvider>\n\t\t</EditorContext.Provider>\n\t)\n}\n"],
+  "mappings": "AAiCG;AAjCH,OAAO,SAAS,qBAAqB;AAErC,SAAS,kBAAkB;AAGpB,MAAM,gBAAgB,cAA6B,IAAI;AAGvD,SAAS,YAAoB;AACnC,QAAM,SAAS,MAAM,WAAW,aAAa;AAC7C,MAAI,CAAC,QAAQ;AACZ,UAAM,IAAI;AAAA,MACT;AAAA,IACD;AAAA,EACD;AACA,SAAO;AACR;AAGO,SAAS,iBAAgC;AAC/C,SAAO,MAAM,WAAW,aAAa;AACtC;AASO,SAAS,eAAe,EAAE,QAAQ,SAAS,GAAwB;AACzE,SACC,oBAAC,cAAc,UAAd,EAAuB,OAAO,QAC9B,8BAAC,cAAY,UAAS,GACvB;AAEF;",
+  "names": []
+}

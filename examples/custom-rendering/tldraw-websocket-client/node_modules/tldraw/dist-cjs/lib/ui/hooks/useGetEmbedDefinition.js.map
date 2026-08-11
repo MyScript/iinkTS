@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/ui/hooks/useGetEmbedDefinition.ts"],
+  "sourcesContent": ["import { useMaybeEditor } from '@tldraw/editor'\nimport { EmbedShapeUtil } from '../../shapes/embed/EmbedShapeUtil'\n\n/** @internal */\nexport function useGetEmbedShapeUtil() {\n\tconst editor = useMaybeEditor()\n\tif (!editor) return undefined\n\tif (editor.hasShapeUtil('embed')) {\n\t\treturn editor.getShapeUtil('embed') as EmbedShapeUtil\n\t}\n\treturn undefined\n}\n\n/** @public */\nexport function useGetEmbedDefinition() {\n\tconst embedUtil = useGetEmbedShapeUtil()\n\treturn (url: string) => {\n\t\treturn embedUtil ? embedUtil.getEmbedDefinition(url) : undefined\n\t}\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,oBAA+B;AAIxB,SAAS,uBAAuB;AACtC,QAAM,aAAS,8BAAe;AAC9B,MAAI,CAAC,OAAQ,QAAO;AACpB,MAAI,OAAO,aAAa,OAAO,GAAG;AACjC,WAAO,OAAO,aAAa,OAAO;AAAA,EACnC;AACA,SAAO;AACR;AAGO,SAAS,wBAAwB;AACvC,QAAM,YAAY,qBAAqB;AACvC,SAAO,CAAC,QAAgB;AACvB,WAAO,YAAY,UAAU,mBAAmB,GAAG,IAAI;AAAA,EACxD;AACD;",
+  "names": []
+}

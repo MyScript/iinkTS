@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../../src/lib/ui/components/primitives/Button/TldrawUiButtonIcon.tsx"],
+  "sourcesContent": ["import { TldrawUiIcon, TLUiIconJsx } from '../TldrawUiIcon'\n\n/** @public */\nexport interface TLUiButtonIconProps {\n\ticon: string | TLUiIconJsx\n\tsmall?: boolean\n\tinvertIcon?: boolean\n}\n\n/** @public @react */\nexport function TldrawUiButtonIcon({ icon, small, invertIcon }: TLUiButtonIconProps) {\n\treturn (\n\t\t<TldrawUiIcon\n\t\t\taria-hidden=\"true\"\n\t\t\tlabel=\"\"\n\t\t\tclassName=\"tlui-button__icon\"\n\t\t\ticon={icon}\n\t\t\tsmall={small}\n\t\t\tinvertIcon={invertIcon}\n\t\t/>\n\t)\n}\n"],
+  "mappings": "AAYE;AAZF,SAAS,oBAAiC;AAUnC,SAAS,mBAAmB,EAAE,MAAM,OAAO,WAAW,GAAwB;AACpF,SACC;AAAA,IAAC;AAAA;AAAA,MACA,eAAY;AAAA,MACZ,OAAM;AAAA,MACN,WAAU;AAAA,MACV;AAAA,MACA;AAAA,MACA;AAAA;AAAA,EACD;AAEF;",
+  "names": []
+}

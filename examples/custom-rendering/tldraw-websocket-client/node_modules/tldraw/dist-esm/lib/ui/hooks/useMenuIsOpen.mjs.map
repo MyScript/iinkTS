@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/ui/hooks/useMenuIsOpen.ts"],
+  "sourcesContent": ["import { useGlobalMenuIsOpen, useMaybeEditor } from '@tldraw/editor'\nimport { useCallback } from 'react'\nimport { TLUiEventMap, useUiEvents } from '../context/events'\n\n/** @public */\nexport function useMenuIsOpen(id: string, cb?: (isOpen: boolean) => void) {\n\tconst editor = useMaybeEditor()\n\n\tconst onChange = useCallback(\n\t\t(isOpen: boolean) => {\n\t\t\tif (isOpen) {\n\t\t\t\teditor?.complete()\n\t\t\t}\n\t\t\tcb?.(isOpen)\n\t\t},\n\t\t[editor, cb]\n\t)\n\n\tconst trackEvent = useUiEvents()\n\n\tconst onEvent = useCallback(\n\t\t(eventName: string) => {\n\t\t\ttrackEvent(eventName as keyof TLUiEventMap, { source: 'unknown', id })\n\t\t},\n\t\t[id, trackEvent]\n\t)\n\n\treturn useGlobalMenuIsOpen(editor ? `${id}-${editor.contextId}` : id, onChange, onEvent)\n}\n"],
+  "mappings": "AAAA,SAAS,qBAAqB,sBAAsB;AACpD,SAAS,mBAAmB;AAC5B,SAAuB,mBAAmB;AAGnC,SAAS,cAAc,IAAY,IAAgC;AACzE,QAAM,SAAS,eAAe;AAE9B,QAAM,WAAW;AAAA,IAChB,CAAC,WAAoB;AACpB,UAAI,QAAQ;AACX,gBAAQ,SAAS;AAAA,MAClB;AACA,WAAK,MAAM;AAAA,IACZ;AAAA,IACA,CAAC,QAAQ,EAAE;AAAA,EACZ;AAEA,QAAM,aAAa,YAAY;AAE/B,QAAM,UAAU;AAAA,IACf,CAAC,cAAsB;AACtB,iBAAW,WAAiC,EAAE,QAAQ,WAAW,GAAG,CAAC;AAAA,IACtE;AAAA,IACA,CAAC,IAAI,UAAU;AAAA,EAChB;AAEA,SAAO,oBAAoB,SAAS,GAAG,EAAE,IAAI,OAAO,SAAS,KAAK,IAAI,UAAU,OAAO;AACxF;",
+  "names": []
+}

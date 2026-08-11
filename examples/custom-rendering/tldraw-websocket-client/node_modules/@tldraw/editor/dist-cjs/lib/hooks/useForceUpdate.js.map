@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/hooks/useForceUpdate.ts"],
+  "sourcesContent": ["import { useEffect, useState } from 'react'\n\n/** @public */\nexport function useForceUpdate() {\n\tconst [_, ss] = useState(0)\n\tuseEffect(() => ss((s) => s + 1), [])\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,mBAAoC;AAG7B,SAAS,iBAAiB;AAChC,QAAM,CAAC,GAAG,EAAE,QAAI,uBAAS,CAAC;AAC1B,8BAAU,MAAM,GAAG,CAAC,MAAM,IAAI,CAAC,GAAG,CAAC,CAAC;AACrC;",
+  "names": []
+}

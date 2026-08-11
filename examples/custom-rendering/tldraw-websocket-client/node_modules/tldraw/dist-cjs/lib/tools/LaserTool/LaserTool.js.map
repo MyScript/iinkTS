@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/tools/LaserTool/LaserTool.ts"],
+  "sourcesContent": ["import { StateNode, TLStateNodeConstructor } from '@tldraw/editor'\nimport { Idle } from './childStates/Idle'\nimport { Lasering } from './childStates/Lasering'\n\n/** @public */\nexport class LaserTool extends StateNode {\n\tstatic override id = 'laser'\n\tstatic override initial = 'idle'\n\tstatic override children(): TLStateNodeConstructor[] {\n\t\treturn [Idle, Lasering]\n\t}\n\tstatic override isLockable = false\n\n\toverride onEnter() {\n\t\tthis.editor.setCursor({ type: 'cross', rotation: 0 })\n\t}\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,oBAAkD;AAClD,kBAAqB;AACrB,sBAAyB;AAGlB,MAAM,kBAAkB,wBAAU;AAAA,EACxC,OAAgB,KAAK;AAAA,EACrB,OAAgB,UAAU;AAAA,EAC1B,OAAgB,WAAqC;AACpD,WAAO,CAAC,kBAAM,wBAAQ;AAAA,EACvB;AAAA,EACA,OAAgB,aAAa;AAAA,EAEpB,UAAU;AAClB,SAAK,OAAO,UAAU,EAAE,MAAM,SAAS,UAAU,EAAE,CAAC;AAAA,EACrD;AACD;",
+  "names": []
+}

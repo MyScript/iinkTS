@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../src/lib/ui/components/Minimap/getRgba.ts"],
+  "sourcesContent": ["const memo = {} as Record<string, Float32Array>\n\nexport function getRgba(colorString: string) {\n\tif (memo[colorString]) {\n\t\treturn memo[colorString]\n\t}\n\tconst canvas = document.createElement('canvas')\n\tconst context = canvas.getContext('2d')\n\tcontext!.fillStyle = colorString\n\tcontext!.fillRect(0, 0, 1, 1)\n\tconst [r, g, b, a] = context!.getImageData(0, 0, 1, 1).data\n\tconst result = new Float32Array([r / 255, g / 255, b / 255, a / 255])\n\n\tmemo[colorString] = result\n\treturn result\n}\n"],
+  "mappings": "AAAA,MAAM,OAAO,CAAC;AAEP,SAAS,QAAQ,aAAqB;AAC5C,MAAI,KAAK,WAAW,GAAG;AACtB,WAAO,KAAK,WAAW;AAAA,EACxB;AACA,QAAM,SAAS,SAAS,cAAc,QAAQ;AAC9C,QAAM,UAAU,OAAO,WAAW,IAAI;AACtC,UAAS,YAAY;AACrB,UAAS,SAAS,GAAG,GAAG,GAAG,CAAC;AAC5B,QAAM,CAAC,GAAG,GAAG,GAAG,CAAC,IAAI,QAAS,aAAa,GAAG,GAAG,GAAG,CAAC,EAAE;AACvD,QAAM,SAAS,IAAI,aAAa,CAAC,IAAI,KAAK,IAAI,KAAK,IAAI,KAAK,IAAI,GAAG,CAAC;AAEpE,OAAK,WAAW,IAAI;AACpB,SAAO;AACR;",
+  "names": []
+}

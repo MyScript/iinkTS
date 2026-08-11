@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../src/lib/ui/components/HelperButtons/DefaultHelperButtonsContent.tsx"],
+  "sourcesContent": ["import { BackToContent } from './BackToContent'\nimport { ExitPenMode } from './ExitPenMode'\nimport { StopFollowing } from './StopFollowing'\n\n/** @public @react */\nexport function DefaultHelperButtonsContent() {\n\treturn (\n\t\t<>\n\t\t\t<ExitPenMode />\n\t\t\t<BackToContent />\n\t\t\t<StopFollowing />\n\t\t</>\n\t)\n}\n"],
+  "mappings": "AAOE,mBACC,KADD;AAPF,SAAS,qBAAqB;AAC9B,SAAS,mBAAmB;AAC5B,SAAS,qBAAqB;AAGvB,SAAS,8BAA8B;AAC7C,SACC,iCACC;AAAA,wBAAC,eAAY;AAAA,IACb,oBAAC,iBAAc;AAAA,IACf,oBAAC,iBAAc;AAAA,KAChB;AAEF;",
+  "names": []
+}

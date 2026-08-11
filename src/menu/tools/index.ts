@@ -1,6 +1,0 @@
-export * from "./EdgeTool"
-export * from "./EraseTool"
-export * from "./MoveTool"
-export * from "./SelectTool"
-export * from "./ShapeTool"
-export * from "./WriteTool"

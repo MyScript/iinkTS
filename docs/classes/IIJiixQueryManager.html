@@ -1,0 +1,788 @@
+<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>IIJiixQueryManager | iink-ts - v1.0.0-buildVersion</title><meta name="description" content="Documentation for iink-ts"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><link rel="stylesheet" href="../assets/custom.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><script async src="../assets/hierarchy.js" id="tsd-hierarchy-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
+<div class="tsd-toolbar-contents container"><a href="../index.html" class="title">iink-ts - v1.0.0-buildVersion</a>
+<div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/>
+<ul role="listbox" id="tsd-search-results"></ul>
+<div id="tsd-search-status" aria-live="polite" aria-atomic="true">
+<div>Preparing search index...</div></div></dialog><a href="#" class="tsd-widget menu" id="tsd-toolbar-menu-trigger" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-menu"></use></svg></a></div></header>
+<div class="container container-main">
+<div class="col-content">
+<div class="tsd-page-title">
+<ul class="tsd-breadcrumb" aria-label="Breadcrumb">
+<li><a href="" aria-current="page">IIJiixQueryManager</a></li></ul>
+<h1>Class IIJiixQueryManager</h1></div>
+<section class="tsd-panel tsd-comment">
+<div class="tsd-comment tsd-typography">
+<div class="tsd-tag-remarks">
+<h4 class="tsd-anchor-link" id="remarks">Remarks<a href="#remarks" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>Manager for querying JIIX export data efficiently
+Provides fast lookups for strokes, labels, and element groupings
+Automatically indexes JIIX data on first access and invalidates cache when model changes</p>
+</div></div></section>
+<section class="tsd-panel tsd-hierarchy" data-refl="7331">
+<h4>Hierarchy (<a href="../hierarchy.html#IIJiixQueryManager">View Summary</a>)</h4>
+<ul class="tsd-hierarchy">
+<li class="tsd-hierarchy-item"><a href="IIAbstractManager.html" class="tsd-signature-type tsd-kind-class">IIAbstractManager</a>
+<ul class="tsd-hierarchy">
+<li class="tsd-hierarchy-item"><span class="tsd-hierarchy-target">IIJiixQueryManager</span></li></ul></li></ul></section><aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:97</li></ul></aside>
+<section class="tsd-panel-group tsd-index-group">
+<section class="tsd-panel tsd-index-panel">
+<details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h5 class="tsd-index-heading uppercase">Index</h5></summary>
+<div class="tsd-accordion-details">
+<section class="tsd-index-section">
+<h3 class="tsd-index-heading tsd-anchor-link" id="constructors">Constructors<a href="#constructors" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-index-list"><a href="#constructor" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Constructor"><use href="../assets/icons.svg#icon-512"></use></svg><span>constructor</span></a>
+</div></section>
+<section class="tsd-index-section">
+<h3 class="tsd-index-heading tsd-anchor-link" id="properties">Properties<a href="#properties" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-index-list"><a href="#canvas" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>canvas</span></a>
+<a href="#logger" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>logger</span></a>
+<a href="#managername" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>manager<wbr/>Name</span></a>
+</div></section>
+<section class="tsd-index-section">
+<h3 class="tsd-index-heading tsd-anchor-link" id="accessors">Accessors<a href="#accessors" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-index-list"><a href="#client" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Accessor"><use href="../assets/icons.svg#icon-262144"></use></svg><span>client</span></a>
+<a href="#configuration" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Accessor"><use href="../assets/icons.svg#icon-262144"></use></svg><span>configuration</span></a>
+<a href="#model" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Accessor"><use href="../assets/icons.svg#icon-262144"></use></svg><span>model</span></a>
+<a href="#renderer" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Accessor"><use href="../assets/icons.svg#icon-262144"></use></svg><span>renderer</span></a>
+</div></section>
+<section class="tsd-index-section">
+<h3 class="tsd-index-heading tsd-anchor-link" id="methods">Methods<a href="#methods" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-index-list"><a href="#buildindex" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>build<wbr/>Index</span></a>
+<a href="#cleartextmetadata" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>clear<wbr/>Text<wbr/>Metadata</span></a>
+<a href="#collectmathexpressiongroups" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>collect<wbr/>Math<wbr/>Expression<wbr/>Groups</span></a>
+<a href="#destroy" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>destroy</span></a>
+<a href="#ensureindexvalid" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>ensure<wbr/>Index<wbr/>Valid</span></a>
+<a href="#getallmathblockswithstrokes" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>All<wbr/>Math<wbr/>Blocks<wbr/>With<wbr/>Strokes</span></a>
+<a href="#getalltextblockswithstrokes" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>All<wbr/>Text<wbr/>Blocks<wbr/>With<wbr/>Strokes</span></a>
+<a href="#getblocklabel" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Block<wbr/>Label</span></a>
+<a href="#getblocksforsymbols" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Blocks<wbr/>For<wbr/>Symbols</span></a>
+<a href="#getelementforstroke" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Element<wbr/>For<wbr/>Stroke</span></a>
+<a href="#getindexstats" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Index<wbr/>Stats</span></a>
+<a href="#getlabelforstroke" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Label<wbr/>For<wbr/>Stroke</span></a>
+<a href="#getlinecenteryforstroke" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Line<wbr/>Center<wbr/>Y<wbr/>For<wbr/>Stroke</span></a>
+<a href="#getmathselectiongroups" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Math<wbr/>Selection<wbr/>Groups</span></a>
+<a href="#getshapeselectiongroups" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Shape<wbr/>Selection<wbr/>Groups</span></a>
+<a href="#getstrokeidsforblock" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Stroke<wbr/>Ids<wbr/>For<wbr/>Block</span></a>
+<a href="#getstrokeinfo" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Stroke<wbr/>Info</span></a>
+<a href="#getstrokesforelement" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Strokes<wbr/>For<wbr/>Element</span></a>
+<a href="#getstrokesgroupedbychar" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Strokes<wbr/>Grouped<wbr/>By<wbr/>Char</span></a>
+<a href="#getstrokesgroupedbyword" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Strokes<wbr/>Grouped<wbr/>By<wbr/>Word</span></a>
+<a href="#getstrokesymbolsforelement" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Stroke<wbr/>Symbols<wbr/>For<wbr/>Element</span></a>
+<a href="#gettextmetadata" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Text<wbr/>Metadata</span></a>
+<a href="#gettextselectiongroups" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Text<wbr/>Selection<wbr/>Groups</span></a>
+<a href="#getwordgroupforstroke" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Word<wbr/>Group<wbr/>For<wbr/>Stroke</span></a>
+<a href="#indexelement" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>index<wbr/>Element</span></a>
+<a href="#indexmathelement" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>index<wbr/>Math<wbr/>Element</span></a>
+<a href="#indexmathexpression" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>index<wbr/>Math<wbr/>Expression</span></a>
+<a href="#indexnodeoredgeelement" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>index<wbr/>Node<wbr/>Or<wbr/>Edge<wbr/>Element</span></a>
+<a href="#indextextelement" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>index<wbr/>Text<wbr/>Element</span></a>
+<a href="#invalidateindex" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>invalidate<wbr/>Index</span></a>
+<a href="#ondestroy" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>on<wbr/>Destroy?</span></a>
+<a href="#oninit" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>on<wbr/>Init?</span></a>
+<a href="#searchbylabel" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>search<wbr/>By<wbr/>Label</span></a>
+<a href="#updatetextmetadata" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>update<wbr/>Text<wbr/>Metadata</span></a>
+</div></section></div></details></section></section>
+<details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Constructors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h2 class="tsd-anchor-link" id="constructors-1">Constructors<a href="#constructors-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
+<section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="constructor"><span>constructor</span><a href="#constructor" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="constructoriijiixquerymanager"><span class="tsd-signature-keyword">new</span> <span class="tsd-kind-constructor-signature">IIJiixQueryManager</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">canvas</span><span class="tsd-signature-symbol">:</span> <a href="../types/TInteractiveInkCanvas.html" class="tsd-signature-type tsd-kind-type-alias">TInteractiveInkCanvas</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="" class="tsd-signature-type tsd-kind-class">IIJiixQueryManager</a><a href="#constructoriijiixquerymanager" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">canvas</span>: <a href="../types/TInteractiveInkCanvas.html" class="tsd-signature-type tsd-kind-type-alias">TInteractiveInkCanvas</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="" class="tsd-signature-type tsd-kind-class">IIJiixQueryManager</a></h4><aside class="tsd-sources">
+<p>Overrides <a href="IIAbstractManager.html">IIAbstractManager</a>.<a href="IIAbstractManager.html#constructor">constructor</a></p>
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:109</li></ul></aside></div></li></ul></section></section></details>
+<details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h2 class="tsd-anchor-link" id="properties-1">Properties<a href="#properties-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
+<section>
+<section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="canvas"><code class="tsd-tag">Protected</code><span>canvas</span><a href="#canvas" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">canvas</span><span class="tsd-signature-symbol">:</span> <a href="../types/TInteractiveInkCanvas.html" class="tsd-signature-type tsd-kind-type-alias">TInteractiveInkCanvas</a></div>
+<div class="tsd-comment tsd-typography"><p>The Interactive Ink Canvas instance</p>
+</div><aside class="tsd-sources">
+<p>Inherited from <a href="IIAbstractManager.html">IIAbstractManager</a>.<a href="IIAbstractManager.html#canvas">canvas</a></p>
+<ul>
+<li>Defined in manager/interactive/IIAbstractManager.ts:67</li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="logger"><code class="tsd-tag">Protected</code><span>logger</span><a href="#logger" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">logger</span><span class="tsd-signature-symbol">:</span> <a href="Logger.html" class="tsd-signature-type tsd-kind-class">Logger</a></div>
+<div class="tsd-comment tsd-typography"><p>Logger instance for this manager
+Automatically uses LoggerCategory.MANAGER</p>
+</div><aside class="tsd-sources">
+<p>Inherited from <a href="IIAbstractManager.html">IIAbstractManager</a>.<a href="IIAbstractManager.html#logger">logger</a></p>
+<ul>
+<li>Defined in manager/interactive/IIAbstractManager.ts:52</li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-protected">
+<h3 class="tsd-anchor-link" id="managername"><code class="tsd-tag">Protected</code><span>manager<wbr/>Name</span><a href="#managername" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">managerName</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;IIJiixQueryManager&quot;</span></div>
+<div class="tsd-comment tsd-typography"><p>Name of the manager for logging purposes
+Must be overridden in concrete classes</p>
+</div>
+<div class="tsd-comment tsd-typography">
+<div class="tsd-tag-example">
+<h4 class="tsd-anchor-link" id="example">Example<a href="#example" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="ts"><span class="hl-2">&quot;IITypesetManager&quot;</span><span class="hl-1">, </span><span class="hl-2">&quot;IIMathManager&quot;</span>
+</code><button type="button">Copy</button></pre>
+
+</div></div><aside class="tsd-sources">
+<p>Overrides <a href="IIAbstractManager.html">IIAbstractManager</a>.<a href="IIAbstractManager.html#managername">managerName</a></p>
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:98</li></ul></aside></section></section></details>
+<details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Accessors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h2 class="tsd-anchor-link" id="accessors-1">Accessors<a href="#accessors-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
+<section>
+<section class="tsd-panel tsd-member tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="client"><span>client</span><a href="#client" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-inherited">
+<li>
+<div class="tsd-signature" id="clientclient"><span class="tsd-signature-keyword">get</span> <span class="tsd-kind-get-signature">client</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <a href="WebSocketClient.html" class="tsd-signature-type tsd-kind-class">WebSocketClient</a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Get the client from the canvas
+Convenience getter to avoid accessing canvas.client everywhere</p>
+</div>
+<h4 class="tsd-returns-title">Returns <a href="WebSocketClient.html" class="tsd-signature-type tsd-kind-class">WebSocketClient</a></h4><aside class="tsd-sources">
+<p>Inherited from IIAbstractManager.client</p>
+<ul>
+<li>Defined in manager/interactive/IIAbstractManager.ts:98</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="configuration"><span>configuration</span><a href="#configuration" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-inherited">
+<li>
+<div class="tsd-signature" id="configurationconfiguration"><span class="tsd-signature-keyword">get</span> <span class="tsd-kind-get-signature">configuration</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <a href="InteractiveInkCanvasConfiguration.html" class="tsd-signature-type tsd-kind-class">InteractiveInkCanvasConfiguration</a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Get the configuration from the canvas
+Convenience getter to avoid accessing canvas.configuration everywhere</p>
+</div>
+<h4 class="tsd-returns-title">Returns <a href="InteractiveInkCanvasConfiguration.html" class="tsd-signature-type tsd-kind-class">InteractiveInkCanvasConfiguration</a></h4><aside class="tsd-sources">
+<p>Inherited from IIAbstractManager.configuration</p>
+<ul>
+<li>Defined in manager/interactive/IIAbstractManager.ts:106</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="model"><span>model</span><a href="#model" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-inherited">
+<li>
+<div class="tsd-signature" id="modelmodel"><span class="tsd-signature-keyword">get</span> <span class="tsd-kind-get-signature">model</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <a href="IIModel.html" class="tsd-signature-type tsd-kind-class">IIModel</a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Get the model from the canvas
+Convenience getter to avoid accessing canvas.model everywhere</p>
+</div>
+<h4 class="tsd-returns-title">Returns <a href="IIModel.html" class="tsd-signature-type tsd-kind-class">IIModel</a></h4><aside class="tsd-sources">
+<p>Inherited from IIAbstractManager.model</p>
+<ul>
+<li>Defined in manager/interactive/IIAbstractManager.ts:82</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="renderer"><span>renderer</span><a href="#renderer" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-inherited">
+<li>
+<div class="tsd-signature" id="rendererrenderer"><span class="tsd-signature-keyword">get</span> <span class="tsd-kind-get-signature">renderer</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <a href="SVGRenderer.html" class="tsd-signature-type tsd-kind-class">SVGRenderer</a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Get the renderer from the canvas
+Convenience getter to avoid accessing canvas.renderer everywhere</p>
+</div>
+<h4 class="tsd-returns-title">Returns <a href="SVGRenderer.html" class="tsd-signature-type tsd-kind-class">SVGRenderer</a></h4><aside class="tsd-sources">
+<p>Inherited from IIAbstractManager.renderer</p>
+<ul>
+<li>Defined in manager/interactive/IIAbstractManager.ts:90</li></ul></aside></div></li></ul></section></section></details>
+<details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h2 class="tsd-anchor-link" id="methods-1">Methods<a href="#methods-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
+<section>
+<section class="tsd-panel tsd-member tsd-is-protected">
+<h3 class="tsd-anchor-link" id="buildindex"><code class="tsd-tag">Protected</code><span>build<wbr/>Index</span><a href="#buildindex" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="buildindex-1"><span class="tsd-kind-call-signature">buildIndex</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#buildindex-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Build or rebuild the JIIX index
+Called automatically when index is stale</p>
+</div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:118</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="cleartextmetadata"><span>clear<wbr/>Text<wbr/>Metadata</span><a href="#cleartextmetadata" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="cleartextmetadata-1"><span class="tsd-kind-call-signature">clearTextMetadata</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">strokeId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#cleartextmetadata-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Clear text metadata for a stroke (called when stroke is deleted)</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">strokeId</span>: <span class="tsd-signature-type">string</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:840</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected">
+<h3 class="tsd-anchor-link" id="collectmathexpressiongroups"><code class="tsd-tag">Protected</code><span>collect<wbr/>Math<wbr/>Expression<wbr/>Groups</span><a href="#collectmathexpressiongroups" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="collectmathexpressiongroups-1"><span class="tsd-kind-call-signature">collectMathExpressionGroups</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">expressions</span><span class="tsd-signature-symbol">:</span> <a href="../types/TJIIXMathExpression.html" class="tsd-signature-type tsd-kind-type-alias">TJIIXMathExpression</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">groups</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">bounds</span><span class="tsd-signature-symbol">:</span> <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">strokeIds</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span> <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#collectmathexpressiongroups-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Recursively collect math expression groups with pixel bboxes</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">expressions</span>: <a href="../types/TJIIXMathExpression.html" class="tsd-signature-type tsd-kind-type-alias">TJIIXMathExpression</a><span class="tsd-signature-symbol">[]</span></span></li>
+<li><span><span class="tsd-kind-parameter">groups</span>: <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">bounds</span><span class="tsd-signature-symbol">:</span> <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">strokeIds</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span> <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">[]</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:1011</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="destroy"><span>destroy</span><a href="#destroy" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-inherited">
+<li class="tsd-is-inherited">
+<div class="tsd-signature tsd-anchor-link" id="destroy-1"><span class="tsd-kind-call-signature">destroy</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#destroy-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Destroy the manager and cleanup resources
+Calls the onDestroy hook if defined</p>
+</div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<p>Inherited from <a href="IIAbstractManager.html">IIAbstractManager</a>.<a href="IIAbstractManager.html#destroy">destroy</a></p>
+<ul>
+<li>Defined in manager/interactive/IIAbstractManager.ts:146</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected">
+<h3 class="tsd-anchor-link" id="ensureindexvalid"><code class="tsd-tag">Protected</code><span>ensure<wbr/>Index<wbr/>Valid</span><a href="#ensureindexvalid" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="ensureindexvalid-1"><span class="tsd-kind-call-signature">ensureIndexValid</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#ensureindexvalid-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Ensure index is up to date.
+When model.exports is absent (cleared by updateSymbol etc.) but a valid index exists,
+preserve it rather than overwriting with an empty rebuild.</p>
+</div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:328</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="getallmathblockswithstrokes"><span>get<wbr/>All<wbr/>Math<wbr/>Blocks<wbr/>With<wbr/>Strokes</span><a href="#getallmathblockswithstrokes" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="getallmathblockswithstrokes-1"><span class="tsd-kind-call-signature">getAllMathBlocksWithStrokes</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{</span><br/>    <span class="tsd-kind-property">mathBlock</span><span class="tsd-signature-symbol">:</span> <a href="../types/TJIIXMathElement.html" class="tsd-signature-type tsd-kind-type-alias">TJIIXMathElement</a><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-property">strokeIds</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-property">strokes</span><span class="tsd-signature-symbol">:</span> <a href="../types/TStroke.html" class="tsd-signature-type tsd-kind-type-alias">TStroke</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">[]</span><a href="#getallmathblockswithstrokes-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Get all math blocks with their strokes</p>
+</div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">mathBlock</span><span class="tsd-signature-symbol">:</span> <a href="../types/TJIIXMathElement.html" class="tsd-signature-type tsd-kind-type-alias">TJIIXMathElement</a><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">strokeIds</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">strokes</span><span class="tsd-signature-symbol">:</span> <a href="../types/TStroke.html" class="tsd-signature-type tsd-kind-type-alias">TStroke</a><span class="tsd-signature-symbol">[]</span> <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">[]</span></h4><p>Array of math blocks with their JIIX element and stroke IDs</p>
+<aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:642</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="getalltextblockswithstrokes"><span>get<wbr/>All<wbr/>Text<wbr/>Blocks<wbr/>With<wbr/>Strokes</span><a href="#getalltextblockswithstrokes" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="getalltextblockswithstrokes-1"><span class="tsd-kind-call-signature">getAllTextBlocksWithStrokes</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{</span><br/>    <span class="tsd-kind-property">strokeIds</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-property">strokes</span><span class="tsd-signature-symbol">:</span> <a href="../types/TStroke.html" class="tsd-signature-type tsd-kind-type-alias">TStroke</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-property">textBlock</span><span class="tsd-signature-symbol">:</span> <a href="../types/TJIIXTextElement.html" class="tsd-signature-type tsd-kind-type-alias">TJIIXTextElement</a><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">[]</span><a href="#getalltextblockswithstrokes-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Get all text blocks with their strokes</p>
+</div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">strokeIds</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">strokes</span><span class="tsd-signature-symbol">:</span> <a href="../types/TStroke.html" class="tsd-signature-type tsd-kind-type-alias">TStroke</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">textBlock</span><span class="tsd-signature-symbol">:</span> <a href="../types/TJIIXTextElement.html" class="tsd-signature-type tsd-kind-type-alias">TJIIXTextElement</a> <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">[]</span></h4><p>Array of text blocks with their JIIX element and stroke IDs</p>
+<aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:674</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="getblocklabel"><span>get<wbr/>Block<wbr/>Label</span><a href="#getblocklabel" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="getblocklabel-1"><span class="tsd-kind-call-signature">getBlockLabel</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">jiixBlockId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><a href="#getblocklabel-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Get the label of a JIIX block by its ID</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">jiixBlockId</span>: <span class="tsd-signature-type">string</span></span>
+<div class="tsd-comment tsd-typography"><p>The JIIX element ID</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span></h4><p>The label of the block, or undefined if not found</p>
+<aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:707</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="getblocksforsymbols"><span>get<wbr/>Blocks<wbr/>For<wbr/>Symbols</span><a href="#getblocksforsymbols" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="getblocksforsymbols-1"><span class="tsd-kind-call-signature">getBlocksForSymbols</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">symbols</span><span class="tsd-signature-symbol">:</span> <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TJIIXElement.html" class="tsd-signature-type tsd-kind-type-alias">TJIIXElement</a><span class="tsd-signature-symbol">[]</span><a href="#getblocksforsymbols-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">symbols</span>: <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a><span class="tsd-signature-symbol">[]</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="../types/TJIIXElement.html" class="tsd-signature-type tsd-kind-type-alias">TJIIXElement</a><span class="tsd-signature-symbol">[]</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:754</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="getelementforstroke"><span>get<wbr/>Element<wbr/>For<wbr/>Stroke</span><a href="#getelementforstroke" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="getelementforstroke-1"><span class="tsd-kind-call-signature">getElementForStroke</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">strokeId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TJIIXElement.html" class="tsd-signature-type tsd-kind-type-alias">TJIIXElement</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><a href="#getelementforstroke-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Get the JIIX element containing a stroke</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">strokeId</span>: <span class="tsd-signature-type">string</span></span>
+<div class="tsd-comment tsd-typography"><p>The stroke ID</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="../types/TJIIXElement.html" class="tsd-signature-type tsd-kind-type-alias">TJIIXElement</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span></h4><p>The JIIX element or undefined</p>
+<aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:362</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="getindexstats"><span>get<wbr/>Index<wbr/>Stats</span><a href="#getindexstats" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="getindexstats-1"><span class="tsd-kind-call-signature">getIndexStats</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{</span><br/>    <span class="tsd-kind-property">byType</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-property">indexed</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-property">totalElements</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-property">totalStrokes</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span><a href="#getindexstats-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Get statistics about the indexed JIIX</p>
+</div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">{</span><br/>    <span class="tsd-kind-property">byType</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-property">indexed</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-property">totalElements</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-property">totalStrokes</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></h4><p>Index statistics</p>
+<aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:770</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="getlabelforstroke"><span>get<wbr/>Label<wbr/>For<wbr/>Stroke</span><a href="#getlabelforstroke" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="getlabelforstroke-1"><span class="tsd-kind-call-signature">getLabelForStroke</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">strokeId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><a href="#getlabelforstroke-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Get the precise label for a stroke
+For text: returns char label if available, word label otherwise
+For math: returns expression label or type</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">strokeId</span>: <span class="tsd-signature-type">string</span></span>
+<div class="tsd-comment tsd-typography"><p>The stroke ID</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span></h4><p>The label or undefined</p>
+<aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:384</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="getlinecenteryforstroke"><span>get<wbr/>Line<wbr/>Center<wbr/>Y<wbr/>For<wbr/>Stroke</span><a href="#getlinecenteryforstroke" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="getlinecenteryforstroke-1"><span class="tsd-kind-call-signature">getLineCenterYForStroke</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">strokeId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><a href="#getlinecenteryforstroke-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Get the pixel-space vertical center of the JIIX line containing the given stroke.
+Uses the line's bounding-box center, not baseline-y (baseline sits low within a
+line, not comparable to a symbol's bounds.center.y — mixing the two anchors
+misclassifies strokes near a line boundary as belonging to the wrong row).
+Returns null when the stroke isn't (yet) part of a recognized text word,
+so callers can fall back to a geometric row calculation.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">strokeId</span>: <span class="tsd-signature-type">string</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:461</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="getmathselectiongroups"><span>get<wbr/>Math<wbr/>Selection<wbr/>Groups</span><a href="#getmathselectiongroups" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="getmathselectiongroups-1"><span class="tsd-kind-call-signature">getMathSelectionGroups</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">level</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;operand&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;element&quot;</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">bounds</span><span class="tsd-signature-symbol">:</span> <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">strokeIds</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span> <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">[]</span><a href="#getmathselectiongroups-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Get stroke groups with pixel bboxes for math selection.
+Only groups with valid bounding boxes are returned.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">level</span>: <span class="tsd-signature-type">&quot;operand&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;element&quot;</span></span>
+<div class="tsd-comment tsd-typography"><p>Selection granularity: &quot;element&quot; or &quot;operand&quot;</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">bounds</span><span class="tsd-signature-symbol">:</span> <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">strokeIds</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span> <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">[]</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:916</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="getshapeselectiongroups"><span>get<wbr/>Shape<wbr/>Selection<wbr/>Groups</span><a href="#getshapeselectiongroups" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="getshapeselectiongroups-1"><span class="tsd-kind-call-signature">getShapeSelectionGroups</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">level</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;stroke&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;element&quot;</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">bounds</span><span class="tsd-signature-symbol">:</span> <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">strokeIds</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span> <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">[]</span><a href="#getshapeselectiongroups-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Get stroke groups with pixel bboxes for shape (Node/Edge) selection.
+&quot;element&quot; level: one group per Node/Edge element.
+&quot;stroke&quot; level: returns empty (signals fallback to stroke overlap).</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">level</span>: <span class="tsd-signature-type">&quot;stroke&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;element&quot;</span></span>
+<div class="tsd-comment tsd-typography"><p>Selection granularity: &quot;element&quot; or &quot;stroke&quot;</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">bounds</span><span class="tsd-signature-symbol">:</span> <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">strokeIds</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span> <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">[]</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:969</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="getstrokeidsforblock"><span>get<wbr/>Stroke<wbr/>Ids<wbr/>For<wbr/>Block</span><a href="#getstrokeidsforblock" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="getstrokeidsforblock-1"><span class="tsd-kind-call-signature">getStrokeIdsForBlock</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">blockId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><a href="#getstrokeidsforblock-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Get the ids of the strokes that make up a given block</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">blockId</span>: <span class="tsd-signature-type">string</span></span>
+<div class="tsd-comment tsd-typography"><p>The id of the JIIX element (block)</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h4><p>Array of stroke ids, or an empty array if the block is unknown</p>
+<aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:372</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="getstrokeinfo"><span>get<wbr/>Stroke<wbr/>Info</span><a href="#getstrokeinfo" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="getstrokeinfo-1"><span class="tsd-kind-call-signature">getStrokeInfo</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">strokeId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TStrokeQueryResult.html" class="tsd-signature-type tsd-kind-type-alias">TStrokeQueryResult</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><a href="#getstrokeinfo-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Get detailed query result for a stroke</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">strokeId</span>: <span class="tsd-signature-type">string</span></span>
+<div class="tsd-comment tsd-typography"><p>The stroke ID</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="../types/TStrokeQueryResult.html" class="tsd-signature-type tsd-kind-type-alias">TStrokeQueryResult</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span></h4><p>Full query result with element, label, and context</p>
+<aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:394</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="getstrokesforelement"><span>get<wbr/>Strokes<wbr/>For<wbr/>Element</span><a href="#getstrokesforelement" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="getstrokesforelement-1"><span class="tsd-kind-call-signature">getStrokesForElement</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">elementId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><a href="#getstrokesforelement-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Get all stroke IDs belonging to an element</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">elementId</span>: <span class="tsd-signature-type">string</span></span>
+<div class="tsd-comment tsd-typography"><p>The JIIX element ID</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h4><p>Array of stroke IDs</p>
+<aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:500</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="getstrokesgroupedbychar"><span>get<wbr/>Strokes<wbr/>Grouped<wbr/>By<wbr/>Char</span><a href="#getstrokesgroupedbychar" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="getstrokesgroupedbychar-1"><span class="tsd-kind-call-signature">getStrokesGroupedByChar</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">elementId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">label</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">strokeIds</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">wordIndex</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">[]</span><a href="#getstrokesgroupedbychar-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Get all strokes grouped by character (for text elements)</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">elementId</span>: <span class="tsd-signature-type">string</span></span>
+<div class="tsd-comment tsd-typography"><p>The text element ID</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">label</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">strokeIds</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">wordIndex</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">[]</span></h4><p>Array of char groups, each containing stroke IDs and label</p>
+<aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:587</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="getstrokesgroupedbyword"><span>get<wbr/>Strokes<wbr/>Grouped<wbr/>By<wbr/>Word</span><a href="#getstrokesgroupedbyword" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="getstrokesgroupedbyword-1"><span class="tsd-kind-call-signature">getStrokesGroupedByWord</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">elementId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">label</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">strokeIds</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span> <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">[]</span><a href="#getstrokesgroupedbyword-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Get all strokes grouped by word (for text elements)</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">elementId</span>: <span class="tsd-signature-type">string</span></span>
+<div class="tsd-comment tsd-typography"><p>The text element ID</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">label</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">strokeIds</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span> <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">[]</span></h4><p>Array of word groups, each containing stroke IDs and label</p>
+<aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:534</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="getstrokesymbolsforelement"><span>get<wbr/>Stroke<wbr/>Symbols<wbr/>For<wbr/>Element</span><a href="#getstrokesymbolsforelement" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="getstrokesymbolsforelement-1"><span class="tsd-kind-call-signature">getStrokeSymbolsForElement</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">elementId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TStroke.html" class="tsd-signature-type tsd-kind-type-alias">TStroke</a><span class="tsd-signature-symbol">[]</span><a href="#getstrokesymbolsforelement-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Get all TStroke objects belonging to an element</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">elementId</span>: <span class="tsd-signature-type">string</span></span>
+<div class="tsd-comment tsd-typography"><p>The JIIX element ID</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="../types/TStroke.html" class="tsd-signature-type tsd-kind-type-alias">TStroke</a><span class="tsd-signature-symbol">[]</span></h4><p>Array of TStroke symbols</p>
+<aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:510</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="gettextmetadata"><span>get<wbr/>Text<wbr/>Metadata</span><a href="#gettextmetadata" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="gettextmetadata-1"><span class="tsd-kind-call-signature">getTextMetadata</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">strokeId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TBlockTextMetadata.html" class="tsd-signature-type tsd-kind-type-alias">TBlockTextMetadata</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><a href="#gettextmetadata-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Get pixel-converted text metadata for a stroke</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">strokeId</span>: <span class="tsd-signature-type">string</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="../types/TBlockTextMetadata.html" class="tsd-signature-type tsd-kind-type-alias">TBlockTextMetadata</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:797</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="gettextselectiongroups"><span>get<wbr/>Text<wbr/>Selection<wbr/>Groups</span><a href="#gettextselectiongroups" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="gettextselectiongroups-1"><span class="tsd-kind-call-signature">getTextSelectionGroups</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">level</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;char&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;element&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;word&quot;</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">bounds</span><span class="tsd-signature-symbol">:</span> <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">strokeIds</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span> <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">[]</span><a href="#gettextselectiongroups-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Get stroke groups with pixel bboxes for text selection.
+Only groups with valid bounding boxes are returned.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">level</span>: <span class="tsd-signature-type">&quot;char&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;element&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;word&quot;</span></span>
+<div class="tsd-comment tsd-typography"><p>Selection granularity: &quot;element&quot;, &quot;word&quot;, or &quot;char&quot;</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">bounds</span><span class="tsd-signature-symbol">:</span> <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">strokeIds</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span> <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">[]</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:849</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="getwordgroupforstroke"><span>get<wbr/>Word<wbr/>Group<wbr/>For<wbr/>Stroke</span><a href="#getwordgroupforstroke" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="getwordgroupforstroke-1"><span class="tsd-kind-call-signature">getWordGroupForStroke</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">strokeId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-symbol">{</span><br/>        <span class="tsd-kind-property">allStrokeIds</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span><br/>        <span class="tsd-kind-property">baseline</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">;</span><br/>        <span class="tsd-kind-property">wordBounds</span><span class="tsd-signature-symbol">:</span> <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">;</span><br/>        <span class="tsd-kind-property">wordKey</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>        <span class="tsd-kind-property">xHeight</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-signature-symbol">}</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><a href="#getwordgroupforstroke-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Get the JIIX word group for a stroke (for word-level decorator spanning).
+Returns all stroke IDs in the same word and the word's pixel bounding box.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">strokeId</span>: <span class="tsd-signature-type">string</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-symbol">{</span><br/>        <span class="tsd-kind-property">allStrokeIds</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span><br/>        <span class="tsd-kind-property">baseline</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">;</span><br/>        <span class="tsd-kind-property">wordBounds</span><span class="tsd-signature-symbol">:</span> <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">;</span><br/>        <span class="tsd-kind-property">wordKey</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>        <span class="tsd-kind-property">xHeight</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-signature-symbol">}</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:414</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected">
+<h3 class="tsd-anchor-link" id="indexelement"><code class="tsd-tag">Protected</code><span>index<wbr/>Element</span><a href="#indexelement" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="indexelement-1"><span class="tsd-kind-call-signature">indexElement</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">element</span><span class="tsd-signature-symbol">:</span> <a href="../types/TJIIXElement.html" class="tsd-signature-type tsd-kind-type-alias">TJIIXElement</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">index</span><span class="tsd-signature-symbol">:</span> <a href="../types/TJiixIndex.html" class="tsd-signature-type tsd-kind-type-alias">TJiixIndex</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#indexelement-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Index a single JIIX element and its strokes</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">element</span>: <a href="../types/TJIIXElement.html" class="tsd-signature-type tsd-kind-type-alias">TJIIXElement</a></span></li>
+<li><span><span class="tsd-kind-parameter">index</span>: <a href="../types/TJiixIndex.html" class="tsd-signature-type tsd-kind-type-alias">TJiixIndex</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:151</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected">
+<h3 class="tsd-anchor-link" id="indexmathelement"><code class="tsd-tag">Protected</code><span>index<wbr/>Math<wbr/>Element</span><a href="#indexmathelement" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="indexmathelement-1"><span class="tsd-kind-call-signature">indexMathElement</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">element</span><span class="tsd-signature-symbol">:</span> <a href="../types/TJIIXMathElement.html" class="tsd-signature-type tsd-kind-type-alias">TJIIXMathElement</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">index</span><span class="tsd-signature-symbol">:</span> <a href="../types/TJiixIndex.html" class="tsd-signature-type tsd-kind-type-alias">TJiixIndex</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">elementStrokes</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#indexmathelement-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Index a math element</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">element</span>: <a href="../types/TJIIXMathElement.html" class="tsd-signature-type tsd-kind-type-alias">TJIIXMathElement</a></span></li>
+<li><span><span class="tsd-kind-parameter">index</span>: <a href="../types/TJiixIndex.html" class="tsd-signature-type tsd-kind-type-alias">TJiixIndex</a></span></li>
+<li><span><span class="tsd-kind-parameter">elementStrokes</span>: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:241</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected">
+<h3 class="tsd-anchor-link" id="indexmathexpression"><code class="tsd-tag">Protected</code><span>index<wbr/>Math<wbr/>Expression</span><a href="#indexmathexpression" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="indexmathexpression-1"><span class="tsd-kind-call-signature">indexMathExpression</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">expression</span><span class="tsd-signature-symbol">:</span> <a href="../types/TJIIXMathExpression.html" class="tsd-signature-type tsd-kind-type-alias">TJIIXMathExpression</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">element</span><span class="tsd-signature-symbol">:</span> <a href="../types/TJIIXMathElement.html" class="tsd-signature-type tsd-kind-type-alias">TJIIXMathElement</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">index</span><span class="tsd-signature-symbol">:</span> <a href="../types/TJiixIndex.html" class="tsd-signature-type tsd-kind-type-alias">TJiixIndex</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">elementStrokes</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">path</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#indexmathexpression-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Index a math expression recursively</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">expression</span>: <a href="../types/TJIIXMathExpression.html" class="tsd-signature-type tsd-kind-type-alias">TJIIXMathExpression</a></span></li>
+<li><span><span class="tsd-kind-parameter">element</span>: <a href="../types/TJIIXMathElement.html" class="tsd-signature-type tsd-kind-type-alias">TJIIXMathElement</a></span></li>
+<li><span><span class="tsd-kind-parameter">index</span>: <a href="../types/TJiixIndex.html" class="tsd-signature-type tsd-kind-type-alias">TJiixIndex</a></span></li>
+<li><span><span class="tsd-kind-parameter">elementStrokes</span>: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></span></li>
+<li><span><span class="tsd-kind-parameter">path</span>: <span class="tsd-signature-type">string</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:265</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected">
+<h3 class="tsd-anchor-link" id="indexnodeoredgeelement"><code class="tsd-tag">Protected</code><span>index<wbr/>Node<wbr/>Or<wbr/>Edge<wbr/>Element</span><a href="#indexnodeoredgeelement" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="indexnodeoredgeelement-1"><span class="tsd-kind-call-signature">indexNodeOrEdgeElement</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">element</span><span class="tsd-signature-symbol">:</span> <a href="../types/TJIIXNodeElement.html" class="tsd-signature-type tsd-kind-type-alias">TJIIXNodeElement</a> <span class="tsd-signature-symbol">|</span> <a href="../types/TJIIXEdgeElement.html" class="tsd-signature-type tsd-kind-type-alias">TJIIXEdgeElement</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">index</span><span class="tsd-signature-symbol">:</span> <a href="../types/TJiixIndex.html" class="tsd-signature-type tsd-kind-type-alias">TJiixIndex</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">elementStrokes</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#indexnodeoredgeelement-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Index a node or edge element</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">element</span>: <a href="../types/TJIIXNodeElement.html" class="tsd-signature-type tsd-kind-type-alias">TJIIXNodeElement</a> <span class="tsd-signature-symbol">|</span> <a href="../types/TJIIXEdgeElement.html" class="tsd-signature-type tsd-kind-type-alias">TJIIXEdgeElement</a></span></li>
+<li><span><span class="tsd-kind-parameter">index</span>: <a href="../types/TJiixIndex.html" class="tsd-signature-type tsd-kind-type-alias">TJiixIndex</a></span></li>
+<li><span><span class="tsd-kind-parameter">elementStrokes</span>: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:306</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected">
+<h3 class="tsd-anchor-link" id="indextextelement"><code class="tsd-tag">Protected</code><span>index<wbr/>Text<wbr/>Element</span><a href="#indextextelement" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="indextextelement-1"><span class="tsd-kind-call-signature">indexTextElement</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">element</span><span class="tsd-signature-symbol">:</span> <a href="../types/TJIIXTextElement.html" class="tsd-signature-type tsd-kind-type-alias">TJIIXTextElement</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">index</span><span class="tsd-signature-symbol">:</span> <a href="../types/TJiixIndex.html" class="tsd-signature-type tsd-kind-type-alias">TJiixIndex</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">elementStrokes</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#indextextelement-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Index a text element</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">element</span>: <a href="../types/TJIIXTextElement.html" class="tsd-signature-type tsd-kind-type-alias">TJIIXTextElement</a></span></li>
+<li><span><span class="tsd-kind-parameter">index</span>: <a href="../types/TJiixIndex.html" class="tsd-signature-type tsd-kind-type-alias">TJiixIndex</a></span></li>
+<li><span><span class="tsd-kind-parameter">elementStrokes</span>: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:178</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="invalidateindex"><span>invalidate<wbr/>Index</span><a href="#invalidateindex" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="invalidateindex-1"><span class="tsd-kind-call-signature">invalidateIndex</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#invalidateindex-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Invalidate and immediately rebuild the index from current exports.
+Called after mergeExport so the rebuild happens while exports are still set,
+before any subsequent updateSymbol calls clear them.</p>
+</div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:347</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="ondestroy"><code class="tsd-tag">Protected</code> <code class="tsd-tag">Optional</code><span>on<wbr/>Destroy</span><a href="#ondestroy" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected tsd-is-inherited">
+<li class="tsd-is-inherited">
+<div class="tsd-signature tsd-anchor-link" id="ondestroy-1"><span class="tsd-kind-call-signature">onDestroy</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#ondestroy-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Lifecycle hook called when the manager is being destroyed
+Override in subclasses to cleanup resources</p>
+</div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+<div class="tsd-comment tsd-typography">
+<div class="tsd-tag-example">
+<h4 class="tsd-anchor-link" id="example-1">Example<a href="#example-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="typescript"><span class="hl-12">protected</span><span class="hl-1"> </span><span class="hl-0">onDestroy</span><span class="hl-1">(): </span><span class="hl-10">void</span><span class="hl-1"> {</span><br/><span class="hl-1">  </span><span class="hl-10">this</span><span class="hl-1">.</span><span class="hl-12">logger</span><span class="hl-1">.</span><span class="hl-0">info</span><span class="hl-1">(</span><span class="hl-2">`</span><span class="hl-10">${</span><span class="hl-10">this</span><span class="hl-5">.</span><span class="hl-12">managerName</span><span class="hl-10">}</span><span class="hl-2"> destroyed`</span><span class="hl-1">)</span><br/><span class="hl-1">  </span><span class="hl-13">// Remove event listeners, clear intervals, etc.</span><br/><span class="hl-1">}</span>
+</code><button type="button">Copy</button></pre>
+
+</div></div><aside class="tsd-sources">
+<p>Inherited from <a href="IIAbstractManager.html">IIAbstractManager</a>.<a href="IIAbstractManager.html#ondestroy">onDestroy</a></p>
+<ul>
+<li>Defined in manager/interactive/IIAbstractManager.ts:140</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="oninit"><code class="tsd-tag">Protected</code> <code class="tsd-tag">Optional</code><span>on<wbr/>Init</span><a href="#oninit" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected tsd-is-inherited">
+<li class="tsd-is-inherited">
+<div class="tsd-signature tsd-anchor-link" id="oninit-1"><span class="tsd-kind-call-signature">onInit</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#oninit-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Lifecycle hook called after manager initialization
+Override in subclasses if needed</p>
+<p>This is called at the end of the constructor, allowing subclasses
+to perform initialization that requires access to this.managerName
+or other properties set in the subclass constructor.</p>
+</div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+<div class="tsd-comment tsd-typography">
+<div class="tsd-tag-example">
+<h4 class="tsd-anchor-link" id="example-2">Example<a href="#example-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="typescript"><span class="hl-12">protected</span><span class="hl-1"> </span><span class="hl-0">onInit</span><span class="hl-1">(): </span><span class="hl-10">void</span><span class="hl-1"> {</span><br/><span class="hl-1">  </span><span class="hl-10">this</span><span class="hl-1">.</span><span class="hl-12">logger</span><span class="hl-1">.</span><span class="hl-0">info</span><span class="hl-1">(</span><span class="hl-2">`</span><span class="hl-10">${</span><span class="hl-10">this</span><span class="hl-5">.</span><span class="hl-12">managerName</span><span class="hl-10">}</span><span class="hl-2"> initialized`</span><span class="hl-1">)</span><br/><span class="hl-1">  </span><span class="hl-13">// Setup event listeners, etc.</span><br/><span class="hl-1">}</span>
+</code><button type="button">Copy</button></pre>
+
+</div></div><aside class="tsd-sources">
+<p>Inherited from <a href="IIAbstractManager.html">IIAbstractManager</a>.<a href="IIAbstractManager.html#oninit">onInit</a></p>
+<ul>
+<li>Defined in manager/interactive/IIAbstractManager.ts:126</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="searchbylabel"><span>search<wbr/>By<wbr/>Label</span><a href="#searchbylabel" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="searchbylabel-1"><span class="tsd-kind-call-signature">searchByLabel</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">label</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TStrokeQueryResult.html" class="tsd-signature-type tsd-kind-type-alias">TStrokeQueryResult</a><span class="tsd-signature-symbol">[]</span><a href="#searchbylabel-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Search strokes by label</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">label</span>: <span class="tsd-signature-type">string</span></span>
+<div class="tsd-comment tsd-typography"><p>The label to search for (case-insensitive partial match)</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="../types/TStrokeQueryResult.html" class="tsd-signature-type tsd-kind-type-alias">TStrokeQueryResult</a><span class="tsd-signature-symbol">[]</span></h4><p>Array of matching stroke query results</p>
+<aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:732</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="updatetextmetadata"><span>update<wbr/>Text<wbr/>Metadata</span><a href="#updatetextmetadata" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="updatetextmetadata-1"><span class="tsd-kind-call-signature">updateTextMetadata</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">stroke</span><span class="tsd-signature-symbol">:</span> <a href="../types/TStroke.html" class="tsd-signature-type tsd-kind-type-alias">TStroke</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">element</span><span class="tsd-signature-symbol">:</span> <a href="../types/TJIIXTextElement.html" class="tsd-signature-type tsd-kind-type-alias">TJIIXTextElement</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#updatetextmetadata-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Update pixel-converted text metadata for a stroke (called during sync)</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">stroke</span>: <a href="../types/TStroke.html" class="tsd-signature-type tsd-kind-type-alias">TStroke</a></span></li>
+<li><span><span class="tsd-kind-parameter">element</span>: <a href="../types/TJIIXTextElement.html" class="tsd-signature-type tsd-kind-type-alias">TJIIXTextElement</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/IIJiixQueryManager.ts:804</li></ul></aside></div></li></ul></section></section></details></div>
+<div class="col-sidebar">
+<div class="page-menu">
+<div class="tsd-navigation settings">
+<details class="tsd-accordion"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h3>Settings</h3></summary>
+<div class="tsd-accordion-details">
+<div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span>
+<ul id="tsd-filter-options">
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-protected" name="protected"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Protected</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-alpha" name="alpha"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Alpha</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-beta" name="beta"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Beta</span></label></li></ul></div>
+<div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div>
+<details open class="tsd-accordion tsd-page-navigation"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h3>On This Page</h3></summary>
+<div class="tsd-accordion-details">
+<details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Constructors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Constructors</summary>
+<div><a href="#constructor"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Constructor"><use href="../assets/icons.svg#icon-512"></use></svg><span>constructor</span></a></div></details>
+<details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Properties</summary>
+<div><a href="#canvas" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>canvas</span></a><a href="#logger" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>logger</span></a><a href="#managername" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>manager<wbr/>Name</span></a></div></details>
+<details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Accessors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Accessors</summary>
+<div><a href="#client" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Accessor"><use href="../assets/icons.svg#icon-262144"></use></svg><span>client</span></a><a href="#configuration" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Accessor"><use href="../assets/icons.svg#icon-262144"></use></svg><span>configuration</span></a><a href="#model" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Accessor"><use href="../assets/icons.svg#icon-262144"></use></svg><span>model</span></a><a href="#renderer" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Accessor"><use href="../assets/icons.svg#icon-262144"></use></svg><span>renderer</span></a></div></details>
+<details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Methods</summary>
+<div><a href="#buildindex" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>build<wbr/>Index</span></a><a href="#cleartextmetadata"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>clear<wbr/>Text<wbr/>Metadata</span></a><a href="#collectmathexpressiongroups" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>collect<wbr/>Math<wbr/>Expression<wbr/>Groups</span></a><a href="#destroy" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>destroy</span></a><a href="#ensureindexvalid" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>ensure<wbr/>Index<wbr/>Valid</span></a><a href="#getallmathblockswithstrokes"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>All<wbr/>Math<wbr/>Blocks<wbr/>With<wbr/>Strokes</span></a><a href="#getalltextblockswithstrokes"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>All<wbr/>Text<wbr/>Blocks<wbr/>With<wbr/>Strokes</span></a><a href="#getblocklabel"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Block<wbr/>Label</span></a><a href="#getblocksforsymbols"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Blocks<wbr/>For<wbr/>Symbols</span></a><a href="#getelementforstroke"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Element<wbr/>For<wbr/>Stroke</span></a><a href="#getindexstats"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Index<wbr/>Stats</span></a><a href="#getlabelforstroke"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Label<wbr/>For<wbr/>Stroke</span></a><a href="#getlinecenteryforstroke"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Line<wbr/>Center<wbr/>Y<wbr/>For<wbr/>Stroke</span></a><a href="#getmathselectiongroups"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Math<wbr/>Selection<wbr/>Groups</span></a><a href="#getshapeselectiongroups"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Shape<wbr/>Selection<wbr/>Groups</span></a><a href="#getstrokeidsforblock"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Stroke<wbr/>Ids<wbr/>For<wbr/>Block</span></a><a href="#getstrokeinfo"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Stroke<wbr/>Info</span></a><a href="#getstrokesforelement"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Strokes<wbr/>For<wbr/>Element</span></a><a href="#getstrokesgroupedbychar"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Strokes<wbr/>Grouped<wbr/>By<wbr/>Char</span></a><a href="#getstrokesgroupedbyword"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Strokes<wbr/>Grouped<wbr/>By<wbr/>Word</span></a><a href="#getstrokesymbolsforelement"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Stroke<wbr/>Symbols<wbr/>For<wbr/>Element</span></a><a href="#gettextmetadata"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Text<wbr/>Metadata</span></a><a href="#gettextselectiongroups"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Text<wbr/>Selection<wbr/>Groups</span></a><a href="#getwordgroupforstroke"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Word<wbr/>Group<wbr/>For<wbr/>Stroke</span></a><a href="#indexelement" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>index<wbr/>Element</span></a><a href="#indexmathelement" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>index<wbr/>Math<wbr/>Element</span></a><a href="#indexmathexpression" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>index<wbr/>Math<wbr/>Expression</span></a><a href="#indexnodeoredgeelement" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>index<wbr/>Node<wbr/>Or<wbr/>Edge<wbr/>Element</span></a><a href="#indextextelement" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>index<wbr/>Text<wbr/>Element</span></a><a href="#invalidateindex"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>invalidate<wbr/>Index</span></a><a href="#ondestroy" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>on<wbr/>Destroy</span></a><a href="#oninit" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>on<wbr/>Init</span></a><a href="#searchbylabel"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>search<wbr/>By<wbr/>Label</span></a><a href="#updatetextmetadata"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>update<wbr/>Text<wbr/>Metadata</span></a></div></details></div></details></div>
+<div class="site-menu">
+<nav class="tsd-navigation"><a href="../modules.html">iink-ts - v1.0.0-buildVersion</a>
+<ul class="tsd-small-nested-navigation" id="tsd-nav-container">
+<li>Loading...</li></ul></nav></div></div></div><footer>
+<p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer>
+<div class="overlay"></div></body></html>

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../../src/lib/ui/components/primitives/Button/TldrawUiButtonSpinner.tsx"],
+  "sourcesContent": ["import { Spinner } from '../../Spinner'\n\n/** @public @react */\nexport function TldrawUiButtonSpinner() {\n\treturn <Spinner />\n}\n"],
+  "mappings": "AAIQ;AAJR,SAAS,eAAe;AAGjB,SAAS,wBAAwB;AACvC,SAAO,oBAAC,WAAQ;AACjB;",
+  "names": []
+}

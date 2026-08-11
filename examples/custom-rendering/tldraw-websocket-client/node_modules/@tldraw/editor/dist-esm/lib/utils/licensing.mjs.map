@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/utils/licensing.ts"],
+  "sourcesContent": ["/*\n  Convert a string into an ArrayBuffer\n  from https://developers.google.com/web/updates/2012/06/How-to-convert-ArrayBuffer-to-and-from-String\n*/\nexport function str2ab(str: string) {\n\tconst buf = new ArrayBuffer(str.length)\n\tconst bufView = new Uint8Array(buf)\n\tfor (let i = 0, strLen = str.length; i < strLen; i++) {\n\t\tbufView[i] = str.charCodeAt(i)\n\t}\n\treturn buf\n}\n\nexport function importPublicKey(pemContents: string) {\n\t// base64 decode the string to get the binary data\n\tconst binaryDerString = atob(pemContents)\n\t// convert from a binary string to an ArrayBuffer\n\tconst binaryDer = str2ab(binaryDerString)\n\n\treturn crypto.subtle.importKey(\n\t\t'spki',\n\t\tnew Uint8Array(binaryDer),\n\t\t{\n\t\t\tname: 'ECDSA',\n\t\t\tnamedCurve: 'P-256',\n\t\t},\n\t\ttrue,\n\t\t['verify']\n\t)\n}\n"],
+  "mappings": "AAIO,SAAS,OAAO,KAAa;AACnC,QAAM,MAAM,IAAI,YAAY,IAAI,MAAM;AACtC,QAAM,UAAU,IAAI,WAAW,GAAG;AAClC,WAAS,IAAI,GAAG,SAAS,IAAI,QAAQ,IAAI,QAAQ,KAAK;AACrD,YAAQ,CAAC,IAAI,IAAI,WAAW,CAAC;AAAA,EAC9B;AACA,SAAO;AACR;AAEO,SAAS,gBAAgB,aAAqB;AAEpD,QAAM,kBAAkB,KAAK,WAAW;AAExC,QAAM,YAAY,OAAO,eAAe;AAExC,SAAO,OAAO,OAAO;AAAA,IACpB;AAAA,IACA,IAAI,WAAW,SAAS;AAAA,IACxB;AAAA,MACC,MAAM;AAAA,MACN,YAAY;AAAA,IACb;AAAA,IACA;AAAA,IACA,CAAC,QAAQ;AAAA,EACV;AACD;",
+  "names": []
+}

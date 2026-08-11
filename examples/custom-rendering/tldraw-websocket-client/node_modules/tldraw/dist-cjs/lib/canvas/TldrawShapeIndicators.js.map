@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/canvas/TldrawShapeIndicators.tsx"],
+  "sourcesContent": ["import { DefaultShapeIndicators, useEditor, useValue } from '@tldraw/editor'\n\n/** @public @react */\nexport function TldrawShapeIndicators() {\n\tconst editor = useEditor()\n\n\tconst isInSelectState = useValue(\n\t\t'is in a valid select state',\n\t\t() => {\n\t\t\treturn editor.isInAny(\n\t\t\t\t'select.idle',\n\t\t\t\t'select.brushing',\n\t\t\t\t'select.scribble_brushing',\n\t\t\t\t'select.editing_shape',\n\t\t\t\t'select.pointing_shape',\n\t\t\t\t'select.pointing_selection',\n\t\t\t\t'select.pointing_handle'\n\t\t\t)\n\t\t},\n\t\t[editor]\n\t)\n\n\treturn <DefaultShapeIndicators hideAll={!isInSelectState} />\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAsBQ;AAtBR,oBAA4D;AAGrD,SAAS,wBAAwB;AACvC,QAAM,aAAS,yBAAU;AAEzB,QAAM,sBAAkB;AAAA,IACvB;AAAA,IACA,MAAM;AACL,aAAO,OAAO;AAAA,QACb;AAAA,QACA;AAAA,QACA;AAAA,QACA;AAAA,QACA;AAAA,QACA;AAAA,QACA;AAAA,MACD;AAAA,IACD;AAAA,IACA,CAAC,MAAM;AAAA,EACR;AAEA,SAAO,4CAAC,wCAAuB,SAAS,CAAC,iBAAiB;AAC3D;",
+  "names": []
+}

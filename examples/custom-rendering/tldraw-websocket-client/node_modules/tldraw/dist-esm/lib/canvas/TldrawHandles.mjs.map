@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/canvas/TldrawHandles.tsx"],
+  "sourcesContent": ["import { TLHandlesProps, useEditor, useValue } from '@tldraw/editor'\n\n/** @public @react */\nexport function TldrawHandles({ children }: TLHandlesProps) {\n\tconst editor = useEditor()\n\n\t// todo: maybe display note shape handles here?\n\n\tconst shouldDisplayHandles = useValue(\n\t\t'shouldDisplayHandles',\n\t\t() => {\n\t\t\tif (editor.isInAny('select.idle', 'select.pointing_handle', 'select.pointing_shape')) {\n\t\t\t\treturn true\n\t\t\t}\n\t\t\tif (editor.isInAny('select.editing_shape')) {\n\t\t\t\tconst onlySelectedShape = editor.getOnlySelectedShape()\n\t\t\t\treturn onlySelectedShape && editor.isShapeOfType(onlySelectedShape, 'note')\n\t\t\t}\n\t\t\treturn false\n\t\t},\n\t\t[editor]\n\t)\n\n\tif (!shouldDisplayHandles) return null\n\n\treturn (\n\t\t<svg className=\"tl-user-handles tl-overlays__item\" aria-hidden=\"true\">\n\t\t\t{children}\n\t\t</svg>\n\t)\n}\n"],
+  "mappings": "AA0BE;AA1BF,SAAyB,WAAW,gBAAgB;AAG7C,SAAS,cAAc,EAAE,SAAS,GAAmB;AAC3D,QAAM,SAAS,UAAU;AAIzB,QAAM,uBAAuB;AAAA,IAC5B;AAAA,IACA,MAAM;AACL,UAAI,OAAO,QAAQ,eAAe,0BAA0B,uBAAuB,GAAG;AACrF,eAAO;AAAA,MACR;AACA,UAAI,OAAO,QAAQ,sBAAsB,GAAG;AAC3C,cAAM,oBAAoB,OAAO,qBAAqB;AACtD,eAAO,qBAAqB,OAAO,cAAc,mBAAmB,MAAM;AAAA,MAC3E;AACA,aAAO;AAAA,IACR;AAAA,IACA,CAAC,MAAM;AAAA,EACR;AAEA,MAAI,CAAC,qBAAsB,QAAO;AAElC,SACC,oBAAC,SAAI,WAAU,qCAAoC,eAAY,QAC7D,UACF;AAEF;",
+  "names": []
+}

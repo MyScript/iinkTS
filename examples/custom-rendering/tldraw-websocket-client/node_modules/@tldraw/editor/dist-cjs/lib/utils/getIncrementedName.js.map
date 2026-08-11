@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/utils/getIncrementedName.ts"],
+  "sourcesContent": ["/**\n * Get an incremented name (e.g. New page (2)) from a name (e.g. New page), based on an array of\n * existing names.\n *\n * @param name - The name to increment.\n * @param others - The array of existing names.\n * @public\n */\nexport function getIncrementedName(name: string, others: string[]) {\n\tlet result = name\n\tconst set = new Set(others)\n\n\twhile (set.has(result)) {\n\t\tresult = /^.*(\\d+)$/.exec(result)?.[1]\n\t\t\t? result.replace(/(\\d+)(?=\\D?)$/, (m) => {\n\t\t\t\t\treturn (+m + 1).toString()\n\t\t\t\t})\n\t\t\t: `${result} 1`\n\t}\n\n\treturn result\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAQO,SAAS,mBAAmB,MAAc,QAAkB;AAClE,MAAI,SAAS;AACb,QAAM,MAAM,IAAI,IAAI,MAAM;AAE1B,SAAO,IAAI,IAAI,MAAM,GAAG;AACvB,aAAS,YAAY,KAAK,MAAM,IAAI,CAAC,IAClC,OAAO,QAAQ,iBAAiB,CAAC,MAAM;AACvC,cAAQ,CAAC,IAAI,GAAG,SAAS;AAAA,IAC1B,CAAC,IACA,GAAG,MAAM;AAAA,EACb;AAEA,SAAO;AACR;",
+  "names": []
+}

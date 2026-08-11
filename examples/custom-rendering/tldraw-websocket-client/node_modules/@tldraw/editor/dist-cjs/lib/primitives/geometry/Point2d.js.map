@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/primitives/geometry/Point2d.ts"],
+  "sourcesContent": ["import { Vec, VecLike } from '../Vec'\nimport { Geometry2d, Geometry2dOptions } from './Geometry2d'\n\n/** @public */\nexport class Point2d extends Geometry2d {\n\tprivate _point: Vec\n\n\tconstructor(\n\t\tconfig: Omit<Geometry2dOptions, 'isClosed' | 'isFilled'> & { margin: number; point: Vec }\n\t) {\n\t\tsuper({ ...config, isClosed: true, isFilled: true })\n\t\tconst { point } = config\n\n\t\tthis._point = point\n\t}\n\n\tgetVertices() {\n\t\treturn [this._point]\n\t}\n\n\tnearestPoint(): Vec {\n\t\treturn this._point\n\t}\n\n\thitTestLineSegment(A: VecLike, B: VecLike, margin: number): boolean {\n\t\treturn Vec.DistanceToLineSegment(A, B, this._point) < margin\n\t}\n\n\tgetSvgPathData() {\n\t\tconst { _point: point } = this\n\t\treturn `M${point.toFixed()}`\n\t}\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,iBAA6B;AAC7B,wBAA8C;AAGvC,MAAM,gBAAgB,6BAAW;AAAA,EAC/B;AAAA,EAER,YACC,QACC;AACD,UAAM,EAAE,GAAG,QAAQ,UAAU,MAAM,UAAU,KAAK,CAAC;AACnD,UAAM,EAAE,MAAM,IAAI;AAElB,SAAK,SAAS;AAAA,EACf;AAAA,EAEA,cAAc;AACb,WAAO,CAAC,KAAK,MAAM;AAAA,EACpB;AAAA,EAEA,eAAoB;AACnB,WAAO,KAAK;AAAA,EACb;AAAA,EAEA,mBAAmB,GAAY,GAAY,QAAyB;AACnE,WAAO,eAAI,sBAAsB,GAAG,GAAG,KAAK,MAAM,IAAI;AAAA,EACvD;AAAA,EAEA,iBAAiB;AAChB,UAAM,EAAE,QAAQ,MAAM,IAAI;AAC1B,WAAO,IAAI,MAAM,QAAQ,CAAC;AAAA,EAC3B;AACD;",
+  "names": []
+}

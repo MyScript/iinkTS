@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../src/lib/ui/components/HelperButtons/DefaultHelperButtons.tsx"],
+  "sourcesContent": ["import { ReactNode } from 'react'\nimport { TldrawUiMenuContextProvider } from '../primitives/menus/TldrawUiMenuContext'\nimport { DefaultHelperButtonsContent } from './DefaultHelperButtonsContent'\n\n/** @public */\nexport interface TLUiHelperButtonsProps {\n\tchildren?: ReactNode\n}\n\n/** @public @react */\nexport function DefaultHelperButtons({ children }: TLUiHelperButtonsProps) {\n\tconst content = children ?? <DefaultHelperButtonsContent />\n\treturn (\n\t\t<div className=\"tlui-helper-buttons\">\n\t\t\t<TldrawUiMenuContextProvider type=\"helper-buttons\" sourceId=\"helper-buttons\">\n\t\t\t\t{content}\n\t\t\t</TldrawUiMenuContextProvider>\n\t\t</div>\n\t)\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAW6B;AAV7B,iCAA4C;AAC5C,yCAA4C;AAQrC,SAAS,qBAAqB,EAAE,SAAS,GAA2B;AAC1E,QAAM,UAAU,YAAY,4CAAC,kEAA4B;AACzD,SACC,4CAAC,SAAI,WAAU,uBACd,sDAAC,0DAA4B,MAAK,kBAAiB,UAAS,kBAC1D,mBACF,GACD;AAEF;",
+  "names": []
+}

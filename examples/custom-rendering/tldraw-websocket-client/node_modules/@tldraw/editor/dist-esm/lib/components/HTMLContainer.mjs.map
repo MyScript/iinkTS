@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/components/HTMLContainer.tsx"],
+  "sourcesContent": ["import classNames from 'classnames'\nimport * as React from 'react'\n\n/** @public */\nexport type HTMLContainerProps = React.HTMLAttributes<HTMLDivElement>\n\n/** @public @react */\nexport function HTMLContainer({ children, className = '', ...rest }: HTMLContainerProps) {\n\treturn (\n\t\t<div {...rest} className={classNames('tl-html-container', className)}>\n\t\t\t{children}\n\t\t</div>\n\t)\n}\n"],
+  "mappings": "AASE;AATF,OAAO,gBAAgB;AAOhB,SAAS,cAAc,EAAE,UAAU,YAAY,IAAI,GAAG,KAAK,GAAuB;AACxF,SACC,oBAAC,SAAK,GAAG,MAAM,WAAW,WAAW,qBAAqB,SAAS,GACjE,UACF;AAEF;",
+  "names": []
+}

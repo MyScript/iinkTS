@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/editor/types/selection-types.ts"],
+  "sourcesContent": ["import { RotateCorner, SelectionCorner, SelectionEdge } from '../../primitives/Box'\n\n/** @public */\nexport type TLSelectionHandle = SelectionCorner | SelectionEdge | RotateCorner\n\n/** @public */\nexport type TLResizeHandle = SelectionCorner | SelectionEdge\n\n/** @public */\nexport type TLAdjacentDirection = 'next' | 'prev' | 'left' | 'right' | 'up' | 'down'\n"],
+  "mappings": ";;;;;;;;;;;;;;AAAA;AAAA;",
+  "names": []
+}

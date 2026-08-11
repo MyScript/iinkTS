@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../../src/lib/ui/components/primitives/Button/TldrawUiButtonCheck.tsx"],
+  "sourcesContent": ["import { useTranslation } from '../../../hooks/useTranslation/useTranslation'\nimport { TldrawUiIcon } from '../TldrawUiIcon'\n\n/** @public */\nexport interface TLUiButtonCheckProps {\n\tchecked: boolean\n}\n\n/** @public @react */\nexport function TldrawUiButtonCheck({ checked }: TLUiButtonCheckProps) {\n\tconst msg = useTranslation()\n\treturn (\n\t\t<TldrawUiIcon\n\t\t\tdata-checked={!!checked}\n\t\t\tlabel={msg(checked ? 'ui.checked' : 'ui.unchecked')}\n\t\t\ticon={checked ? 'check' : 'none'}\n\t\t\tclassName=\"tlui-button__icon\"\n\t\t\tsmall\n\t\t/>\n\t)\n}\n"],
+  "mappings": "AAYE;AAZF,SAAS,sBAAsB;AAC/B,SAAS,oBAAoB;AAQtB,SAAS,oBAAoB,EAAE,QAAQ,GAAyB;AACtE,QAAM,MAAM,eAAe;AAC3B,SACC;AAAA,IAAC;AAAA;AAAA,MACA,gBAAc,CAAC,CAAC;AAAA,MAChB,OAAO,IAAI,UAAU,eAAe,cAAc;AAAA,MAClD,MAAM,UAAU,UAAU;AAAA,MAC1B,WAAU;AAAA,MACV,OAAK;AAAA;AAAA,EACN;AAEF;",
+  "names": []
+}

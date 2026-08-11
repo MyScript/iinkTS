@@ -1,4 +1,0 @@
-export * from "./AbstractTransformManager"
-export * from "./IIResizeManager"
-export * from "./IIRotationManager"
-export * from "./IITranslateManager"

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../src/lib/shapes/draw/toolStates/Idle.ts"],
+  "sourcesContent": ["import { StateNode, TLPointerEventInfo } from '@tldraw/editor'\n\nexport class Idle extends StateNode {\n\tstatic override id = 'idle'\n\n\toverride onPointerDown(info: TLPointerEventInfo) {\n\t\tthis.parent.transition('drawing', info)\n\t}\n\n\toverride onEnter() {\n\t\tthis.editor.setCursor({ type: 'cross', rotation: 0 })\n\t}\n\n\toverride onCancel() {\n\t\tthis.editor.setCurrentTool('select')\n\t}\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,oBAA8C;AAEvC,MAAM,aAAa,wBAAU;AAAA,EACnC,OAAgB,KAAK;AAAA,EAEZ,cAAc,MAA0B;AAChD,SAAK,OAAO,WAAW,WAAW,IAAI;AAAA,EACvC;AAAA,EAES,UAAU;AAClB,SAAK,OAAO,UAAU,EAAE,MAAM,SAAS,UAAU,EAAE,CAAC;AAAA,EACrD;AAAA,EAES,WAAW;AACnB,SAAK,OAAO,eAAe,QAAQ;AAAA,EACpC;AACD;",
+  "names": []
+}

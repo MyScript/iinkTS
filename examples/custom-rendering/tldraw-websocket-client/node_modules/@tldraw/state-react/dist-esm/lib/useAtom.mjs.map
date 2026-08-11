@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../src/lib/useAtom.ts"],
+  "sourcesContent": ["import { Atom, AtomOptions, atom } from '@tldraw/state'\nimport { useState } from 'react'\n\n/**\n * Creates a new atom and returns it. The atom will be created only once.\n *\n * See `atom`.\n *\n * @example\n * ```ts\n * const Counter = track(function Counter () {\n *   const count = useAtom('count', 0)\n *   const increment = useCallback(() => count.set(count.get() + 1), [count])\n *   return <button onClick={increment}>{count.get()}</button>\n * })\n * ```\n *\n * @param name - The name of the atom. This does not need to be globally unique. It is used for debugging and performance profiling.\n * @param valueOrInitialiser - The initial value of the atom. If this is a function, it will be called to get the initial value.\n * @param options - Options for the atom.\n *\n * @public\n */\nexport function useAtom<Value, Diff = unknown>(\n\tname: string,\n\tvalueOrInitialiser: Value | (() => Value),\n\toptions?: AtomOptions<Value, Diff>\n): Atom<Value, Diff> {\n\treturn useState(() => {\n\t\tconst initialValue =\n\t\t\ttypeof valueOrInitialiser === 'function' ? (valueOrInitialiser as any)() : valueOrInitialiser\n\n\t\treturn atom(`useAtom(${name})`, initialValue, options)\n\t})[0]\n}\n"],
+  "mappings": "AAAA,SAA4B,YAAY;AACxC,SAAS,gBAAgB;AAsBlB,SAAS,QACf,MACA,oBACA,SACoB;AACpB,SAAO,SAAS,MAAM;AACrB,UAAM,eACL,OAAO,uBAAuB,aAAc,mBAA2B,IAAI;AAE5E,WAAO,KAAK,WAAW,IAAI,KAAK,cAAc,OAAO;AAAA,EACtD,CAAC,EAAE,CAAC;AACL;",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/shapes/draw/DrawShapeTool.ts"],
+  "sourcesContent": ["import { StateNode, TLStateNodeConstructor } from '@tldraw/editor'\nimport { Drawing } from './toolStates/Drawing'\nimport { Idle } from './toolStates/Idle'\n\n/** @public */\nexport class DrawShapeTool extends StateNode {\n\tstatic override id = 'draw'\n\tstatic override initial = 'idle'\n\tstatic override isLockable = false\n\tstatic override useCoalescedEvents = true\n\tstatic override children(): TLStateNodeConstructor[] {\n\t\treturn [Idle, Drawing]\n\t}\n\n\toverride shapeType = 'draw'\n\n\toverride onExit() {\n\t\tconst drawingState = this.children!['drawing'] as Drawing\n\t\tdrawingState.initialShape = undefined\n\t}\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,oBAAkD;AAClD,qBAAwB;AACxB,kBAAqB;AAGd,MAAM,sBAAsB,wBAAU;AAAA,EAC5C,OAAgB,KAAK;AAAA,EACrB,OAAgB,UAAU;AAAA,EAC1B,OAAgB,aAAa;AAAA,EAC7B,OAAgB,qBAAqB;AAAA,EACrC,OAAgB,WAAqC;AACpD,WAAO,CAAC,kBAAM,sBAAO;AAAA,EACtB;AAAA,EAES,YAAY;AAAA,EAEZ,SAAS;AACjB,UAAM,eAAe,KAAK,SAAU,SAAS;AAC7C,iBAAa,eAAe;AAAA,EAC7B;AACD;",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../src/lib/ui/components/QuickActions/DefaultQuickActions.tsx"],
+  "sourcesContent": ["import { ReactNode, memo } from 'react'\nimport { TldrawUiMenuContextProvider } from '../primitives/menus/TldrawUiMenuContext'\nimport { DefaultQuickActionsContent } from './DefaultQuickActionsContent'\n\n/** @public */\nexport interface TLUiQuickActionsProps {\n\tchildren?: ReactNode\n}\n\n/** @public @react */\nexport const DefaultQuickActions = memo(function DefaultQuickActions({\n\tchildren,\n}: TLUiQuickActionsProps) {\n\tconst content = children ?? <DefaultQuickActionsContent />\n\n\treturn (\n\t\t<TldrawUiMenuContextProvider type=\"small-icons\" sourceId=\"quick-actions\">\n\t\t\t{content}\n\t\t</TldrawUiMenuContextProvider>\n\t)\n})\n"],
+  "mappings": "AAa6B;AAb7B,SAAoB,YAAY;AAChC,SAAS,mCAAmC;AAC5C,SAAS,kCAAkC;AAQpC,MAAM,sBAAsB,KAAK,SAASA,qBAAoB;AAAA,EACpE;AACD,GAA0B;AACzB,QAAM,UAAU,YAAY,oBAAC,8BAA2B;AAExD,SACC,oBAAC,+BAA4B,MAAK,eAAc,UAAS,iBACvD,mBACF;AAEF,CAAC;",
+  "names": ["DefaultQuickActions"]
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/hooks/useIsDarkMode.ts"],
+  "sourcesContent": ["import { useValue } from '@tldraw/state-react'\nimport { useSvgExportContext } from '../editor/types/SvgExportContext'\nimport { useEditor } from './useEditor'\n\n/** @public */\nexport function useIsDarkMode() {\n\tconst editor = useEditor()\n\tconst exportContext = useSvgExportContext()\n\treturn useValue('isDarkMode', () => exportContext?.isDarkMode ?? editor.user.getIsDarkMode(), [\n\t\texportContext,\n\t\teditor,\n\t])\n}\n"],
+  "mappings": "AAAA,SAAS,gBAAgB;AACzB,SAAS,2BAA2B;AACpC,SAAS,iBAAiB;AAGnB,SAAS,gBAAgB;AAC/B,QAAM,SAAS,UAAU;AACzB,QAAM,gBAAgB,oBAAoB;AAC1C,SAAO,SAAS,cAAc,MAAM,eAAe,cAAc,OAAO,KAAK,cAAc,GAAG;AAAA,IAC7F;AAAA,IACA;AAAA,EACD,CAAC;AACF;",
+  "names": []
+}

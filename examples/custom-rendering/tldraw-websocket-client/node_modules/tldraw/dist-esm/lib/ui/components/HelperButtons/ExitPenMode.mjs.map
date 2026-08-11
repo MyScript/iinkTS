@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../src/lib/ui/components/HelperButtons/ExitPenMode.tsx"],
+  "sourcesContent": ["import { useEditor, useValue } from '@tldraw/editor'\nimport { TldrawUiMenuActionItem } from '../primitives/menus/TldrawUiMenuActionItem'\n\nexport function ExitPenMode() {\n\tconst editor = useEditor()\n\tconst isPenMode = useValue('is pen mode', () => editor.getInstanceState().isPenMode, [editor])\n\n\tif (!isPenMode) return null\n\n\treturn <TldrawUiMenuActionItem actionId=\"exit-pen-mode\" />\n}\n"],
+  "mappings": "AASQ;AATR,SAAS,WAAW,gBAAgB;AACpC,SAAS,8BAA8B;AAEhC,SAAS,cAAc;AAC7B,QAAM,SAAS,UAAU;AACzB,QAAM,YAAY,SAAS,eAAe,MAAM,OAAO,iBAAiB,EAAE,WAAW,CAAC,MAAM,CAAC;AAE7F,MAAI,CAAC,UAAW,QAAO;AAEvB,SAAO,oBAAC,0BAAuB,UAAS,iBAAgB;AACzD;",
+  "names": []
+}

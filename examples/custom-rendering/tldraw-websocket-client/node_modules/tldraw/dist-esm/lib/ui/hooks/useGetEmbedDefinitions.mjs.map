@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/ui/hooks/useGetEmbedDefinitions.ts"],
+  "sourcesContent": ["import { useGetEmbedShapeUtil } from './useGetEmbedDefinition'\n\n/** @public */\nexport function useGetEmbedDefinitions() {\n\tconst embedUtil = useGetEmbedShapeUtil()\n\treturn embedUtil ? embedUtil.getEmbedDefinitions() : []\n}\n"],
+  "mappings": "AAAA,SAAS,4BAA4B;AAG9B,SAAS,yBAAyB;AACxC,QAAM,YAAY,qBAAqB;AACvC,SAAO,YAAY,UAAU,oBAAoB,IAAI,CAAC;AACvD;",
+  "names": []
+}

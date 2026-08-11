@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../src/lib/ui/components/ZoomMenu/DefaultZoomMenuContent.tsx"],
+  "sourcesContent": ["import { ZoomTo100MenuItem, ZoomToFitMenuItem, ZoomToSelectionMenuItem } from '../menu-items'\nimport { TldrawUiMenuActionItem } from '../primitives/menus/TldrawUiMenuActionItem'\n\n/** @public @react */\nexport function DefaultZoomMenuContent() {\n\treturn (\n\t\t<>\n\t\t\t<TldrawUiMenuActionItem actionId=\"zoom-in\" noClose />\n\t\t\t<TldrawUiMenuActionItem actionId=\"zoom-out\" noClose />\n\t\t\t<ZoomTo100MenuItem />\n\t\t\t<ZoomToFitMenuItem />\n\t\t\t<ZoomToSelectionMenuItem />\n\t\t</>\n\t)\n}\n"],
+  "mappings": "AAME,mBACC,KADD;AANF,SAAS,mBAAmB,mBAAmB,+BAA+B;AAC9E,SAAS,8BAA8B;AAGhC,SAAS,yBAAyB;AACxC,SACC,iCACC;AAAA,wBAAC,0BAAuB,UAAS,WAAU,SAAO,MAAC;AAAA,IACnD,oBAAC,0BAAuB,UAAS,YAAW,SAAO,MAAC;AAAA,IACpD,oBAAC,qBAAkB;AAAA,IACnB,oBAAC,qBAAkB;AAAA,IACnB,oBAAC,2BAAwB;AAAA,KAC1B;AAEF;",
+  "names": []
+}

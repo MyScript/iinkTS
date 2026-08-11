@@ -1,6 +1,0 @@
-export * from "./Anchor"
-export * from "./Arc"
-export * from "./Edge"
-export * from "./Edge-enum"
-export * from "./Line"
-export * from "./PolyLine"

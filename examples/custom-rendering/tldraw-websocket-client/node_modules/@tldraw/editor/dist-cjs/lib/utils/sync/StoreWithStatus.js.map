@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/utils/sync/StoreWithStatus.ts"],
+  "sourcesContent": ["import { TLStore } from '@tldraw/tlschema'\n\n/** @public */\nexport type TLStoreWithStatus =\n\t| {\n\t\t\treadonly status: 'not-synced'\n\t\t\treadonly store: TLStore\n\t\t\treadonly error?: undefined\n\t  }\n\t| {\n\t\t\treadonly status: 'error'\n\t\t\treadonly store?: undefined\n\t\t\treadonly error: Error\n\t  }\n\t| {\n\t\t\treadonly status: 'loading'\n\t\t\treadonly store?: undefined\n\t\t\treadonly error?: undefined\n\t  }\n\t| {\n\t\t\treadonly status: 'synced-local'\n\t\t\treadonly store: TLStore\n\t\t\treadonly error?: undefined\n\t  }\n\t| {\n\t\t\treadonly status: 'synced-remote'\n\t\t\treadonly connectionStatus: 'online' | 'offline'\n\t\t\treadonly store: TLStore\n\t\t\treadonly error?: undefined\n\t  }\n"],
+  "mappings": ";;;;;;;;;;;;;;AAAA;AAAA;",
+  "names": []
+}

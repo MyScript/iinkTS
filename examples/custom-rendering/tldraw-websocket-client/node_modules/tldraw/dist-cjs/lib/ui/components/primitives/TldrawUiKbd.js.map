@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../src/lib/ui/components/primitives/TldrawUiKbd.tsx"],
+  "sourcesContent": ["import { PORTRAIT_BREAKPOINT } from '../../constants'\nimport { useBreakpoint } from '../../context/breakpoints'\nimport { kbd } from '../../kbd-utils'\n\n/** @public */\nexport interface TLUiKbdProps {\n\tchildren: string\n\tvisibleOnMobileLayout?: boolean\n}\n\n/** @public @react */\nexport function TldrawUiKbd({ children, visibleOnMobileLayout = false }: TLUiKbdProps) {\n\tconst breakpoint = useBreakpoint()\n\tif (!visibleOnMobileLayout && breakpoint < PORTRAIT_BREAKPOINT.MOBILE) return null\n\treturn (\n\t\t<kbd className=\"tlui-kbd\">\n\t\t\t{kbd(children).map((k, i) => (\n\t\t\t\t<span key={i}>{k}</span>\n\t\t\t))}\n\t\t</kbd>\n\t)\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAiBI;AAjBJ,uBAAoC;AACpC,yBAA8B;AAC9B,uBAAoB;AASb,SAAS,YAAY,EAAE,UAAU,wBAAwB,MAAM,GAAiB;AACtF,QAAM,iBAAa,kCAAc;AACjC,MAAI,CAAC,yBAAyB,aAAa,qCAAoB,OAAQ,QAAO;AAC9E,SACC,4CAAC,SAAI,WAAU,YACb,oCAAI,QAAQ,EAAE,IAAI,CAAC,GAAG,MACtB,4CAAC,UAAc,eAAJ,CAAM,CACjB,GACF;AAEF;",
+  "names": []
+}

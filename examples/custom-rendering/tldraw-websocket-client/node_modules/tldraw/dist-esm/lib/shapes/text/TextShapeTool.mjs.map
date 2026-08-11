@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/shapes/text/TextShapeTool.ts"],
+  "sourcesContent": ["import { StateNode, TLStateNodeConstructor } from '@tldraw/editor'\nimport { Idle } from './toolStates/Idle'\nimport { Pointing } from './toolStates/Pointing'\n\n/** @public */\nexport class TextShapeTool extends StateNode {\n\tstatic override id = 'text'\n\tstatic override initial = 'idle'\n\tstatic override children(): TLStateNodeConstructor[] {\n\t\treturn [Idle, Pointing]\n\t}\n\toverride shapeType = 'text'\n}\n"],
+  "mappings": "AAAA,SAAS,iBAAyC;AAClD,SAAS,YAAY;AACrB,SAAS,gBAAgB;AAGlB,MAAM,sBAAsB,UAAU;AAAA,EAC5C,OAAgB,KAAK;AAAA,EACrB,OAAgB,UAAU;AAAA,EAC1B,OAAgB,WAAqC;AACpD,WAAO,CAAC,MAAM,QAAQ;AAAA,EACvB;AAAA,EACS,YAAY;AACtB;",
+  "names": []
+}

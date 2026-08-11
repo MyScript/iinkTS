@@ -1,5 +1,0 @@
-export * from "./Circle"
-export * from "./Ellipse"
-export * from "./Polygon"
-export * from "./Shape"
-export * from "./Shape-enum"
