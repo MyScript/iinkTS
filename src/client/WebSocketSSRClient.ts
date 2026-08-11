@@ -137,7 +137,7 @@ export class WebSocketSSRClient {
     }
     if (isVersionSuperiorOrEqual(this.configuration.server.version!, "2.0.4")) {
       params["myscript-client-name"] = "iink-ts"
-      params["myscript-client-version"] = "1.0.0-buildVersion"
+      params["myscript-client-version"] = "4.0.0"
     }
     this.send(params)
   }

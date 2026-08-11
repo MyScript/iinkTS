@@ -362,7 +362,7 @@ export class WebSocketClient {
     this.#send({
       type: "authenticate",
       "myscript-client-name": "iink-ts",
-      "myscript-client-version": "1.0.0-buildVersion",
+      "myscript-client-version": "4.0.0",
     })
   }
 

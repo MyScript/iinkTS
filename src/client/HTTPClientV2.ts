@@ -156,7 +156,7 @@ export class HTTPClientV2 {
 
     if (this.configuration.server.version && isVersionSuperiorOrEqual(this.configuration.server.version, "2.0.4")) {
       headers.append("myscript-client-name", "iink-ts")
-      headers.append("myscript-client-version", "1.0.0-buildVersion")
+      headers.append("myscript-client-version", "4.0.0")
     }
 
     const reqInit: RequestInit = {
