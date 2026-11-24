@@ -15,6 +15,36 @@ describe("IIMathVariableSubManager.ts", () => {
     return stroke
   }
 
+  describe("asVariableDefinition caching", () => {
+    test("should not cache a failure, so a transient error does not poison the session", async () => {
+      const canvas = createCanvasMock()
+      const manager = new IIMathVariableSubManager(asCanvas(canvas))
+      const definition = { name: "c", value: 1.5 }
+      canvas.client.asVariableDefinition = jest
+        .fn()
+        .mockRejectedValueOnce(new Error("transient network failure"))
+        .mockResolvedValue(definition)
+
+      await expect(manager.asVariableDefinition("block-1")).resolves.toBeNull()
+      // The success path already caches a legitimately absent definition, so caching in the
+      // failure path only ever pins a transient error for the rest of the session.
+      await expect(manager.asVariableDefinition("block-1")).resolves.toEqual(definition)
+      expect(canvas.client.asVariableDefinition).toHaveBeenCalledTimes(2)
+    })
+
+    test("should still cache a successful lookup", async () => {
+      const canvas = createCanvasMock()
+      const manager = new IIMathVariableSubManager(asCanvas(canvas))
+      const definition = { name: "c", value: 1.5 }
+      canvas.client.asVariableDefinition = jest.fn().mockResolvedValue(definition)
+
+      await manager.asVariableDefinition("block-1")
+      await manager.asVariableDefinition("block-1")
+
+      expect(canvas.client.asVariableDefinition).toHaveBeenCalledTimes(1)
+    })
+  })
+
   test("should create", () => {
     const canvas = createCanvasMock()
     const manager = new IIMathVariableSubManager(asCanvas(canvas))

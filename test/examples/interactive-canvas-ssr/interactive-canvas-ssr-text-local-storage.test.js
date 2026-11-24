@@ -1,12 +1,10 @@
 import { test, expect } from '@playwright/test'
 import {
-  waitForCanvasInit,
   writeStrokes,
   waitForExportedEvent,
   passModalKey
 } from '../helper'
 import helloOneStroke from '../__dataset__/helloOneStroke'
-import TextNavActions from '../_partials/text-nav-actions'
 
 test.describe('Interactive Canvas SSR Text local storage', () => {
   test.beforeEach(async ({ page }) => {

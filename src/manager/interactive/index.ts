@@ -3,15 +3,18 @@
  * @summary Interactive Ink managers
  *
  * These managers are used with the InteractiveInkCanvas variant (WebSocket API with advanced features).
- * They handle selection, resizing, rotation, text editing, gesture recognition, and more.
+ * They handle selection, transforms, conversion, typeset layout, gestures, math, connectors, export and more.
  *
  * @remarks
  * All managers in this group work with InteractiveInkCanvas and depend on the IIModel (Interactive Ink Model).
  */
+export * from "./CanvasWriteTool"
+export * from "./GestureOperationLabels"
 export * from "./gestures"
 export * from "./IIAbstractManager"
 export * from "./IIConnectorManager"
 export * from "./IIConversionManager"
+export * from "./IIExportManager"
 export * from "./IIGestureManager"
 export * from "./IIJiixQueryManager"
 export * from "./IIKeyboardManager"

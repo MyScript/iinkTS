@@ -1,12 +1,13 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import { GestureHandler } from "@/manager/interactive/gestures/GestureHandler"
-import type { GestureHelpers } from "@/manager/interactive/gestures/GestureHelpers"
-import type { TGesture } from "@/manager/interactive/gestures/GestureTypes"
-import { SurroundAction } from "@/manager/interactive/gestures/GestureTypes"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import { OBBOps } from "@/core"
 import type { TStroke } from "@/symbol"
 import { DecoratorKind } from "@/symbol"
-import { OBBOps } from "@/symbol/primitives/OBB"
+import { SymbolGeometry, symbolRegistry } from "@/symbol-utils"
 
+import { GestureHandler } from "../GestureHandler"
+import type { GestureHelpers } from "../GestureHelpers"
+import type { TGesture } from "../GestureTypes"
+import { SurroundAction } from "../GestureTypes"
 /**
  * Handler for SURROUND gesture type
  * Supports three actions: Select, Highlight, and Surround
@@ -24,7 +25,12 @@ export class SurroundGestureHandler extends GestureHandler {
       gestureStroke,
       gesture,
     })
-    const ids = this.model.symbols.filter((s) => OBBOps.contains(gestureStroke.bounds, s.bounds)).map((s) => s.id)
+    const gestureBounds = SymbolGeometry.boundsOf(gestureStroke)
+    // Scans every symbol in the document regardless of type, so an integrator's custom symbol type
+    // missing its util must not abort the gesture — skip it like a non-candidate instead of throwing.
+    const ids = this.model.symbols
+      .filter((s) => symbolRegistry.has(s.type) && OBBOps.contains(gestureBounds, SymbolGeometry.boundsOf(s)))
+      .map((s) => s.id)
 
     switch (this.manager.surroundAction) {
       case SurroundAction.Select:
@@ -38,7 +44,7 @@ export class SurroundGestureHandler extends GestureHandler {
           decoratorKind: DecoratorKind.Highlight,
         })
         if (changes) {
-          this.history.push(this.model, changes)
+          this.history.push(changes)
         }
         break
       }
@@ -48,7 +54,7 @@ export class SurroundGestureHandler extends GestureHandler {
           decoratorKind: DecoratorKind.Surround,
         })
         if (changes) {
-          this.history.push(this.model, changes)
+          this.history.push(changes)
         }
         break
       }

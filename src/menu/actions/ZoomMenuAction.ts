@@ -1,7 +1,8 @@
 import zoomInIcon from "@/assets/svg/zoom-in.svg"
 import zoomOutIcon from "@/assets/svg/zoom-out.svg"
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import { BaseMenuItem } from "@/menu/items/BaseMenuItem"
+import type { TInteractiveInkCanvas } from "@/canvas"
+
+import { BaseMenuItem } from "../items/BaseMenuItem"
 
 /**
  * @group Menu

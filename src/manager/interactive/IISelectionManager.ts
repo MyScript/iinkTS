@@ -1,22 +1,29 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import { ResizeDirection, SELECTION_MARGIN, SvgElementRole } from "@/Constants"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import { SELECTION_PADDING } from "@/constants"
+import type { TBox, TDraft, TPoint } from "@/core"
+import { applyInverseMatrixToPoint, BoxOps, OBBOps } from "@/core"
+import { RafCoalescer } from "@/dom"
 import type { TPointerInfo } from "@/grabber"
 import { PointerEventGrabber } from "@/grabber"
 import { LoggerCategory } from "@/logger"
-import { SVGBuilder } from "@/renderer"
-import type { TBox, TDecorator, TEdge, TEdgeArc, TEdgeLine, TEdgePolyLine, TPoint, TStroke, TSymbol } from "@/symbol"
-import { EdgeKind, isDecorator, isRecognizedMath, StrokeOps, SymbolType } from "@/symbol"
-import { EdgeArcOps } from "@/symbol/edge/Arc"
-import { EdgeOps } from "@/symbol/edge/Edge"
-import { BoxOps } from "@/symbol/primitives/Box"
-import { OBBOps } from "@/symbol/primitives/OBB"
-import { symbolRegistry } from "@/symbol-utils/SymbolRegistry"
-import { computeAngleFromPointOnEllipse, computeDistance } from "@/utils"
+import { SVGBuilder, SvgElementRole } from "@/renderer"
+import type { TDecorator, TEdge, TEdgeArc, TStroke, TSymbol } from "@/symbol"
+import {
+  EdgeKind,
+  isDecorator,
+  isRecognizedMath,
+  isStroke,
+  reprojectArcMidpoint,
+  stretchArcEndpoint,
+  SymbolType,
+} from "@/symbol"
+import { EdgeUtil, SymbolGeometry, symbolRegistry } from "@/symbol-utils"
 
 import { IIAbstractManager } from "./IIAbstractManager"
 import type { IIResizeManager } from "./transform/IIResizeManager"
 import type { IIRotationManager } from "./transform/IIRotationManager"
 import type { IITranslateManager } from "./transform/IITranslateManager"
+import { ResizeDirection } from "./transform/ResizeDirection"
 
 /**
  * @group Manager
@@ -149,6 +156,48 @@ export class IISelectionManager extends IIAbstractManager {
     }
   }
 
+  /**
+   * Wires the pointerdown → pointermove/pointerup/pointercancel/pointerleave dance shared by
+   * every drag handle in this file (translate/resize/rotate rect+group handles, edge resize
+   * points, arc handles): on a primary-button `pointerdown`, hide the interact overlay and run
+   * `onStart`, then listen for the 4 continuation events on `renderer.layer`; on any of those,
+   * run `onEnd` and remove all 4 listeners. `onContinue` runs on every `pointermove` in between.
+   */
+  #bindPointerDrag(
+    el: SVGElement,
+    onStart: (ev: PointerEvent) => void,
+    onContinue: (ev: PointerEvent) => void,
+    onEnd: (ev: PointerEvent) => void
+  ): void {
+    const handler = (ev: PointerEvent) => {
+      ev.preventDefault()
+      ev.stopPropagation()
+      onContinue(ev)
+    }
+    const endHandler = (ev: PointerEvent) => {
+      ev.preventDefault()
+      ev.stopPropagation()
+      onEnd(ev)
+      this.renderer.layer.removeEventListener("pointermove", handler)
+      this.renderer.layer.removeEventListener("pointercancel", endHandler)
+      this.renderer.layer.removeEventListener("pointerleave", endHandler)
+      this.renderer.layer.removeEventListener("pointerup", endHandler)
+    }
+    el.addEventListener("pointerdown", (ev) => {
+      if (ev.button !== 0 || ev.buttons !== 1) {
+        return
+      }
+      ev.preventDefault()
+      ev.stopPropagation()
+      this.hideInteractElements()
+      onStart(ev)
+      this.renderer.layer.addEventListener("pointermove", handler)
+      this.renderer.layer.addEventListener("pointercancel", endHandler)
+      this.renderer.layer.addEventListener("pointerleave", endHandler)
+      this.renderer.layer.addEventListener("pointerup", endHandler)
+    })
+  }
+
   protected createTranslateRect(box: TBox): SVGRectElement {
     const attrs = {
       role: SvgElementRole.Translate,
@@ -163,38 +212,19 @@ export class IISelectionManager extends IIAbstractManager {
       y: box.y,
     }
     const translateEl = SVGBuilder.createRect(boxWithMarge, attrs)
-    const handler = (ev: PointerEvent) => {
-      ev.preventDefault()
-      ev.stopPropagation()
-      this.translate.continue(this.getPoint(ev))
-    }
-    const endHandler = (ev: PointerEvent) => {
-      ev.preventDefault()
-      ev.stopPropagation()
-      this.translate.end(this.getPoint(ev))
-      this.renderer.layer.removeEventListener("pointermove", handler)
-      this.renderer.layer.removeEventListener("pointercancel", endHandler)
-      this.renderer.layer.removeEventListener("pointerleave", endHandler)
-      this.renderer.layer.removeEventListener("pointerup", endHandler)
-      this.renderer.layer.style.cursor = ""
-      this.redrawSelectedGroup()
-    }
-
-    translateEl.addEventListener("pointerdown", (ev) => {
-      if (ev.button !== 0 || ev.buttons !== 1) {
-        return
+    this.#bindPointerDrag(
+      translateEl,
+      (ev) => {
+        this.translate.start(ev.target as Element, this.getPoint(ev))
+        this.renderer.layer.style.cursor = "move"
+      },
+      (ev) => this.translate.continue(this.getPoint(ev)),
+      (ev) => {
+        this.translate.end(this.getPoint(ev))
+        this.renderer.layer.style.cursor = ""
+        this.redrawSelectedGroup()
       }
-      ev.preventDefault()
-      ev.stopPropagation()
-      this.hideInteractElements()
-      this.translate.start(ev.target as Element, this.getPoint(ev))
-      this.renderer.layer.addEventListener("pointermove", handler)
-      this.renderer.layer.addEventListener("pointercancel", endHandler)
-      this.renderer.layer.addEventListener("pointerleave", endHandler)
-      this.renderer.layer.addEventListener("pointerup", endHandler)
-
-      this.renderer.layer.style.cursor = "move"
-    })
+    )
     return translateEl
   }
 
@@ -208,7 +238,7 @@ export class IISelectionManager extends IIAbstractManager {
     const radius = 8
     const center: TPoint = {
       x: box.x + box.width / 2,
-      y: box.y - 4 * SELECTION_MARGIN,
+      y: box.y - 4 * SELECTION_PADDING,
     }
     const attrs1 = {
       role: SvgElementRole.Rotate,
@@ -234,41 +264,21 @@ export class IISelectionManager extends IIAbstractManager {
         { x: center.x, y: center.y + radius },
         {
           x: center.x,
-          y: box.y - SELECTION_MARGIN,
+          y: box.y - SELECTION_PADDING,
         },
         attrs3
       )
     )
 
-    const handler = (ev: PointerEvent) => {
-      ev.preventDefault()
-      ev.stopPropagation()
-      this.rotation.continue(this.getPoint(ev))
-    }
-    const endHandler = (ev: PointerEvent) => {
-      ev.preventDefault()
-      ev.stopPropagation()
-      this.rotation.end(this.getPoint(ev))
-      this.renderer.layer.removeEventListener("pointermove", handler)
-      this.renderer.layer.removeEventListener("pointercancel", endHandler)
-      this.renderer.layer.removeEventListener("pointerleave", endHandler)
-      this.renderer.layer.removeEventListener("pointerup", endHandler)
-      this.drawSelectedGroup(this.model.symbolsSelected)
-    }
-
-    group.addEventListener("pointerdown", (ev) => {
-      if (ev.button !== 0 || ev.buttons !== 1) {
-        return
+    this.#bindPointerDrag(
+      group,
+      (ev) => this.rotation.start(ev.target as Element, this.getPoint(ev)),
+      (ev) => this.rotation.continue(this.getPoint(ev)),
+      (ev) => {
+        this.rotation.end(this.getPoint(ev))
+        this.drawSelectedGroup(this.model.symbolsSelected)
       }
-      ev.preventDefault()
-      ev.stopPropagation()
-      this.hideInteractElements()
-      this.rotation.start(ev.target as Element, this.getPoint(ev))
-      this.renderer.layer.addEventListener("pointermove", handler)
-      this.renderer.layer.addEventListener("pointercancel", endHandler)
-      this.renderer.layer.addEventListener("pointerleave", endHandler)
-      this.renderer.layer.addEventListener("pointerup", endHandler)
-    })
+    )
     return group
   }
 
@@ -280,55 +290,36 @@ export class IISelectionManager extends IIAbstractManager {
       stroke: "#3e68ff",
     })
     const P_NW: TPoint = {
-      x: box.x - SELECTION_MARGIN,
-      y: box.y - SELECTION_MARGIN,
+      x: box.x - SELECTION_PADDING,
+      y: box.y - SELECTION_PADDING,
     }
     const P_NE: TPoint = {
-      x: box.x + box.width + SELECTION_MARGIN,
-      y: box.y - SELECTION_MARGIN,
+      x: box.x + box.width + SELECTION_PADDING,
+      y: box.y - SELECTION_PADDING,
     }
     const P_SE: TPoint = {
-      x: box.x + box.width + SELECTION_MARGIN,
-      y: box.y + box.height + SELECTION_MARGIN,
+      x: box.x + box.width + SELECTION_PADDING,
+      y: box.y + box.height + SELECTION_PADDING,
     }
     const P_SW: TPoint = {
-      x: box.x - SELECTION_MARGIN,
-      y: box.y + box.height + SELECTION_MARGIN,
+      x: box.x - SELECTION_PADDING,
+      y: box.y + box.height + SELECTION_PADDING,
     }
 
     const bindEl = (el: SVGElement, transformOrigin: TPoint, cursor: string) => {
-      const handler = (ev: PointerEvent) => {
-        ev.preventDefault()
-        ev.stopPropagation()
-        this.resize.continue(this.getPoint(ev))
-      }
-      const endHandler = (ev: PointerEvent) => {
-        ev.preventDefault()
-        ev.stopPropagation()
-        this.resize.end(this.getPoint(ev))
-        this.renderer.layer.removeEventListener("pointermove", handler)
-        this.renderer.layer.removeEventListener("pointercancel", endHandler)
-        this.renderer.layer.removeEventListener("pointerleave", endHandler)
-        this.renderer.layer.removeEventListener("pointerup", endHandler)
-
-        this.renderer.layer.style.cursor = ""
-        this.drawSelectedGroup(this.model.symbolsSelected)
-      }
-
-      el.addEventListener("pointerdown", (ev) => {
-        if (ev.button !== 0 || ev.buttons !== 1) {
-          return
+      this.#bindPointerDrag(
+        el,
+        (ev) => {
+          this.renderer.layer.style.cursor = cursor
+          this.resize.start(ev.target as Element, transformOrigin)
+        },
+        (ev) => this.resize.continue(this.getPoint(ev)),
+        (ev) => {
+          this.resize.end(this.getPoint(ev))
+          this.renderer.layer.style.cursor = ""
+          this.drawSelectedGroup(this.model.symbolsSelected)
         }
-        ev.preventDefault()
-        ev.stopPropagation()
-        this.hideInteractElements()
-        this.renderer.layer.style.cursor = cursor
-        this.resize.start(ev.target as Element, transformOrigin)
-        this.renderer.layer.addEventListener("pointermove", handler)
-        this.renderer.layer.addEventListener("pointercancel", endHandler)
-        this.renderer.layer.addEventListener("pointerleave", endHandler)
-        this.renderer.layer.addEventListener("pointerup", endHandler)
-      })
+      )
     }
 
     const sideResizeDefs = [
@@ -435,9 +426,16 @@ export class IISelectionManager extends IIAbstractManager {
       return
     }
 
+    // Reachable from `selectAll()`, which selects every symbol in the model with no render or
+    // registry check ahead of it — a custom symbol type missing its util must not abort building
+    // the selection outline, so it's left out of the bounding box, mirroring this file's own
+    // silent-skip precedent for a document-wide scan (`continue`'s `getUtil(...)?.overlaps(...) ??
+    // false`).
+    const registeredSymbols = symbols.filter((s) => symbolRegistry.has(s.type))
+
     const box1 = BoxOps.createFromBoxes(
-      symbols.map((s) => {
-        const b = OBBOps.toBox(s.bounds)
+      registeredSymbols.map((s) => {
+        const b = OBBOps.toBox(SymbolGeometry.boundsOf(s))
         return {
           x: b.x - (s.style.width || 1),
           y: b.y - (s.style.width || 1),
@@ -447,7 +445,7 @@ export class IISelectionManager extends IIAbstractManager {
       })
     )
 
-    const box2 = BoxOps.createFromPoints(symbols.flatMap((s) => s.vertices))
+    const box2 = BoxOps.createFromPoints(registeredSymbols.flatMap((s) => SymbolGeometry.verticesOf(s)))
     const ghostBoxes = this.getGhostBoxesForSelectedMath(symbols)
     const box = BoxOps.createFromBoxes([box1, box2, ...ghostBoxes])
 
@@ -486,6 +484,11 @@ export class IISelectionManager extends IIAbstractManager {
     return boxes
   }
 
+  /**
+   * `edge` positions the handles and nothing more. The drag handlers take a **fresh draft on every
+   * frame**: a draft is frozen the moment it is committed, so one draft reused across the gesture
+   * would throw on the second `pointermove`.
+   */
   protected createEdgeResizeGroup(edge: TEdge): SVGGElement {
     const group = SVGBuilder.createGroup({
       role: SvgElementRole.Resize,
@@ -502,159 +505,176 @@ export class IISelectionManager extends IIAbstractManager {
       fill: "white",
       style: `cursor:grab;`,
     }
-    const bindEl = (el: SVGCircleElement, pointIndex: number) => {
-      const handler = (ev: PointerEvent) => {
-        ev.preventDefault()
-        ev.stopPropagation()
-        const point = this.getPoint(ev)
-        const { x, y } = this.canvas.snaps.snapResize(point)
-        edge.vertices[pointIndex].x = x
-        edge.vertices[pointIndex].y = y
-        EdgeOps.updateEdgeDerivedFields(edge)
-        this.model.updateSymbol(edge)
-        this.renderer.drawSymbol(edge)
-        this.canvas.connector.showAnchorHint({ x, y }, edge.id)
-      }
-      const endHandler = (ev: PointerEvent) => {
-        ev.preventDefault()
-        ev.stopPropagation()
-        const point = this.getPoint(ev)
-        const { x, y } = this.canvas.snaps.snapResize(point)
-        edge.vertices[pointIndex].x = x
-        edge.vertices[pointIndex].y = y
-        EdgeOps.updateEdgeDerivedFields(edge)
-        this.canvas.connector.clearAnchorHint()
-        this.canvas.connector.applyEndpointAnchor(edge, pointIndex, { x, y })
-        this.renderer.layer.style.cursor = ""
-        this.canvas.updateSymbol(edge)
-        this.renderer.layer.removeEventListener("pointermove", handler)
-        this.renderer.layer.removeEventListener("pointercancel", endHandler)
-        this.renderer.layer.removeEventListener("pointerleave", endHandler)
-        this.renderer.layer.removeEventListener("pointerup", endHandler)
-        this.canvas.snaps.clearSnapToElementLines()
-        this.drawSelectedGroup(this.model.symbolsSelected)
-      }
-
-      el.addEventListener("pointerdown", (ev) => {
-        if (ev.button !== 0 || ev.buttons !== 1) {
-          return
-        }
-        this.renderer.layer.style.cursor = "grabbing"
-        this.hideInteractElements()
-        ev.preventDefault()
-        ev.stopPropagation()
-        this.renderer.layer.addEventListener("pointermove", handler)
-        this.renderer.layer.addEventListener("pointercancel", endHandler)
-        this.renderer.layer.addEventListener("pointerleave", endHandler)
-        this.renderer.layer.addEventListener("pointerup", endHandler)
-      })
+    /** The edge as the document currently holds it, mutable. One per frame. */
+    const draftEdge = (): TDraft<TEdge> | undefined => {
+      const draft = this.model.draftSymbol(edge.id)
+      return draft && EdgeUtil.isEdge(draft) ? (draft as TDraft<TEdge>) : undefined
     }
-    if (edge.kind === EdgeKind.Arc) {
-      const arc = edge as TEdgeArc
-      const bindArcEl = (el: SVGCircleElement, isStart: boolean, isEnd: boolean) => {
-        const updateArc = (x: number, y: number) => {
-          if (isStart) {
-            const endAngle = arc.startAngle + arc.sweepAngle
-            arc.startAngle = computeAngleFromPointOnEllipse(arc.center, arc.radiusX, arc.radiusY, arc.phi, { x, y })
-            arc.sweepAngle = endAngle - arc.startAngle
-          } else if (isEnd) {
-            const newEndAngle = computeAngleFromPointOnEllipse(arc.center, arc.radiusX, arc.radiusY, arc.phi, { x, y })
-            arc.sweepAngle = newEndAngle - arc.startAngle
-          } else {
-            const midVertex = arc.vertices[Math.floor(arc.vertices.length / 2)]
-            const oldDist = computeDistance(arc.center, midVertex)
-            const newDist = computeDistance(arc.center, { x, y })
-            if (oldDist > 0) {
-              const scale = newDist / oldDist
-              arc.radiusX *= scale
-              arc.radiusY *= scale
-            }
+    const moveVertex = (draft: TDraft<TEdge>, pointIndex: number, x: number, y: number) => {
+      // `x`/`y` are where the pointer is, in document coordinates; `draft.vertices` are the edge's
+      // own raw coordinates, which its matrix places. Writing the one into the other lands the vertex
+      // off by exactly that matrix — an already-moved edge jumped when a handle was dragged.
+      const raw = applyInverseMatrixToPoint({ x, y }, draft.transform)
+      if (!raw) {
+        // The edge is flattened to nothing on some axis, so no raw coordinate corresponds to where
+        // the pointer is. Nothing sensible to store; leave the edge as it stands.
+        return
+      }
+      // Written through the kind's own `moveVertex` rather than into a vertices array: a line's
+      // vertices are its `start`/`end` and a polyline's are its `points`, and mutating a computed
+      // array would take the write and discard it. An arc never reaches here — it has its own
+      // handles, bound by `bindArcEl` below.
+      if (EdgeUtil.isLineEdge(draft)) {
+        EdgeUtil.moveLineVertex(draft, pointIndex, raw)
+      } else if (EdgeUtil.isPolyEdge(draft)) {
+        EdgeUtil.movePolyLineVertex(draft, pointIndex, raw)
+      } else {
+        return
+      }
+    }
+    const bindEl = (el: SVGCircleElement, pointIndex: number) => {
+      this.#bindPointerDrag(
+        el,
+        () => {
+          this.renderer.layer.style.cursor = "grabbing"
+        },
+        (ev) => {
+          const draft = draftEdge()
+          if (!draft) {
+            return
           }
-        }
-        const handler = (ev: PointerEvent) => {
-          ev.preventDefault()
-          ev.stopPropagation()
           const point = this.getPoint(ev)
           const { x, y } = this.canvas.snaps.snapResize(point)
-          updateArc(x, y)
-          EdgeArcOps.updateDerivedFields(arc)
-          this.model.updateSymbol(arc)
-          this.renderer.drawSymbol(arc)
-        }
-        const endHandler = (ev: PointerEvent) => {
-          ev.preventDefault()
-          ev.stopPropagation()
+          moveVertex(draft, pointIndex, x, y)
+          this.model.commitSymbol(draft)
+          this.renderer.drawSymbol(draft)
+          this.canvas.connector.showAnchorHint({ x, y }, draft.id)
+        },
+        (ev) => {
           const point = this.getPoint(ev)
           const { x, y } = this.canvas.snaps.snapResize(point)
-          updateArc(x, y)
-          EdgeArcOps.updateDerivedFields(arc)
+          this.canvas.connector.clearAnchorHint()
           this.renderer.layer.style.cursor = ""
-          this.canvas.updateSymbol(arc)
-          this.renderer.layer.removeEventListener("pointermove", handler)
-          this.renderer.layer.removeEventListener("pointercancel", endHandler)
-          this.renderer.layer.removeEventListener("pointerleave", endHandler)
-          this.renderer.layer.removeEventListener("pointerup", endHandler)
+          this.canvas.updateSymbol(edge.id, (draft) => {
+            if (EdgeUtil.isEdge(draft)) {
+              moveVertex(draft, pointIndex, x, y)
+              this.canvas.connector.applyEndpointAnchor(draft, pointIndex, { x, y })
+            }
+          })
           this.canvas.snaps.clearSnapToElementLines()
           this.drawSelectedGroup(this.model.symbolsSelected)
         }
-        el.addEventListener("pointerdown", (ev) => {
-          if (ev.button !== 0 || ev.buttons !== 1) {
+      )
+    }
+    if (edge.kind === EdgeKind.Arc) {
+      const arc = edge as TEdgeArc
+      /** The arc as the document currently holds it, mutable. One per frame. */
+      const draftArc = (): TDraft<TEdgeArc> | undefined => {
+        const draft = this.model.draftSymbol(arc.id)
+        return draft && EdgeUtil.isEdge(draft) && EdgeUtil.isArcEdge(draft) ? (draft as TDraft<TEdgeArc>) : undefined
+      }
+      const bindArcEl = (el: SVGCircleElement, isStart: boolean, isEnd: boolean) => {
+        const updateArc = (arc: TDraft<TEdgeArc>, x: number, y: number) => {
+          // Same frame mismatch as `moveVertex`: the pointer speaks document coordinates, the arc's
+          // centre, radii and endpoints are raw. Mapped back through the arc's own matrix before any
+          // of the three reshaping helpers below sees it, so each still works in one frame.
+          const raw = applyInverseMatrixToPoint({ x, y }, arc.transform)
+          if (!raw) {
             return
           }
-          this.renderer.layer.style.cursor = "grabbing"
-          this.hideInteractElements()
-          ev.preventDefault()
-          ev.stopPropagation()
-          this.renderer.layer.addEventListener("pointermove", handler)
-          this.renderer.layer.addEventListener("pointercancel", endHandler)
-          this.renderer.layer.addEventListener("pointerleave", endHandler)
-          this.renderer.layer.addEventListener("pointerup", endHandler)
-        })
+          x = raw.x
+          y = raw.y
+          if (isStart) {
+            // Free stretch: lets the ellipse resize to reach the dragged point, rather than
+            // sliding the endpoint's angle around the existing (unchanged-size) ellipse.
+            Object.assign(arc, stretchArcEndpoint(arc, "start", { x, y }))
+          } else if (isEnd) {
+            Object.assign(arc, stretchArcEndpoint(arc, "end", { x, y }))
+          } else {
+            // Keeps both endpoints (and phi, and the radiusX:radiusY ratio) exactly fixed —
+            // dragging this handle only changes the arc's bulge, not where it's anchored.
+            Object.assign(arc, reprojectArcMidpoint(arc, { x, y }))
+          }
+        }
+        // Midpoint drag (reprojectArcMidpoint) runs a ~280-sample golden-section search per
+        // call — coalescing to one commit per animation frame, instead of one per native
+        // pointermove, keeps that search from running far more often than it can be seen.
+        const dragCoalescer = new RafCoalescer()
+        const runHandler = (ev: PointerEvent) => {
+          const draft = draftArc()
+          if (!draft) {
+            return
+          }
+          const point = this.getPoint(ev)
+          const { x, y } = this.canvas.snaps.snapResize(point)
+          updateArc(draft, x, y)
+          this.model.commitSymbol(draft)
+          this.renderer.drawSymbol(draft)
+          if (isStart || isEnd) {
+            this.canvas.connector.showAnchorHint({ x, y }, draft.id)
+          }
+        }
+        this.#bindPointerDrag(
+          el,
+          () => {
+            this.renderer.layer.style.cursor = "grabbing"
+          },
+          (ev) => dragCoalescer.schedule(() => runHandler(ev)),
+          (ev) => {
+            dragCoalescer.cancel()
+            const point = this.getPoint(ev)
+            const { x, y } = this.canvas.snaps.snapResize(point)
+            this.canvas.connector.clearAnchorHint()
+            this.renderer.layer.style.cursor = ""
+            this.canvas.updateSymbol(arc.id, (draft) => {
+              if (!EdgeUtil.isEdge(draft) || !EdgeUtil.isArcEdge(draft)) {
+                return
+              }
+              updateArc(draft, x, y)
+              if (isStart || isEnd) {
+                // Recomputed fresh, not the vertexIndex captured before this drag
+                // just re-tessellated the arc, and the vertex COUNT can change with the new radius/
+                // sweep — a stale index could silently miss applyEndpointAnchor's own isEnd check.
+                const currentIndex = isStart ? 0 : SymbolGeometry.verticesOf(draft).length - 1
+                this.canvas.connector.applyEndpointAnchor(draft, currentIndex, { x, y })
+              }
+            })
+            this.canvas.snaps.clearSnapToElementLines()
+            this.drawSelectedGroup(this.model.symbolsSelected)
+          }
+        )
       }
-      EdgeArcOps.getResizePoints(arc).forEach(({ point, vertexIndex }) => {
-        const initialVertexCount = arc.vertices.length
-        const isStart = vertexIndex === 0
-        const isEnd = vertexIndex === initialVertexCount - 1
-        const pointEl = SVGBuilder.createCircle(point, radius, attrs)
-        bindArcEl(pointEl, isStart, isEnd)
-        group.appendChild(pointEl)
-      })
+      symbolRegistry
+        .getUtilFor(edge)
+        .getResizePoints(edge)
+        .forEach(({ point, vertexIndex }) => {
+          const initialVertexCount = SymbolGeometry.verticesOf(arc).length
+          const isStart = vertexIndex === 0
+          const isEnd = vertexIndex === initialVertexCount - 1
+          const pointEl = SVGBuilder.createCircle(point, radius, attrs)
+          bindArcEl(pointEl, isStart, isEnd)
+          group.appendChild(pointEl)
+        })
     } else {
-      EdgeOps.getEdgeResizePoints(edge).forEach(({ point, vertexIndex }) => {
-        const pointEl = SVGBuilder.createCircle(point, radius, attrs)
-        bindEl(pointEl, vertexIndex)
-        group.appendChild(pointEl)
-      })
+      symbolRegistry
+        .getUtilFor(edge)
+        .getResizePoints(edge)
+        .forEach(({ point, vertexIndex }) => {
+          const pointEl = SVGBuilder.createCircle(point, radius, attrs)
+          bindEl(pointEl, vertexIndex)
+          group.appendChild(pointEl)
+        })
     }
 
     return group
   }
 
   /**
-   * Path-based hit area for line/polyline edges — narrow stroke aligned with edge geometry,
-   * avoiding the AABB problem where diagonal edges have an oversized clickable rectangle.
+   * Path-based hit area for an edge — a narrow stroke following the edge's own geometry, rather
+   * than its bounding box, which on a diagonal edge would be a far larger clickable rectangle than
+   * the edge itself.
    */
-  protected createEdgeTranslatePath(edge: TEdgeLine | TEdgePolyLine): SVGPathElement {
-    let d: string
-    if (edge.kind === EdgeKind.Line) {
-      const start = edge.startAnchor?.entryPoint ?? edge.start
-      const end = edge.endAnchor?.entryPoint ?? edge.end
-      d = `M ${start.x} ${start.y} L ${end.x} ${end.y}`
-    } else {
-      const pts = [...edge.points]
-      if (edge.startAnchor?.entryPoint) {
-        pts[0] = edge.startAnchor.entryPoint
-      }
-      if (edge.endAnchor?.entryPoint) {
-        pts[pts.length - 1] = edge.endAnchor.entryPoint
-      }
-      d =
-        `M ${pts[0].x} ${pts[0].y}` +
-        pts
-          .slice(1)
-          .map((p) => ` L ${p.x} ${p.y}`)
-          .join("")
-    }
+  protected createEdgeTranslatePath(edge: TEdge): SVGPathElement {
     const translateEl = SVGBuilder.createPath({
       role: SvgElementRole.Translate,
       style: "cursor:move",
@@ -662,38 +682,25 @@ export class IISelectionManager extends IIAbstractManager {
       stroke: "transparent",
       "stroke-width": "16",
       "stroke-linecap": "round",
-      d,
+      // The edge's own path, resolved by the kind table EdgeUtil has owned since IIC-2002. This
+      // used to be a fourth switch on kind, calling the same three Ops that table calls — and it
+      // assigned into a `let d: string` with no `default`, so a new edge kind would have left `d`
+      // unassigned.
+      d: EdgeUtil.getSVGPath(edge),
     })
-    const handler = (ev: PointerEvent) => {
-      ev.preventDefault()
-      ev.stopPropagation()
-      this.translate.continue(this.getPoint(ev))
-    }
-    const endHandler = (ev: PointerEvent) => {
-      ev.preventDefault()
-      ev.stopPropagation()
-      this.translate.end(this.getPoint(ev))
-      this.renderer.layer.removeEventListener("pointermove", handler)
-      this.renderer.layer.removeEventListener("pointercancel", endHandler)
-      this.renderer.layer.removeEventListener("pointerleave", endHandler)
-      this.renderer.layer.removeEventListener("pointerup", endHandler)
-      this.renderer.layer.style.cursor = ""
-      this.drawSelectedGroup(this.model.symbolsSelected)
-    }
-    translateEl.addEventListener("pointerdown", (ev) => {
-      if (ev.button !== 0 || ev.buttons !== 1) {
-        return
+    this.#bindPointerDrag(
+      translateEl,
+      (ev) => {
+        this.translate.start(ev.target as Element, this.getPoint(ev))
+        this.renderer.layer.style.cursor = "move"
+      },
+      (ev) => this.translate.continue(this.getPoint(ev)),
+      (ev) => {
+        this.translate.end(this.getPoint(ev))
+        this.renderer.layer.style.cursor = ""
+        this.drawSelectedGroup(this.model.symbolsSelected)
       }
-      ev.preventDefault()
-      ev.stopPropagation()
-      this.hideInteractElements()
-      this.translate.start(ev.target as Element, this.getPoint(ev))
-      this.renderer.layer.addEventListener("pointermove", handler)
-      this.renderer.layer.addEventListener("pointercancel", endHandler)
-      this.renderer.layer.addEventListener("pointerleave", endHandler)
-      this.renderer.layer.addEventListener("pointerup", endHandler)
-      this.renderer.layer.style.cursor = "move"
-    })
+    )
     return translateEl
   }
 
@@ -706,12 +713,9 @@ export class IISelectionManager extends IIAbstractManager {
       role: SvgElementRole.InteractElementsGroup,
     }
     const surroundGroup = SVGBuilder.createGroup(attrs)
-    const translateEl =
-      edge.kind === EdgeKind.Line || edge.kind === EdgeKind.PolyEdge
-        ? this.createEdgeTranslatePath(edge as TEdgeLine | TEdgePolyLine)
-        : this.createTranslateRect(OBBOps.toBox(edge.bounds))
+    const translateEl = this.createEdgeTranslatePath(edge)
     surroundGroup.appendChild(translateEl)
-    surroundGroup.appendChild(this.createEdgeResizeGroup(structuredClone(edge)))
+    surroundGroup.appendChild(this.createEdgeResizeGroup(edge))
     return surroundGroup
   }
 
@@ -720,7 +724,7 @@ export class IISelectionManager extends IIAbstractManager {
       return
     }
     this.removeSelectedGroup()
-    if (symbols.length === 1 && EdgeOps.isEdge(symbols[0])) {
+    if (symbols.length === 1 && EdgeUtil.isEdge(symbols[0])) {
       this.selectedGroup = this.createInteractEdgeGroup(symbols[0])
     } else {
       this.selectedGroup = this.createInteractElementsGroup(symbols)
@@ -773,14 +777,14 @@ export class IISelectionManager extends IIAbstractManager {
   }
 
   /**
-   * Build selected/covered stroke ID sets from JIIX text groups.
-   * Returns null when no JIIX groups exist (fallback to stroke overlap).
+   * Build selected/covered stroke ID sets from a batch of JIIX groups: `covered` is every stroke
+   * the groups account for, `selected` is those in a group overlapping the selection box.
+   * Returns null when there are no groups, which callers read as "fall back to stroke overlap".
    */
-  protected getTextGroupSets(selectionBox: TBox): {
-    selected: Set<string>
-    covered: Set<string>
-  } | null {
-    const groups = this.canvas.jiix.getTextSelectionGroups(this.canvas.configuration.selection.textLevel)
+  #buildGroupSets(
+    groups: Array<{ strokeIds: string[]; bounds: TBox }>,
+    selectionBox: TBox
+  ): { selected: Set<string>; covered: Set<string> } | null {
     if (groups.length === 0) {
       return null
     }
@@ -796,6 +800,20 @@ export class IISelectionManager extends IIAbstractManager {
     }
 
     return { selected, covered }
+  }
+
+  /**
+   * Build selected/covered stroke ID sets from JIIX text groups.
+   * Returns null when no JIIX groups exist (fallback to stroke overlap).
+   */
+  protected getTextGroupSets(selectionBox: TBox): {
+    selected: Set<string>
+    covered: Set<string>
+  } | null {
+    return this.#buildGroupSets(
+      this.canvas.jiix.getTextSelectionGroups(this.canvas.configuration.selection.textLevel),
+      selectionBox
+    )
   }
 
   /**
@@ -806,22 +824,10 @@ export class IISelectionManager extends IIAbstractManager {
     selected: Set<string>
     covered: Set<string>
   } | null {
-    const groups = this.canvas.jiix.getMathSelectionGroups(this.canvas.configuration.selection.mathLevel)
-    if (groups.length === 0) {
-      return null
-    }
-
-    const selected = new Set<string>()
-    const covered = new Set<string>()
-
-    for (const group of groups) {
-      group.strokeIds.forEach((id) => covered.add(id))
-      if (BoxOps.overlaps(group.bounds, selectionBox)) {
-        group.strokeIds.forEach((id) => selected.add(id))
-      }
-    }
-
-    return { selected, covered }
+    return this.#buildGroupSets(
+      this.canvas.jiix.getMathSelectionGroups(this.canvas.configuration.selection.mathLevel),
+      selectionBox
+    )
   }
 
   /**
@@ -832,22 +838,10 @@ export class IISelectionManager extends IIAbstractManager {
     selected: Set<string>
     covered: Set<string>
   } | null {
-    const groups = this.canvas.jiix.getShapeSelectionGroups(this.canvas.configuration.selection.shapeLevel)
-    if (groups.length === 0) {
-      return null
-    }
-
-    const selected = new Set<string>()
-    const covered = new Set<string>()
-
-    for (const group of groups) {
-      group.strokeIds.forEach((id) => covered.add(id))
-      if (BoxOps.overlaps(group.bounds, selectionBox)) {
-        group.strokeIds.forEach((id) => selected.add(id))
-      }
-    }
-
-    return { selected, covered }
+    return this.#buildGroupSets(
+      this.canvas.jiix.getShapeSelectionGroups(this.canvas.configuration.selection.shapeLevel),
+      selectionBox
+    )
   }
 
   start(info: TPointerInfo): void {
@@ -884,22 +878,22 @@ export class IISelectionManager extends IIAbstractManager {
           if (textSets && textSets.covered.has(stroke.id)) {
             shouldBeSelected = textSets.selected.has(stroke.id)
           } else {
-            shouldBeSelected = StrokeOps.overlaps(s, selectionBox)
+            shouldBeSelected = symbolRegistry.getUtilFor(stroke).overlaps(stroke, selectionBox)
           }
         } else if (stroke.jiixBlockType === "Math") {
           if (mathSets && mathSets.covered.has(stroke.id)) {
             shouldBeSelected = mathSets.selected.has(stroke.id)
           } else {
-            shouldBeSelected = StrokeOps.overlaps(s, selectionBox)
+            shouldBeSelected = symbolRegistry.getUtilFor(stroke).overlaps(stroke, selectionBox)
           }
         } else if (stroke.jiixBlockType === "Node" || stroke.jiixBlockType === "Edge") {
           if (shapeSets && shapeSets.covered.has(stroke.id)) {
             shouldBeSelected = shapeSets.selected.has(stroke.id)
           } else {
-            shouldBeSelected = StrokeOps.overlaps(s, selectionBox)
+            shouldBeSelected = symbolRegistry.getUtilFor(stroke).overlaps(stroke, selectionBox)
           }
         } else {
-          shouldBeSelected = StrokeOps.overlaps(s, selectionBox)
+          shouldBeSelected = symbolRegistry.getUtilFor(stroke).overlaps(stroke, selectionBox)
         }
       } else {
         shouldBeSelected = symbolRegistry.getUtil(s.type)?.overlaps(s, selectionBox) ?? false
@@ -908,9 +902,9 @@ export class IISelectionManager extends IIAbstractManager {
       const wasSelected = this.model.selectedIds.has(s.id)
       if (wasSelected !== shouldBeSelected) {
         if (shouldBeSelected) {
-          this.model.selectedIds.add(s.id)
+          this.model.selectSymbol(s.id)
         } else {
-          this.model.selectedIds.delete(s.id)
+          this.model.unselectSymbol(s.id)
         }
         updatedSymbols.push(s)
         this.renderer.updateSelectedState(s, shouldBeSelected)
@@ -998,7 +992,7 @@ export class IISelectionManager extends IIAbstractManager {
       if (this.model.selectedIds.has(id)) {
         return
       }
-      this.model.selectedIds.add(id)
+      this.model.selectSymbol(id)
       const symbol = this.model.symbols.find((s) => s.id === id)
       if (symbol) {
         this.renderer.updateSelectedState(symbol, true)
@@ -1006,9 +1000,36 @@ export class IISelectionManager extends IIAbstractManager {
     })
   }
 
+  /**
+   * For every selected stroke that belongs to a Node or Edge JIIX block, pull in all sibling
+   * strokes of that block — unconditionally (unlike expandSelectionForMathBlocks, this doesn't
+   * gate on selection.mathLevel; shape/edge blocks always move as one rigid group so that
+   * connected-edge live-follow has a consistent group bounds to work with).
+   */
+  expandSelectionForBlocks(): void {
+    const blockIds = new Set<string>()
+    this.model.symbolsSelected.forEach((s) => {
+      if (isStroke(s) && s.jiixBlockId && (s.jiixBlockType === "Node" || s.jiixBlockType === "Edge")) {
+        blockIds.add(s.jiixBlockId)
+      }
+    })
+    blockIds.forEach((blockId) => {
+      this.canvas.jiix.getStrokesForElement(blockId).forEach((id) => {
+        if (!this.model.selectedIds.has(id)) {
+          const sym = this.model.getSymbol(id)
+          if (sym) {
+            this.model.selectSymbol(id)
+            this.renderer.updateSelectedState(sym, true)
+          }
+        }
+      })
+    })
+  }
+
   end(info: TPointerInfo): TSymbol[] {
     const updatedSymbols = this.continue(info)
     this.expandSelectionForMathBlocks()
+    this.expandSelectionForBlocks()
     this.startSelectionPoint = undefined
     this.endSelectionPoint = undefined
     this.clearSelectingRect()

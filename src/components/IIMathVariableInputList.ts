@@ -1,4 +1,4 @@
-import { DOMFactory } from "@/components/dom"
+import { DOMFactory } from "@/dom"
 
 /**
  * @group Components

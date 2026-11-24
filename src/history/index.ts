@@ -1,3 +1,4 @@
+export * from "./AbstractDiffHistoryManager"
 export * from "./AbstractHistoryStack"
 export * from "./HistoryConfiguration"
 export * from "./HistoryContext"

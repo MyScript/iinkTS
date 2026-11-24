@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="../assets/style/panel.css" />
   <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
 
-  <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+  <script src="../assets/js/theme-init.js"></script>
 </head>
 
 <body>
@@ -117,7 +117,7 @@
       <div class="ex-panel-divider"></div>
 
       <div class="ex-panel-hint">
-        💡 End expressions with <code>=</code> or <code>?</code> to request a result. Use the scratch-out gesture to erase. Draw a tight circle to trigger the context menu reliably.
+        💡 End expressions with <code>=</code> to request a result. Use the scratch-out gesture to erase. Draw a tight circle to trigger the context menu reliably.
       </div>
 
     </aside>
@@ -177,14 +177,7 @@
             shape: false,
             edge: false
           },
-          style: {
-            strokeColor: true,
-            fillColor: false,
-            thickness: false,
-            fontSize: false,
-            fontWeight: false,
-            opacity: false,
-          },
+          style: false,
           context: {
             edit: false,
             decorator: false,
@@ -192,6 +185,10 @@
             export: false,
             convert: false,
           }
+        },
+        math: {
+          // Results come from the context menu here: drawn as ink, computed on request only
+          computation: { resultMode: "draw", autoCompute: false }
         }
       }
     }

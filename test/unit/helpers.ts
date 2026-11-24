@@ -1,29 +1,5 @@
-import {
-  DefaultPenStyle,
-  DefaultStyle,
-  TBox,
-  TStyle,
-  Stroke,
-  TStroke,
-  StrokeOps,
-  TDecorator,
-  TShapeCircle,
-  TEdgeLine,
-  TText,
-  TSymbolChar,
-  TPoint,
-  DecoratorKind,
-  TEraser,
-  EraserOps,
-  TMath,
-  TMathElement,
-  TPartialDeep,
-} from "@/iink"
-import { DecoratorOps } from "../../src/symbol/decorator/Decorator"
-import { TextOps } from "../../src/symbol/text/Text"
-import { MathOps } from "../../src/symbol/math/Math"
-import { ShapeCircleOps } from "../../src/symbol/shape/Circle"
-import { EdgeLineOps } from "../../src/symbol/edge/Line"
+import { BaseMenuItem, DecoratorKind, DecoratorUtil, DefaultPenStyle, DefaultStyle, EdgeUtil, Ellipse2d, EraserOps, MathUtil, OBBOps, Polygon2d, Polyline2d, HIT_TOLERANCE, ShapeUtil, Stroke, StrokeUtil, TBox, TDecorator, TEdge, TEdgeLine, TEraser, TMath, TMathElement, TPartialDeep, TPoint, TShapeCircle, TShapeEllipse, TStroke, TStyle, TSymbolChar, TText, TextUtil, computeTypesetVertices, TInteractiveInkCanvas } from "@/iink"
+
 
 export const delay = (delayInms: number) => {
   return new Promise((resolve) => setTimeout(resolve, delayInms))
@@ -49,7 +25,7 @@ export function buildStroke({
   for (let i = 0; i < nbPoint; i++) {
     stroke.pointers.push({
       p: Math.random(),
-      t: Date.now() + i,
+      dt: i,
       x: randomIntFromInterval(box.x, box.x + box.width),
       y: randomIntFromInterval(box.y, box.y + box.height),
     })
@@ -63,11 +39,11 @@ export function buildStrokeV2({
   nbPoint = 5,
   pointerType = "pen",
 } = {}): TStroke {
-  const stroke = StrokeOps.create(style, pointerType)
+  const stroke = StrokeUtil.createEmpty(style, pointerType)
   for (let i = 0; i < nbPoint; i++) {
     stroke.pointers.push({
       p: Math.random(),
-      t: Date.now() + i,
+      dt: i,
       x: randomIntFromInterval(box.x, box.x + box.width),
       y: randomIntFromInterval(box.y, box.y + box.height),
     })
@@ -81,13 +57,13 @@ export function buildIIStroke({
   nbPoint = 5,
   pointerType = "pen",
 } = {}): TStroke {
-  const stroke = StrokeOps.create(style, pointerType)
+  const stroke = StrokeUtil.createEmpty(style, pointerType)
   const stepX = box.width / (nbPoint - 1)
   const stepY = box.height / (nbPoint - 1)
   for (let i = 0; i < nbPoint; i++) {
-    StrokeOps.addPointer(stroke, {
+    StrokeUtil.addPointer(stroke, {
       p: Math.random(),
-      t: Date.now() + i,
+      dt: i,
       x: box.x + stepX * i,
       y: box.y + stepY * i,
     })
@@ -102,7 +78,7 @@ export function buildIIEraser({ box = defaultBox, nbPoint = 5 } = {}): TEraser {
   for (let i = 0; i < nbPoint; i++) {
     eraser.pointers.push({
       p: Math.random(),
-      t: Date.now() + i,
+      dt: i,
       x: box.x + stepX * i,
       y: box.y + stepY * i,
     })
@@ -111,7 +87,7 @@ export function buildIIEraser({ box = defaultBox, nbPoint = 5 } = {}): TEraser {
 }
 
 export function buildIIDecorator(kind: DecoratorKind, style: TPartialDeep<TStyle> = DefaultStyle): TDecorator {
-  return DecoratorOps.create(kind, style)
+  return DecoratorUtil.createDecorator(kind, style)
 }
 
 export function buildIICircle({
@@ -119,7 +95,7 @@ export function buildIICircle({
   radius = 5,
   style = DefaultStyle,
 }: { center?: TPoint; radius?: number; style?: TPartialDeep<TStyle> } = {}): TShapeCircle {
-  return ShapeCircleOps.create(center, radius, style)
+  return ShapeUtil.createCircle(center, radius, style)
 }
 
 export function buildIILine({
@@ -127,7 +103,7 @@ export function buildIILine({
   end = { x: 5, y: 5 },
   style = DefaultStyle,
 }: { start?: TPoint; end?: TPoint; style?: TPartialDeep<TStyle> } = {}): TEdgeLine {
-  return EdgeLineOps.create(start, end, undefined, undefined, style)
+  return EdgeUtil.createLine(start, end, undefined, undefined, style)
 }
 
 export function buildIIText({
@@ -136,7 +112,7 @@ export function buildIIText({
   boundingBox = { x: 0, y: 10, width: 20, height: 30 },
   style = DefaultStyle,
 }: { chars?: TSymbolChar[]; point?: TPoint; boundingBox?: TBox; style?: TPartialDeep<TStyle> } = {}): TText {
-  return TextOps.create(chars, point, boundingBox, style)
+  return TextUtil.createText(chars, point, boundingBox, style)
 }
 
 export function buildIIMath(
@@ -158,5 +134,65 @@ export function buildIIMath(
       bounds: boundingBox,
     },
   ]
-  return MathOps.create(elements, point, boundingBox, style)
+  return MathUtil.createMath(elements, point, boundingBox, style)
+}
+
+
+/**
+ * Asserts a transform wrote its coordinates rounded to the three decimals the document stores.
+ *
+ * Takes the points explicitly rather than walking the symbol, because only the geometry a transform
+ * *writes* is in scope: `center`, `start`, `end`, `points`, `point`, `pointers`. The derived fields
+ * — `bounds`, `vertices`, `snapPoints`, `edges` — are recomputed from those by the symbol's util,
+ * and arithmetic on a rounded value is not itself a rounded value (3.217 − 4 is
+ * −0.7829999999999999 in binary floating point). They were never rounded and are not asked to be.
+ *
+ * The invariant, not thirteen enumerated call sites: before IIC-2010 some transform branches went
+ * through `MatrixTransform.applyToPoint` raw and others through a rounding helper, so a resized
+ * line held three decimals while a translated one held seventeen.
+ */
+export function expectPointsRounded(points: TPoint[]): void {
+  expect(points.length).toBeGreaterThan(0)
+  const unrounded = points.filter((point) => point.x !== +point.x.toFixed(3) || point.y !== +point.y.toFixed(3))
+  // Named, not counted: a failure has to show which coordinate kept its full precision.
+  expect(unrounded).toEqual([])
+}
+
+/**
+ * The geometry a symbol's util builds for it, for tests that used to assert against the `*Ops`
+ * geometry methods the util replaced. Written once here rather than per file, so a change to how a
+ * kind describes itself is a change in one place.
+ */
+export function ellipseGeometry(ellipse: TShapeEllipse): Ellipse2d {
+  return Ellipse2d.fromRadii(ellipse.center, ellipse.radiusX, ellipse.radiusY, ellipse.orientation)
+}
+
+/** An edge's path, padded the way `EdgeUtil` pads it so it stays reachable by a selection. */
+export function edgeGeometry(vertices: TPoint[], edge: TEdge): Polyline2d {
+  const decorated = edge.startDecoration || edge.endDecoration
+  return new Polyline2d(vertices, HIT_TOLERANCE + (decorated ? (edge.style.width || 1) * 2.5 : 0))
+}
+
+/** A decorator is found by its target's box, filled, in that box's own frame. */
+export function decoratorGeometry(decorator: TDecorator): Polygon2d {
+  const bounds = decorator.targetBounds
+  return bounds ? new Polygon2d(OBBOps.toCorners(bounds), true, bounds.angle) : new Polygon2d([])
+}
+
+/** A typeset symbol is found by the box it was measured at, as an outline. */
+export function typesetGeometry(symbol: TText | TMath): Polygon2d {
+  return new Polygon2d(computeTypesetVertices(OBBOps.toUnrotatedBox(symbol.bounds)))
+}
+
+/** A menu item with nothing of its own: a button, for tests about where a menu puts its items */
+export class StubMenuItem extends BaseMenuItem<HTMLButtonElement> {
+  constructor(id: string, canvas: TInteractiveInkCanvas) {
+    super({ id, type: "button" }, canvas)
+  }
+  createElement(): HTMLButtonElement {
+    const button = document.createElement("button")
+    button.id = this.config.id
+    return button
+  }
+  update(): void {}
 }

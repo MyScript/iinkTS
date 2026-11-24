@@ -1,10 +1,11 @@
-import type { TCanvasConfiguration } from "@/canvas/AbstractCanvas"
 import type {
   TRecognitionWebSocketConfiguration,
   TServerWebsocketConfiguration,
   TWebSocketClientConfiguration,
 } from "@/client"
 import { DefaultWebSocketClientConfiguration, WebSocketClientConfiguration } from "@/client"
+import type { TPartialDeep } from "@/core"
+import { mergeDeep } from "@/core"
 import type { TGrabberConfiguration } from "@/grabber"
 import { DefaultGrabberConfiguration } from "@/grabber"
 import type { THistoryConfiguration } from "@/history"
@@ -12,6 +13,7 @@ import { DefaultHistoryConfiguration } from "@/history"
 import type { TLoggerConfiguration } from "@/logger"
 import { DefaultLoggerConfiguration } from "@/logger"
 import type {
+  TConnectorConfiguration,
   TGestureConfiguration,
   TMathConfig,
   TOverlayConfig,
@@ -19,6 +21,8 @@ import type {
   TSnapConfiguration,
 } from "@/manager"
 import {
+  ConnectorConfiguration,
+  DefaultConnectorConfiguration,
   DefaultGestureConfiguration,
   DefaultOverlayConfig,
   DefaultSelectionConfig,
@@ -31,9 +35,8 @@ import type { TIIRendererConfiguration } from "@/renderer"
 import { DefaultIIRendererConfiguration } from "@/renderer"
 import type { TStyle } from "@/style"
 import { DefaultStyle } from "@/style"
-import type { TPartialDeep } from "@/utils"
-import { mergeDeep } from "@/utils"
 
+import type { TCanvasConfiguration } from "../AbstractCanvas"
 /**
  * @group Canvas
  */
@@ -50,6 +53,8 @@ export type TInteractiveInkCanvasConfiguration = TCanvasConfiguration &
     }
     gesture: TGestureConfiguration
     snap: TSnapConfiguration
+    /** Whether moving/resizing/rotating a connected shape reshapes its anchored edges to follow it */
+    connector: TConnectorConfiguration
     overlays: TOverlayConfig
     selection: TSelectionConfig
     /** Math manager configuration (computation behavior and visual interactions) */
@@ -78,6 +83,7 @@ export const DefaultInteractiveInkCanvasConfiguration: TInteractiveInkCanvasConf
   },
   gesture: DefaultGestureConfiguration,
   snap: DefaultSnapConfiguration,
+  connector: DefaultConnectorConfiguration,
   overlays: DefaultOverlayConfig,
   selection: DefaultSelectionConfig,
   math: {},
@@ -103,6 +109,7 @@ export class InteractiveInkCanvasConfiguration implements TInteractiveInkCanvasC
   }
   gesture: TGestureConfiguration
   snap: TSnapConfiguration
+  connector: TConnectorConfiguration
   overlays: TOverlayConfig
   selection: TSelectionConfig
   math: TMathConfig
@@ -113,15 +120,27 @@ export class InteractiveInkCanvasConfiguration implements TInteractiveInkCanvasC
     this.recognition = recognition
     this.server = server
 
-    this.grabber = mergeDeep({}, DefaultInteractiveInkCanvasConfiguration.grabber, configuration?.grabber)
-    this.logger = mergeDeep({}, DefaultInteractiveInkCanvasConfiguration.logger, configuration?.logger)
-    this.rendering = mergeDeep({}, DefaultInteractiveInkCanvasConfiguration.rendering, configuration?.rendering)
-    this["undo-redo"] = mergeDeep(
+    this.grabber = mergeDeep<TGrabberConfiguration>(
+      {},
+      DefaultInteractiveInkCanvasConfiguration.grabber,
+      configuration?.grabber
+    )
+    this.logger = mergeDeep<TLoggerConfiguration>(
+      {},
+      DefaultInteractiveInkCanvasConfiguration.logger,
+      configuration?.logger
+    )
+    this.rendering = mergeDeep<TIIRendererConfiguration>(
+      {},
+      DefaultInteractiveInkCanvasConfiguration.rendering,
+      configuration?.rendering
+    )
+    this["undo-redo"] = mergeDeep<THistoryConfiguration>(
       {},
       DefaultInteractiveInkCanvasConfiguration["undo-redo"],
       configuration?.["undo-redo"]
     )
-    this.menu = mergeDeep({}, DefaultInteractiveInkCanvasConfiguration.menu, configuration?.menu)
+    this.menu = mergeDeep<TMenuConfiguration>({}, DefaultInteractiveInkCanvasConfiguration.menu, configuration?.menu)
     if (configuration?.menu?.style) {
       if (configuration.menu.style.colors) {
         this.menu.style.colors = configuration.menu.style.colors.filter((color): color is string => color !== undefined)
@@ -163,14 +182,23 @@ export class InteractiveInkCanvasConfiguration implements TInteractiveInkCanvasC
       this.menu.style.fontWeight = configuration.menu.style.fontWeight ?? this.menu.style.fontWeight
       this.menu.style.opacity = configuration.menu.style.opacity ?? this.menu.style.opacity
     }
-    this.gesture = mergeDeep({}, DefaultInteractiveInkCanvasConfiguration.gesture, configuration?.gesture)
+    this.gesture = mergeDeep<TGestureConfiguration>(
+      {},
+      DefaultInteractiveInkCanvasConfiguration.gesture,
+      configuration?.gesture
+    )
     this.snap = new SnapConfiguration(configuration?.snap)
-    this.overlays = mergeDeep({}, DefaultOverlayConfig, configuration?.overlays)
+    this.connector = new ConnectorConfiguration(configuration?.connector)
+    this.overlays = mergeDeep<TOverlayConfig>({}, DefaultOverlayConfig, configuration?.overlays)
 
-    this.penStyle = mergeDeep({}, DefaultInteractiveInkCanvasConfiguration.penStyle, configuration?.penStyle)
-    this.fontStyle = mergeDeep({}, DefaultInteractiveInkCanvasConfiguration.fontStyle, configuration?.fontStyle)
-    this.selection = mergeDeep({}, DefaultSelectionConfig, configuration?.selection)
-    this.math = mergeDeep({}, DefaultInteractiveInkCanvasConfiguration.math, configuration?.math)
+    this.penStyle = mergeDeep<TStyle>({}, DefaultInteractiveInkCanvasConfiguration.penStyle, configuration?.penStyle)
+    this.fontStyle = mergeDeep<InteractiveInkCanvasConfiguration["fontStyle"]>(
+      {},
+      DefaultInteractiveInkCanvasConfiguration.fontStyle,
+      configuration?.fontStyle
+    )
+    this.selection = mergeDeep<TSelectionConfig>({}, DefaultSelectionConfig, configuration?.selection)
+    this.math = mergeDeep<TMathConfig>({}, DefaultInteractiveInkCanvasConfiguration.math, configuration?.math)
     this.cssVars = configuration?.cssVars as Record<string, string> | undefined
   }
 }

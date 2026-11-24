@@ -1,20 +1,22 @@
-import type { InkCanvas } from "@/canvas"
+import type { TInkCanvas } from "@/canvas"
+import type { TPointer } from "@/core"
 import type { TPointerInfo } from "@/grabber"
-import { AbstractWriterManager } from "@/manager/base/AbstractWriterManager"
 import type { IModel } from "@/model"
 import type { TStyle } from "@/style"
-import type { TPointer, TStroke, TSymbol } from "@/symbol"
+import type { TStroke, TSymbol } from "@/symbol"
 import { isStroke } from "@/symbol"
-import { StrokeOps } from "@/symbol/stroke/Stroke"
+import { StrokeUtil } from "@/symbol-utils"
+
+import { AbstractWriterManager } from "../base/AbstractWriterManager"
 
 /**
  * @group Manager
  */
 export class IWriterManager extends AbstractWriterManager {
-  canvas: InkCanvas
+  canvas: TInkCanvas
   #exportTimer?: ReturnType<typeof setTimeout>
 
-  constructor(canvas: InkCanvas) {
+  constructor(canvas: TInkCanvas) {
     super(canvas)
     this.canvas = canvas
   }
@@ -23,15 +25,15 @@ export class IWriterManager extends AbstractWriterManager {
     return this.canvas.model
   }
 
-  protected createCurrentSymbol(pointer: TPointer, style: TStyle, pointerType: string): TSymbol {
-    this.model.currentStroke = StrokeOps.create(style, pointerType)
-    StrokeOps.addPointer(this.model.currentStroke, pointer)
+  protected createCurrentSymbol(pointer: TPointer, style: TStyle, pointerType: string, creationTime: number): TSymbol {
+    this.model.currentStroke = StrokeUtil.createEmpty(style, pointerType, creationTime)
+    StrokeUtil.addPointer(this.model.currentStroke, pointer)
     return this.model.currentStroke
   }
 
   protected updateCurrentSymbol(pointer: TPointer): TStroke {
     if (this.model.currentStroke && isStroke(this.model.currentStroke)) {
-      StrokeOps.addPointer(this.model.currentStroke, pointer)
+      StrokeUtil.addPointer(this.model.currentStroke, pointer)
     }
     return this.model.currentStroke!
   }
@@ -42,14 +44,20 @@ export class IWriterManager extends AbstractWriterManager {
     this.model.currentStroke = undefined
     this.renderer.drawSymbol(localSymbol)
     this.model.addStroke(localSymbol)
-    this.canvas.history.push(this.model, {
+    this.canvas.history.push({
       added: [localSymbol],
     })
     if (this.canvas.configuration.triggers.exportContent !== "DEMAND") {
       clearTimeout(this.#exportTimer)
       this.#exportTimer = setTimeout(
         async () => {
-          this.canvas.export()
+          try {
+            await this.canvas.export()
+          } catch (error) {
+            // Not awaited before, so every failed auto-export reached the integrator as an
+            // unhandled rejection. InkCanvas has no manageError, so report on the error event.
+            this.canvas.event.emitError(error as Error)
+          }
         },
         this.canvas.configuration.triggers.exportContent === "QUIET_PERIOD"
           ? this.canvas.configuration.triggers.exportContentDelay

@@ -109,6 +109,25 @@ nav {
   outline: none;
 }
 
+/* Narrow screens: header buttons shrink instead of pushing others off-screen */
+@media (max-width: 600px) {
+  .header-main {
+    padding: 0 var(--ex-space-sm);
+    gap: var(--ex-space-xs);
+  }
+
+  .header-main > button:not(.ex-theme-toggle) {
+    min-width: 0;
+    flex-shrink: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 var(--ex-space-sm);
+    font-size: 12px;
+  }
+
+  .header-title { font-size: 15px; }
+}
+
 /* ─── Result panel ───────────────────────────────────────────────────────── */
 
 /* ─── Theme toggle button (injected into .header-main by theme.js) ────────── */

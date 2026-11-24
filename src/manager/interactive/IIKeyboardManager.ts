@@ -1,7 +1,7 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import { CanvasTool } from "@/Constants"
+import type { TInteractiveInkCanvas } from "@/canvas"
 import { LoggerCategory } from "@/logger"
 
+import { CanvasTool } from "../base/CanvasTool"
 import { IIAbstractManager } from "./IIAbstractManager"
 
 /**

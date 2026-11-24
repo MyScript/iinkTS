@@ -5,7 +5,6 @@ import {
   passModalKey
 } from "../helper"
 import hello from "../__dataset__/helloOneStroke"
-import TextNavActions from "../_partials/text-nav-actions"
 
 test.describe("Interactive Canvas SSR Text file export", () => {
   test.beforeEach(async ({ page }) => {

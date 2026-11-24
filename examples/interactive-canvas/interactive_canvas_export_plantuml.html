@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Interactive Ink Canvas - PlantUML Export</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <style>
+      #rootEl {
+        flex: 1;
+        min-width: 0;
+      }
+
+      #results-panel {
+        width: 360px;
+      }
+
+      .export-result-item {
+        margin-bottom: var(--ex-space-md);
+      }
+
+      .export-result-item pre {
+        margin: 4px 0 0;
+        min-height: 120px;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+    </style>
+    <script src="../assets/js/theme-init.js"></script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="resultsPanelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="results-panel">
+        📤 Results
+      </button>
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">
+        Interactive Ink Canvas - PlantUML Export
+      </h1>
+    </header>
+
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">Hand-drawn diagram → PlantUML</p>
+        <p class="ex-panel-intro"><code>canvas.exportAs("plantuml")</code> resolves with a <code>@startuml</code>/<code>@enduml</code> block, derived locally from the JIIX recognition result.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Draw shapes (rectangle, circle, rhombus…) connected by lines. Write a word inside a shape to label it.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Same diagram as the Mermaid export, in PlantUML syntax instead — paste it into your own PlantUML toolchain.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">The panel refreshes on every <code>exported</code> event, so the diagram source follows what you draw.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc"><code>canvas.download("plantuml")</code> saves the same content as a <code>.puml</code> file.</div>
+        </div>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-hint">This page shows the source text only, with no rendered preview: rendering PlantUML means sending the diagram to a remote server, and an example should not ship your ink to a third party. Render it locally with your own PlantUML instance.</div>
+      </aside>
+      <div class="page-content">
+        <nav class="flex-container wrap gap between">
+          <div class="flex-container wrap gap">
+            <button class="classic-btn primary" id="exportPlantUML">
+              Export as PlantUML
+            </button>
+            <button class="classic-btn" id="downloadPlantUML">
+              Download .puml
+            </button>
+            <button class="classic-btn" id="clear">
+              Clear
+            </button>
+          </div>
+        </nav>
+        <div class="main-layout">
+          <div id="rootEl"></div>
+          <aside id="results-panel" class="ex-panel">
+            <p class="ex-panel-heading">PlantUML source</p>
+            <div class="export-result-item">
+              <pre id="plantUMLResult" class="ex-panel-code"></pre>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { Canvas } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from "../components/modal/modalCanvasOptions.js";
+
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      const resultsPanelToggleBtn = document.getElementById('resultsPanelToggleBtn')
+      const resultsPanel = document.getElementById('results-panel')
+      resultsPanelToggleBtn.addEventListener('click', () => {
+        const open = resultsPanel.classList.toggle('open')
+        resultsPanelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      const rootElement = document.getElementById("rootEl");
+      const exportPlantUMLBtn = document.getElementById("exportPlantUML");
+      const downloadPlantUMLBtn = document.getElementById("downloadPlantUML");
+      const clearBtn = document.getElementById("clear");
+      const plantUMLResultElement = document.getElementById("plantUMLResult");
+      const showModalBtn = document.getElementById("showModalBtn");
+
+      let canvas;
+      const canvasOptions = {
+        configuration: {
+          recognition: { types: ['text', 'shape'] },
+          menu: {
+            action: {
+              language: false,
+              gesture: false,
+              snap: false,
+              export: false,
+              import: false,
+              convert: false,
+              math: false,
+              guide: false,
+              selection: false,
+            },
+            tool: {
+              write: true,
+              move: true,
+              select: true,
+              erase: true,
+              shape: false,
+              edge: false,
+            },
+            style: {
+              strokeColor: true,
+              fillColor: false,
+              thickness: false,
+              fontSize: false,
+              fontWeight: false,
+              opacity: false,
+            },
+            context: {
+              edit: false,
+              decorator: false,
+              reorder: false,
+              export: false,
+              convert: false,
+            },
+          },
+        },
+      };
+
+      async function refreshPlantUML() {
+        if (!canvas) return;
+        plantUMLResultElement.textContent = await canvas.exportAs("plantuml");
+      }
+
+      async function loadCanvas(options) {
+        await canvas?.destroy();
+        canvas = await Canvas.load(rootElement, "INTERACTIVE_INK", options);
+        window.canvas = canvas;
+        plantUMLResultElement.textContent = "";
+        canvas.event.addEventListener("exported", () => refreshPlantUML());
+      }
+
+      exportPlantUMLBtn.addEventListener("click", () => refreshPlantUML());
+
+      downloadPlantUMLBtn.addEventListener("click", () => canvas?.download("plantuml"));
+
+      clearBtn.addEventListener("click", async () => {
+        if (!canvas) return;
+        await canvas.clear();
+        plantUMLResultElement.textContent = "";
+      });
+
+      showModalBtn.addEventListener("click", () => {
+        ModalCanvasOptions.show(loadCanvas, canvasOptions);
+      });
+
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions);
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.canvasOptions = canvasOptions
+      window.loadCanvas = loadCanvas
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>

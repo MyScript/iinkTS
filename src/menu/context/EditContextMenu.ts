@@ -1,11 +1,10 @@
 import ArrowDown from "@/assets/svg/nav-arrow-down.svg"
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import type { TGenericMenuItem } from "@/menu/items/BaseMenuItem"
-import { BaseMenuItem } from "@/menu/items/BaseMenuItem"
-import type { TText } from "@/symbol"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import { createUUID } from "@/core"
 import { isText } from "@/symbol"
-import { createUUID } from "@/utils"
 
+import type { TGenericMenuItem } from "../items/BaseMenuItem"
+import { BaseMenuItem } from "../items/BaseMenuItem"
 /**
  * @group Menu
  * @remarks Menu contextuel Edit - Édite le texte sélectionné
@@ -52,22 +51,35 @@ export class EditContextMenu extends BaseMenuItem<HTMLElement> {
 
     this.editSaveBtn.addEventListener("pointerdown", async (e) => {
       e.stopPropagation()
-      const textSymbol = this.canvas.model.symbolsSelected.find((s) => isText(s)) as TText
-      if (textSymbol) {
-        const firstChar = textSymbol.chars[0]
-        textSymbol.chars = []
-        for (let i = 0; i < this.editInput!.value.length; i++) {
-          textSymbol.chars.push({
-            label: this.editInput!.value.charAt(i),
-            id: createUUID(),
-            color: firstChar.color,
-            fontSize: firstChar.fontSize,
-            fontWeight: firstChar.fontWeight,
-            bounds: firstChar.bounds,
+      const selectedText = this.canvas.model.symbolsSelected.find((s) => isText(s))
+      if (selectedText) {
+        const label = this.editInput!.value
+        try {
+          // The patch rewrites the chars of a draft; the canvas re-measures and commits it
+          const updated = await this.canvas.updateSymbol(selectedText.id, (draft) => {
+            if (!isText(draft)) {
+              return
+            }
+            const firstChar = draft.chars[0]
+            draft.chars = []
+            for (let i = 0; i < label.length; i++) {
+              draft.chars.push({
+                label: label.charAt(i),
+                id: createUUID(),
+                color: firstChar.color,
+                fontSize: firstChar.fontSize,
+                fontWeight: firstChar.fontWeight,
+                bounds: firstChar.bounds,
+              })
+            }
           })
+          if (updated) {
+            this.canvas.selector.drawSelectedGroup([updated])
+          }
+        } catch (error) {
+          // Reported rather than swallowed: the edit would otherwise end with no redraw and no feedback
+          this.canvas.manageError(error as Error)
         }
-        await this.canvas.updateSymbol(textSymbol)
-        this.canvas.selector.drawSelectedGroup([textSymbol])
       }
     })
 

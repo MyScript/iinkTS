@@ -1,10 +1,4 @@
-import {
-  CanvasRendererShape,
-  DefaultPenStyle,
-  TCanvasShapeEllipseSymbol,
-  TCanvasShapeLineSymbol,
-  TCanvasShapeTableSymbol,
-} from "@/iink"
+import { CanvasRendererShape, DefaultPenStyle, MatrixTransform, TCanvasShapeEllipseSymbol, TCanvasShapeLineSymbol, TCanvasShapeTableSymbol } from "@/iink"
 
 describe("CanvasRendererShape.ts", () => {
   const canvas: HTMLCanvasElement = document.createElement("canvas")
@@ -24,6 +18,7 @@ describe("CanvasRendererShape.ts", () => {
       type: canvasRendererShape.symbols.table,
       style: DefaultPenStyle,
       lines: [{ p1, p2 }],
+      transform: MatrixTransform.identity(),
     }
     canvasRendererShape.draw(canvasContext, table)
     expect(canvasContext.moveTo).toHaveBeenCalledTimes(1)
@@ -48,6 +43,7 @@ describe("CanvasRendererShape.ts", () => {
       startAngle: 0,
       style: DefaultPenStyle,
       sweepAngle: 1,
+      transform: MatrixTransform.identity(),
     }
     canvasRendererShape.draw(canvasContext, table)
     expect(canvasContext.moveTo).toHaveBeenCalledTimes(1)
@@ -65,6 +61,7 @@ describe("CanvasRendererShape.ts", () => {
       type: canvasRendererShape.symbols.line,
       beginTangentAngle: 1,
       endTangentAngle: 90,
+      transform: MatrixTransform.identity(),
     }
     canvasRendererShape.draw(canvasContext, line)
     expect(canvasContext.moveTo).toHaveBeenCalledTimes(1)

@@ -5,11 +5,12 @@ import {
   waitForConvertedEvent,
   waitForSynchronizedEvent,
   writeStrokes,
-  callCanvasConvert
+  callCanvasConvert,
+  openMenuCollapsible
 } from "../helper"
 import helloOneStroke from "../__dataset__/helloOneStroke"
 
-test.describe("Interactive ink canvas Get Started Menu Style", () => {
+test.describe("Interactive ink canvas Get Started Menu Style", { tag: "@touch" }, () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/interactive-canvas/interactive_canvas_get_started.html`)
     await passModalKey(page)
@@ -26,7 +27,13 @@ test.describe("Interactive ink canvas Get Started Menu Style", () => {
     colors.forEach(async (color) => {
       test(`should write with color: ${ color.color }`, async ({ page }) => {
         await page.locator("#ms-menu-style-color").click()
-        await page.locator("#ms-menu-style-color-list-" + color.rgb).click()
+        // The palette slides open with a 500ms max-height transition, and a click landing while
+        // the swatches are still moving silently misses them — leaving the strokes written next
+        // in the default black. Retry the pick until the pen style actually holds the colour.
+        await expect(async () => {
+          await page.locator("#ms-menu-style-color-list-" + color.rgb).click()
+          expect(await page.evaluate("rootEl.iink.penStyle.color")).toStrictEqual("#" + color.rgb)
+        }).toPass({ timeout: 10000 })
 
         await Promise.all([
           waitForSynchronizedEvent(page),
@@ -38,7 +45,7 @@ test.describe("Interactive ink canvas Get Started Menu Style", () => {
         expect(stroke.style.color).toStrictEqual("#" + color.rgb)
         expect(stroke.style.width).toStrictEqual(2)
 
-        const strokePathLocator = page.locator(` #${ stroke.id } path`)
+        const strokePathLocator = page.locator(` #${stroke.id}`)
         await expect(strokePathLocator).toBeVisible()
         await expect(strokePathLocator).toHaveAttribute("fill", "#" + color.rgb)
       })
@@ -54,7 +61,7 @@ test.describe("Interactive ink canvas Get Started Menu Style", () => {
     ]
     thicknesses.forEach(async (thickness) => {
       test(`should write with size: ${ thickness.size }`, async ({ page }) => {
-        await page.locator("#ms-menu-style-thickness .collapsible-header").click()
+        await openMenuCollapsible(page, "#ms-menu-style-thickness")
         await page
           .locator("#ms-menu-style-thickness-" + thickness.width)
           .click()
@@ -69,7 +76,7 @@ test.describe("Interactive ink canvas Get Started Menu Style", () => {
         expect(stroke.style.color).toStrictEqual("#000000")
         expect(stroke.style.width).toStrictEqual(thickness.width)
 
-        const strokePathLocator = page.locator(` #${ stroke.id } path`)
+        const strokePathLocator = page.locator(` #${stroke.id}`)
         await expect(strokePathLocator).toBeVisible()
         await expect(strokePathLocator).toHaveAttribute(
           "stroke-width",
@@ -89,7 +96,7 @@ test.describe("Interactive ink canvas Get Started Menu Style", () => {
     const DEFAULT_GUIDE_SIZE = 50
     fontSizes.forEach(async (fontSize) => {
       test(`should convert stroke with font size: ${fontSize.size}`, async ({ page }) => {
-        await page.locator("#ms-menu-style-font-size .collapsible-header").click()
+        await openMenuCollapsible(page, "#ms-menu-style-font-size")
         await page.locator(`[id="ms-menu-style-font-size-${fontSize.pixels}"]`).click()
         await Promise.all([
           waitForSynchronizedEvent(page),
@@ -115,7 +122,7 @@ test.describe("Interactive ink canvas Get Started Menu Style", () => {
     })
 
     test("should have a correct text converted size with fontSize Auto", async ({ page, }) => {
-      await page.locator("#ms-menu-style-font-size .collapsible-header").click()
+      await openMenuCollapsible(page, "#ms-menu-style-font-size")
       await page.locator("#ms-menu-style-font-size-auto").click()
 
       await Promise.all([
@@ -133,7 +140,7 @@ test.describe("Interactive ink canvas Get Started Menu Style", () => {
       const maxY = Math.max(...helloOneStroke.strokes[0].pointers.map(p => p.y))
 
       const strokesHeight = maxY - minY
-      const symbolsAfterConvert = await page.evaluate("rootEl.iink.model.symbols")
+      const symbolsAfterConvert = await getCanvasSymbols(page)
       const boundsHeight = symbolsAfterConvert[0].bounds.height
       const chars = symbolsAfterConvert[0].chars
       expect(chars).toHaveLength(helloOneStroke.exports["application/vnd.myscript.jiix"].label.length)
@@ -159,7 +166,7 @@ test.describe("Interactive ink canvas Get Started Menu Style", () => {
     ]
     fontWeights.forEach(fw => {
       test(`should have convert with font weight ${fw.label}`, async ({ page }) => {
-        await page.locator("#ms-menu-style-font-weight .collapsible-header").click()
+        await openMenuCollapsible(page, "#ms-menu-style-font-weight")
         await page.locator(`#${fw.id}`).click()
 
         await Promise.all([
@@ -195,7 +202,7 @@ test.describe("Interactive ink canvas Get Started Menu Style", () => {
       const strokes = await getCanvasSymbols(page)
       const stroke = strokes[0]
       expect(stroke.style.opacity).toStrictEqual(0.5)
-      await expect(page.locator(`#${ stroke.id } path`)).toHaveAttribute("opacity", "0.5")
+      await expect(page.locator(`#${stroke.id}`)).toHaveAttribute("opacity", "0.5")
     })
   })
 })

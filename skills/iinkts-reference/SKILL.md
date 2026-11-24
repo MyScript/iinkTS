@@ -10,99 +10,108 @@ description: iinkTS directory map, naming conventions, symbol hierarchy, manager
 ```
 src/
 ├── canvas/
-│   ├── variants/        # InteractiveInkCanvas, InkCanvas, InkCanvasDeprecated, InteractiveInkSSRCanvas
+│   ├── variants/        # InteractiveInkCanvas, InkCanvas, InkCanvasDeprecated, InteractiveInkSSRCanvas + their *Configuration
 │   ├── AbstractCanvas.ts, CanvasFactory.ts, CanvasEvent.ts, CanvasLayer.ts
+│   ├── TInteractiveInkCanvas.ts, TInkCanvas.ts, TCanvasOperationLabel.ts
 │   └── Canvas.ts        # Public entry point
 ├── manager/
-│   ├── base/            # AbstractWriterManager, ColorPaletteManager, EraseManager
+│   ├── base/            # AbstractWriterManager, EraseManager, ColorPaletteManager, ExportManager, PDFExportManager, LayoutManager, CanvasTool, TExport
 │   ├── simple/          # IWriterManager
 │   ├── debug/           # IDebugSVGManager
 │   └── interactive/     # Core interactive managers
-│       ├── math/        # IIMathComputationSubManager, IIMathFunctionEvaluationSubManager, IIMathVariableSubManager
-│       ├── transform/   # AbstractTransformManager, IIResizeManager, IIRotationManager, IITranslateManager
-│       ├── gestures/    # GestureHandler, GestureHelpers, IIGestureAnnotationProcessor, handlers/
-│       ├── IIConversionManager.ts, IIGestureManager.ts, IIJiixQueryManager.ts
-│       ├── IIKeyboardManager.ts, IIMathManager.ts, IIMoveManager.ts
-│       ├── IIOverlayManager.ts, IISelectionManager.ts, IISnapManager.ts
-│       ├── IISynchronizerManager.ts, IITransformManager.ts (orchestrator)
-│       ├── IITypesetManager.ts, IIWriterManager.ts
+│       ├── math/        # IIMathComputationSubManager, IIMathFunctionEvaluationSubManager, IIMathVariableSubManager, IIMathCapabilitiesSubManager
+│       ├── transform/   # AbstractTransformManager.ts (class IIAbstractTransformManager), IIResizeManager, IIRotationManager, IITranslateManager, ResizeDirection
+│       ├── gestures/    # GestureHandler, GestureHelpers, GestureTypes, GestureAnnotation (IIGestureAnnotationProcessor), handlers/
+│       ├── IIConnectorManager.ts, IIConversionManager.ts, IIExportManager.ts
+│       ├── IIGestureManager.ts, IIJiixQueryManager.ts, IIKeyboardManager.ts
+│       ├── IIMathManager.ts, IIMoveManager.ts, IIOverlayManager.ts, IIPlaybackManager.ts
+│       ├── IISelectionManager.ts, IISnapManager.ts, IISynchronizerManager.ts
+│       ├── IITransformManager.ts (orchestrator), IITypesetManager.ts, IIWriterManager.ts
+│       ├── CanvasWriteTool.ts, GestureOperationLabels.ts
 │       └── IIAbstractManager.ts
 ├── model/               # Model, IModel, IIModel
-├── client/
-│   ├── recognition/     # Config files (MathConfiguration, TextConfiguration, etc.)
-│   ├── HTTPClientV1.ts (deprecated), HTTPClientV2.ts
-│   ├── WebSocketClient.ts, WebSocketSSRClient.ts
-│   └── ClientEvent.ts, ClientError.ts
+├── store/               # SymbolStore — IIModel's storage: frozen records, drafts
+├── client/              # grouped by protocol; language.ts, font.ts at the root
+│   ├── http/            # HTTPClientV1 (deprecated), HTTPClientV2, their configurations, HTTPRecognition
+│   ├── websocket/       # WebSocketClient, WebSocketSSRClient, their configurations and messages
+│   ├── jiix/            # The JIIX format: JIIX, JIIXCommon, JIIXMath, JIIXV2, JIIXEdgeGeometry
+│   ├── shared/          # ClientEvent, ClientError, ServerConfiguration (serverUrl), StrokeSerializer, HmacAuth, crypto, infos, getJSON
+│   └── recognition/     # Config files (MathConfiguration, TextConfiguration, etc.)
 ├── renderer/
 │   ├── base/            # BaseRenderer
-│   ├── canvas/          # CanvasRenderer, CanvasRendererShape/Stroke/Text
+│   ├── canvas/          # CanvasRenderer, CanvasRendererShape/Stroke/Text — INK_V1 only
+│   ├── ssr/             # SVGSSRenderer.ts (InteractiveInkSSRSVGRenderer), SVGStroker
 │   └── svg/
-│       ├── utils/       # SVGRendererConst; SVGBuilder is a re-export shim → @/symbol-utils/SVGBuilder
-│       └── SVGRenderer.ts, SVGSSRenderer.ts, SVGStroker.ts
+│       ├── utils/       # SVGRendererConst, GUIDE_PATH_ATTRS; SVGBuilder is a re-export shim → @/symbol-utils
+│       └── SVGRenderer.ts, SvgElementRole.ts
 ├── symbol-utils/        # Per-type rendering/behavior, plugin registry (see Symbol hierarchy below)
-│   ├── SymbolUtil.ts            # Abstract base: create/updateDerivedFields/overlaps/getSVGElement per type
+│   ├── SymbolUtil.ts            # Abstract base: type, create, getGeometry, getSVGElement + overridable capabilities
+│   ├── PathSymbolUtil.ts        # Base for single-<path> symbols (getPathData + getPathAttributes)
+│   ├── SymbolGeometry.ts        # Façade caching a Geometry2d per frozen symbol
 │   ├── SymbolRegistry.ts        # symbolRegistry — register/lookup SymbolUtil by SymbolType
+│   ├── KindDefinition.ts        # TKindDefinition — one entry per kind inside a type
+│   ├── TransformContext.ts
 │   ├── registerBuiltinSymbolUtils.ts  # Registers the 6 built-in Util classes at startup
-│   ├── SymbolFactory.ts         # Symbol creation entry point
+│   ├── SymbolFactory.ts         # createSymbolFromPartial / createSymbolsFromPartial (functions, not a class)
 │   ├── SVGBuilder.ts            # Real SVGBuilder implementation
-│   ├── stroke/StrokeUtil.ts, text/TextUtil.ts, math/MathUtil.ts
+│   ├── stroke/StrokeUtil.ts, typeset/{TypesetUtil,TextUtil,MathUtil}.ts
 │   ├── shape/ShapeUtil.ts, edge/EdgeUtil.ts, decorator/DecoratorUtil.ts
 │   └── edge/EdgeRenderOptions.ts
 ├── grabber/             # PointerEventGrabber
-├── history/             # HistoryManager, IHistoryManager, IIHistoryManager
-├── symbol/              # Type + co-located *Ops (pure logic) + type guard, per type
-│   ├── primitives/      # TPoint, TBox, OBB, BoxOps
-│   ├── stroke/          # TStroke, StrokeOps, isStroke/isRecognizedMath/isRecognizedText
-│   ├── text/            # TText, TSymbolChar, TextOps, isText
-│   ├── math/            # TMath, TMathElement, MathOps, isMath
-│   ├── typeset/         # TTypesetChild, TRotation
-│   ├── decorator/       # TDecorator, DecoratorOps, isDecorator
-│   ├── eraser/          # TEraser, EraserOps
-│   ├── shape/           # TShapeCircle/Ellipse/Polygon, ShapeOps
-│   ├── edge/            # TEdgeArc, TEdgeLine, TEdgePolyLine, Anchor (smart connectors), EdgeOps
+├── history/             # AbstractHistoryStack, AbstractDiffHistoryManager, HistoryManager, IHistoryManager, IIHistoryManager
+├── symbol/              # Type + type guard, per type — nothing else
+│   ├── stroke/          # TStroke, isStroke/isRecognizedMath/isRecognizedText
+│   ├── typeset/         # TText/TSymbolChar/isText, TMath/TMathElement/isMath, TTypesetChild (rotation lives in symbol.transform)
+│   ├── decorator/       # TDecorator, DecoratorKind, isDecorator
+│   ├── eraser/          # TEraser, EraserOps — a transient tool, not a symbol type, so no util
+│   ├── shape/           # TShapeCircle/Ellipse/Polygon, ShapeKind
+│   ├── edge/            # TEdgeArc, TEdgeLine, TEdgePolyLine, TAnchor (smart connectors)
 │   ├── Symbol.ts        # SymbolType enum, TBaseSymbol, TSymbol union
 │   ├── SymbolHelpers.ts # cloneSymbol() only — NOT a dispatch class, see symbol-utils/ for that
 │   └── legacy/          # Stroke, CanvasSymbol (deprecated v1)
 ├── menu/
-│   ├── actions/         # 12 action handlers (Clear, Convert, Export, Undo, etc.)
-│   ├── context/         # 9 context menus
-│   ├── items/           # 9 item types (Button, Checkbox, Color, Range, etc.)
+│   ├── IIAbstractMenu.ts # base of the 4 menus: items, zones "bar"/"dropdown", dropdown mechanics
+│   ├── IIMenuManager.ts # canvas.menu: builds the menus (override classes), item registry, setConfig
+│   ├── actions/         # 17 action handlers (Clear, Convert, Export, Undo/Redo, Zoom, Theme, etc.)
+│   ├── context/         # 10 context menus
+│   ├── items/           # 10 item types (Button, ButtonList, Checkbox, ColorList, Range, Select, SubMenu, etc.)
 │   ├── tools/           # 6 tools (Write, Erase, Select, Move, Shape, Edge)
-│   └── styles/
-├── components/
-│   ├── dom/             # DOMFactory — centralized DOM element creation
-│   ├── Chart.ts, Modal.ts, Table.ts, Minimap.ts
-│   └── IIMath{CapabilitiesTable,DiagnosticChecker,FunctionEvaluator,VariableEditor,VariableInputList,VariablePerBlockEditor}.ts
+│   └── styles/          # 7 style controls (stroke/fill color, thickness, opacity, pen nib, font size/weight)
+├── components/          # Minimap, IIMath{CapabilitiesTable,DiagnosticChecker,FunctionEvaluator,VariableCanvas,VariableInputList,VariablePerBlockCanvas}, MathDiagnosticMessages
+├── ui/                  # Chart, Modal, Table
+├── dom/                 # DOMFactory and element builders (button, input, select, table…), RafCoalescer
+├── export/              # JIIX → other formats: toLLM, toMarkdown, toMermaid, toPlantUML, jiixGraph
 ├── smartguide/          # InteractiveInkSSRSmartGuide
-├── style/               # Style, PenStyle, StyleManager, Theme
-├── transform/           # Matrix.ts — matrix transformation utilities
-├── constants/           # Shared constants
+├── style/               # Style, PenStyle, PenNib, StyleManager, Theme
+├── style-css/           # StyleHelper (JSON ↔ CSS for themes and pen styles)
+├── constants/           # Shared constants — a leaf: imports nothing else from src/
 ├── assets/              # SVG assets
 ├── logger/              # LoggerManager, LoggerConfiguration (singleton)
 ├── worker/              # ping.worker.ts (WebSocket heartbeat)
-└── utils/
-    ├── geometry.ts      # Distance, angles, collision detection; TWO_PI, PI_HALF, ANGLE_EPSILON
-    ├── math.ts          # isValidNumber, isBetween, computeAverage
-    ├── validation.ts    # areValidCoordinates, isPlainObject
-    ├── quadratics.ts    # Bezier/quadratic helpers
-    ├── units.ts         # mm ↔ px conversion
-    ├── object.ts        # mergeDeep, isDeepEqual
-    ├── crypto.ts        # HMAC signing for WebSocket auth
-    ├── uuid.ts          # ID generation
-    ├── font.ts          # Font utilities
-    ├── language.ts      # Language helpers
-    ├── version.ts       # Version info
-    └── DeferredPromise.ts
+└── core/                # Cross-cutting primitives, DOM-free — there is no src/utils/
+    ├── geometry/        # TPoint, TBox/BoxOps, OBB/OBBOps, MatrixTransform, distance/angle/intersection/containment
+    │   └── shapes/      # Geometry2d, PointsGeometry2d, PointSet2d, Polyline2d, Polygon2d, Circle2d, Ellipse2d
+    ├── math/            # isValidNumber, angles, tessellation, mm ↔ px conversion
+    ├── std/             # mergeDeep, isDeepEqual, createUUID, DeferredPromise, version, shared types
+    └── latex.ts
 ```
 
 See [SETUP.md](../../../SETUP.md) for prefix conventions (T/I/II).
+
+## Imports
+
+Enforced by the `iink/barrel-imports` lint rule (`config/eslint-plugin-barrel-imports.mjs`):
+
+- across `src/` folders: only the folder barrel `@/x` — `@/core`, `@/symbol`, `@/symbol-utils`, never `@/core/std` or `@/symbol/stroke/Stroke`
+- inside a folder: relative paths only, never leaving the folder
+- unit tests: the library only through `@/iink`
 
 ## Naming conventions
 
 **Prefixes** (see [SETUP.md](../../../SETUP.md) "Prefix Helper"):
 - `T{Name}` → TypeScript type/interface (e.g., `TSymbol`, `TPoint`, `TExport`)
 - `I{Name}` → Ink variant, uses `HTTPClientV2` (e.g., `IModel`, `IWriterManager`)
-- `II{Name}` → InteractiveInk variant, uses `WebSocketClient` (e.g., `IIModel`, `IIStroke`)
+- `II{Name}` → InteractiveInk variant, uses `WebSocketClient` (e.g., `IIModel`, `IIWriterManager`)
 
 **Classes**:
 - `{Name}Manager` → Business logic orchestrator
@@ -114,140 +123,151 @@ See [SETUP.md](../../../SETUP.md) for prefix conventions (T/I/II).
 
 ## Configuration pattern
 
-Every major component uses **partial configuration merging**:
+Every major component uses **partial configuration merging** — a `Default*` constant plus a class whose constructor merges the partial input over it:
 
 ```typescript
-// Type definition
-export type TClientConfig = { ... }
+export type TWebSocketClientConfiguration = { server: …; recognition: … }
 
-// Class with defaults
-export class ClientConfiguration implements TClientConfig {
-  static readonly DEFAULT = { /* sensible defaults */ }
+export const DefaultWebSocketClientConfiguration: TWebSocketClientConfiguration = { … }
+
+export class WebSocketClientConfiguration implements TWebSocketClientConfiguration {
+  constructor(configuration?: TPartialDeep<TWebSocketClientConfiguration>) {
+    this.server = mergeDeep({}, DefaultWebSocketClientConfiguration.server, configuration?.server)
+    …
+  }
 }
-
-// Usage: merge user config with defaults
-import { mergeDeep } from "@/utils"
-this.config = mergeDeep({}, DefaultConfig, userConfig)
 ```
 
-**Never** assume all config properties exist → always merge with defaults.
+**Never** assume all config properties exist → always merge with defaults. Arrays are concatenated by `mergeDeep`: replace them explicitly when that is wrong (see Layout below).
 
 ## Async patterns
 
-1. **DeferredPromise**: Custom promise wrapper for tracking pending operations ([src/utils/DeferredPromise.ts](../../../src/utils/DeferredPromise.ts)). `WebSocketClient` uses maps of deferred promises for concurrent requests.
+1. **DeferredPromise**: Custom promise wrapper for tracking pending operations ([src/core/std/DeferredPromise.ts](../../../src/core/std/DeferredPromise.ts)). `WebSocketClient` waits for answers with `waitForAnswer(key, neutral)`, keyed by string (`export:<mimeType>`, block id…).
 2. **Dual async model**: Operations return Promises + emit Events
    ```typescript
    await client.addStrokes(strokes)  // Operation promise
    client.event.addContentChangedListener(cb) // Notification event
    ```
-3. **Initialization**: Stateful clients (`WebSocketClient`, `WebSocketSSRClient`) expose `initialized: DeferredPromise<void>` — always `await canvas.client.initialized.promise` before interacting. `HTTPClientV2`/`HTTPClientV1` are stateless, no init step.
+3. **Initialization**: always `await canvas.initializationPromise` before interacting. On the WebSocket variants it is the client's `initialized: DeferredPromise<void>`; `HTTPClientV2`/`HTTPClientV1` are stateless, no init step.
 
 ## Symbol hierarchy
 
-**Base type**: `TSymbol` — shared properties (id, type, creationTime, style)
+**Base type**: `TBaseSymbol` — shared properties (id, type, creationTime, modificationDate, style, transform)
 
-**Symbol types** (`SymbolType` enum): `Stroke` (raw ink), `Group`, `Shape` (Circle/Ellipse/Polygon), `Edge` (Line/Arc/PolyLine), `Text`/`Math`/`Typeset` (recognized/typeset content)
+**Symbol types** (`SymbolType` enum): `Stroke`, `Shape` (Circle/Ellipse/Polygon), `Edge` (Line/Arc/PolyLine), `Text`, `Math`, `Decorator`, `Eraser` (tool only, not in `TSymbol`)
 
 ```
-Primitives: TPoint { x, y }, TBox { x, y, height, width }, OBB (oriented box)
+Primitives: TPoint { x, y }, TBox { x, y, height, width }, TOBB (oriented box)
 Stroke:     TStroke
 Text:       TText
 Math:       TMath
-Typeset:    TTypesetChild, TRotation
+Typeset:    TTypesetChild
 Decorator:  TDecorator
 Eraser:     TEraser
 Shape:      TShapeCircle, TShapeEllipse, TShapePolygon
-Edge:       TEdgeArc, TEdgeLine, TEdgePolyLine, Anchor (smart connectors)
+Edge:       TEdgeArc, TEdgeLine, TEdgePolyLine, TAnchor (smart connectors)
 Legacy:     Stroke, CanvasSymbol (deprecated v1)
 ```
 
 **Root types** (`src/symbol/Symbol.ts`):
 ```typescript
-type TBaseSymbol = { id: string; creationTime: number; modificationDate: number; type: string; style: TPartialDeep<TStyle> }
+type TBaseSymbol = { id: string; creationTime: number; modificationDate: number; type: string; style: TPartialDeep<TStyle>; transform: TMatrixTransform }
 type TSymbol = TEdge | TShape | TStroke | TText | TMath | TDecorator
 ```
 
-**Two layers of per-type logic — don't confuse them:**
-1. **`*Ops`** (`StrokeOps`, `TextOps`, `MathOps`, `DecoratorOps`, `EraserOps`, `BoxOps`, `ShapeOps`, `EdgeOps`) — pure functions/objects co-located with the type in `src/symbol/{type}/{Type}.ts`. This is where actual create/update/overlap logic lives. Type guards (`isStroke`, `isText`, `isMath`, `isDecorator`) live here too.
-2. **`*Util`** (`StrokeUtil`, `TextUtil`, `MathUtil`, `ShapeUtil`, `EdgeUtil`, `DecoratorUtil` in `src/symbol-utils/{type}/`) — thin adapter classes extending abstract `SymbolUtil`, mostly delegating to the matching `*Ops`, plus SVG-specific `getSVGElement()`. All 6 register into `symbolRegistry` via `registerBuiltinSymbolUtils()`.
+A transform writes `symbol.transform` only; the raw coordinates never move after creation.
 
-`SVGRenderer` dispatches rendering with `symbolRegistry.getUtil(symbol.type).getSVGElement(symbol)` — don't branch on `SymbolType` inline, extend the matching `*Ops`/`*Util` pair instead.
+**One place per type — the util:**
+`src/symbol/{type}/{Type}.ts` holds the type and its guards (`isStroke`, `isText`, `isMath`, `isDecorator`). Everything else — construction, editing, geometry, rendering — is on `StrokeUtil`, `TextUtil`, `MathUtil`, `ShapeUtil`, `EdgeUtil`, `DecoratorUtil` in `src/symbol-utils/{type}/`, all extending `SymbolUtil` and registered by `registerBuiltinSymbolUtils()`. Instance methods are what the registry dispatches; statics are construction and editing, which have no symbol to dispatch on.
+
+**There is no `*Ops` object for a symbol.** `BoxOps` and `OBBOps` are geometry primitives, not symbols; `EraserOps` belongs to a transient tool with no util.
+
+`SVGRenderer` dispatches rendering with `symbolRegistry.getUtil(symbol.type).getSVGElement(symbol)` — don't branch on `SymbolType` inline, extend the matching util instead.
 
 **Model distinctions**:
 - `Model` (basic): `Stroke[]` — InkCanvasDeprecated (v1)
 - `IModel` (intermediate): `TStroke[]` — InkCanvas (v2)
-- `IIModel` (advanced): `TSymbol[]` with Map caching — InteractiveInkCanvas
+- `IIModel` (advanced): `TSymbol`s in a `SymbolStore`, frozen records, `draftSymbol`/`commitSymbol` — InteractiveInkCanvas
 
 ## Manager sub-system patterns
 
-**Transform** (`manager/interactive/transform/`): `AbstractTransformManager<TParams>` Template Method base, extended by `IITranslateManager`, `IIRotationManager`, `IIResizeManager`, orchestrated by `IITransformManager`.
+**Base** (`manager/interactive/IIAbstractManager.ts`): every interactive manager extends `IIAbstractManager(canvas, LoggerCategory)` — `protected logger`, getters `model`/`renderer`/`client`/`configuration` read from the canvas, optional `onInit`/`onDestroy` hooks. See the `manager-patterns` skill.
 
-**Math** (`manager/interactive/math/`): `IIMathVariableSubManager` (variable state), `IIMathComputationSubManager` (computation), `IIMathFunctionEvaluationSubManager` (function evaluation), orchestrated by `IIMathManager`.
+**Transform** (`manager/interactive/transform/`): `IIAbstractTransformManager` base (file `AbstractTransformManager.ts`) — `applyMatrix`/`applyToSymbol` shared, one abstract `applyThroughUtil(symbol, matrix)` — extended by `IITranslateManager`, `IIRotationManager`, `IIResizeManager`, orchestrated by `IITransformManager`.
 
-**Gestures** (`manager/interactive/gestures/`): `GestureHandler` + `handlers/` per-gesture, `IIGestureAnnotationProcessor` for annotation logic, orchestrated by `IIGestureManager`.
+**Math** (`manager/interactive/math/`): `IIMathVariableSubManager` (variable state), `IIMathComputationSubManager` (computation), `IIMathFunctionEvaluationSubManager` (function evaluation), `IIMathCapabilitiesSubManager` (available actions), orchestrated by `IIMathManager`.
+
+**Gestures** (`manager/interactive/gestures/`): `GestureHandler` + `handlers/` per-gesture (Insert, Join, Scratch, StrikeThrough, Surround, Underline), `IIGestureAnnotationProcessor` for annotation logic, orchestrated by `IIGestureManager`.
 
 **Typeset** (`IITypesetManager`): handles both text and math typeset bounds via SVG `getBBox`, replaced former `IITextManager`.
 
+**Export** (`manager/base/ExportManager.ts`, `canvas.exportManager`): `exportAs(format)` returns `json`/`svg`/`png`/`text`/`markdown`…, `download(format)` also takes `"pdf"` (delegated to `PDFExportManager`, `window.print()`-based). `IIExportManager` is the interactive subclass; the canvas exposes `canvas.exportAs` / `canvas.download`.
+
+**Menus** (`menu/`): `IIMenuAction`, `IIMenuStyle`, `IIMenuTool`, `IIMenuContext` extend `IIAbstractMenu<TConfig>`. Each has two zones, `"bar"` and `"dropdown"`, built on their first item (`createZone`), and a `defaultZone`. In `render()`, a menu sets `wrapper` first, then calls the protected `addItem(key, item, { zone, before, after, replace })`. An integrator adds items with `canvas.menu.addItem(menu, key, factory, options)`: the `IIMenuManager` registry keeps **factories** (menus are rebuilt by every `setConfig`, and a destroyed item can't be reused) and replays them after each render. A whole menu is replaced through `options.override.menu` (`TMenuOverride`, classes constructed `(canvas, id, config)`). Menu members are protected, never `#private`: they are overridable.
+
+**Layout** (`manager/base/LayoutManager.ts`, `canvas.layout`, InteractiveInkCanvas + InkCanvas, not SSR/V1): 8 slots (`top-*`, `middle-left/right`, `bottom-*`, no center). `configuration.layout` maps slots to occupants in stacking order — menus, `state` (connection badge), `minimap`, custom ones — and replaces the default **slot by slot, never via `mergeDeep`** (it would concatenate arrays: a moved menu would show twice). Each occupant renders into its host (`layout.host(name)`). The slot decides a menu's `orientation` and `openTowards` (overridable in its config); the menu injects `BaseMenuItem.openPosition` into its items before they render. `canvas.layout.set/add/remove` change it at runtime (`onOccupantMoved` → `IIMenuManager` rebuilds the moved menu); `options.extend.menuItems`/`extend.layout` declare additions at load so they are in the first render. A menu hiding in a shared slot folds its host (CSS grid `minmax(0, 0fr)`).
+
 ## Key utilities
 
-Always check `src/utils/` before writing a new utility function.
+Always check `src/core/` (and `src/dom/` for DOM builders) before writing a new utility function — there is no `src/utils/`.
 
 ```typescript
-// Geometry
-import { computeDistance, computeDistanceSquared, computeAngleAxeRadian,
-         isPointInsideBox, TWO_PI, PI_HALF, ANGLE_EPSILON } from "@/utils"
+// Geometry, scalars, std — all through the @/core barrel
+import {
+  computeDistance, computeDistanceSquared, computeAngleAxeRadian, isPointInsideBox, areValidCoordinates,
+  isValidNumber, TWO_PI, convertMillimeterToPixel,
+  mergeDeep, isDeepEqual, createUUID, DeferredPromise,
+} from "@/core"
 if (computeDistanceSquared(p1, p2) < threshold * threshold) { ... } // no sqrt, ~2x faster for comparisons
 
-// Validation
-import { areValidCoordinates, isPlainObject } from "@/utils/validation"
-import { isValidNumber } from "@/utils/math"
+// A symbol's geometry is an object, not a record — reach it through the façade, never rebuild it
+import { SymbolGeometry } from "@/symbol-utils"
+SymbolGeometry.of(symbol).overlapsBox(box)   // or boundsOf / verticesOf / snapPointsOf / edgesOf / lengthOf
 
-// SVG building — SVGBuilder's real implementation lives in @/symbol-utils; @/renderer/svg/utils re-exports it
+// SVG building — SVGBuilder's real implementation lives in @/symbol-utils; renderer/svg/utils re-exports it
 import { SVGBuilder } from "@/symbol-utils"
-import { SVGRendererConst } from "@/renderer/svg/utils"
-SVGBuilder.createPath({ ...SVGRendererConst.guidePathAttrs, d: pathData })
+import { GUIDE_PATH_ATTRS } from "@/renderer"
+SVGBuilder.createPath({ ...GUIDE_PATH_ATTRS, d: pathData })
 
-// Other
-import { mergeDeep, isDeepEqual } from "@/utils/object"
-import { uuid } from "@/utils/uuid"
-import { computeHmac } from "@/utils/crypto"
-import { convertMillimeterToPixel } from "@/utils/units"
-import { DeferredPromise } from "@/utils/DeferredPromise"
+// HMAC signature (server.sign or hmacKey)
+import { resolveHmac } from "@/client"
 ```
 
 ## Examples
 
-- **`interactive-canvas/`** (19 files) → `InteractiveInkCanvas` (WebSocket), pattern: `interactive_canvas_{feature}.html`
-- **`interactive-canvas-ssr/`** (28 files) → `InteractiveInkSSRCanvas` (WebSocket SSR)
-- **`canvas/`** (16 files) → `InkCanvas`/`InkCanvasDeprecated` (HTTP), pattern: `canvas_v2_{feature}.html` (current) / `canvas_v1_{feature}.html` (deprecated)
+- **`interactive-canvas/`** (31 pages) → `InteractiveInkCanvas` (WebSocket), pattern: `interactive_canvas_{feature}.html`
+- **`interactive-canvas-ssr/`** (28 pages) → `InteractiveInkSSRCanvas` (WebSocket SSR)
+- **`canvas/`** (18 pages) → `InkCanvas`/`InkCanvasDeprecated` (HTTP), pattern: `canvas_v2_{feature}.html` (current) / `canvas_v1_{feature}.html` (deprecated)
 - **`non-specific/`** → Configuration demos
-- **`custom-rendering/`** → Third-party integrations (`tldraw-websocket-client/`)
+- **`server-signing/`** → HMAC signed by a server (`server.js` + page holding no credential)
+- **`custom-rendering/`** → Third-party integrations (`tldraw-websocket-client/`, `excalidraw-websocket-client/`)
 
 Most examples: `<div id="rootEl">` → `Canvas.load(element, type, options)` → event listeners. Shared assets in `examples/assets/` and `examples/components/`. Matching E2E specs live in `test/examples/{same-subdir}/*.test.js`.
 
 ## Build system
 
-**Rollup-based**: `config/rollup.config.{build,dev,mjs}`. Outputs: `dist/iink.min.js` (UMD), `dist/iink.esm.js` (ESM), `dist/iink.d.ts`. CSS imported as strings in TS, injected dynamically at runtime.
+**Rollup-based**: `config/rollup.config.{build,dev}.mjs` over `config/rollup.config.mjs`. Outputs: `dist/iink.min.js` (UMD), `dist/iink.esm.js` (ESM), `dist/iink.d.ts`. CSS imported as strings in TS, injected dynamically at runtime.
 
 ## Testing
 
-- **Unit (Jest)**: `test/unit/` mirrors `src/` exactly, ≥75% coverage (branches/functions/lines/statements), `yarn test:unit`, mocks in `test/unit/__config__/`
-- **E2E (Playwright)**: `test/examples/`, `yarn test:examples`
+- **Unit (Jest + `@swc/jest`)**: `test/unit/` mirrors `src/` exactly, global threshold 88% branches/lines/statements and 86% functions, `yarn test:unit`, setup in `test/unit/__config__/`, mocks in `test/unit/__mocks__/`
+- **E2E (Playwright)**: `test/examples/`, `yarn test:examples` — see the `testing-patterns` skill
+- **Types**: `yarn typecheck` (tests included; Jest only transpiles)
 
 ## Development
 
 ```bash
 yarn dev          # Rollup watch + example server on :8000
-make dev-lib      # Docker: MongoDB, backend services, fonts, resources
+yarn dev:backend  # Docker (testcontainers): local iink backend on localhost:8897, Ctrl+C stops it
 ```
 
 ## Common patterns
 
 ```typescript
-// Logger
-import { LoggerManager, LoggerCategory } from "@/logger"
-#logger = LoggerManager.getLogger(LoggerCategory.CANVAS)
-this.#logger.info("Message", data)
+// Logger — in a manager, inherited from IIAbstractManager as `protected logger`
+import { LoggerCategory, LoggerManager } from "@/logger"
+protected logger = LoggerManager.getLogger(LoggerCategory.CANVAS)
+this.logger.info("Message", data)
 
 // Event handling — events defined in src/canvas/CanvasEvent.ts
 canvas.event.addChangedListener((context: THistoryContext) => { ... })
@@ -256,9 +276,10 @@ canvas.event.addChangedListener((context: THistoryContext) => { ... })
 ## Documentation
 
 - **SETUP**: [SETUP.md](../../../SETUP.md) — development setup, prefix guide
+- **Architecture**: [architecture/](../../../architecture/) — class diagrams and WebSocket protocol
 - **API Docs**: `yarn build:docs` → `docs/`
-- **External**: https://developer.myscript.com/docs/interactive-ink/latest/web/iinkts/
+- **External**: https://developer.myscript.com/docs/cloud/latest/iinkts/get-started/
 
 ## MyScript Cloud integration
 
-**Authentication**: HMAC-based (applicationKey + hmacKey) set in `configuration.server`. See `examples/websocket/` for credential setup.
+**Authentication**: HMAC-based, set in `configuration.server`: `sign` (signature computed on a server holding the key, production default) or `hmacKey` string (development only). See `examples/server-signing/`. Example credentials for `yarn dev` go in `.env.local` (`HOST`, `APPLICATION_KEY`, `HMAC_KEY`, optional `SCHEME`), turned into `examples/dev-env-loader.generated.js` and loaded into `localStorage` on localhost.

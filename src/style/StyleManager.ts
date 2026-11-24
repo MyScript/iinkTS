@@ -1,6 +1,6 @@
+import type { TPartialDeep } from "@/core"
+import { mergeDeep } from "@/core"
 import { LoggerCategory, LoggerManager } from "@/logger"
-import type { TPartialDeep } from "@/utils"
-import { mergeDeep } from "@/utils"
 
 import type { TPenStyle } from "./PenStyle"
 import { DefaultPenStyle } from "./PenStyle"
@@ -36,7 +36,7 @@ export class StyleManager {
   }
   setPenStyle(style?: TPartialDeep<TPenStyle>) {
     this.#logger.info("setPenStyle", { style })
-    this.#penStyle = mergeDeep(structuredClone(DefaultPenStyle), style || {}) as TPenStyle
+    this.#penStyle = mergeDeep(structuredClone(DefaultPenStyle), style || {})
     this.#currentPenStyle = style || (this.theme[`.${this.#penStyleClasses}`] as TPenStyle)
     this.#logger.debug("setPenStyle", this.#currentPenStyle)
   }
@@ -46,7 +46,7 @@ export class StyleManager {
   }
   setTheme(theme?: TPartialDeep<TTheme>) {
     this.#logger.info("setTheme", { theme })
-    this.#theme = mergeDeep(structuredClone(DefaultTheme), theme || {}) as TTheme
+    this.#theme = mergeDeep(structuredClone(DefaultTheme), theme || {})
     this.#logger.debug("setTheme", this.#theme)
   }
 

@@ -10,9 +10,8 @@ import rome from "../__dataset__/rome"
 import madrid from "../__dataset__/madrid"
 import tokyo from "../__dataset__/tokyo"
 import paris from "../__dataset__/paris"
-import TextNavActions from "../_partials/text-nav-actions"
 
-test.describe("Interactive Canvas SSR Text interact", () => {
+test.describe("Interactive Canvas SSR Text interact", { tag: "@slow" }, () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/interactive-canvas-ssr/interactive_canvas_ssr_text_interact.html`)
     await passModalKey(page)
@@ -23,8 +22,9 @@ test.describe("Interactive Canvas SSR Text interact", () => {
   })
 
   test("should resolve all questions", async ({ page }) => {
-    // Increase timeout for this test because sometimes it may take longer than the default 60 seconds
-    test.setTimeout(90 * 1000)
+    // Five questions, each answered stroke by stroke with a server round trip per stroke: the
+    // whole walk takes well over a minute on WebKit, and more when the run is loaded.
+    test.setTimeout(180 * 1000)
 
     await test.step(`should ask the capital of France`, async () => {
       await expect(page.locator("#question")).toHaveText("What is the capital of France?")

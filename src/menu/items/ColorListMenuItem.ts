@@ -1,4 +1,4 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import type { TInteractiveInkCanvas } from "@/canvas"
 
 import type { TMenuItemBase } from "./BaseMenuItem"
 import { BaseMenuItem } from "./BaseMenuItem"

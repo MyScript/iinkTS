@@ -4,10 +4,11 @@
 
 ## Quick Reference
 
-- **Build**: `yarn build:lib` or `npm run build:lib`
+- **Build**: `yarn build:lib` (yarn only, never npm)
+- **Typecheck**: `yarn typecheck`
 - **Test**: `yarn test:unit` (Jest), `yarn test:examples` (Playwright)
-- **Dev**: `yarn dev` (starts Rollup watcher + example server on http://localhost:8000)
-- **Lint**: `yarn lint` or `yarn lint:fix`
+- **Dev**: `yarn dev` (starts Rollup watcher + example server on http://localhost:8000), `yarn dev:backend` (local iink backend in Docker)
+- **Lint**: `yarn lint`; fix one file with `yarn eslint --fix <file>` (there is no `lint:fix` script)
 - **Docs**: `yarn build:docs` (TypeDoc)
 
 ## Agent Rules
@@ -15,11 +16,12 @@
 No exceptions:
 
 - **Use Serena for source code** — navigate/edit `src/`, `test/`, `examples/*.ts` via Serena tools (`find_symbol`, `find_referencing_symbols`, `get_symbols_overview`, `replace_symbol_body`, `insert_after_symbol`/`insert_before_symbol`) instead of raw `Read`/`Grep`/`Edit`. Native tools stay fine for config, Markdown, JSON, and non-code files.
-- **Check `src/utils/` first** — before writing utility function, grep for existing equivalents. Duplication = bug.
+- **Check `src/core/` first** (and `src/dom/` for DOM helpers) — before writing utility function, grep for existing equivalents. Duplication = bug. There is no `src/utils/`.
+- **Barrel imports** — across `src/` folders import only the folder barrel `@/x` (never `@/x/y`); inside a folder use relative paths; unit tests import the library only through `@/iink`. Enforced by the `iink/barrel-imports` lint rule.
 - **Scope discipline** — fix bug, don't refactor adjacent code. Keep diffs minimal and reviewable.
 - **Typecheck before commit** — always run `yarn typecheck` after code changes. Never run bare `tsc`, never use `--no-verify`.
 - **No generated files** — never hand-edit `dist/`, `docs/`, or API report snapshots. Run owning generator command.
-- **Public API changes need note** — any change to exported types/functions requires mention in PR description and CHANGELOG entry.
+- **Public API changes need note** — any change to exported types/functions requires mention in PR description, a one-line entry in `CHANGELOG.md` (index, features first) and the full entry in `changelog/<version>.md`.
 - **Prefer targeted checks** — run the narrowest relevant test/lint first (single file/suite). Avoid full `test:unit`/`test:examples` runs unless the change is cross-cutting.
 - **Respect existing worktree changes** — don't revert or discard user changes unless explicitly asked.
 - **No AI attribution** — never add Co-Authored-By or similar AI attribution in commits, PR descriptions, or docs.
@@ -57,10 +59,10 @@ No exceptions:
 
 See the `code-quality-principles` skill for full detail.
 
-- One source of truth per concept — use `src/utils/`, base classes
+- One source of truth per concept — use `src/core/`, base classes
 - DRY: 2 occurrences → extract function; 3 → abstraction
 - Functions ≤ 20 lines, one abstraction level, explicit names
-- Unit tests mandatory, mirror `src/` structure, ≥75% coverage
+- Unit tests mandatory, mirror `src/` structure; global coverage threshold 88% branches/lines/statements, 86% functions (`test/unit/jest.config.js`)
 
 ### TypeScript Rules (Hard)
 
@@ -81,7 +83,7 @@ See the `code-quality-principles` skill for full detail.
 ## Documentation
 
 - **API Docs**: `yarn build:docs` → `docs/`
-- **External**: https://developer.myscript.com/docs/interactive-ink/latest/web/iinkts/
+- **External**: https://developer.myscript.com/docs/cloud/latest/iinkts/get-started/
 
 ## Architecture Memory
 
@@ -89,5 +91,5 @@ Code/architecture notes (managers, symbol system, refactor status) live in Seren
 
 ## MyScript Cloud Integration
 
-**Authentication**: HMAC-based (applicationKey + hmacKey) set in `configuration.server`.
-See `examples/websocket/` for credential setup.
+**Authentication**: HMAC-based, set in `configuration.server`: `sign` (signature computed on a server holding the key, production default) or `hmacKey` string (development only). See `examples/server-signing/`.
+Example credentials: put `HOST`/`APPLICATION_KEY`/`HMAC_KEY` (optional `SCHEME`) in `.env.local`; `yarn dev` generates `examples/dev-env-loader.generated.js` from it and the examples load it into `localStorage` on localhost.

@@ -1,15 +1,5 @@
 import { delay } from "../helpers"
-import {
-  InkCanvasDeprecated,
-  Model,
-  DefaultPenStyle,
-  TInkCanvasDeprecatedOptions,
-  TInkCanvasDeprecatedConfiguration,
-  TPointer,
-  PointerEventGrabber,
-  HTTPClientV1,
-  DefaultInkCanvasDeprecatedConfiguration,
-} from "@/iink"
+import { InkCanvasDeprecated, Model, DefaultPenStyle, TInkCanvasDeprecatedOptions, TInkCanvasDeprecatedConfiguration, TPointer, PointerEventGrabber, HTTPClientV1, DefaultInkCanvasDeprecatedConfiguration } from "@/iink"
 
 describe("InkCanvasDeprecated.ts", () => {
   const height = 100,
@@ -71,8 +61,8 @@ describe("InkCanvasDeprecated.ts", () => {
     const canvas = new InkCanvasDeprecated(document.createElement("div"), DefaultInkCanvasDeprecatedOptions)
     await canvas.initialize()
     canvas.renderer.drawPendingStroke = jest.fn()
-    const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
-    const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
+    const p1: TPointer = { dt: 1, p: 1, x: 1, y: 1 }
+    const p2: TPointer = { dt: 10, p: 1, x: 100, y: 1 }
     canvas.model.initCurrentStroke(p1, "pen", DefaultPenStyle)
     canvas.model.endCurrentStroke(p2)
     canvas.drawCurrentStroke()
@@ -146,8 +136,8 @@ describe("InkCanvasDeprecated.ts", () => {
     canvas.renderer.resize = jest.fn()
     canvas.client.resize = jest.fn((m) => Promise.resolve(m))
     await canvas.initialize()
-    const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
-    const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
+    const p1: TPointer = { dt: 1, p: 1, x: 1, y: 1 }
+    const p2: TPointer = { dt: 10, p: 1, x: 100, y: 1 }
     canvas.model.initCurrentStroke(p1, "pen", DefaultPenStyle)
     canvas.model.endCurrentStroke(p2)
     await canvas.resize({ height: 1, width: 2 })
@@ -180,8 +170,8 @@ describe("InkCanvasDeprecated.ts", () => {
     const canvas = new InkCanvasDeprecated(document.createElement("div"), DefaultInkCanvasDeprecatedOptions)
     await canvas.initialize()
     const model2 = new Model(width, height)
-    const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
-    const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
+    const p1: TPointer = { dt: 1, p: 1, x: 1, y: 1 }
+    const p2: TPointer = { dt: 10, p: 1, x: 100, y: 1 }
     model2.initCurrentStroke(p1, "pen", DefaultPenStyle)
     model2.endCurrentStroke(p2)
     canvas.client.export = jest.fn((m) => Promise.resolve(m))
@@ -195,8 +185,8 @@ describe("InkCanvasDeprecated.ts", () => {
     const canvas = new InkCanvasDeprecated(document.createElement("div"), DefaultInkCanvasDeprecatedOptions)
     await canvas.initialize()
     canvas.renderer.drawModel = jest.fn()
-    const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
-    const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
+    const p1: TPointer = { dt: 1, p: 1, x: 1, y: 1 }
+    const p2: TPointer = { dt: 10, p: 1, x: 100, y: 1 }
     canvas.model.initCurrentStroke(p1, "pen", DefaultPenStyle)
     canvas.model.endCurrentStroke(p2)
     expect(canvas.model.symbols.length).toBeGreaterThan(0)

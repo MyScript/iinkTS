@@ -1,10 +1,6 @@
-import { buildIIStroke } from "../helpers"
+import { buildIIStroke, StubMenuItem } from "../helpers"
 import { createCanvasMock, asCanvas } from "../__mocks__/createCanvasMock"
-import {
-  IIMenuContext,
-  IIJiixQueryManager,
-  IIMathManager
-} from "@/iink"
+import { IIMenuContext, IIJiixQueryManager, IIMathManager, TMenuItemOptions } from "@/iink"
 
 const ONLY_MATH_MENU_CONFIG = {
   edit: false,
@@ -198,5 +194,64 @@ describe("IIMenuContext.ts", () => {
 
       expect(getMathMenuElement(menuContext).style.display).toBe("none")
     })
+  })
+
+  describe("destroy", () => {
+    test("destroys every rendered context menu and clears the map", () => {
+      const canvas = createCanvasMock()
+      const menuContext = new IIMenuContext(asCanvas(canvas), "ms-menu-context")
+      menuContext.render(canvas.layers.rendering)
+
+      const contextMenus = (menuContext as unknown as { items: Map<string, { destroy: () => void }> }).items
+      expect(contextMenus.size).toBeGreaterThan(0)
+      const destroySpies = Array.from(contextMenus.values()).map((contextMenu) => jest.spyOn(contextMenu, "destroy"))
+
+      menuContext.destroy()
+
+      destroySpies.forEach((spy) => expect(spy).toHaveBeenCalledTimes(1))
+      expect(contextMenus.size).toBe(0)
+    })
+
+    test("removes the scroll listener from the rendering layer", () => {
+      const canvas = createCanvasMock()
+      const removeSpy = jest.spyOn(canvas.layers.rendering, "removeEventListener")
+      const menuContext = new IIMenuContext(asCanvas(canvas), "ms-menu-context")
+      menuContext.render(canvas.layers.rendering)
+
+      menuContext.destroy()
+
+      expect(removeSpy).toHaveBeenCalledWith("scroll", expect.any(Function))
+    })
+  })
+})
+
+describe("IIMenuContext zones", () => {
+  class ExtendedMenuContext extends IIMenuContext {
+    extra: { key: string; options?: TMenuItemOptions }[] = []
+    render(layer: HTMLElement): void {
+      super.render(layer)
+      this.extra.forEach(({ key, options }) => this.addItem(key, new StubMenuItem(key, this.canvas), options))
+    }
+  }
+
+  function render(extra: { key: string; options?: TMenuItemOptions }[]) {
+    const canvas = createCanvasMock()
+    const menu = new ExtendedMenuContext(asCanvas(canvas))
+    menu.extra = extra
+    menu.render(canvas.layers.rendering)
+    return menu
+  }
+
+  test("should add a list item to the list itself, after the built-in ones", () => {
+    const menu = render([{ key: "extra-list" }])
+    expect(menu.wrapper?.lastElementChild?.id).toBe("extra-list")
+    expect(menu.wrapper?.querySelector(".ms-menu-context-bar")).toBeNull()
+  })
+
+  test("should put a bar item in a row of quick actions above the list", () => {
+    const menu = render([{ key: "extra-bar", options: { zone: "bar" } }])
+    const bar = menu.wrapper?.firstElementChild
+    expect(bar?.classList.contains("ms-menu-context-bar")).toBe(true)
+    expect(bar?.querySelector("#extra-bar")).not.toBeNull()
   })
 })

@@ -11,12 +11,14 @@ description: >
 
 ### Unit Tests (Jest)
 
-**Location**: `test/unit/{module}/{Class}.test.ts`
+**Location**: `test/unit/` + the same path as in `src/` → `test/unit/{same/path}/{Class}.test.ts`
+
+**Imports**: the library only through `@/iink` (lint rule `iink/barrel-imports`, which also catches missing exports); mocks, helpers and datasets by relative path.
 
 **Example structure**:
 ```typescript
 import { describe, test, expect, beforeEach, jest } from '@jest/globals'
-import { ClassUnderTest } from '@/module/ClassUnderTest'
+import { ClassUnderTest } from '@/iink'
 
 describe('ClassUnderTest', () => {
   let instance: ClassUnderTest
@@ -44,20 +46,25 @@ describe('ClassUnderTest', () => {
 
 **Location**: `test/examples/{canvas|interactive-canvas|interactive-canvas-ssr|custom-rendering}/{feature}.test.js` — mirrors the `examples/` subdirectory (not `.spec.ts`, real files are `.test.js`).
 
-**Example structure**:
-```typescript
-import { test, expect } from '@playwright/test'
+**Example structure** (trimmed from `test/examples/interactive-canvas/interactive-canvas-get-started.test.js`):
+```javascript
+import { test, expect } from "@playwright/test"
+import { passModalKey, waitForUIUpdatedEvent } from "../helper"
+import locator from "../locators"
 
-test.describe('Feature Name', () => {
-  test('should load and initialize canvas', async ({ page }) => {
-    await page.goto('/examples/interactive-canvas/interactive_canvas_get_started.html')
-    await page.waitForSelector('#rootEl')
-    
-    const canvasEl = page.locator('#rootEl')
-    await expect(canvasEl).toBeVisible()
+test.describe("Feature Name", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto(`${process.env.PATH_PREFIX ?? ""}/examples/interactive-canvas/interactive_canvas_get_started.html`)
+    await passModalKey(page)
+  })
+
+  test("should display the menu", async ({ page }) => {
+    await expect(page.locator(locator.menu.action.guide.enable)).toBeHidden()
   })
 })
 ```
+
+Shared helpers in `test/examples/helper.js` (writing strokes, waiting for canvas events…) and selectors in `test/examples/locators.js`. Tags in test titles select subsets: `@minimal`, `@touch`, `@slow`. A purely vertical/horizontal SVG line fails `toBeVisible()` (zero-area box): use `toBeAttached()`.
 
 ## Mocking Patterns
 
@@ -140,23 +147,25 @@ test('should make API request', async () => {
 ### Available Helper Functions
 
 ```typescript
-import { 
+import {
   delay,                    // Promise-based delay
   round,                    // Decimal rounding
   randomIntFromInterval,    // Random integer generation
-  buildStroke,              // Create basic Stroke test data
-  buildStrokeV2,            // Create TStroke test data
-  buildIIStroke,            // Create IIStroke (TSymbol) test data
-  buildIIEraser,            // Create eraser test data
-  buildIIDecorator, buildIICircle, buildIILine, buildIIText, buildIIMath  // per-symbol-type builders
-} from '../helpers'
+  buildStroke,              // Legacy Stroke (INK_V1)
+  buildStrokeV2,            // TStroke
+  buildIIStroke,            // TStroke for the interactive variant
+  buildIIEraser,            // TEraser
+  buildIIDecorator, buildIICircle, buildIILine, buildIIText, buildIIMath,  // per-symbol-type builders
+  expectPointsRounded,      // point arrays compared after rounding
+  ellipseGeometry, edgeGeometry, decoratorGeometry, typesetGeometry,     // geometry shortcuts
+} from '../helpers'          // path relative to the test file: test/unit/helpers.ts
 
-// Example: Create test stroke
-const stroke = buildStrokeV2(
-  { x: 0, y: 0, width: 100, height: 100 },  // bounds
-  10,                                        // point count
-  'pen'                                      // pointer type
-)
+// Example: Create test stroke — builders take one options object
+const stroke = buildStrokeV2({
+  box: { x: 0, y: 0, width: 100, height: 100 },
+  nbPoint: 10,
+  pointerType: 'pen',
+})
 
 // Example: Wait for async operations
 await delay(100)  // Wait 100ms
@@ -175,7 +184,7 @@ export function buildStrokeV2({
   nbPoint = 5,
   pointerType = "pen",
 } = {}): TStroke {
-  const stroke = StrokeOps.create(style, pointerType)
+  const stroke = StrokeUtil.createEmpty(style, pointerType)
   for (let i = 0; i < nbPoint; i++) {
     stroke.pointers.push({
       p: Math.random(),
@@ -188,21 +197,12 @@ export function buildStrokeV2({
 }
 ```
 
-**buildStroke** - Create basic Stroke for simple tests:
+**buildStroke** - Create a legacy `Stroke` (INK_V1), same options object:
 ```typescript
-const stroke = buildStroke(
-  { x: 0, y: 0, width: 100, height: 100 },
-  20  // 20 points
-)
+const stroke = buildStroke({ box: { x: 0, y: 0, width: 100, height: 100 }, nbPoint: 20 })
 ```
 
-### Test Configuration
-
-**Default test values** used in helpers:
-- `DefaultPenStyle` - Standard pen styling
-- `DefaultStyle` - Base symbol styling
-- Default DPI: 96
-- Default pointer pressure: 0.5
+Builders default to `DefaultPenStyle`, 5 points and random coordinates inside the box — pass explicit values when the test asserts on them.
 
 ## Running Tests
 
@@ -213,16 +213,16 @@ const stroke = buildStroke(
 yarn test:unit
 
 # Single file
-yarn test:unit -- test/unit/canvas/InteractiveInkCanvas.test.ts
+yarn test:unit test/unit/canvas/InteractiveInkCanvas.test.ts
 
 # Watch mode
-yarn test:unit -- --watch
+yarn test:unit --watch
 
 # Coverage
-yarn test:unit -- --coverage
+yarn test:unit:coverage
 ```
 
-**Coverage threshold**: 75% for branches, functions, lines, statements (enforced in CI).
+**Coverage threshold**: 88% branches/lines/statements, 86% functions, global (`test/unit/jest.config.js`). Jest only transpiles (`@swc/jest`): types are checked by `yarn typecheck`, tests included. Don't combine `--coverage` with `--detectOpenHandles` (very slow), and read success from the exit code, not from a piped summary.
 
 ### E2E Tests
 
@@ -230,15 +230,25 @@ yarn test:unit -- --coverage
 # All examples
 yarn test:examples
 
-# Specific test
-yarn test:examples -- interactive-canvas-get-started.test.js
+# Against a local backend, examples and browsers in docker (testcontainers), as CI does
+yarn test:examples:docker
 
-# Headed mode (see browser)
-yarn test:examples -- --headed
+# One browser project (PROJECT: one name, or several separated by commas)
+PROJECT="Desktop Chrome" yarn test:examples
 
-# Debug mode
-yarn test:examples -- --debug
+# Specific file (path filter, no `--`) or test title
+PROJECT="Desktop Chrome" yarn test:examples interactive-canvas-get-started
+PROJECT="Desktop Chrome" yarn test:examples -g "Menu guide display"
+
+# Only the @minimal tests
+E2E_SCOPE=minimal yarn test:examples
+
+# Headed / debug
+PROJECT="Desktop Chrome" yarn test:examples --headed
+PROJECT="Desktop Chrome" yarn test:examples --debug
 ```
+
+`yarn test:examples -- <file>` does **not** filter: the `--` is passed through.
 
 ## Test Data
 
@@ -258,18 +268,20 @@ import { hTextJIIX } from '../__dataset__/jiix.dataset'
 
 Key settings in [test/unit/jest.config.js](test/unit/jest.config.js):
 - `testEnvironment: "jsdom"` - Browser-like environment
-- `preset: "ts-jest"` - TypeScript support
-- `moduleNameMapper` - Web worker path resolution
-- `setupFiles` - Canvas mock, TextEncoder polyfill
-- `transform` - CSS and SVG transforms
+- `transform` - `@swc/jest` for TS (transpile only), `jest-transform-css` for CSS, a custom SVG transform
+- `moduleNameMapper` - `@/` alias to `src/`, web worker path resolution
+- `setupFiles` - `jest-canvas-mock`, `__config__/jest.setup.ts`, TextEncoder polyfill, `setupTests.ts`
+- `setupFilesAfterEnv` - `jest-websocket-mock`
+- `coverageThreshold` - see above
 
 ### Playwright Config
 
 Key settings in `test/examples/playwright.config.js`:
-- Browser targets: Chromium, Firefox, WebKit
-- Base URL: `http://localhost:8000`
-- Screenshot on failure
-- Video recording
+- Projects: `Desktop Chrome`, `Desktop Firefox`, `Desktop Safari`, `Tablet Chrome`, `Tablet Safari`, `Whiteboard Chrome` (select with `PROJECT`)
+- `E2E_SCOPE`: `default`, `minimal`, `complete`
+- `globalSetup` starts the stack; `yarn test:examples:docker` runs backend, examples and browsers in Docker (testcontainers) like CI
+- Base URL: `http://localhost:8000` (or `BASE_URL`), retries 1, timeout 60s
+- Screenshot only on failure, video retained on failure
 
 ## Common Test Scenarios
 
@@ -287,50 +299,32 @@ test('should initialize canvas', async () => {
 })
 ```
 
-### Testing Stroke Drawing
+### Testing the Model
 
 ```typescript
-test('should add stroke to model', () => {
-  const stroke: Stroke = {
-    id: 'stroke-1',
-    pointerType: 'pen',
-    pointsX: [0, 10, 20],
-    pointsY: [0, 10, 20],
-    pointsT: [0, 100, 200],
-    pointsP: [0.5, 0.5, 0.5],
-    style: { color: '#000000' }
-  }
-  
-  model.addStroke(stroke)
-  
+import { IIModel } from '@/iink'
+import { buildIIStroke } from '../helpers'
+
+test('should add a symbol to the model', () => {
+  const model = new IIModel()
+  const stroke = buildIIStroke()
+
+  model.addSymbol(stroke)
+
   expect(model.symbols).toHaveLength(1)
-  expect(model.symbols[0]).toEqual(stroke)
+  expect(model.getSymbol(stroke.id)).toEqual(stroke)
 })
 ```
 
-### Testing Recognition
+Committed records are frozen: to test a change, `model.draftSymbol(id)` → mutate → `model.commitSymbol(draft)`.
 
-```typescript
-test('should recognize strokes', async () => {
-  const server = new WS('ws://localhost:1234')
-  const client = new WebSocketClient(config)
-  const onContentChanged = jest.fn()
-  client.event.addContentChangedListener(onContentChanged)
+### Testing a Manager
 
-  await client.init()
-  await server.connected
+Build the canvas from `createCanvasMock` (override only what the test needs) and pass `asCanvas(mock)` to the manager — see existing specs under `test/unit/manager/interactive/`.
 
-  await client.addStrokes([stroke])
+### Testing the WebSocket Client
 
-  // Mock recognition response
-  server.send(JSON.stringify({
-    type: 'contentChanged',
-    exports: { 'text/plain': 'Hello' }
-  }))
-
-  expect(onContentChanged).toHaveBeenCalled()
-})
-```
+Use `ServerWebSocketMock` (`test/unit/__mocks__/ServerWebSocketMock.ts`), which answers the handshake (`hmacChallenge` → `authenticated` → `sessionDescription` → `newPart`), then send server messages such as `{ type: "contentChanged", canUndo, canRedo, undoStackIndex }` and assert on the client's events. Real patterns: `test/unit/client/websocket/WebSocketClient.test.ts`.
 
 ## Testing Anti-Patterns
 

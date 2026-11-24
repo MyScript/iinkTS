@@ -1,21 +1,20 @@
-import type { TCanvasOptionsBase } from "@/canvas/AbstractCanvas"
-import { AbstractCanvas } from "@/canvas/AbstractCanvas"
-import type { TConverstionState } from "@/client"
+import type { TConverstionState, TExport } from "@/client"
 import { HTTPClientV1 } from "@/client"
-import { CanvasTool } from "@/Constants"
+import type { TPartialDeep, TPointer } from "@/core"
+import { DeferredPromise, resolvePointerDelta } from "@/core"
 import type { TPointerInfo } from "@/grabber"
 import { PointerEventGrabber } from "@/grabber"
 import { HistoryManager } from "@/history"
-import type { TExport } from "@/model"
+import { CanvasTool } from "@/manager"
 import { Model } from "@/model"
 import { CanvasRenderer } from "@/renderer"
 import type { TPenStyle, TTheme } from "@/style"
 import { DefaultPenStyle, StyleManager } from "@/style"
-import type { TLegacyStroke, TPointer } from "@/symbol"
+import type { TLegacyStroke } from "@/symbol"
 import { Stroke } from "@/symbol"
-import type { TPartialDeep } from "@/utils"
-import { DeferredPromise } from "@/utils"
 
+import type { TCanvasOptionsBase } from "../AbstractCanvas"
+import { AbstractCanvas } from "../AbstractCanvas"
 import type { TInkCanvasDeprecatedConfiguration } from "./InkCanvasDeprecatedConfiguration"
 import { InkCanvasDeprecatedConfiguration } from "./InkCanvasDeprecatedConfiguration"
 
@@ -161,19 +160,6 @@ export class InkCanvasDeprecated extends AbstractCanvas {
   set tool(i: CanvasTool) {
     this.#tool = i
     this.setCursorStyle()
-  }
-
-  protected setCursorStyle(): void {
-    switch (this.tool) {
-      case CanvasTool.Erase:
-        this.layers.root.classList.remove("draw")
-        this.layers.root.classList.add("erase")
-        break
-      default:
-        this.layers.root.classList.add("draw")
-        this.layers.root.classList.remove("erase")
-        break
-    }
   }
 
   get model(): Model {
@@ -338,7 +324,8 @@ export class InkCanvasDeprecated extends AbstractCanvas {
         flag = false
         return
       }
-      s.pointers?.forEach((pp, pIndex) => {
+      const sourcePointers = s.pointers ?? []
+      sourcePointers.forEach((pp, pIndex) => {
         if (!pp) {
           errors.push(`stroke ${strokeIndex + 1} has no pointer at ${pIndex}`)
           flag = false
@@ -346,7 +333,7 @@ export class InkCanvasDeprecated extends AbstractCanvas {
         }
         const pointer: TPointer = {
           p: pp.p || 1,
-          t: pp.t || pIndex,
+          dt: resolvePointerDelta(sourcePointers, pIndex),
           x: 0,
           y: 0,
         }
@@ -394,12 +381,14 @@ export class InkCanvasDeprecated extends AbstractCanvas {
     width?: number
   } = {}): Promise<void> {
     this.logger.info("resize", { height, width })
-    const compStyles = window.getComputedStyle(this.layers.root)
-    this.model.height =
-      height || Math.max(parseInt(compStyles.height.replace("px", "")), this.configuration.rendering.minHeight)
-    this.model.width =
-      width || Math.max(parseInt(compStyles.width.replace("px", "")), this.configuration.rendering.minWidth)
+    const dims = this.resolveDimensions(height, width)
+    this.model.height = dims.height
+    this.model.width = dims.width
     this.renderer.resize(this.model)
+  }
+
+  protected get minDimensions(): { minHeight: number; minWidth: number } {
+    return this.configuration.rendering
   }
 
   async undo(): Promise<void> {
@@ -438,11 +427,9 @@ export class InkCanvasDeprecated extends AbstractCanvas {
 
   async destroy(): Promise<void> {
     this.logger.info("destroy")
-    this.stopResizeObserver()
-    this.event.removeAllListeners()
     this.grabber.detach()
-    this.layers.destroy()
-    this.renderer.destroy()
+    this.teardownCommon()
+    this.clearRootElementReference()
     return Promise.resolve()
   }
 }

@@ -1,15 +1,14 @@
-import { SvgElementRole } from "@/Constants"
+import type { TBox, TPoint, TPointer } from "@/core"
+import { BoxOps, getClosestPoints, MatrixTransform, OBBOps, type TOBB } from "@/core"
+import { bumpSvgTransformVersion } from "@/dom"
 import { LoggerCategory, LoggerManager } from "@/logger"
-import { BaseRenderer } from "@/renderer/base"
-import type { TIIRendererConfiguration } from "@/renderer/RendererConfiguration"
-import type { TBox, TEraser, TPoint, TPointer, TSymbol } from "@/symbol"
+import type { TEraser, TSymbol } from "@/symbol"
 import { SymbolType } from "@/symbol"
-import { BoxOps } from "@/symbol/primitives/Box"
-import { OBBOps, type TOBB } from "@/symbol/primitives/OBB"
-import { arrowHeadEndMarkerId, arrowHeadStartMarkerId } from "@/symbol-utils/edge/EdgeRenderOptions"
-import { symbolRegistry } from "@/symbol-utils/SymbolRegistry"
-import { bumpSvgTransformVersion, getClosestPoints } from "@/utils"
+import { arrowHeadEndMarkerId, arrowHeadStartMarkerId, SymbolGeometry, symbolRegistry } from "@/symbol-utils"
 
+import { BaseRenderer } from "../base"
+import type { TIIRendererConfiguration } from "../RendererConfiguration"
+import { SvgElementRole } from "./SvgElementRole"
 import { SVGBuilder } from "./utils/SVGBuilder"
 import { GUIDE_PATH_ATTRS, SUB_GUIDE_PATH_ATTRS, SVGRendererConst } from "./utils/SVGRendererConst"
 
@@ -47,13 +46,38 @@ export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfigur
    */
   static readonly VIRTUALIZATION_MARGIN_RATIO = 0.5
 
+  /** How much wider than the line a selection halo is, in screen pixels (half of it each side) */
+  static readonly #HALO_SPREAD = 4
+
+  /** What a group wrapping a selected symbol takes over from its element */
+  static readonly #ADDRESS_ATTRIBUTES = ["id", "type", "transform"] as const
+
+  /**
+   * Symbols drawn selected. Kept here rather than read off the element, because an element is
+   * rebuilt from the symbol alone — on a redraw, a deferred rebuild, a symbol scrolling back in.
+   */
+  #selectedIds = new Set<string>()
+
   /**
    * Tracks every drawn symbol's element and bounds, whether currently attached to
    * `layer` or not - see {@link drawSymbol} and {@link #reconcileVirtualization}.
    * Off-screen symbols keep their built element here instead of in the DOM, so
    * pan/zoom over a large document doesn't force a repaint of the whole scene.
    */
-  #virtualizedSymbols = new Map<string, { element: SVGGraphicsElement; bounds: TOBB; isDecorator: boolean }>()
+  #virtualizedSymbols = new Map<
+    string,
+    {
+      element: SVGGraphicsElement
+      bounds: TOBB
+      isDecorator: boolean
+      /**
+       * Set when a redraw was skipped because the symbol was outside the extended viewBox, so
+       * `element` no longer matches the symbol. `#reconcileVirtualization` rebuilds from this the
+       * moment the symbol becomes visible, and clears it.
+       */
+      pendingRedraw?: TSymbol
+    }
+  >()
 
   constructor(configuration: TIIRendererConfiguration) {
     super(configuration)
@@ -115,21 +139,30 @@ export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfigur
   }
 
   /**
-   * Attaches symbols that scrolled into the (extended) viewBox and detaches
-   * symbols that scrolled out of it, without rebuilding their elements.
+   * Attaches symbols that scrolled into the (extended) viewBox and detaches symbols that scrolled
+   * out of it. Elements are not rebuilt here, except for the one case where `drawSymbol` deferred a
+   * rebuild because the symbol was off screen — that debt is settled on the way in.
    */
   #reconcileVirtualization(): void {
-    this.#virtualizedSymbols.forEach(({ element, bounds, isDecorator }) => {
-      const shouldAttach = this.#isInViewBox(bounds)
-      const isAttached = element.parentNode !== null
-      if (shouldAttach && !isAttached) {
-        if (isDecorator) {
-          this.definitionGroup.insertAdjacentElement("afterend", element)
-        } else {
-          this.layer.appendChild(element)
+    this.#virtualizedSymbols.forEach((tracked) => {
+      if (!this.#isInViewBox(tracked.bounds)) {
+        tracked.element.remove()
+        return
+      }
+      if (tracked.pendingRedraw) {
+        const rebuilt = this.buildElementFromSymbol(tracked.pendingRedraw)
+        tracked.pendingRedraw = undefined
+        if (rebuilt) {
+          tracked.element.remove()
+          tracked.element = rebuilt
         }
-      } else if (!shouldAttach && isAttached) {
-        element.remove()
+      }
+      if (tracked.element.parentNode === null) {
+        if (tracked.isDecorator) {
+          this.definitionGroup.insertAdjacentElement("afterend", tracked.element)
+        } else {
+          this.layer.appendChild(tracked.element)
+        }
       }
     })
   }
@@ -192,47 +225,6 @@ export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfigur
     const filtersGroup = SVGBuilder.createGroup({
       id: "filters-group",
     })
-    const removalFilter = SVGBuilder.createFilter(SVGRendererConst.removalFilterId)
-    const bfeComponentTransfer = SVGBuilder.createComponentTransfert()
-    const bfeFuncA = SVGBuilder.createTransfertFunctionTable("feFuncA", "0 0.25")
-    bfeComponentTransfer.appendChild(bfeFuncA)
-    removalFilter.appendChild(bfeComponentTransfer)
-    filtersGroup.appendChild(removalFilter)
-
-    const selectionFilter = SVGBuilder.createFilter(SVGRendererConst.selectionFilterId, {
-      x: "-50%",
-      y: "-50%",
-      width: "200%",
-      height: "200%",
-    })
-
-    const feMorphology = document.createElementNS("http://www.w3.org/2000/svg", "feMorphology")
-    feMorphology.setAttribute("operator", "dilate")
-    feMorphology.setAttribute("radius", "1.5")
-    feMorphology.setAttribute("in", "SourceAlpha")
-    feMorphology.setAttribute("result", "dilated")
-
-    const feFlood = document.createElementNS("http://www.w3.org/2000/svg", "feFlood")
-    feFlood.setAttribute("flood-color", "#3e68ff")
-    feFlood.setAttribute("result", "color")
-
-    const feComposite1 = document.createElementNS("http://www.w3.org/2000/svg", "feComposite")
-    feComposite1.setAttribute("in", "color")
-    feComposite1.setAttribute("in2", "dilated")
-    feComposite1.setAttribute("operator", "in")
-    feComposite1.setAttribute("result", "outline")
-
-    const feComposite2 = document.createElementNS("http://www.w3.org/2000/svg", "feComposite")
-    feComposite2.setAttribute("in", "SourceGraphic")
-    feComposite2.setAttribute("in2", "outline")
-    feComposite2.setAttribute("operator", "over")
-
-    selectionFilter.appendChild(feMorphology)
-    selectionFilter.appendChild(feFlood)
-    selectionFilter.appendChild(feComposite1)
-    selectionFilter.appendChild(feComposite2)
-    filtersGroup.appendChild(selectionFilter)
-
     return filtersGroup
   }
 
@@ -433,11 +425,17 @@ export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfigur
 
   buildElementFromSymbol(symbol: TSymbol): SVGGraphicsElement | undefined {
     const util = symbolRegistry.getUtil(symbol.type)
-    if (util?.getSVGElement) {
-      return util.getSVGElement(symbol)
+    if (!util) {
+      this.#logger.error("buildElementFromSymbol", `no util for symbol: "${JSON.stringify(symbol)}"`)
+      return undefined
     }
-    this.#logger.error("buildElementFromSymbol", `no util for symbol: "${JSON.stringify(symbol)}"`)
-    return undefined
+    // No check that the util can draw: `getSVGElement` is part of the contract. This used to log
+    // "no util for symbol" for a util that existed but had no draw method, which said the wrong
+    // thing about a registration that had in fact worked.
+    const element = util.getSVGElement(symbol)
+    // Applied here, where every element is built, so a redraw, a deferred rebuild or a symbol coming
+    // back into view keeps its outline without each of them having to remember it
+    return element && this.#selectedIds.has(symbol.id) ? this.#outlineSelected(symbol, element) : element
   }
 
   prependElement(el: Element): void {
@@ -474,6 +472,7 @@ export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfigur
   removeElement(id: string): void {
     this.#logger.debug("Element", { id })
     this.#virtualizedSymbols.delete(id)
+    this.#selectedIds.delete(id)
     if (!this.layer) {
       this.#logger.debug("removeElement: layer not initialized yet, skipping")
       return
@@ -497,10 +496,28 @@ export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfigur
       return svgEl
     }
 
+    const tracked = this.#virtualizedSymbols.get(symbol.id)
+    // Only computed when a util is registered for this type: `buildElementFromSymbol` below already
+    // owns the "no util" case (logs and returns undefined), and `SymbolGeometry.boundsOf` throws for
+    // an unregistered type instead of returning undefined - it must not run ahead of that guard.
+    const bounds = symbolRegistry.has(symbol.type) ? SymbolGeometry.boundsOf(symbol as TSymbol) : undefined
+
+    // Building an element walks every pointer of the symbol, so doing it for a symbol nobody can see
+    // is work thrown away. Committing a transform over a large selection redraws every symbol in it:
+    // on a 4419-stroke document that is 4419 rebuilt paths to keep the 295 elements the viewport
+    // actually holds. Defer instead, and let `#reconcileVirtualization` pay for the ones that come
+    // into view. Only a symbol already tracked can be deferred — the first draw must produce an
+    // element, because `drawSymbol` and `getElementById` are expected to return one off screen too.
+    if (tracked && bounds && !this.#isInViewBox(bounds)) {
+      tracked.bounds = bounds
+      tracked.pendingRedraw = symbol as TSymbol
+      tracked.element.remove()
+      return tracked.element
+    }
+
     const svgEl = this.buildElementFromSymbol(symbol as TSymbol)
-    if (svgEl) {
+    if (svgEl && bounds) {
       const isDecorator = symbol.type === SymbolType.Decorator
-      const bounds = (symbol as TSymbol).bounds
       this.#virtualizedSymbols.set(symbol.id, { element: svgEl, bounds, isDecorator })
 
       const shouldAttach = this.#isInViewBox(bounds)
@@ -520,6 +537,38 @@ export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfigur
       }
     }
     return svgEl
+  }
+
+  /**
+   * Re-points an already-drawn symbol at its current matrix, without rebuilding it.
+   *
+   * The element's geometry is the symbol's raw coordinates, which a transform never changes — so the
+   * matrix is the whole of what has to reach the DOM. Committing a transform over a large selection
+   * used to rebuild every element in it (`buildElementFromSymbol` walks every pointer); this writes
+   * one attribute per symbol instead.
+   *
+   * The tracked bounds are refreshed here too. They are what `#reconcileVirtualization` culls by,
+   * and leaving them behind would strand a moved symbol at its old address — attached where it is no
+   * longer drawn, detached where it now is.
+   */
+  setSymbolTransform(symbol: TSymbol): void {
+    const tracked = this.#virtualizedSymbols.get(symbol.id)
+    if (!tracked) {
+      this.drawSymbol(symbol)
+      return
+    }
+    tracked.bounds = SymbolGeometry.boundsOf(symbol)
+    if (tracked.pendingRedraw) {
+      // The element is already stale for another reason (it was off screen when last drawn); let
+      // the deferred rebuild in `#reconcileVirtualization` carry this matrix too, instead of writing
+      // an attribute onto an element that is about to be replaced wholesale.
+      tracked.pendingRedraw = symbol
+      return
+    }
+    tracked.element.setAttribute("transform", MatrixTransform.toCssString(symbol.transform))
+    if (!this.#isInViewBox(tracked.bounds)) {
+      tracked.element.remove()
+    }
   }
 
   /**
@@ -552,20 +601,66 @@ export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfigur
   }
 
   updateSelectedState(symbol: TSymbol, isSelected: boolean): void {
-    // Edge selection adds/removes a child outline path — full redraw needed
-    if (symbol.type === SymbolType.Edge) {
-      this.drawSymbol(symbol)
-      return
+    if (isSelected) {
+      this.#selectedIds.add(symbol.id)
+    } else {
+      this.#selectedIds.delete(symbol.id)
     }
     const el = this.getElementById(symbol.id)
     if (!el) {
       return
     }
-    if (isSelected) {
-      el.setAttribute("filter", `url(#${SVGRendererConst.selectionFilterId})`)
-    } else {
-      el.removeAttribute("filter")
+    // A halo changes the element itself (a group instead of the bare path): rebuild it
+    if (SVGRenderer.#isOutlinedByHalo(symbol)) {
+      this.drawSymbol(symbol)
+      return
     }
+    // The outline is a stroke the stylesheet paints under the fill, not a filter: WebKit crashed on
+    // an SVG one, and Chrome left ghost ink next to the selection with a CSS drop-shadow on the GPU
+    el.classList.toggle(SVGRendererConst.selectedClassName, isSelected)
+  }
+
+  /** A shape or an edge is drawn by its stroke, so the stylesheet cannot paint an outline under it */
+  static #isOutlinedByHalo(symbol: TSymbol): boolean {
+    return symbol.type === SymbolType.Shape || symbol.type === SymbolType.Edge
+  }
+
+  #outlineSelected(symbol: TSymbol, element: SVGGraphicsElement): SVGGraphicsElement {
+    if (!SVGRenderer.#isOutlinedByHalo(symbol)) {
+      element.classList.add(SVGRendererConst.selectedClassName)
+      return element
+    }
+    return SVGRenderer.#groupWithHalo(element)
+  }
+
+  /**
+   * The element preceded by a wider copy of itself, the halo, which the stylesheet colours.
+   *
+   * The group takes over what addresses the symbol — id, type and matrix — so `getElementById`,
+   * hit-testing by `type` and `setSymbolTransform` reach the group and move both paths together.
+   * The halo is unpainted until the stylesheet colours it, so an SVG export of a selected symbol does
+   * not carry it. No arrow heads on it: their size follows the stroke width, they would balloon.
+   */
+  static #groupWithHalo(element: SVGGraphicsElement): SVGGElement {
+    const group = SVGBuilder.createGroup({ class: SVGRendererConst.selectedClassName })
+    SVGRenderer.#ADDRESS_ATTRIBUTES.forEach((name) => {
+      const value = element.getAttribute(name)
+      if (value !== null) {
+        group.setAttribute(name, value)
+        element.removeAttribute(name)
+      }
+    })
+    const halo = element.cloneNode(true) as SVGGraphicsElement
+    const width = Number(element.getAttribute("stroke-width")) || 1
+    halo.classList.add(SVGRendererConst.selectionHaloClassName)
+    halo.removeAttribute("marker-start")
+    halo.removeAttribute("marker-end")
+    halo.setAttribute("stroke-width", String(width + SVGRenderer.#HALO_SPREAD))
+    halo.setAttribute("stroke", "none")
+    halo.setAttribute("fill", "none")
+    halo.setAttribute("style", SVGRendererConst.noSelection)
+    group.append(halo, element)
+    return group
   }
 
   updateDeletingState(symbol: TSymbol, isDeleting: boolean): void {
@@ -573,11 +668,9 @@ export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfigur
     if (!el) {
       return
     }
-    if (isDeleting) {
-      el.setAttribute("filter", `url(#${SVGRendererConst.removalFilterId})`)
-    } else {
-      el.removeAttribute("filter")
-    }
+    // Plain CSS opacity, not a filter: WebKit's renderer crashed painting the SVG removal filter
+    // (an alpha transfer table) on as few as five strokes
+    el.classList.toggle(SVGRendererConst.deletingClassName, isDeleting)
   }
 
   replaceSymbol(id: string, symbols: TSymbol[]): SVGGraphicsElement[] | undefined {
@@ -711,6 +804,7 @@ export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfigur
     this.#virtualizedSymbols.forEach(({ element }, id) => {
       if (element.matches(query)) {
         this.#virtualizedSymbols.delete(id)
+        this.#selectedIds.delete(id)
         element.remove()
       }
     })
@@ -720,6 +814,7 @@ export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfigur
   clear(): void {
     this.#logger.info("clear")
     this.#virtualizedSymbols.clear()
+    this.#selectedIds.clear()
     if (this.layer) {
       while (this.layer.firstChild) {
         this.layer.firstChild.remove()
@@ -844,6 +939,7 @@ export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfigur
     )
     bumpSvgTransformVersion(this.layer)
     this.#syncCurrentSymbolLayerViewBox()
+    this.#reconcileVirtualization()
 
     if (redrawGuides && this.configuration.guides.enable) {
       this.removeGuides()

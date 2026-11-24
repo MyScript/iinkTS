@@ -1,14 +1,12 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import type { TJIIXMathElement, TJIIXMathExpression, TJIIXStrokeItem } from "@/client"
+import type { MatrixTransform, TBox, TPoint } from "@/core"
+import { BoxOps, convertMillimeterToPixel, createUUID, isDeepEqualIgnoring, OBBOps } from "@/core"
 import { LoggerCategory } from "@/logger"
-import type { TJIIXMathElement, TJIIXMathExpression } from "@/model"
-import type { TStyle } from "@/style/Style"
-import type { TBox, TPoint, TStroke } from "@/symbol"
-import { BoxOps, isStroke, OBBOps } from "@/symbol"
-import { StrokeOps } from "@/symbol/stroke/Stroke"
-import type { MatrixTransform } from "@/transform"
-import { convertMillimeterToPixel } from "@/utils"
-import { isDeepEqualIgnoring } from "@/utils/object"
-import { createUUID } from "@/utils/uuid"
+import type { TStyle } from "@/style"
+import type { TStroke, TSymbol } from "@/symbol"
+import { isStroke } from "@/symbol"
+import { StrokeUtil, SymbolGeometry } from "@/symbol-utils"
 
 import { IIAbstractManager } from "../IIAbstractManager"
 
@@ -27,7 +25,7 @@ export type TMathResultMode = "draw" | "ghost"
 export type TMathComputationConfig = {
   /** How solver output is displayed */
   resultMode: TMathResultMode
-  /** Automatically compute results when blocks end with = or ? */
+  /** Automatically compute every block the server offers numerical computation for (ending with =, or a vertical operation with an empty result row) */
   autoCompute: boolean
   /** Color applied to result strokes (both draw and ghost modes) */
   resultColor: string
@@ -54,8 +52,8 @@ export class IIMathComputationSubManager extends IIAbstractManager {
   protected managerName = "IIMathComputationSubManager"
 
   static readonly DEFAULT_CONFIG: TMathComputationConfig = {
-    resultMode: "draw",
-    autoCompute: false,
+    resultMode: "ghost",
+    autoCompute: true,
     resultColor: "#4caf50",
   }
 
@@ -169,7 +167,7 @@ export class IIMathComputationSubManager extends IIAbstractManager {
         y: convertMillimeterToPixel(strokeData.Y[i]),
       }))
       const pathData = this.buildGhostStrokePath(points)
-      const stroke = StrokeOps.createFromPartial({
+      const stroke = StrokeUtil.createFromPartial({
         id: `ghost-stroke-${createUUID()}`,
         pointers: points.map((p, i) => ({
           x: p.x,
@@ -201,11 +199,16 @@ export class IIMathComputationSubManager extends IIAbstractManager {
     if (ghostIds && ghostIds.length > 0) {
       return true
     }
-    return !!this.#computations.get(jiixBlockId)?.solverOutputStrokeIds?.length
+    return this.hasDrawSolverOutputs(jiixBlockId)
   }
 
+  /**
+   * Read from the model, not from the ids recorded at compute time: undo/redo adds and removes
+   * drawn results without going through this manager, so the recorded ids can name strokes that
+   * are gone - which froze the block with no result on screen.
+   */
   hasDrawSolverOutputs(jiixBlockId: string): boolean {
-    return !!this.#computations.get(jiixBlockId)?.solverOutputStrokeIds?.length
+    return this.canvas.model.symbols.some((s) => isStroke(s) && s.jiixBlockId === jiixBlockId && s.isSolverOutput)
   }
 
   hasGhostStrokes(jiixBlockId: string): boolean {
@@ -227,7 +230,7 @@ export class IIMathComputationSubManager extends IIAbstractManager {
     if (!strokes || strokes.length === 0) {
       return undefined
     }
-    return BoxOps.createFromBoxes(strokes.map((s) => OBBOps.toBox(s.bounds)))
+    return BoxOps.createFromBoxes(strokes.map((s) => OBBOps.toBox(SymbolGeometry.boundsOf(s))))
   }
 
   /**
@@ -245,7 +248,6 @@ export class IIMathComputationSubManager extends IIAbstractManager {
         p.x = +np.x.toFixed(3)
         p.y = +np.y.toFixed(3)
       })
-      StrokeOps.updateBounds(stroke)
       this.renderer.drawSymbol(stroke)
     })
   }
@@ -270,7 +272,11 @@ export class IIMathComputationSubManager extends IIAbstractManager {
     }
   }
 
-  async clearSolverOutputs(jiixBlockId: string): Promise<void> {
+  /**
+   * Removes a block's solver output strokes and ghosts, without recording a history step.
+   * @returns The removed strokes, so a caller can record them in its own history step
+   */
+  async clearSolverOutputs(jiixBlockId: string): Promise<TSymbol[]> {
     this.logger.info("clearSolverOutputs", {
       jiixBlockId,
     })
@@ -279,16 +285,18 @@ export class IIMathComputationSubManager extends IIAbstractManager {
       (s) => isStroke(s) && s.jiixBlockId === jiixBlockId && s.isSolverOutput
     )
 
-    if (solverOutputStrokes.length > 0) {
-      await this.canvas.removeSymbols(
-        solverOutputStrokes.map((s) => s.id),
-        false
-      )
-    }
+    const removed =
+      solverOutputStrokes.length > 0
+        ? await this.canvas.removeSymbols(
+            solverOutputStrokes.map((s) => s.id),
+            false
+          )
+        : []
 
     this.updateSolverOutputs(jiixBlockId, [])
     // clearGhostStrokes also invalidates #lastComputationResult
     this.clearGhostStrokes(jiixBlockId)
+    return removed
   }
 
   async clearAllSolverOutputs(): Promise<void> {
@@ -339,7 +347,8 @@ export class IIMathComputationSubManager extends IIAbstractManager {
     this.logger.info("computeNumericalResult", "Numerical computation completed successfully", result)
 
     const lastResult = this.#lastComputationResult.get(jiixBlockId)
-    if (lastResult && isDeepEqualIgnoring(lastResult, result, ["timestamp"])) {
+    const isDisplayed = mode === "ghost" ? this.hasGhostStrokes(jiixBlockId) : this.hasDrawSolverOutputs(jiixBlockId)
+    if (isDisplayed && lastResult && isDeepEqualIgnoring(lastResult, result, ["timestamp"])) {
       this.logger.debug("computeNumericalResult", "Result unchanged, skipping re-render", { jiixBlockId })
       const addedStrokesCount =
         mode === "ghost"
@@ -349,14 +358,16 @@ export class IIMathComputationSubManager extends IIAbstractManager {
       return { result, addedStrokesCount, value, wasRecomputed: false }
     }
 
-    await this.clearSolverOutputs(jiixBlockId)
+    const erased = await this.clearSolverOutputs(jiixBlockId)
     this.#lastComputationResult.set(jiixBlockId, result)
 
     let addedStrokesCount = 0
+    let added: TStroke[] = []
 
     if (mode === "draw") {
       const wasBlockSelected = this.canvas.selector.isMathBlockSelected(jiixBlockId)
-      const addedStrokes = await this.addSolverOutputStrokes(result)
+      const addedStrokes = await this.addSolverOutputStrokes(result, undefined, false)
+      added = addedStrokes
       addedStrokesCount = addedStrokes.length
       this.logger.info("computeNumericalResult", `Added ${addedStrokesCount} solver output strokes`)
       this.updateSolverOutputs(
@@ -376,6 +387,7 @@ export class IIMathComputationSubManager extends IIAbstractManager {
       )
       this.#ghostStrokes.set(jiixBlockId, strokes)
     }
+    this.pushResultSwap(erased, added)
 
     let value: number | undefined
     if (result.expressions && Array.isArray(result.expressions)) {
@@ -437,36 +449,34 @@ export class IIMathComputationSubManager extends IIAbstractManager {
     F?: number[]
     T?: number[]
   }> {
-    const items: Array<{
-      X: number[]
-      Y: number[]
-      F?: number[]
-      T?: number[]
-    }> = []
-
-    const exprRecord = expression as Record<string, unknown>
-    if (
-      expression?.type === "number" &&
-      exprRecord["solver-output"] === true &&
-      exprRecord.items &&
-      Array.isArray(exprRecord.items)
-    ) {
-      items.push(
-        ...(exprRecord.items as Array<{
-          X: number[]
-          Y: number[]
-          F?: number[]
-          T?: number[]
-        }>)
-      )
+    if ((expression as Record<string, unknown>)["solver-output"] === true) {
+      return this.extractAllStrokesFromExpression(expression)
     }
-
-    if ("operands" in expression && expression.operands && Array.isArray(expression.operands)) {
-      expression.operands.forEach((operand: TJIIXMathExpression) => {
-        items.push(...this.extractSolverOutputStrokesFromExpression(operand))
-      })
+    if (!("operands" in expression) || !Array.isArray(expression.operands)) {
+      return []
     }
-    return items
+    return expression.operands.flatMap((operand: TJIIXMathExpression) =>
+      this.extractSolverOutputStrokesFromExpression(operand)
+    )
+  }
+
+  /**
+   * Below a solver-output node every stroke is generated, flagged or not.
+   */
+  protected extractAllStrokesFromExpression(expression: TJIIXMathExpression): Array<{
+    X: number[]
+    Y: number[]
+    F?: number[]
+    T?: number[]
+  }> {
+    const items = (expression.items ?? []).filter(
+      (item): item is TJIIXStrokeItem & { X: number[]; Y: number[] } => !!item.X && !!item.Y
+    )
+    const operands = "operands" in expression && Array.isArray(expression.operands) ? expression.operands : []
+    return [
+      ...items,
+      ...operands.flatMap((operand: TJIIXMathExpression) => this.extractAllStrokesFromExpression(operand)),
+    ]
   }
 
   protected extractSolverOutputStrokes(mathElement: TJIIXMathElement): Array<{
@@ -497,7 +507,17 @@ export class IIMathComputationSubManager extends IIAbstractManager {
     return strokes
   }
 
-  async addSolverOutputStrokes(result: TJIIXMathElement, style?: TStyle): Promise<TStroke[]> {
+  /**
+   * Records the replacement of a block's drawn result as one undoable step, so undo/redo restores
+   * the old result instead of stacking every result ever computed.
+   */
+  protected pushResultSwap(erased: TSymbol[], added: TStroke[]): void {
+    if (erased.length || added.length) {
+      this.canvas.history.push({ erased, added })
+    }
+  }
+
+  async addSolverOutputStrokes(result: TJIIXMathElement, style?: TStyle, addToHistory = true): Promise<TStroke[]> {
     this.logger.info("addSolverOutputStrokes", {
       result,
     })
@@ -523,7 +543,7 @@ export class IIMathComputationSubManager extends IIAbstractManager {
         t: strokeData.T?.[i] || i,
       }))
 
-      const stroke = StrokeOps.createFromPartial({
+      const stroke = StrokeUtil.createFromPartial({
         id: `solver-stroke-${createUUID()}`,
         pointers,
         style: defaultStyle,
@@ -534,7 +554,7 @@ export class IIMathComputationSubManager extends IIAbstractManager {
       addedStrokes.push(stroke)
       this.logger.debug("addSolverOutputStrokes", "Added solver output stroke:", stroke.id)
     }
-    await this.canvas.addSymbols(addedStrokes)
+    await this.canvas.addSymbols(addedStrokes, addToHistory)
     return addedStrokes
   }
 

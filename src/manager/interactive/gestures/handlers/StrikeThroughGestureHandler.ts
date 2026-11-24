@@ -1,11 +1,11 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import { GestureHandler } from "@/manager/interactive/gestures/GestureHandler"
-import type { GestureHelpers } from "@/manager/interactive/gestures/GestureHelpers"
-import type { TGesture } from "@/manager/interactive/gestures/GestureTypes"
-import { StrikeThroughAction } from "@/manager/interactive/gestures/GestureTypes"
+import type { TInteractiveInkCanvas } from "@/canvas"
 import type { TStroke } from "@/symbol"
 import { DecoratorKind } from "@/symbol"
 
+import { GestureHandler } from "../GestureHandler"
+import type { GestureHelpers } from "../GestureHelpers"
+import type { TGesture } from "../GestureTypes"
+import { StrikeThroughAction } from "../GestureTypes"
 /**
  * Handler for STRIKETHROUGH gesture type
  * Supports two actions: Draw (apply decorator) and Erase (remove symbols)
@@ -32,7 +32,7 @@ export class StrikeThroughGestureHandler extends GestureHandler {
           decoratorKind: DecoratorKind.Strikethrough,
         })
         if (changes) {
-          this.history.push(this.model, changes)
+          this.history.push(changes)
         }
         break
       }

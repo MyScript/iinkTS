@@ -1,7 +1,6 @@
 import { test, expect } from "@playwright/test"
 import {
   passModalKey,
-  getCanvasConfiguration,
   waitForUIUpdatedEvent
 } from "../helper"
 
@@ -25,7 +24,7 @@ test.describe("Interactive ink canvas Get Started - Guides", () => {
       await expect(menuActionGuideBtn).toBeVisible()
       await menuActionGuideBtn.click()
       await expect(page.getByRole('heading', { name: 'Guide' })).toBeVisible()
-      await expect(page.getByRole("checkbox", { id: locator.menu.action.guide.enable })).toBeVisible()
+      await expect(page.locator(locator.menu.action.guide.enable)).toBeVisible()
       await expect(page.locator(locator.menu.action.guide.types)).toBeVisible()
       await expect(page.locator("#ms-menu-action-guide-size")).toBeVisible()
     })
@@ -46,7 +45,7 @@ test.describe("Interactive ink canvas Get Started - Guides", () => {
       await test.step("should set guide style to grid", async () => {
         await page.locator(locator.menu.action.triggerBtn).click()
         await page.getByRole('button', { name: 'Guide' }).click()
-        await page.getByRole("checkbox", { id: locator.menu.action.guide.enable }).check()
+        await page.locator(locator.menu.action.guide.enable).check()
         await page.locator(locator.menu.action.guide.types).selectOption({ value: "grid" })
       })
 
@@ -67,7 +66,7 @@ test.describe("Interactive ink canvas Get Started - Guides", () => {
       await test.step("should set guide style to line", async () => {
         await page.locator(locator.menu.action.triggerBtn).click()
         await page.getByRole('button', { name: 'Guide' }).click()
-        await page.getByRole("checkbox", { id: locator.menu.action.guide.enable }).check()
+        await page.locator(locator.menu.action.guide.enable).check()
         await page.locator(locator.menu.action.guide.types).selectOption({ value: "line" })
       })
 
@@ -88,7 +87,7 @@ test.describe("Interactive ink canvas Get Started - Guides", () => {
       await test.step("should set guide style to point", async () => {
         await page.locator(locator.menu.action.triggerBtn).click()
         await page.getByRole('button', { name: 'Guide' }).click()
-        await page.getByRole("checkbox", { id: locator.menu.action.guide.enable }).check()
+        await page.locator(locator.menu.action.guide.enable).check()
         await page.locator(locator.menu.action.guide.types).selectOption({ value: "point" })
       })
 

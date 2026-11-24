@@ -1,15 +1,15 @@
 {
-  "extends": "../../tsconfig.json",
+  // The project VSCode opens for unit tests. It reuses the options `yarn typecheck` runs with, so
+  // the editor reports what CI reports; only `include` narrows it to the tests, `src` comes in
+  // through their imports. Its ambient declarations (svg, css, untyped packages) are imported by
+  // nothing, so they are named here.
+  "extends": "../../tsconfig.typecheck.json",
   "compilerOptions": {
-    "rootDir": "../../",
-    "outDir": "../../dist-test",
-    "types": [
-      "@types/jest",
-      "jest-websocket-mock",
-      "node"
-    ]
+    // Its own cache: sharing `yarn typecheck`'s would make each one discard the other's
+    "tsBuildInfoFile": "../../node_modules/.cache/tsc/test-unit.tsbuildinfo"
   },
   "include": [
-    "./"
+    "./",
+    "../../src/modules.d.ts"
   ]
 }

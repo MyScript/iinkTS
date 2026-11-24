@@ -1,8 +1,9 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import type { TInteractiveInkCanvas } from "@/canvas"
 import { IIMathDiagnosticChecker, IIMathFunctionEvaluator, IIMathVariablePerBlockCanvas } from "@/components"
 import { LoggerCategory, LoggerManager } from "@/logger"
-import type { TMenuSubMenu } from "@/menu/items/SubMenuItem"
-import { SubMenuItem } from "@/menu/items/SubMenuItem"
+
+import type { TMenuSubMenu } from "../items/SubMenuItem"
+import { SubMenuItem } from "../items/SubMenuItem"
 
 /** @group Menu */
 export type TContextMathItemsConfig = {

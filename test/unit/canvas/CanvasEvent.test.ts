@@ -69,6 +69,13 @@ describe("CanvasEvent.ts", () => {
       expect(idleCallback).toHaveBeenNthCalledWith(1, idle)
     })
 
+    test("should execute callback on emitIdle with a falsy value", () => {
+      const falsyIdleCallback = jest.fn()
+      events.addIdleListener(falsyIdleCallback)
+      events.emitIdle(false)
+      expect(falsyIdleCallback).toHaveBeenNthCalledWith(1, false)
+    })
+
     test("should execute callback on emitCleared", () => {
       events.addClearedListener(clearedCallback)
       events.emitCleared()

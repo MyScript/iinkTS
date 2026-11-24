@@ -1,6 +1,6 @@
 import Server from "jest-websocket-mock"
 import { DeserializedMessage } from "jest-websocket-mock/lib/websocket"
-import { TWebSocketClientMessage } from "@/client"
+import { TWebSocketClientMessage } from "@/iink"
 
 export const HMACChallengeMessage = {
   type: "hmacChallenge",

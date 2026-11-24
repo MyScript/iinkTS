@@ -1,15 +1,13 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import type { TButtonElConfig } from "@/components/dom"
-import { DOMFactory } from "@/components/dom"
-import { LoggerCategory } from "@/logger/logger"
-import { LoggerManager } from "@/logger/LoggerManager"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import type { TButtonElConfig } from "@/dom"
+import { DOMFactory } from "@/dom"
+import { LoggerCategory, LoggerManager } from "@/logger"
+import type { TTableRow } from "@/ui"
+import { Modal, Table } from "@/ui"
 
 import { IIMathDiagnosticChecker } from "./IIMathDiagnosticChecker"
 import { IIMathFunctionEvaluator } from "./IIMathFunctionEvaluator"
 import { IIMathVariablePerBlockCanvas } from "./IIMathVariablePerBlockCanvas"
-import { Modal } from "./Modal"
-import type { TTableRow } from "./Table"
-import { Table } from "./Table"
 
 /**
  * @group Components

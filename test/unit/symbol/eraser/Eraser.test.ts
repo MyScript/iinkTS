@@ -53,8 +53,8 @@ describe("EraserOps", () => {
 
     test("with pointers returns bounding box", () => {
       const eraser = EraserOps.create()
-      eraser.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
-      eraser.pointers.push({ p: 1, t: 1, x: 11, y: 11 })
+      eraser.pointers.push({ p: 1, dt: 1, x: 1, y: 1 })
+      eraser.pointers.push({ p: 1, dt: 1, x: 11, y: 11 })
       const bounds = EraserOps.getBounds(eraser)
       expect(bounds).toEqual({ x: 1, y: 1, width: 10, height: 10 })
     })
@@ -63,7 +63,7 @@ describe("EraserOps", () => {
   describe("clone via structuredClone", () => {
     test("deep copy, different reference", () => {
       const eraser = EraserOps.create()
-      eraser.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
+      eraser.pointers.push({ p: 1, dt: 1, x: 1, y: 1 })
       const clone: TEraser = structuredClone(eraser)
       expect(clone).toEqual(eraser)
       expect(clone).not.toBe(eraser)

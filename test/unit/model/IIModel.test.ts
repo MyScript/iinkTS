@@ -22,7 +22,7 @@ describe("IIModel.ts", () => {
       const updatedSymb = structuredClone(sym)
       updatedSymb.style.color = "yellow"
       updatedSymb.style.width = 25
-      updatedSymb.pointers.push({ p: 1, t: 20, x: 42, y: 31 })
+      updatedSymb.pointers.push({ p: 1, dt: 20, x: 42, y: 31 })
       model.updateSymbol(updatedSymb)
       expect(model.symbols[0]).not.toEqual(sym)
       expect(model.symbols[0]).toEqual(updatedSymb)
@@ -34,9 +34,25 @@ describe("IIModel.ts", () => {
       updatedSymb2.id = "not-exist"
       updatedSymb2.style.color = "yellow"
       updatedSymb2.style.width = 25
-      updatedSymb2.pointers.push({ p: 1, t: 20, x: 42, y: 31 })
+      updatedSymb2.pointers.push({ p: 1, dt: 20, x: 42, y: 31 })
       model.updateSymbol(updatedSymb2)
       expect(model.symbols[1]).toEqual(symb2)
+    })
+    test("should updateSymbol without marking dirty when markDirty is false", () => {
+      const symb3 = buildIIStroke()
+      model.addSymbol(symb3)
+      const versionBefore = model.version
+      const modificationDateBefore = model.modificationDate
+      model.mergeExport({ "application/vnd.myscript.jiix": {} } as unknown as TExport)
+
+      const updatedSymb3 = structuredClone(symb3)
+      updatedSymb3.style.color = "yellow"
+      model.updateSymbol(updatedSymb3, false)
+
+      expect(model.symbols.find((s) => s.id === symb3.id)).toEqual(updatedSymb3)
+      expect(model.version).toEqual(versionBefore)
+      expect(model.modificationDate).toEqual(modificationDateBefore)
+      expect(model.exports).toBeDefined()
     })
     test("should replaceSymbol", () => {
       const sym1 = buildIIStroke()
@@ -146,13 +162,13 @@ describe("IIModel.ts", () => {
     model.addSymbol(circle1)
 
     test("shoud get symbol if stroke root", () => {
-      expect(model.getRootSymbol(stroke1.id)).toEqual(stroke1)
+      expect(model.getSymbol(stroke1.id)).toEqual(stroke1)
     })
     test("shoud get symbol if circle root", () => {
-      expect(model.getRootSymbol(circle1.id)).toEqual(circle1)
+      expect(model.getSymbol(circle1.id)).toEqual(circle1)
     })
     test("shoud get undefined if child of group root", () => {
-      expect(model.getRootSymbol("pouet")).toBeUndefined()
+      expect(model.getSymbol("pouet")).toBeUndefined()
     })
   })
 
@@ -185,31 +201,59 @@ describe("IIModel.ts", () => {
     })
   })
 
-  describe("extract", () => {
-    const model = new IIModel()
-    model.addSymbol(buildIIStroke())
-    model.addSymbol(buildIIStroke())
+  describe("selectionVersion", () => {
+    // `selectedIds` is a live Set whose identity never changes, so this counter is the only way a
+    // reader can cache per-selection work. Readers compare it every pointermove of every drag.
+    const build = () => {
+      const model = new IIModel()
+      const stroke1 = buildIIStroke({ box: { height: 10, width: 10, x: 0, y: 0 } })
+      const stroke2 = buildIIStroke({ box: { height: 10, width: 10, x: 20, y: 0 } })
+      model.addSymbol(stroke1)
+      model.addSymbol(stroke2)
+      return { model, stroke1, stroke2 }
+    }
 
-    test("should extract symbol added in second model", () => {
-      const newModel = model.clone()
-      const newSymb = buildIIStroke()
-      model.addSymbol(newSymb)
-      const { added, removed } = model.extractDifferenceSymbols(newModel)
-      expect(added).toEqual([newSymb])
-      expect(removed).toEqual([])
+    test("should bump when a symbol is selected", () => {
+      const { model, stroke1 } = build()
+      const before = model.selectionVersion
+      model.selectSymbol(stroke1.id)
+      expect(model.selectionVersion).toBeGreaterThan(before)
     })
-    test("should extract symbol removed in second model", () => {
-      const newModel = model.clone()
-      const newSymb = buildIIStroke()
-      model.addSymbol(newSymb)
-      const { added, removed } = newModel.extractDifferenceSymbols(model)
-      expect(added).toEqual([])
-      expect(removed).toEqual([newSymb])
+
+    test("should not bump when the same symbol is selected twice", () => {
+      const { model, stroke1 } = build()
+      model.selectSymbol(stroke1.id)
+      const after = model.selectionVersion
+      model.selectSymbol(stroke1.id)
+      expect(model.selectionVersion).toEqual(after)
     })
-    test("should extract nothing if same model", () => {
-      const { added, removed } = model.extractDifferenceSymbols(model)
-      expect(added).toEqual([])
-      expect(removed).toEqual([])
+
+    test("should bump when a symbol is unselected, and not when it was not selected", () => {
+      const { model, stroke1, stroke2 } = build()
+      model.selectSymbol(stroke1.id)
+      const selected = model.selectionVersion
+      model.unselectSymbol(stroke2.id)
+      expect(model.selectionVersion).toEqual(selected)
+      model.unselectSymbol(stroke1.id)
+      expect(model.selectionVersion).toBeGreaterThan(selected)
+    })
+
+    test("should bump when a non-empty selection is reset, and not when it is already empty", () => {
+      const { model, stroke1 } = build()
+      const empty = model.selectionVersion
+      model.resetSelection()
+      expect(model.selectionVersion).toEqual(empty)
+      model.selectSymbol(stroke1.id)
+      const selected = model.selectionVersion
+      model.resetSelection()
+      expect(model.selectionVersion).toBeGreaterThan(selected)
+    })
+
+    test("should not move when the document content changes", () => {
+      const { model } = build()
+      const before = model.selectionVersion
+      model.addSymbol(buildIIStroke({ box: { height: 10, width: 10, x: 40, y: 0 } }))
+      expect(model.selectionVersion).toEqual(before)
     })
   })
 
@@ -242,18 +286,6 @@ describe("IIModel.ts", () => {
       model.mergeExport(newExport)
       expect(model.exports).toMatchObject(newExport)
       expect(model.exports).toMatchObject(e)
-    })
-  })
-
-  describe("clone", () => {
-    const model = new IIModel()
-    const stroke = buildIIStroke()
-    model.addSymbol(stroke)
-    model.exports = { "text/plain": "M" }
-    test("should clone", () => {
-      const clone = model.clone()
-      expect(clone).toStrictEqual(model)
-      expect(clone).not.toBe(model)
     })
   })
 

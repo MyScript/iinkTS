@@ -126,6 +126,72 @@ describe("InteractiveInkSSRSmartGuide.ts", () => {
     })
   })
 
+  describe("Candidates escaping", () => {
+    const PAYLOAD = '<img src=x onerror="window.__xss = true">'
+
+    const buildJiix = (candidate: string) => ({
+      type: "Text",
+      label: "hello",
+      words: [
+        {
+          id: "1",
+          label: "hello",
+          candidates: ["hello", candidate],
+        },
+      ],
+      version: "3",
+      id: "MainBlock",
+    })
+
+    const openCandidates = (sm: InteractiveInkSSRSmartGuide, domElement: HTMLElement) => {
+      const wordSpan = domElement.querySelector(`#word-0${sm.uuid}`) as HTMLSpanElement
+      expect(wordSpan).not.toBeNull()
+      // EventMock does not set `bubbles`, so it cannot reach the listener on the prompter;
+      // #onClickPrompter only reads target/preventDefault/stopPropagation, so a plain
+      // bubbling Event is enough here.
+      wordSpan.dispatchEvent(new Event("pointerdown", { bubbles: true, cancelable: true }))
+      return domElement.querySelector(".candidates") as HTMLDivElement
+    }
+
+    test("should not build DOM from a server candidate label", () => {
+      const domElement = document.createElement("div")
+      const sm = new InteractiveInkSSRSmartGuide(canvasMock)
+      sm.init(domElement, margin)
+      sm.update(buildJiix(PAYLOAD))
+
+      const candidates = openCandidates(sm, domElement)
+
+      expect(candidates.querySelector("img")).toBeNull()
+      expect(candidates.textContent).toContain(PAYLOAD)
+    })
+
+    test("should still render one span per candidate", () => {
+      const domElement = document.createElement("div")
+      const sm = new InteractiveInkSSRSmartGuide(canvasMock)
+      sm.init(domElement, margin)
+      sm.update(buildJiix("helle"))
+
+      const candidates = openCandidates(sm, domElement)
+
+      expect(candidates.children).toHaveLength(2)
+      expect(candidates.children[0].id).toBe(`cdt-0${sm.uuid}`)
+      expect(candidates.children[0].textContent).toBe("hello")
+      expect(candidates.children[1].textContent).toBe("helle")
+    })
+
+    test("should mark the candidate matching the current label as selected", () => {
+      const domElement = document.createElement("div")
+      const sm = new InteractiveInkSSRSmartGuide(canvasMock)
+      sm.init(domElement, margin)
+      sm.update(buildJiix("helle"))
+
+      const candidates = openCandidates(sm, domElement)
+
+      expect(candidates.children[0].classList.contains("selected-word")).toBe(true)
+      expect(candidates.children[1].classList.contains("selected-word")).toBe(false)
+    })
+  })
+
   describe("Display", () => {
     const domElement = document.createElement("div")
     const sm = new InteractiveInkSSRSmartGuide(canvasMock)

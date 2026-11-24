@@ -1,6 +1,6 @@
 import { buildIICircle, buildIIStroke, buildIIText } from "../../helpers"
 import { createCanvasMock, asCanvas } from "../../__mocks__/createCanvasMock"
-import { IITypesetManager, OBBOps, TSymbolChar, SVGBuilder } from "@/iink"
+import { IITypesetManager, OBBOps, TSymbolChar, SVGBuilder, TBaseSymbol, TSymbol } from "@/iink"
 
 describe("IITypesetManager.ts", () => {
   const chars: TSymbolChar[] = [
@@ -143,6 +143,74 @@ describe("IITypesetManager.ts", () => {
       expect(rows[2].symbols).toEqual([stroke31])
       expect(rows[3].rowIndex).toEqual(5)
       expect(rows[3].symbols).toEqual([stroke51])
+    })
+
+    test("skips an unregistered symbol type without throwing, keeping the rest of the rows", () => {
+      const orphan = {
+        ...(buildIIStroke({ box: { height: 9, width: 10, x: 0, y: 3.5 * rowHeight } }) as unknown as TBaseSymbol),
+        type: "no-such-type",
+        id: "orphan-1",
+      } as unknown as TSymbol
+      canvas.model.addSymbol(orphan)
+
+      let rows: ReturnType<typeof manager.getSymbolsByRowOrdered>
+      expect(() => {
+        rows = manager.getSymbolsByRowOrdered()
+      }).not.toThrow()
+
+      expect(rows!.some((r) => r.symbols.some((s) => s.id === orphan.id))).toBe(false)
+      expect(rows!.find((r) => r.rowIndex === 1)?.symbols).toEqual([stroke11, stroke12, circle13])
+    })
+  })
+  describe("moveTextAfter", () => {
+    /**
+     * Reproduces the crash first. `getSymbolsByRowOrdered` reads `model.symbols`, which hands out
+     * the store's deep-frozen committed records, and the shift wrote straight onto them.
+     */
+    test("should shift the texts that follow, without writing into the frozen document", () => {
+      const canvas = createCanvasMock()
+      const manager = new IITypesetManager(asCanvas(canvas))
+
+      // Order and row come from the stored `bounds` — a typeset symbol's box is a DOM
+      // measurement, so `SymbolGeometry` reports it as-is and `point` does not place it.
+      const moved = buildIIText({ point: { x: 10, y: 100 }, boundingBox: { x: 10, y: 90, width: 20, height: 20 }, chars })
+      const following = buildIIText({
+        point: { x: 200, y: 100 },
+        boundingBox: { x: 200, y: 90, width: 20, height: 20 },
+        chars,
+      })
+      canvas.model.addSymbol(moved)
+      canvas.model.addSymbol(following)
+      // What the bug was: the committed record is frozen all the way down.
+      expect(Object.isFrozen(canvas.model.getSymbol(following.id))).toBe(true)
+
+      const pairs = manager.moveTextAfter(canvas.model.getSymbol(moved.id) as typeof moved, 25)
+
+      expect(pairs).toHaveLength(1)
+      expect(pairs![0].before.id).toBe(following.id)
+      expect((pairs![0].before as typeof following).point.x).toBe(200)
+      expect((canvas.model.getSymbol(following.id) as typeof following).point.x).toBe(225)
+      // The snapshot is a value, not a view on the document: it must not have moved with it.
+      expect((pairs![0].before as typeof following).point.x).toBe(200)
+    })
+
+    test("should leave a text that precedes it alone", () => {
+      const canvas = createCanvasMock()
+      const manager = new IITypesetManager(asCanvas(canvas))
+
+      const moved = buildIIText({ point: { x: 200, y: 100 }, boundingBox: { x: 200, y: 90, width: 20, height: 20 }, chars })
+      const preceding = buildIIText({
+        point: { x: 10, y: 100 },
+        boundingBox: { x: 10, y: 90, width: 20, height: 20 },
+        chars,
+      })
+      canvas.model.addSymbol(moved)
+      canvas.model.addSymbol(preceding)
+
+      const pairs = manager.moveTextAfter(canvas.model.getSymbol(moved.id) as typeof moved, 25)
+
+      expect(pairs).toEqual([])
+      expect((canvas.model.getSymbol(preceding.id) as typeof preceding).point.x).toBe(10)
     })
   })
 })

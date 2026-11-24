@@ -1,13 +1,8 @@
+import { type TOBB } from "@/core"
 import type { TStyle } from "@/style"
-import { DefaultStyle } from "@/style"
-import type { TBox } from "@/symbol/primitives/Box"
-import { OBBOps, type TOBB } from "@/symbol/primitives/OBB"
-import type { TPoint, TSegment } from "@/symbol/primitives/Point"
-import type { TBaseSymbol } from "@/symbol/Symbol"
-import { SymbolType } from "@/symbol/Symbol"
-import type { TPartialDeep } from "@/utils"
-import { createUUID } from "@/utils"
 
+import type { TBaseSymbol } from "../Symbol"
+import { SymbolType } from "../Symbol"
 /**
  * @group Symbol
  */
@@ -20,10 +15,9 @@ export enum DecoratorKind {
 
 /**
  * Standalone decorator symbol that references the strokes or text it decorates.
- * When standalone (in model.symbols): targetIds contains the referenced stroke IDs
- * and hasBounds is true with word-level bounding box.
- * When embedded (in TText.decorators[]): targetIds is empty and hasBounds is false
- * (the parent symbol's bounds are used at render time).
+ * When standalone (in model.symbols): `targetIds` holds the referenced stroke ids and
+ * `targetBounds` the box to draw across. When embedded (in `TText.decorators[]`): `targetIds` is
+ * empty and `targetBounds` unset — the parent symbol's bounds are used at render time.
  * @group Symbol
  */
 export type TDecorator = TBaseSymbol & {
@@ -31,11 +25,22 @@ export type TDecorator = TBaseSymbol & {
   style: TStyle
   kind: DecoratorKind
   targetIds: string[]
-  bounds: TOBB
-  hasBounds: boolean
-  vertices: TPoint[]
-  snapPoints: TPoint[]
-  edges: TSegment[]
+  /**
+   * The box this decorator is drawn across — an **input**, not a derived value, which is why it
+   * survived the removal of every computable field and why it is named for where it comes from.
+   *
+   * A decorator holds no coordinates of its own: it is placed over other symbols. Its box arrives
+   * from outside, either as the recognizer's own word box (JIIX, which is not the union of the
+   * strokes' boxes and cannot be recomputed from them) or as that union when JIIX has not answered
+   * yet. `DecoratorUtil.getGeometry` therefore reads this field rather than deriving anything. It is
+   * in the decorator's local frame: when its targets are transformed together the decorator takes
+   * their matrix in `transform` and this box is left alone; only a partial move refits it — see
+   * `IIAbstractTransformManager.updateDecoratorsForTargets`.
+   *
+   * Unset is the "no box of its own" case, and it is the only flag: the `hasBounds` boolean that
+   * used to shadow a zero-size box is gone, so presence cannot disagree with itself.
+   */
+  targetBounds?: TOBB
   baseline?: number
   xHeight?: number
 }
@@ -51,49 +56,3 @@ export function isDecorator(symbol: TBaseSymbol): symbol is TDecorator {
 /**
  * @group Symbol
  */
-export const DecoratorOps = {
-  create(kind: DecoratorKind, style: TPartialDeep<TStyle>, targetIds: string[] = [], bounds?: TBox): TDecorator {
-    const mergedStyle = Object.assign({}, DefaultStyle, style) as TStyle
-    if (mergedStyle.opacity) {
-      mergedStyle.opacity = +mergedStyle.opacity
-    }
-    mergedStyle.width = +mergedStyle.width
-    const now = Date.now()
-    const decorator: TDecorator = {
-      id: `${kind}-${createUUID()}`,
-      type: SymbolType.Decorator,
-      style: mergedStyle,
-      creationTime: now,
-      modificationDate: now,
-      kind,
-      targetIds,
-      bounds: OBBOps.create({ x: 0, y: 0 }, 0, 0),
-      hasBounds: false,
-      vertices: [],
-      snapPoints: [],
-      edges: [],
-    }
-    if (bounds) {
-      DecoratorOps.setBounds(decorator, OBBOps.fromBox(bounds))
-    }
-    return decorator
-  },
-
-  setBounds(decorator: TDecorator, bounds: TOBB): void {
-    decorator.bounds = bounds
-    decorator.hasBounds = true
-    const yMid = bounds.center.y
-    const hw = bounds.width / 2
-    const vertices: TPoint[] = [
-      { x: bounds.center.x - hw, y: yMid },
-      { x: bounds.center.x + hw, y: yMid },
-    ]
-    decorator.vertices = vertices
-    decorator.snapPoints = vertices
-    decorator.edges = [{ p1: vertices[0], p2: vertices[1] }]
-  },
-
-  overlaps(decorator: TDecorator, box: TBox): boolean {
-    return decorator.hasBounds ? OBBOps.overlapsBox(decorator.bounds, box) : false
-  },
-}

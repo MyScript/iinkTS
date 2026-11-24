@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="../assets/style/panel.css" />
   <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
 
-  <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+  <script src="../assets/js/theme-init.js"></script>
 </head>
 
 <body>
@@ -187,14 +187,7 @@
             shape: false,
             edge: false
           },
-          style: {
-            strokeColor: true,
-            fillColor: false,
-            thickness: false,
-            fontSize: false,
-            fontWeight: false,
-            opacity: false,
-          },
+          style: false,
           context: {
             edit: false,
             decorator: false,

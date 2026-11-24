@@ -1,12 +1,89 @@
-import { buildIILine } from "../helpers"
+import { buildIILine, buildIIStroke } from "../helpers"
 import { createCanvasMock, asCanvas } from "../__mocks__/createCanvasMock"
-import { IISnapManager, TSegment, TPoint, TSnapNudge, SVGRendererConst } from "@/iink"
+import { IISnapManager, IIModel, TSegment, TPoint, TSnapNudge, SVGRendererConst } from "@/iink"
 
 describe("IISnapManager.ts", () => {
   test("should create", () => {
     const canvas = createCanvasMock()
     const manager = new IISnapManager(asCanvas(canvas))
     expect(manager).toBeDefined()
+  })
+
+  describe("snap point caches", () => {
+    /** A model with two symbols, the first of them selected. */
+    const setup = () => {
+      const model = new IIModel()
+      const selected = buildIIStroke({ box: { x: 0, y: 0, width: 10, height: 10 } })
+      const other = buildIIStroke({ box: { x: 100, y: 100, width: 10, height: 10 } })
+      model.addSymbol(selected)
+      model.addSymbol(other)
+      model.selectSymbol(selected.id)
+      const canvas = createCanvasMock({ model })
+      return { model, manager: new IISnapManager(asCanvas(canvas)), selected, other }
+    }
+
+    test("should reuse otherSnapPoints while nothing changes", () => {
+      const { manager } = setup()
+      expect(manager.otherSnapPoints).toBe(manager.otherSnapPoints)
+    })
+
+    test("should rebuild otherSnapPoints when the selection changes", () => {
+      const { manager, model, other } = setup()
+      const before = manager.otherSnapPoints
+      model.selectSymbol(other.id)
+      expect(manager.otherSnapPoints).not.toBe(before)
+      // `other` is selected now, so it must no longer be offered as a snap target.
+      expect(manager.otherSnapPoints).toHaveLength(0)
+    })
+
+    test("should rebuild otherSnapPoints when the document content changes", () => {
+      const { manager, model } = setup()
+      const before = manager.otherSnapPoints
+      model.addSymbol(buildIIStroke({ box: { x: 200, y: 200, width: 10, height: 10 } }))
+      expect(manager.otherSnapPoints).not.toBe(before)
+      expect(manager.otherSnapPoints.length).toBeGreaterThan(before.length)
+    })
+
+    // `selectionSnapPoints` is read on every pointermove of every drag, and it lists the whole
+    // document to filter the selection out of it. Nothing it depends on changes during a gesture:
+    // `continue()` moves DOM elements, the model is only written at commit.
+    test("should reuse selectionSnapPoints while nothing changes", () => {
+      const { manager } = setup()
+      expect(manager.selectionSnapPoints).toBe(manager.selectionSnapPoints)
+    })
+
+    test("should rebuild selectionSnapPoints when the selection changes", () => {
+      const { manager, model, other } = setup()
+      const before = manager.selectionSnapPoints
+      model.selectSymbol(other.id)
+      const after = manager.selectionSnapPoints
+      expect(after).not.toBe(before)
+      expect(after).not.toEqual(before)
+    })
+
+    test("should rebuild selectionSnapPoints when a selected symbol moves", () => {
+      const { manager, model, selected } = setup()
+      const before = manager.selectionSnapPoints
+      const draft = model.draftSymbol(selected.id)
+      if (!draft || !("pointers" in draft)) {
+        throw new Error("expected a stroke draft")
+      }
+      draft.pointers.forEach((pointer) => {
+        pointer.x += 50
+        pointer.y += 50
+      })
+      model.updateSymbol(draft)
+      const after = manager.selectionSnapPoints
+      expect(after).not.toBe(before)
+      expect(after).not.toEqual(before)
+    })
+
+    test("should rebuild selectionSnapPoints after the selection is reset", () => {
+      const { manager, model } = setup()
+      const before = manager.selectionSnapPoints
+      model.resetSelection()
+      expect(manager.selectionSnapPoints).not.toBe(before)
+    })
   })
 
   test("should call renderer.drawLine when drawSnapToElementLines", () => {

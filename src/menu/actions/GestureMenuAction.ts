@@ -1,7 +1,17 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import { CanvasTool, CanvasWriteTool } from "@/Constants"
-import type { TMenuSubMenu } from "@/menu/items/SubMenuItem"
-import { SubMenuItem } from "@/menu/items/SubMenuItem"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import type { TRecognitionGesture } from "@/client"
+import {
+  CanvasTool,
+  CanvasWriteTool,
+  InsertAction,
+  JoinAction,
+  StrikeThroughAction,
+  SurroundAction,
+  UnderlineAction,
+} from "@/manager"
+
+import type { TMenuSubMenu } from "../items/SubMenuItem"
+import { SubMenuItem } from "../items/SubMenuItem"
 
 /** @group Menu */
 export type TGestureActionItemsConfig = {
@@ -10,11 +20,25 @@ export type TGestureActionItemsConfig = {
   strikethrough?: boolean
   underline?: boolean
   insert?: boolean
+  join?: boolean
+  scratchOut?: boolean
 }
 /** @group Menu */
 export type TGestureActionConfig = boolean | TGestureActionItemsConfig
-import gestureIcon from "@/assets/svg/spock-hand-gesture.svg"
-import { InsertAction, StrikeThroughAction, SurroundAction, UnderlineAction } from "@/manager"
+
+type TGestureAction = {
+  values: Record<string, string>
+  get: (canvas: TInteractiveInkCanvas) => string
+  set: (canvas: TInteractiveInkCanvas, value: string) => void
+}
+
+type TGestureSubMenuOptions = {
+  key: Exclude<keyof TGestureActionItemsConfig, "detect">
+  gestureType: TRecognitionGesture
+  label: string
+  /** Absent for a gesture with a single behavior: its submenu only turns it on or off. */
+  action?: TGestureAction
+}
 
 /**
  * @group Menu
@@ -23,61 +47,117 @@ import { InsertAction, StrikeThroughAction, SurroundAction, UnderlineAction } fr
 export class GestureMenuAction extends SubMenuItem {
   constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-action", itemsConfig?: TGestureActionItemsConfig) {
     const enabled = (key: keyof TGestureActionItemsConfig) => itemsConfig?.[key] !== false
-
-    const surroundActionValues: {
-      label: string
-      value: string
-    }[] = []
-    for (const key in SurroundAction) {
-      const value = SurroundAction[key as keyof typeof SurroundAction]
-      surroundActionValues.push({
-        label: key,
-        value,
-      })
+    const isGestureEnabled = (canvas: TInteractiveInkCanvas, gestureType: TRecognitionGesture) =>
+      canvas.configuration.recognition["raw-content"]?.gestures?.includes(gestureType) ?? false
+    const resetToPencil = (canvas: TInteractiveInkCanvas) => {
+      canvas.tool = CanvasTool.Write
+      canvas.writer.tool = CanvasWriteTool.Pencil
     }
 
-    const strikeThroughActionValues: {
-      label: string
-      value: string
-    }[] = []
-    for (const key in StrikeThroughAction) {
-      const value = StrikeThroughAction[key as keyof typeof StrikeThroughAction]
-      strikeThroughActionValues.push({
-        label: key,
-        value,
-      })
+    const setGestureEnabled = (canvas: TInteractiveInkCanvas, gestureType: TRecognitionGesture, value: boolean) => {
+      const conf = structuredClone(canvas.configuration.recognition)
+      const gestures = (conf["raw-content"].gestures ?? []).filter((g) => g !== gestureType)
+      conf["raw-content"].gestures = value ? [...gestures, gestureType] : gestures
+      canvas.updateRecognitionConfiguration(conf)
     }
 
-    const underlineActionValues: {
-      label: string
-      value: string
-    }[] = []
-    for (const key in UnderlineAction) {
-      const value = UnderlineAction[key as keyof typeof UnderlineAction]
-      underlineActionValues.push({
-        label: key,
-        value,
-      })
-    }
+    const buildActionSelect = (
+      options: TGestureSubMenuOptions,
+      action: TGestureAction
+    ): TMenuSubMenu["items"][number] => ({
+      type: "select",
+      id: `${idPrefix}-gesture-${options.key}`,
+      label: "Action on detection",
+      options: Object.entries(action.values).map(([label, value]) => ({ label, value })),
+      getValue: action.get,
+      setValue: (canvas, value) => {
+        action.set(canvas, value)
+        resetToPencil(canvas)
+      },
+      disabled: (canvas) => !isGestureEnabled(canvas, options.gestureType),
+    })
 
-    const splitActionValues: {
-      label: string
-      value: string
-    }[] = []
-    for (const key in InsertAction) {
-      const value = InsertAction[key as keyof typeof InsertAction]
-      splitActionValues.push({
-        label: key,
-        value,
-      })
-    }
+    const buildGestureSubMenu = (options: TGestureSubMenuOptions): TMenuSubMenu => ({
+      type: "submenu",
+      id: `${idPrefix}-gesture-${options.key}-menu`,
+      label: options.label,
+      menuTitle: options.label,
+      position: "right-top",
+      items: [
+        {
+          type: "checkbox",
+          id: `${idPrefix}-gesture-${options.key}-enable`,
+          label: "Enable",
+          getValue: (canvas) => isGestureEnabled(canvas, options.gestureType),
+          setValue: (canvas, value) => setGestureEnabled(canvas, options.gestureType, value),
+        },
+        ...(options.action ? [buildActionSelect(options, options.action)] : []),
+      ],
+    })
+
+    const gestureSubMenus: TGestureSubMenuOptions[] = [
+      {
+        key: "scratchOut",
+        gestureType: "scratch-out",
+        label: "Scratch-out",
+      },
+      {
+        key: "surround",
+        gestureType: "surround",
+        label: "Surround",
+        action: {
+          values: SurroundAction,
+          get: (canvas) => canvas.gesture.surroundAction,
+          set: (canvas, value) => (canvas.gesture.surroundAction = value as SurroundAction),
+        },
+      },
+      {
+        key: "strikethrough",
+        gestureType: "strike-through",
+        label: "Strikethrough",
+        action: {
+          values: StrikeThroughAction,
+          get: (canvas) => canvas.gesture.strikeThroughAction,
+          set: (canvas, value) => (canvas.gesture.strikeThroughAction = value as StrikeThroughAction),
+        },
+      },
+      {
+        key: "underline",
+        gestureType: "underline",
+        label: "Underline",
+        action: {
+          values: UnderlineAction,
+          get: (canvas) => canvas.gesture.underlineAction,
+          set: (canvas, value) => (canvas.gesture.underlineAction = value as UnderlineAction),
+        },
+      },
+      {
+        key: "insert",
+        gestureType: "insert",
+        label: "Insert",
+        action: {
+          values: InsertAction,
+          get: (canvas) => canvas.gesture.insertAction,
+          set: (canvas, value) => (canvas.gesture.insertAction = value as InsertAction),
+        },
+      },
+      {
+        key: "join",
+        gestureType: "join",
+        label: "Join",
+        action: {
+          values: JoinAction,
+          get: (canvas) => canvas.gesture.joinAction,
+          set: (canvas, value) => (canvas.gesture.joinAction = value as JoinAction),
+        },
+      },
+    ]
 
     const config: TMenuSubMenu = {
       type: "submenu",
       id: `${idPrefix}-gesture`,
       label: "Gesture",
       menuTitle: "Gesture",
-      icon: gestureIcon,
       position: "right-top",
       items: [],
     }
@@ -90,74 +170,14 @@ export class GestureMenuAction extends SubMenuItem {
         getValue: (canvas) => canvas.writer.detectGesture,
         setValue: (canvas, value) => {
           canvas.writer.detectGesture = value
-          canvas.tool = CanvasTool.Write
-          canvas.writer.tool = CanvasWriteTool.Pencil
+          resetToPencil(canvas)
         },
       })
     }
 
-    if (enabled("surround") && canvas.configuration.recognition["raw-content"]?.gestures?.includes("surround")) {
-      config.items.push({
-        type: "select",
-        id: `${idPrefix}-gesture-surround`,
-        label: "On surround",
-        options: surroundActionValues,
-        getValue: (canvas) => canvas.gesture.surroundAction,
-        setValue: (canvas, value) => {
-          canvas.gesture.surroundAction = value as SurroundAction
-          canvas.tool = CanvasTool.Write
-          canvas.writer.tool = CanvasWriteTool.Pencil
-        },
-      })
-    }
-
-    if (
-      enabled("strikethrough") &&
-      canvas.configuration.recognition["raw-content"]?.gestures?.includes("strike-through")
-    ) {
-      config.items.push({
-        type: "select",
-        id: `${idPrefix}-gesture-strikethrough`,
-        label: "On strikethrough",
-        options: strikeThroughActionValues,
-        getValue: (canvas) => canvas.gesture.strikeThroughAction,
-        setValue: (canvas, value) => {
-          canvas.gesture.strikeThroughAction = value as StrikeThroughAction
-          canvas.tool = CanvasTool.Write
-          canvas.writer.tool = CanvasWriteTool.Pencil
-        },
-      })
-    }
-
-    if (enabled("underline") && canvas.configuration.recognition["raw-content"]?.gestures?.includes("underline")) {
-      config.items.push({
-        type: "select",
-        id: `${idPrefix}-gesture-underline`,
-        label: "On underline",
-        options: underlineActionValues,
-        getValue: (canvas) => canvas.gesture.underlineAction,
-        setValue: (canvas, value) => {
-          canvas.gesture.underlineAction = value as UnderlineAction
-          canvas.tool = CanvasTool.Write
-          canvas.writer.tool = CanvasWriteTool.Pencil
-        },
-      })
-    }
-
-    if (enabled("insert") && canvas.configuration.recognition["raw-content"]?.gestures?.includes("insert")) {
-      config.items.push({
-        type: "select",
-        id: `${idPrefix}-gesture-insert`,
-        label: "On insert",
-        options: splitActionValues,
-        getValue: (canvas) => canvas.gesture.insertAction,
-        setValue: (canvas, value) => {
-          canvas.gesture.insertAction = value as InsertAction
-          canvas.tool = CanvasTool.Write
-          canvas.writer.tool = CanvasWriteTool.Pencil
-        },
-      })
-    }
+    gestureSubMenus
+      .filter((options) => enabled(options.key) && isGestureEnabled(canvas, options.gestureType))
+      .forEach((options) => config.items.push(buildGestureSubMenu(options)))
 
     super(config, canvas)
   }

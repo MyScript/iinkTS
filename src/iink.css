@@ -32,6 +32,7 @@
   --ms-ink-surface: #f5f6f7;
   --ms-ink-text-muted: #717171;
   --ms-ink-guide-color: #c8c8c8;
+  --ms-ink-selection-color: #3e68ff;
 
   --ms-ink-menu-bg: #ffffff;
   --ms-ink-menu-title-bg: #b3dfff;
@@ -132,6 +133,30 @@
   z-index: 20;
 }
 
+/* Outline of a selected symbol: a stroke painted under the fill of the ink outline (or of the
+   glyphs), so only its outer half shows. No filter on purpose: an SVG filter crashed WebKit's
+   renderer, and a CSS drop-shadow, rasterized on the GPU by Chrome, left a ghost broken copy of
+   the ink next to the selection on some drivers */
+.ms-ink .ms-layer-rendering .ms-selected[type="stroke"],
+.ms-ink .ms-layer-rendering .ms-selected text {
+  stroke: var(--ms-ink-selection-color);
+  stroke-width: 2px;
+  stroke-linejoin: round;
+  paint-order: stroke fill;
+  vector-effect: non-scaling-stroke;
+}
+
+/* A shape or an edge is drawn by its stroke, so its outline is a wider copy of its path drawn under
+   it by the renderer, unpainted until coloured here */
+.ms-ink .ms-layer-rendering .ms-selection-halo {
+  stroke: var(--ms-ink-selection-color);
+}
+
+/* A symbol the eraser is passing over. Plain opacity, no filter: see the selection outline above */
+.ms-ink .ms-layer-rendering .ms-deleting {
+  opacity: 0.25;
+}
+
 .ms-ink .ms-layer-rendering .ms-rendering-canvas {
   z-index: 9;
   pointer-events: none;
@@ -221,6 +246,154 @@
   box-shadow:
     1px 1px 5px rgba(0, 0, 0, 0.25),
     -1px -1px 5px rgba(0, 0, 0, 0.25);
+}
+
+/** layout: the slots of the UI layer, see LayoutManager **/
+.ms-ink .ms-layout-slot {
+  position: absolute;
+  z-index: 99;
+  display: flex;
+  flex-direction: column;
+}
+
+/*
+ * A host folds along the slot's axis when its menu hides in a shared slot: its grid track goes from 1fr to 0fr, so the
+ * other occupants slide over without knowing its size. Only a folded host clips (overflow: hidden): a shown one must
+ * not, as its menu's dropdowns overflow it.
+ */
+.ms-ink .ms-layout-host {
+  display: grid;
+  /* minmax(0, …): a track may then shrink below its content (padding included) down to 0 when folded */
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
+  transition:
+    grid-template-rows 200ms ease,
+    grid-template-columns 200ms ease,
+    margin 200ms ease,
+    opacity 200ms ease,
+    visibility 0s linear 0s;
+}
+
+.ms-ink .ms-layout-host > * {
+  min-width: 0;
+  min-height: 0;
+}
+
+/* The spacing between occupants: a margin rather than a gap, so a folded host gives its share back */
+.ms-ink .ms-layout-host + .ms-layout-host {
+  margin-top: 8px;
+}
+
+.ms-ink .ms-layout-host.ms-layout-host-hidden {
+  grid-template-rows: minmax(0, 0fr);
+  margin-top: 0;
+  opacity: 0;
+  visibility: hidden;
+  /* Folded, the menu is invisible: clipping it is harmless, and absorbs the padding a 0fr track cannot */
+  overflow: hidden;
+  transition:
+    grid-template-rows 200ms ease,
+    grid-template-columns 200ms ease,
+    margin 200ms ease,
+    opacity 200ms ease,
+    visibility 0s linear 200ms;
+}
+
+/* A first occupant folded away leaves no spacing above the next one */
+.ms-ink .ms-layout-host-hidden:first-child + .ms-layout-host {
+  margin-top: 0;
+}
+
+/* An occupant that rendered nothing (a disabled menu) takes no room */
+.ms-ink .ms-layout-host:empty {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ms-ink .ms-layout-host,
+  .ms-ink .ms-layout-host.ms-layout-host-hidden {
+    transition: none;
+  }
+}
+
+.ms-ink .ms-layout-top-left {
+  top: 0;
+  left: 5px;
+  align-items: flex-start;
+}
+
+.ms-ink .ms-layout-top-center {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  align-items: center;
+}
+
+.ms-ink .ms-layout-top-right {
+  top: 0;
+  right: 5px;
+  align-items: flex-end;
+}
+
+.ms-ink .ms-layout-middle-left {
+  top: 50%;
+  left: 5px;
+  transform: translateY(-50%);
+  flex-direction: row;
+  align-items: center;
+}
+
+.ms-ink .ms-layout-middle-right {
+  top: 50%;
+  right: 5px;
+  transform: translateY(-50%);
+  flex-direction: row;
+  align-items: center;
+}
+
+/* Side slots stack their occupants side by side: spacing and folding run along the row */
+.ms-ink .ms-layout-middle-left > .ms-layout-host + .ms-layout-host,
+.ms-ink .ms-layout-middle-right > .ms-layout-host + .ms-layout-host {
+  margin-top: 0;
+  margin-left: 8px;
+}
+
+.ms-ink .ms-layout-middle-left > .ms-layout-host.ms-layout-host-hidden,
+.ms-ink .ms-layout-middle-right > .ms-layout-host.ms-layout-host-hidden {
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 0fr);
+  margin-left: 0;
+}
+
+.ms-ink .ms-layout-middle-left > .ms-layout-host-hidden:first-child + .ms-layout-host,
+.ms-ink .ms-layout-middle-right > .ms-layout-host-hidden:first-child + .ms-layout-host {
+  margin-left: 0;
+}
+
+.ms-ink .ms-layout-bottom-left {
+  bottom: 8px;
+  left: 8px;
+  align-items: flex-start;
+}
+
+.ms-ink .ms-layout-bottom-center {
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  align-items: center;
+}
+
+.ms-ink .ms-layout-bottom-right {
+  bottom: 16px;
+  right: 16px;
+  align-items: flex-end;
+}
+
+/* In a slot, the connection state flows with the other occupants; relative keeps its tooltip anchored */
+.ms-ink .ms-layout-slot .ms-ink-state {
+  position: relative;
+  bottom: auto;
+  left: auto;
 }
 
 .ms-ink .ms-ink-state-icon {
@@ -588,7 +761,6 @@
   border-radius: var(--ms-ink-radius-sm);
   border: 1px solid transparent;
   font-size: inherit;
-  padding: 0 var(--ms-ink-spacing-sm);
   background-color: transparent;
   color: var(--ms-ink-color);
   -webkit-tap-highlight-color: transparent;
@@ -768,7 +940,7 @@
   left: 50%;
   transform: translate(-50%, -100%);
   white-space: nowrap;
-  background-color: var(--ms-ink-color);
+  background-color: var(--ms-ink-input-bg);
   color: var(--ms-ink-color);
   box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.225);
   font-weight: bold;

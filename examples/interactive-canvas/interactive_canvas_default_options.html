@@ -24,7 +24,7 @@
         height: 100%;
       }
     </style>
-    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+    <script src="../assets/js/theme-init.js"></script>
 </head>
 
   <body>
@@ -281,15 +281,15 @@
         <p class="ex-panel-subtitle">Math</p>
 
         <div class="ex-panel-item">
-          <div><span class="ex-panel-item-label">math.computation.resultMode</span><span class="ex-panel-item-default">"draw"</span></div>
+          <div><span class="ex-panel-item-label">math.computation.resultMode</span><span class="ex-panel-item-default">"ghost"</span></div>
           <div class="ex-panel-item-values">"draw" · "ghost"</div>
           <div class="ex-panel-item-desc"><strong>draw</strong>: result strokes added to the model (interactive, sent to backend). <strong>ghost</strong>: SVG overlay at 0.5 opacity, not in model.</div>
         </div>
 
         <div class="ex-panel-item">
-          <div><span class="ex-panel-item-label">math.computation.autoCompute</span><span class="ex-panel-item-default">false</span></div>
+          <div><span class="ex-panel-item-label">math.computation.autoCompute</span><span class="ex-panel-item-default">true</span></div>
           <div class="ex-panel-item-values">true · false</div>
-          <div class="ex-panel-item-desc">Automatically trigger solver when a math block ends with <code>=</code> or <code>?</code>.</div>
+          <div class="ex-panel-item-desc">Automatically trigger solver when a math block ends with <code>=</code>.</div>
         </div>
 
         <div class="ex-panel-item">
@@ -422,7 +422,7 @@
         </div>
 
         <div class="ex-panel-item">
-          <div><span class="ex-panel-item-label">recognition.math.solver.angle-unit</span><span class="ex-panel-item-default">"deg"</span></div>
+          <div><span class="ex-panel-item-label">recognition.math.solver.angle-unit</span><span class="ex-panel-item-default">"rad"</span></div>
           <div class="ex-panel-item-values">"deg" · "rad"</div>
           <div class="ex-panel-item-desc">Angle unit for math solver trigonometric functions.</div>
         </div>

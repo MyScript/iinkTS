@@ -1,11 +1,12 @@
 import ArrowDown from "@/assets/svg/nav-arrow-down.svg"
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import type { TGenericMenuItem } from "@/menu/items/BaseMenuItem"
-import { BaseMenuItem } from "@/menu/items/BaseMenuItem"
-import { DEFAULT_MENU_COLORS } from "@/menu/MenuConstants"
+import type { TInteractiveInkCanvas } from "@/canvas"
 import type { TText } from "@/symbol"
 import { DecoratorKind, isRecognizedMath, isText } from "@/symbol"
-import { DecoratorOps } from "@/symbol/decorator/Decorator"
+import { DecoratorUtil } from "@/symbol-utils"
+
+import type { TGenericMenuItem } from "../items/BaseMenuItem"
+import { BaseMenuItem } from "../items/BaseMenuItem"
+import { DEFAULT_MENU_COLORS } from "../MenuConstants"
 
 /** @group Menu */
 export type TContextDecoratorItemsConfig = {
@@ -87,21 +88,24 @@ export class DecoratorContextMenu extends BaseMenuItem<HTMLElement> {
     })
     checkbox.addEventListener("change", (e) => {
       const enable = (e.target as HTMLInputElement).checked
-      const symbolsDecorable = this.symbolsDecorable
-
-      symbolsDecorable.forEach((s) => {
-        if (enable) {
-          if (!s.decorators.some((d) => d.kind === kind)) {
-            s.decorators.push(DecoratorOps.create(kind, this.canvas.penStyle))
+      this.canvas.updateSymbols(
+        this.symbolsDecorable.map((s) => s.id),
+        (s) => {
+          if (!isText(s)) {
+            return
           }
-        } else {
-          const decoIndex = s.decorators.findIndex((d) => d.kind === kind)
-          if (decoIndex > -1) {
-            s.decorators.splice(decoIndex, 1)
+          if (enable) {
+            if (!s.decorators.some((d) => d.kind === kind)) {
+              s.decorators.push(DecoratorUtil.createDecorator(kind, this.canvas.penStyle))
+            }
+          } else {
+            const decoIndex = s.decorators.findIndex((d) => d.kind === kind)
+            if (decoIndex > -1) {
+              s.decorators.splice(decoIndex, 1)
+            }
           }
         }
-      })
-      this.canvas.updateSymbols(symbolsDecorable)
+      )
 
       document.querySelectorAll(`#${idPrefix}-decorator-${kind}-color button`).forEach((b) => {
         ;(b as HTMLButtonElement).disabled = !enable
@@ -154,15 +158,15 @@ export class DecoratorContextMenu extends BaseMenuItem<HTMLElement> {
       btn.addEventListener("pointerup", (e) => {
         e.preventDefault()
         e.stopPropagation()
-        const symbolsDecorable = this.symbolsDecorable
-
-        symbolsDecorable.forEach((s) => {
-          const deco = s.decorators.find((d) => d.kind === kind)
-          if (deco) {
-            deco.style.color = color
+        this.canvas.updateSymbols(
+          this.symbolsDecorable.filter((s) => s.decorators.some((d) => d.kind === kind)).map((s) => s.id),
+          (s) => {
+            const deco = isText(s) ? s.decorators.find((d) => d.kind === kind) : undefined
+            if (deco) {
+              deco.style.color = color
+            }
           }
-        })
-        this.canvas.updateSymbols(symbolsDecorable.filter((s) => s.decorators.some((d) => d.kind === kind)))
+        )
         colorList.querySelectorAll("*").forEach((e) => e.classList.remove("active"))
         btn.classList.add("active")
       })

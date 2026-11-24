@@ -1,7 +1,9 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import type { TMenuColorList } from "@/menu/items"
-import { CollapsibleWrapper, ColorListMenuItem } from "@/menu/items"
-import { BaseMenuItem } from "@/menu/items/BaseMenuItem"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import { CanvasTool } from "@/manager"
+
+import type { TMenuColorList } from "../items"
+import { CollapsibleWrapper, ColorListMenuItem } from "../items"
+import { BaseMenuItem } from "../items/BaseMenuItem"
 
 /**
  * @group Menu
@@ -16,6 +18,7 @@ export class StrokeColorStyle extends BaseMenuItem<HTMLDivElement> {
       type: "strokecolor" as const,
       id: `${idPrefix}-color`,
       label: "Stroke Color",
+      visible: (canvas: TInteractiveInkCanvas) => [CanvasTool.Write, CanvasTool.Select].includes(canvas.tool),
     }
     super(config, canvas)
     this.colors = colors
@@ -36,9 +39,9 @@ export class StrokeColorStyle extends BaseMenuItem<HTMLDivElement> {
       initValue: color,
       onChange: (color, canvas) => {
         canvas.penStyle = { color }
-        canvas.updateSymbolsStyle(
+        canvas.updateSymbols(
           canvas.model.symbolsSelected.map((s) => s.id),
-          { color }
+          { style: { color } }
         )
       },
     }

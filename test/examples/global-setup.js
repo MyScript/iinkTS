@@ -10,9 +10,20 @@ dotenv.config({
   path: pathToEnvFile,
 })
 
+/**
+ * With E2E_STACK=docker, starts the backend, the examples and the browsers in docker and points
+ * the tests at them; the returned function is the teardown. Workers read the environment set here:
+ * they start after it. docker/e2e-stack.mjs is internal, left out of the public snapshot: imported
+ * only when asked for.
+ */
 export default async function globalSetup(config) {
   //https://github.com/microsoft/playwright/issues/41351
   process.env.PLAYWRIGHT_TRACING_NO_WEBSOCKET_FRAMES=1
+
+  const stack = process.env.E2E_STACK === 'docker'
+    ? await (await import('../../docker/e2e-stack.mjs')).startStack()
+    : undefined
+  Object.assign(process.env, stack?.env)
 
   for (const project of config.projects) {
     if (!project.use) {
@@ -32,4 +43,5 @@ export default async function globalSetup(config) {
 
   console.log(config.projects.map(p => ({name: p.__projectId, viewport: p.use.viewport })))
   console.log('Global setup completed.')
+  return stack?.stop
 }

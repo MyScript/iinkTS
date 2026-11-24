@@ -1,13 +1,19 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import type { TEdge, TMath, TPoint, TShape, TStroke, TText } from "@/symbol"
-import { cloneSymbol, EdgeKind, ShapeKind } from "@/symbol"
-import { EdgeOps } from "@/symbol/edge/Edge"
-import { BoxOps } from "@/symbol/primitives/Box"
-import { type TOBB } from "@/symbol/primitives/OBB"
-import { ShapeOps } from "@/symbol/shape/Shape"
-import { StrokeOps } from "@/symbol/stroke/Stroke"
-import { MatrixTransform } from "@/transform"
-import { computeAngleRadian, convertDegreeToRadian, convertRadianToDegree, TWO_PI } from "@/utils"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import type { TPoint } from "@/core"
+import {
+  BoxOps,
+  computeAngleRadian,
+  convertDegreeToRadian,
+  convertRadianToDegree,
+  MatrixTransform,
+  type TOBB,
+  TWO_PI,
+} from "@/core"
+import type { TIIHistoryChanges } from "@/history"
+import { appendUpdated } from "@/history"
+import type { TSymbol } from "@/symbol"
+import { cloneSymbol } from "@/symbol"
+import { SymbolGeometry, symbolRegistry } from "@/symbol-utils"
 
 import { IIAbstractTransformManager } from "./AbstractTransformManager"
 
@@ -16,7 +22,6 @@ import { IIAbstractTransformManager } from "./AbstractTransformManager"
  */
 export class IIRotationManager extends IIAbstractTransformManager {
   protected managerName = "IIRotationManager"
-  protected transformName = "rotate"
   center!: TPoint
   origin!: TPoint
 
@@ -24,81 +29,12 @@ export class IIRotationManager extends IIAbstractTransformManager {
     super(canvas)
   }
 
-  protected applyToStroke(stroke: TStroke, matrix: MatrixTransform): TStroke {
-    this.applyMatrixToPoints(stroke.pointers, matrix)
-    StrokeOps.updateBounds(stroke)
-    return stroke
-  }
-
-  protected applyToShape(shape: TShape, matrix: MatrixTransform): TShape {
-    switch (shape.kind) {
-      case ShapeKind.Ellipse: {
-        shape.center = matrix.applyToPoint(shape.center)
-        shape.orientation = (shape.orientation + MatrixTransform.rotation(matrix)) % TWO_PI
-        ShapeOps.updateShapeDerivedFields(shape)
-        return shape
-      }
-      case ShapeKind.Circle: {
-        shape.center = matrix.applyToPoint(shape.center)
-        ShapeOps.updateShapeDerivedFields(shape)
-        return shape
-      }
-      case ShapeKind.Polygon: {
-        this.applyMatrixToPoints(shape.points, matrix)
-        ShapeOps.updateShapeDerivedFields(shape)
-        return shape
-      }
-      default:
-        throw new Error(`Can't apply rotate on shape, kind unknown: ${JSON.stringify(shape)}`)
-    }
-  }
-
-  protected applyToEdge(edge: TEdge, matrix: MatrixTransform): TEdge {
-    switch (edge.kind) {
-      case EdgeKind.Arc: {
-        edge.phi = (edge.phi - MatrixTransform.rotation(matrix)) % TWO_PI
-        edge.center = matrix.applyToPoint(edge.center)
-        EdgeOps.updateEdgeDerivedFields(edge)
-        return edge
-      }
-      case EdgeKind.Line: {
-        edge.start = matrix.applyToPoint(edge.start)
-        edge.end = matrix.applyToPoint(edge.end)
-        EdgeOps.updateEdgeDerivedFields(edge)
-        return edge
-      }
-      case EdgeKind.PolyEdge: {
-        edge.points = edge.points.map((p) => matrix.applyToPoint(p))
-        EdgeOps.updateEdgeDerivedFields(edge)
-        return edge
-      }
-      default:
-        throw new Error(`Can't apply rotate on edge, kind unknown: ${JSON.stringify(edge)}`)
-    }
-  }
-
-  protected applyOnText(text: TText, matrix: MatrixTransform): TText {
-    text.rotation = {
-      degree: convertRadianToDegree(MatrixTransform.rotation(matrix)) + (text.rotation?.degree || 0),
-      center: this.center,
-    }
-    return this.canvas.typeset.updateBounds(text)
-  }
-
-  protected applyOnMath(math: TMath, matrix: MatrixTransform): TMath {
-    math.rotation = {
-      degree: convertRadianToDegree(MatrixTransform.rotation(matrix)) + (math.rotation?.degree || 0),
-      center: this.center,
-    }
-    return math
-  }
-
-  rotateElement(id: string, degree: number): void {
-    this.logger.info("rotateElement", {
-      id,
-      degree,
-    })
-    this.canvas.renderer.setAttribute(id, "transform", `rotate(${degree})`)
+  /**
+   * One hook, like the other two managers'. `center` is passed here rather than read
+   * off `this` inside the util, which is what retired its definite-assignment assertion.
+   */
+  protected applyThroughUtil(symbol: TSymbol, matrix: MatrixTransform): void {
+    symbolRegistry.getUtilFor(symbol).rotate(symbol, { matrix })
   }
 
   start(target: Element, origin: TPoint): void {
@@ -108,17 +44,18 @@ export class IIRotationManager extends IIAbstractTransformManager {
     // gesture. Ended synchronously in `end()`.
     this.canvas.startOperation("Rotating")
     this.interactElementsGroup = this.resolveInteractGroup(target)
-    const boundingBox = BoxOps.createFromPoints(this.model.symbolsSelected.flatMap((s) => s.vertices))
+    // selectAll() populates symbolsSelected with no registry check ahead of it (see
+    // IISelectionManager.createInteractElementsGroup) — a symbol type missing its util must not
+    // abort starting the rotation, so it's excluded from the bounding box, same silent-skip
+    // precedent as that file.
+    const registeredSymbols = this.model.symbolsSelected.filter((s) => symbolRegistry.has(s.type))
+    const boundingBox = BoxOps.createFromPoints(registeredSymbols.flatMap((s) => SymbolGeometry.verticesOf(s)))
 
     this.center = {
       x: boundingBox.x + boundingBox.width / 2,
       y: boundingBox.y + boundingBox.height / 2,
     }
     this.origin = origin
-    this.setTransformOrigin(this.interactElementsGroup.id, this.center.x, this.center.y)
-    this.model.symbolsSelected.forEach((s) => {
-      this.setTransformOrigin(s.id, this.center.x, this.center.y)
-    })
   }
 
   continue(point: TPoint): number {
@@ -134,15 +71,19 @@ export class IIRotationManager extends IIAbstractTransformManager {
       angleDegree = 360 - angleDegree
     }
 
-    this.rotateElement(this.interactElementsGroup.id, angleDegree)
-    this.model.symbolsSelected.forEach((s) => {
-      this.rotateElement(s.id, angleDegree)
-    })
-    this.getGhostStrokeIdsForSelectedMath(this.model.symbolsSelected).forEach((id) => {
-      this.rotateElement(id, angleDegree)
-    })
     const angleRad = convertDegreeToRadian(angleDegree)
+    // Built before the preview, and carrying `center` explicitly, so one matrix serves both the
+    // preview and the connector below — and so the preview needs no `transform-origin`.
     const matrix = MatrixTransform.identity().rotate(angleRad, this.center)
+
+    this.previewElementTransform(this.interactElementsGroup.id, matrix)
+    this.model.symbolsSelected.forEach((s) => {
+      this.previewTransform(s, matrix)
+    })
+    this.previewDecorators(this.model.symbolsSelected, matrix)
+    this.getGhostStrokeIdsForSelectedMath(this.model.symbolsSelected).forEach((id) => {
+      this.previewElementTransform(id, matrix)
+    })
     this.canvas.connector.drawAnchoredEdgesForMatrix(
       this.model.symbolsSelected.map((s) => s.id),
       matrix
@@ -158,41 +99,59 @@ export class IIRotationManager extends IIAbstractTransformManager {
     this.canvas.endOperation("Rotating")
     const angleDegree = this.continue(point)
     const angleRad = convertDegreeToRadian(angleDegree) % TWO_PI
-    const oldSymbols = this.model.symbolsSelected.map((s) => cloneSymbol(s))
+    // Queried before anything is mutated: the pre-convert edge strokes that will rigidly follow
+    // this rotation need a pre-transform snapshot in history, like the selection itself. Gradient-
+    // followed strokes are excluded — their shift isn't a uniform rotation, so they get their own
+    // pre-mutation snapshot via `updated` below instead, like the anchored converted edges.
+    const followedStrokeIds = this.canvas.connector.getRigidFollowedStrokeIds(
+      this.model.symbolsSelected.map((s) => s.id)
+    )
+    const oldSymbols = [
+      ...this.model.symbolsSelected,
+      ...this.resolveFollowedSymbols(followedStrokeIds, this.model.symbolsSelected),
+    ].map((s) => cloneSymbol(s))
     const matrix = MatrixTransform.identity().rotate(angleRad, this.center)
     const preTransformBoundsById = new Map<string, TOBB>()
     this.model.symbolsSelected.forEach((s) => {
-      const bounds = (s as unknown as { bounds?: TOBB }).bounds
-      if (bounds) {
-        preTransformBoundsById.set(s.id, {
-          ...bounds,
-          center: { ...bounds.center },
-        })
+      // Same selectAll() gap as start()'s bounding box — an unregistered symbol has no snapshot
+      // taken, so updateAnchoredEdges below leaves it untouched rather than throwing.
+      if (!symbolRegistry.has(s.type)) {
+        return
       }
+      const bounds = SymbolGeometry.boundsOf(s)
+      preTransformBoundsById.set(s.id, {
+        ...bounds,
+        center: { ...bounds.center },
+      })
     })
-    this.applyAndDraw(this.model.symbolsSelected, matrix)
+    const movedDecorators = this.applyAndDraw(this.model.symbolsSelected, matrix)
     this.applyTransformToGhostStrokesForSelectedMath(this.model.symbolsSelected, matrix)
-    this.canvas.connector.updateAnchoredEdges(
-      this.model.symbolsSelected.map((s) => s.id),
-      matrix,
-      preTransformBoundsById
-    )
+    const { oldSymbols: anchoredOldSymbols, newSymbols: anchoredNewSymbols } =
+      this.canvas.connector.updateAnchoredEdges(
+        this.model.symbolsSelected.map((s) => s.id),
+        matrix,
+        preTransformBoundsById
+      )
     const strokesFromSymbols = this.canvas.extractStrokesFromSymbols(this.model.symbolsSelected)
-    await this.canvas.client.transformRotate(
-      strokesFromSymbols.map((s) => s.id),
-      angleRad,
-      this.center.x,
-      this.center.y
+    await Promise.all([
+      this.canvas.client.transformRotate(
+        [...new Set([...strokesFromSymbols.map((s) => s.id), ...followedStrokeIds])],
+        angleRad,
+        this.center.x,
+        this.center.y
+      ),
+      ...this.replaceGradientFollowedStrokes(anchoredOldSymbols, anchoredNewSymbols),
+    ])
+    const changes: TIIHistoryChanges = {}
+    this.recordTransformed(changes, [...oldSymbols, ...movedDecorators])
+    // Converted Line/PolyEdge/Arc anchors are recomputed from the target's new bounds, and
+    // gradient-followed raw strokes are reshaped non-uniformly. They join the same `updated` pair
+    // as the rotated selection — appended, not assigned, or one of the two sets would be lost.
+    appendUpdated(
+      changes,
+      anchoredOldSymbols.map((before, index) => ({ before, after: anchoredNewSymbols[index] }))
     )
-    this.canvas.history.push(this.model, {
-      rotate: [
-        {
-          symbols: oldSymbols,
-          angle: angleRad,
-          center: { ...this.center },
-        },
-      ],
-    })
+    this.canvas.history.push(changes)
     this.finalizeTransform()
   }
 }

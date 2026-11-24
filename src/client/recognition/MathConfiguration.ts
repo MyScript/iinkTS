@@ -21,6 +21,19 @@ export type TSolverOptions = "algebraic" | "numeric"
 /**
  * @group Client
  */
+export type TScopingPolicy = "closest" | "last-modified" | "last-edited"
+
+/**
+ * @group Client
+ */
+export type TAutoVariableManagement = {
+  enable?: boolean
+  "scoping-policy"?: TScopingPolicy
+}
+
+/**
+ * @group Client
+ */
 export type TSolverConfiguration = {
   enable?: boolean
   "fractional-part-digits"?: number
@@ -39,7 +52,7 @@ export const DefaultSolverConfiguration: TSolverConfiguration = {
   "fractional-part-digits": 3,
   "decimal-separator": ".",
   "rounding-mode": "half up",
-  "angle-unit": "deg",
+  "angle-unit": "rad",
 }
 
 /**

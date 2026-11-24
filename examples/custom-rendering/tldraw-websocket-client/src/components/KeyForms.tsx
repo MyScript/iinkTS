@@ -37,7 +37,7 @@ export const KeyForms: React.FC<KeyFormsProps> = ({ onSubmit }) => {
         <h3>Set your server configuration</h3>
 
         <a
-          href="https://developer.myscript.com/getting-started/"
+          href="https://developer.myscript.com/#getting-started"
           className="form-a"
           target="_blank"
           rel="noopener noreferrer"

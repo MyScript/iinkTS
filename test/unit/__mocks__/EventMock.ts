@@ -5,6 +5,8 @@ type EventMockProps = {
   pointerType: string
   pointerId?: number
   coalescedEvents?: EventMock[]
+  /** Milliseconds since the page's time origin, as a real PointerEvent reports it. */
+  timeStamp?: number
 }
 
 type CompleteEventMockProps = EventMockProps & {
@@ -37,6 +39,10 @@ export class EventMock extends Event {
     this.buttons = props.buttons
     this.pointerId = props.pointerId || Math.floor(Math.random() * 100)
     this.coalescedEvents = props.coalescedEvents
+    if (props.timeStamp !== undefined) {
+      // `Event.timeStamp` is a prototype getter, so an own data property is what shadows it.
+      Object.defineProperty(this, "timeStamp", { value: props.timeStamp, configurable: true })
+    }
   }
 
   getCoalescedEvents(): EventMock[] {

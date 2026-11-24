@@ -12,7 +12,7 @@ import ja_JP2Columns from "../__dataset__/ja_JP-2Columns"
 
 test.describe("Text ja_JP vertical Canvas Iink", () => {
   test.beforeEach(async ({ page }) => {
-    page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/canvas/canvas_v2_text_vertical_japanese.html`)
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/canvas/canvas_v2_text_vertical_japanese.html`)
     await passModalKey(page)
   })
 

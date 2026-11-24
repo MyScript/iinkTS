@@ -112,6 +112,88 @@ describe("IIJiixQueryManager.ts", () => {
     })
   })
 
+  describe("destroy", () => {
+    test("should drop the text metadata it accumulated", () => {
+      const canvas = createCanvasMock()
+      const jiix = new IIJiixQueryManager(asCanvas(canvas))
+      const stroke = buildIIStroke()
+      canvas.model.addSymbol(stroke)
+
+      jiix.updateTextMetadata(stroke, {
+        type: "Text" as never,
+        id: "block-1",
+        label: "a",
+        words: [{ label: "a", items: [{ type: "stroke", id: "i1", "full-id": stroke.id }] }],
+      } as never)
+      expect(jiix.getTextMetadata(stroke.id)).toBeDefined()
+
+      jiix.destroy()
+
+      // The map keys strokes of a document this manager no longer belongs to; keeping it alive
+      // retains that document for as long as the manager is referenced.
+      expect(jiix.getTextMetadata(stroke.id)).toBeUndefined()
+    })
+  })
+
+  describe("getStrokesGroupedByWord / getStrokesGroupedByChar", () => {
+    const setup = () => {
+      const canvas = createCanvasMock()
+      const jiix = new IIJiixQueryManager(asCanvas(canvas))
+      const stroke = buildIIStroke()
+      canvas.model.addSymbol(stroke)
+      canvas.model.mergeExport({
+        "application/vnd.myscript.jiix": {
+          type: "Text",
+          id: "MainBlock",
+          version: "3",
+          elements: [
+            {
+              id: "block-1",
+              type: "Text" as never,
+              label: "hi",
+              words: [{ label: "hi", items: [{ type: "stroke", id: "i1", "full-id": stroke.id }] }],
+              chars: [
+                { label: "h", word: 0, grid: [], items: [{ type: "stroke", id: "i1", "full-id": stroke.id }] },
+                { label: "i", word: 0, grid: [], items: [{ type: "stroke", id: "i1", "full-id": stroke.id }] },
+              ],
+            },
+          ],
+        },
+      })
+      jiix.invalidateIndex()
+      return { canvas, jiix, stroke }
+    }
+
+    test("should group a text element's strokes by word", () => {
+      const { jiix, stroke } = setup()
+      expect(jiix.getStrokesGroupedByWord("block-1")).toEqual([{ label: "hi", strokeIds: [stroke.id] }])
+    })
+
+    test("should group a text element's strokes by char", () => {
+      const { jiix, stroke } = setup()
+      expect(jiix.getStrokesGroupedByChar("block-1")).toEqual([
+        { label: "h", strokeIds: [stroke.id], wordIndex: 0 },
+        { label: "i", strokeIds: [stroke.id], wordIndex: 0 },
+      ])
+    })
+
+    test("should keep resolving the element after model.exports is transiently cleared", () => {
+      const { canvas, jiix, stroke } = setup()
+      expect(jiix.getStrokesGroupedByWord("block-1")).toHaveLength(1)
+
+      // updateSymbol clears model.exports and bumps the version. ensureIndexValid deliberately
+      // keeps the existing index for exactly this case ("Exports cleared transiently"), so the
+      // element must still resolve — through the index, not by re-scanning the exports.
+      // Committed records are frozen, so the update has to go through a draft.
+      const draft = canvas.model.draftSymbol(stroke.id)
+      expect(draft).toBeDefined()
+      canvas.model.updateSymbol(draft!)
+
+      expect(jiix.getStrokesGroupedByWord("block-1")).toEqual([{ label: "hi", strokeIds: [stroke.id] }])
+      expect(jiix.getStrokesGroupedByChar("block-1")).toHaveLength(2)
+    })
+  })
+
   describe("getStrokeIdsForBlock", () => {
     test("returns the stroke ids belonging to the given block", () => {
       const canvas = createCanvasMock()

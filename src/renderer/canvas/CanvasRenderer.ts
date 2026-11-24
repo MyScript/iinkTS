@@ -1,10 +1,10 @@
 import { LoggerCategory, LoggerManager } from "@/logger"
 import type { Model } from "@/model"
-import { BaseRenderer } from "@/renderer/base"
-import type { TRendererConfiguration } from "@/renderer/RendererConfiguration"
 import type { Stroke, TBaseSymbol } from "@/symbol"
 import { isStroke } from "@/symbol"
 
+import { BaseRenderer } from "../base"
+import type { TRendererConfiguration } from "../RendererConfiguration"
 import { CanvasRendererShape } from "./CanvasRendererShape"
 import { CanvasRendererStroke } from "./CanvasRendererStroke"
 import { CanvasRendererText } from "./CanvasRendererText"
@@ -58,6 +58,13 @@ export class CanvasRenderer extends BaseRenderer<CanvasRenderingContext2D, Omit<
     })
   }
 
+  /**
+   * Dispatches on `isStroke` and two fixed renderer tables rather than asking `symbolRegistry` for
+   * the symbol's util, so a custom registered symbol type lands in the warn branch and is never
+   * drawn. Deliberate: this renderer belongs to `InkCanvasDeprecated` (INK_V1), which is deprecated
+   * and not worth wiring into the plugin contract. The SVG renderer the other three variants use
+   * does ask the registry.
+   */
   protected drawSymbol(context2D: CanvasRenderingContext2D, symbol: TBaseSymbol) {
     this.#logger.debug("drawSymbol", { symbol })
     if (isStroke(symbol)) {

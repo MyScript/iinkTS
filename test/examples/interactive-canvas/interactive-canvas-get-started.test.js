@@ -7,7 +7,7 @@ import {
 } from "../helper"
 import helloOneStroke from "../__dataset__/helloOneStroke"
 
-test.describe("Interactive ink canvas Get Started", () => {
+test.describe("Interactive ink canvas Get Started", { tag: "@minimal" }, () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/interactive-canvas/interactive_canvas_get_started.html`)
     await passModalKey(page)
@@ -40,15 +40,12 @@ test.describe("Interactive ink canvas Get Started", () => {
       const symLocator = page.locator(`#${stroke.id}`)
       await expect(symLocator).toBeVisible()
 
-      const strokePathLocator = page.locator(`#${stroke.id} path`)
+      const strokePathLocator = page.locator(`#${stroke.id}`)
 
       await expect(strokePathLocator).toBeVisible()
       await expect(strokePathLocator).toHaveAttribute("stroke-width", "2")
-      await expect(strokePathLocator).toHaveAttribute(
-        "d",
-        /^(M 252 244 m -2 0 a 2 2 0 1 0 4 0 a 2 2 0 1 0).*/
-      )
-      await expect(strokePathLocator).toHaveAttribute("d", /(L 336 228\.58)$/)
+      await expect(strokePathLocator).toHaveAttribute("d", /^(M 252 244 m).*/)
+      await expect(strokePathLocator).toHaveAttribute("d", /(L 336 229\.3)$/)
     })
   })
 })

@@ -18,7 +18,7 @@ src/manager/interactive/IIWriterManager.ts
 → test/unit/manager/interactive/IIWriterManager.test.ts
 ```
 
-If the test file doesn't exist yet, create it. Never put tests elsewhere.
+If the test file doesn't exist yet, create it at the mirrored path — even where older sibling tests sit flat in a parent folder (e.g. `test/unit/canvas/*.test.ts` for `src/canvas/variants/`): don't copy the legacy placement. Never put tests elsewhere.
 
 ### 2. Load the patterns reference
 
@@ -31,7 +31,7 @@ Before writing, invoke the `testing-patterns` skill for:
 
 ```typescript
 import { describe, test, expect, beforeEach, jest } from "@jest/globals"
-import { ClassOrFunction } from "@/path/to/module"
+import { ClassOrFunction } from "@/iink" // the only library import a test may use (lint rule iink/barrel-imports)
 
 describe("ClassName", () => {
   describe("methodName", () => {
@@ -55,14 +55,16 @@ For every public function/method:
 ### 5. Coverage check
 
 ```bash
-yarn test:unit --coverage --testPathPatterns="YourFile"
+yarn test:unit --coverage --testPathPatterns="YourFile" --collectCoverageFrom="src/path/to/YourFile.ts"
 ```
 
-Target: ≥80% branches, functions, lines for new files.
+The global threshold is 88% branches/lines/statements, 86% functions (`test/unit/jest.config.js`): a new file below it drags the whole suite down. On a single-file run, ignore the global threshold failure and read the file's own line.
 
-Full suite check before commit:
+Before commit:
 ```bash
-yarn test:unit
+yarn typecheck              # Jest only transpiles: type errors in tests show up here
+yarn eslint --fix <test file>
+yarn test:unit              # full suite when the change is cross-cutting
 ```
 
 ## Quick Rules

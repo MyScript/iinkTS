@@ -1,6 +1,6 @@
+import type { TPointer } from "@/core"
+import { bumpSvgTransformVersion, getSvgTransformVersion } from "@/dom"
 import { LoggerCategory, LoggerLevel, LoggerManager } from "@/logger"
-import type { TPointer } from "@/symbol"
-import { bumpSvgTransformVersion, getSvgTransformVersion } from "@/utils"
 
 import type { TGrabberConfiguration } from "./GrabberConfiguration"
 
@@ -17,6 +17,12 @@ export type TPointerInfo = {
   pointer: TPointer
   button: number
   buttons: number
+  /**
+   * Epoch milliseconds of the `pointerdown` that opened the current gesture — the origin the
+   * `dt` field of every {@link TPointer} in this gesture counts from. A symbol built out of these pointers takes it
+   * as its `creationTime`, which is what turns their relative times back into absolute ones.
+   */
+  gestureStartTime: number
 }
 
 /**
@@ -40,8 +46,7 @@ export class PointerEventGrabber {
    * ancestor between `window` and `layerCapture`.
    */
   #scrollHandler = () => {
-    const svgElement =
-      this.layerCapture instanceof SVGSVGElement ? this.layerCapture : this.layerCapture.querySelector("svg")
+    const svgElement = this.getCaptureSvg()
     if (svgElement) {
       bumpSvgTransformVersion(svgElement)
     }
@@ -71,6 +76,23 @@ export class PointerEventGrabber {
     return oneFloat
   }
 
+  #captureSvg?: SVGSVGElement
+
+  /**
+   * The svg pointers are mapped into. Every coalesced pointer sample needs it, so the lookup is
+   * kept rather than redone per sample; it is redone only once the kept svg has left
+   * `layerCapture`, which is what a renderer that rebuilds its svg does.
+   */
+  protected getCaptureSvg(): SVGSVGElement | null {
+    if (this.layerCapture instanceof SVGSVGElement) {
+      return this.layerCapture
+    }
+    if (!this.#captureSvg || !this.layerCapture.contains(this.#captureSvg)) {
+      this.#captureSvg = this.layerCapture.querySelector("svg") ?? undefined
+    }
+    return this.#captureSvg ?? null
+  }
+
   #cachedCTM?: DOMMatrix
   #cachedCTMSvg?: SVGSVGElement
   #cachedCTMVersion = -1
@@ -92,6 +114,36 @@ export class PointerEventGrabber {
     return ctm
   }
 
+  /**
+   * Epoch milliseconds of the gesture currently being captured. Set on `pointerdown` and read back
+   * by every pointer of that gesture, so they all count from the same origin.
+   */
+  protected gestureStartTime = 0
+
+  /**
+   * The instant an event was captured, in epoch milliseconds and with sub-millisecond precision.
+   *
+   * Read off the event rather than by calling `Date.now()` in the handler: under main-thread
+   * pressure the browser hands several samples to one `pointermove`, and a clock read taken while
+   * replaying them would stamp them all with the same instant — the recognizer would then see a
+   * burst of points captured simultaneously, which is exactly the timing information it uses to
+   * segment characters. `timeStamp` is relative to the page's time origin, so it is shifted back
+   * onto the epoch to keep the same reference as `creationTime`.
+   */
+  protected eventTime(event: Event): number {
+    // Three decimals: the sum of two floats carries digits neither operand had, and they would
+    // ride into `creationTime` and from there onto the wire as false precision.
+    return +(performance.timeOrigin + event.timeStamp).toFixed(3)
+  }
+
+  protected extractDelta(event: Event): number {
+    const delta = this.eventTime(event) - this.gestureStartTime
+    // Three decimals, the precision coordinates already carry. `timestampFloatPrecision` can still
+    // coarsen further, but it cannot express decimals - it rounds to a power of ten - so it no
+    // longer decides the default.
+    return +this.roundFloat(delta, this.configuration.timestampFloatPrecision).toFixed(3)
+  }
+
   protected extractPointer(event: MouseEvent | TouchEvent): TPointer {
     let clientX: number, clientY: number
     if ("changedTouches" in event) {
@@ -102,8 +154,7 @@ export class PointerEventGrabber {
 
     let x: number, y: number
 
-    const svgElement: SVGSVGElement | null =
-      this.layerCapture instanceof SVGSVGElement ? this.layerCapture : this.layerCapture.querySelector("svg")
+    const svgElement = this.getCaptureSvg()
 
     if (svgElement) {
       const ctm = this.getCachedScreenCTM(svgElement)
@@ -128,7 +179,7 @@ export class PointerEventGrabber {
     const pointer = {
       x: this.roundFloat(x, this.configuration.xyFloatPrecision),
       y: this.roundFloat(y, this.configuration.xyFloatPrecision),
-      t: this.roundFloat(Date.now(), this.configuration.timestampFloatPrecision),
+      dt: this.extractDelta(event),
       p: (event as PointerEvent).pressure,
     }
     this.#logger.debug("extractPointer", {
@@ -149,16 +200,43 @@ export class PointerEventGrabber {
       pointer: this.extractPointer(evt),
       button: evt.button,
       buttons: evt.buttons,
+      gestureStartTime: this.gestureStartTime,
+    }
+  }
+
+  #penDetected = false
+
+  /** Applies `inputMode`: in "auto", the first pen seen switches the grabber to pen only */
+  protected acceptsPointerType(pointerType: string): boolean {
+    if (pointerType === "pen") {
+      this.#penDetected = true
+      return true
+    }
+    switch (this.configuration.inputMode) {
+      case "pen":
+        return false
+      case "auto":
+        return !this.#penDetected
+      default:
+        return true
     }
   }
 
   protected pointerDownHandler = (evt: PointerEvent) => {
+    // Checked before anything else: a rejected palm landing during a pen stroke must leave that
+    // stroke's time origin and capture state untouched.
+    if (!this.acceptsPointerType(evt.pointerType)) {
+      return
+    }
     // Reparenting layerCapture (e.g. moving one editor's DOM between several
     // inputs) changes the svg's screen position without touching its transform
     // (pan/zoom/resize) or firing a scroll event, so the version-keyed cache
     // can't detect it. Force a fresh getScreenCTM read at the start of every
     // gesture so a stale value never survives across a reparent.
     this.#cachedCTMSvg = undefined
+    // Opens the gesture's time origin before the first pointer is extracted, so that pointer comes
+    // out at dt 0 and every later one counts from the same instant.
+    this.gestureStartTime = this.eventTime(evt)
     const pointerInfo = this.getPointerInfos(evt)
     this.#logger.debug("pointerDownHandler", pointerInfo)
 
@@ -168,9 +246,22 @@ export class PointerEventGrabber {
     }
     this.capturing = true
     this.pointerType = evt.pointerType
+    this.capturePointer(evt)
 
     if (this.onPointerDown) {
       this.onPointerDown(pointerInfo)
+    }
+  }
+
+  /**
+   * Keeps every event of the gesture on the canvas once the pointer leaves it, until the pointer is
+   * released: the page around neither starts a text selection nor reacts to a drag it never saw begin.
+   */
+  protected capturePointer(evt: PointerEvent): void {
+    try {
+      this.layerCapture.setPointerCapture(evt.pointerId)
+    } catch {
+      // The pointer is already gone (or the event is synthetic): there is nothing left to capture.
     }
   }
 
@@ -227,6 +318,9 @@ export class PointerEventGrabber {
 
   protected contextMenuHandler = (evt: MouseEvent) => {
     if (evt.target && this.onContextMenu) {
+      // A context menu opens no gesture, so it has no origin of its own to count from. Left on the
+      // previous gesture's origin it would report a dt of however long ago that stroke was drawn.
+      this.gestureStartTime = this.eventTime(evt)
       const pointerInfo: TPointerInfo = {
         clientX: evt.clientX,
         clientY: evt.clientY,
@@ -237,6 +331,7 @@ export class PointerEventGrabber {
         pointer: this.extractPointer(evt),
         button: evt.button,
         buttons: evt.buttons,
+        gestureStartTime: this.gestureStartTime,
       }
       this.#logger.debug("contextMenuHandler", pointerInfo)
       this.onContextMenu(pointerInfo)

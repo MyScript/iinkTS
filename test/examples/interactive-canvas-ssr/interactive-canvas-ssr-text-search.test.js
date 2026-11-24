@@ -1,11 +1,7 @@
 import { test, expect } from "@playwright/test"
 import {
-  writeStrokes,
-  waitForExportedEvent,
   passModalKey,
 } from "../helper"
-import hello from "../__dataset__/helloOneStroke"
-import h from "../__dataset__/h"
 
 test.describe("Interactive Canvas SSR Text search", () => {
   test.beforeEach(async ({ page }) => {

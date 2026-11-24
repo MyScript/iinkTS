@@ -1,5 +1,4 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import { LoggerCategory } from "@/logger"
+import type { TInteractiveInkCanvas } from "@/canvas"
 import type {
   TJIIXChar,
   TJIIXEdgeArc,
@@ -18,8 +17,23 @@ import type {
   TJIIXNodeTriangle,
   TJIIXTextElement,
   TJIIXWord,
-} from "@/model"
-import { JIIXEdgeKind, JIIXElementType, JIIXNodeKind } from "@/model"
+} from "@/client"
+import { extractEdgeEndpoints, JIIXEdgeKind, JIIXElementType, JIIXNodeKind } from "@/client"
+import type { TPoint } from "@/core"
+import {
+  BoxOps,
+  computeAngleAxeRadian,
+  computeAverage,
+  convertBoundingBoxMillimeterToPixel,
+  convertMillimeterToPixel,
+  createUUID,
+  latexToUnicodeMath,
+  OBBOps,
+  roundTo,
+  type TBox,
+  uniqueById,
+} from "@/core"
+import { LoggerCategory } from "@/logger"
 import type {
   DecoratorKind,
   TDecorator,
@@ -29,7 +43,6 @@ import type {
   TEdgePolyLine,
   TMath,
   TMathElement,
-  TPoint,
   TShape,
   TShapeCircle,
   TShapeEllipse,
@@ -39,26 +52,17 @@ import type {
   TSymbolChar,
   TText,
 } from "@/symbol"
-import { isDecorator, isRecognizedMath } from "@/symbol"
-import { DecoratorOps } from "@/symbol/decorator/Decorator"
-import { EdgeArcOps } from "@/symbol/edge/Arc"
-import { EdgeLineOps } from "@/symbol/edge/Line"
-import { EdgePolyLineOps } from "@/symbol/edge/PolyLine"
-import { MathOps } from "@/symbol/math/Math"
-import { BoxOps } from "@/symbol/primitives/Box"
-import { ShapeCircleOps } from "@/symbol/shape/Circle"
-import { ShapeEllipseOps } from "@/symbol/shape/Ellipse"
-import { ShapePolygonOps } from "@/symbol/shape/Polygon"
-import { TextOps } from "@/symbol/text/Text"
+import { isDecorator, isRecognizedMath, resolveConnectionAnchors } from "@/symbol"
 import {
-  computeAngleAxeRadian,
-  computeAverage,
-  convertBoundingBoxMillimeterToPixel,
-  convertMillimeterToPixel,
-  createUUID,
-  latexToUnicodeMath,
-  roundTo,
-} from "@/utils"
+  DecoratorUtil,
+  EdgeUtil,
+  MathUtil,
+  ShapeUtil,
+  StrokeUtil,
+  SymbolGeometry,
+  symbolRegistry,
+  TextUtil,
+} from "@/symbol-utils"
 
 import { IIAbstractManager } from "./IIAbstractManager"
 
@@ -99,7 +103,7 @@ export class IIConversionManager extends IIAbstractManager {
     }))
     let fontWeight = this.fontStyleConfiguration.weight
     if (fontWeight === "auto") {
-      fontWeight = (strokes[0].style.width || 1) > 2 ? "bold" : "normal"
+      fontWeight = StrokeUtil.isBold(strokes[0]) ? "bold" : "normal"
     }
 
     const color = strokes[0].style.color || "black"
@@ -128,7 +132,7 @@ export class IIConversionManager extends IIAbstractManager {
       x: boundingBox.x,
       y: boundingBox.y + boundingBox.height,
     }
-    const text = TextOps.create(charSymbols, point, boundingBox, strokes[0].style)
+    const text = TextUtil.createText(charSymbols, point, boundingBox, strokes[0].style)
     const strokeIds = new Set(strokes.map((s) => s.id))
 
     // Find standalone IIDecorator symbols in model whose targets overlap with converted strokes
@@ -147,7 +151,7 @@ export class IIConversionManager extends IIAbstractManager {
       decoratorsToRemove.push(dec)
       if (!appliedKinds.has(dec.kind)) {
         appliedKinds.add(dec.kind)
-        text.decorators.push(DecoratorOps.create(dec.kind, dec.style))
+        text.decorators.push(DecoratorUtil.createDecorator(dec.kind, dec.style))
       }
     }
 
@@ -230,7 +234,7 @@ export class IIConversionManager extends IIAbstractManager {
         }
 
         this.canvas.typeset.setBounds(wordSymbol)
-        currentX += wordSymbol.bounds.width
+        currentX += SymbolGeometry.boundsOf(wordSymbol).width
         result.push({
           symbol: wordSymbol,
           strokes: wordStrokes,
@@ -247,7 +251,7 @@ export class IIConversionManager extends IIAbstractManager {
       x: convertMillimeterToPixel(circle.cx),
       y: convertMillimeterToPixel(circle.cy),
     }
-    return ShapeCircleOps.create(center, convertMillimeterToPixel(circle.r), strokes[0]?.style)
+    return ShapeUtil.createCircle(center, convertMillimeterToPixel(circle.r), strokes[0]?.style)
   }
 
   buildEllipse(ellipse: TJIIXNodeEllipse, strokes: TStroke[]): TShapeEllipse {
@@ -255,7 +259,7 @@ export class IIConversionManager extends IIAbstractManager {
       x: convertMillimeterToPixel(ellipse.cx),
       y: convertMillimeterToPixel(ellipse.cy),
     }
-    return ShapeEllipseOps.create(
+    return ShapeUtil.createEllipse(
       center,
       convertMillimeterToPixel(ellipse.rx),
       convertMillimeterToPixel(ellipse.ry),
@@ -275,7 +279,7 @@ export class IIConversionManager extends IIAbstractManager {
       { x: x + width, y: y + height },
       { x, y: y + height },
     ]
-    return ShapePolygonOps.create(points, strokes[0]?.style)
+    return ShapeUtil.createPolygon(points, strokes[0]?.style)
   }
 
   #buildPolygonFromPoints(polygon: { points: number[] }, strokes: TStroke[]): TShapePolygon {
@@ -286,7 +290,7 @@ export class IIConversionManager extends IIAbstractManager {
         y: convertMillimeterToPixel(polygon.points[i + 1]),
       })
     }
-    return ShapePolygonOps.create(points, strokes[0]?.style)
+    return ShapeUtil.createPolygon(points, strokes[0]?.style)
   }
 
   buildPolygon(polygon: TJIIXNodePolygon, strokes: TStroke[]): TShapePolygon {
@@ -311,7 +315,7 @@ export class IIConversionManager extends IIAbstractManager {
       return
     }
 
-    const uniqStrokes = associatedStroke.filter((a, i) => associatedStroke.findIndex((s) => a.id === s.id) === i)
+    const uniqStrokes = uniqueById(associatedStroke)
 
     let shape: TShape
     switch (node.kind) {
@@ -363,7 +367,7 @@ export class IIConversionManager extends IIAbstractManager {
       point1.x = +((point1.x + point2.x) / 2).toFixed(3)
       point2.x = point1.x
     }
-    return EdgeLineOps.create(point1, point2, line.p1Decoration, line.p2Decoration, strokes[0]?.style)
+    return EdgeUtil.createLine(point1, point2, line.p1Decoration, line.p2Decoration, strokes[0]?.style)
   }
 
   buildPolyEdge(polyline: TJIIXEdgePolyEdge, strokes: TStroke[]): TEdgePolyLine {
@@ -389,7 +393,7 @@ export class IIConversionManager extends IIAbstractManager {
       }
     }
 
-    return EdgePolyLineOps.create(
+    return EdgeUtil.createPolyLine(
       points,
       polyline.edges[0].p1Decoration,
       polyline.edges.at(-1)!.p2Decoration,
@@ -404,7 +408,7 @@ export class IIConversionManager extends IIAbstractManager {
     }
     const radiusX = convertMillimeterToPixel(arc.rx)
     const radiusY = convertMillimeterToPixel(arc.ry)
-    return EdgeArcOps.create(
+    return EdgeUtil.createArc(
       center,
       arc.startAngle,
       arc.sweepAngle,
@@ -417,15 +421,20 @@ export class IIConversionManager extends IIAbstractManager {
     )
   }
 
-  convertEdge(edge: TJIIXEdgeElement, strokes: TStroke[]): { symbol: TEdge; strokes: TStroke[] } | undefined {
+  convertEdge(
+    edge: TJIIXEdgeElement,
+    strokes: TStroke[],
+    blockIdToNewSymbolId: Map<string, string> = new Map()
+  ): { symbol: TEdge; strokes: TStroke[] } | undefined {
     switch (edge.kind) {
       case JIIXEdgeKind.Line: {
         const associatedStroke = strokes.filter((s) => edge.items?.some((i) => i["full-id"] === s.id))
         if (!associatedStroke.length) {
           return
         }
-        const uniqStrokes = associatedStroke.filter((a, i) => associatedStroke.findIndex((s) => a.id === s.id) === i)
+        const uniqStrokes = uniqueById(associatedStroke)
         const oiEdge = this.buildLine(edge, uniqStrokes)
+        this.#applyConnectionAnchors(edge, oiEdge, blockIdToNewSymbolId)
         return {
           symbol: oiEdge,
           strokes: uniqStrokes,
@@ -436,8 +445,9 @@ export class IIConversionManager extends IIAbstractManager {
         if (!associatedStroke.length) {
           return
         }
-        const uniqStrokes = associatedStroke.filter((a, i) => associatedStroke.findIndex((s) => a.id === s.id) === i)
+        const uniqStrokes = uniqueById(associatedStroke)
         const oiEdge = this.buildArc(edge, uniqStrokes)
+        this.#applyConnectionAnchors(edge, oiEdge, blockIdToNewSymbolId)
         return {
           symbol: oiEdge,
           strokes: uniqStrokes,
@@ -450,8 +460,9 @@ export class IIConversionManager extends IIAbstractManager {
         if (!associatedStroke.length) {
           return
         }
-        const uniqStrokes = associatedStroke.filter((a, i) => associatedStroke.findIndex((s) => a.id === s.id) === i)
+        const uniqStrokes = uniqueById(associatedStroke)
         const oiEdge = this.buildPolyEdge(edge, uniqStrokes)
+        this.#applyConnectionAnchors(edge, oiEdge, blockIdToNewSymbolId)
         return {
           symbol: oiEdge,
           strokes: uniqStrokes,
@@ -463,6 +474,36 @@ export class IIConversionManager extends IIAbstractManager {
     }
   }
 
+  /**
+   * Resolve connected shapes to their newly-converted symbol ids (this batch only — a shape not
+   * converted in the same call has no entry in the map and the connection is dropped silently)
+   * and set startAnchor/endAnchor on the built edge symbol.
+   */
+  #applyConnectionAnchors(edge: TJIIXEdgeElement, symbol: TEdge, blockIdToNewSymbolId: Map<string, string>): void {
+    const endpoints = extractEdgeEndpoints(edge)
+    const connectedIds = edge.connected ?? []
+    if (!endpoints || connectedIds.length === 0) {
+      return
+    }
+    const connections = connectedIds
+      .map((blockId) => {
+        const targetId = blockIdToNewSymbolId.get(blockId)
+        if (!targetId) {
+          return undefined
+        }
+        const target = this.model.getSymbol(targetId)
+        if (!target || !symbolRegistry.has(target.type)) {
+          return undefined
+        }
+        return { targetId, box: OBBOps.toBox(SymbolGeometry.boundsOf(target)) }
+      })
+      .filter((c): c is { targetId: string; box: TBox } => !!c)
+
+    const { startAnchor, endAnchor } = resolveConnectionAnchors(endpoints.start, endpoints.end, connections)
+    symbol.startAnchor = startAnchor
+    symbol.endAnchor = endAnchor
+  }
+
   buildMath(mathElement: TJIIXMathElement, strokes: TStroke[], fontSize: number): TMath {
     const boundingBox = BoxOps.createFromBoxes([convertBoundingBoxMillimeterToPixel(mathElement["bounding-box"])])
 
@@ -471,7 +512,7 @@ export class IIConversionManager extends IIAbstractManager {
 
     let fontWeight = this.fontStyleConfiguration.weight
     if (fontWeight === "auto") {
-      fontWeight = (strokes[0]?.style.width || 1) > 2 ? "bold" : "normal"
+      fontWeight = strokes[0] && StrokeUtil.isBold(strokes[0]) ? "bold" : "normal"
     }
     const color = strokes[0]?.style.color || "black"
 
@@ -630,7 +671,7 @@ export class IIConversionManager extends IIAbstractManager {
       }
     }
 
-    const math = MathOps.create(mathElements, point, adjustedBounds, strokes[0]?.style)
+    const math = MathUtil.createMath(mathElements, point, adjustedBounds, strokes[0]?.style)
 
     return math
   }
@@ -737,11 +778,18 @@ export class IIConversionManager extends IIAbstractManager {
       await new Promise((resolve) => requestAnimationFrame(resolve))
     }
 
-    // Also convert from JIIX export if available - process sequentially
+    // Also convert from JIIX export if available - process sequentially.
+    // Nodes are processed before edges (regardless of the export's own element order) so an
+    // edge converted in the same batch as its connected shape can resolve a real anchor.
     if (jiix?.elements?.length) {
       const onlyText = !jiix.elements?.some((e) => e.type !== "Text")
+      const blockIdToNewSymbolId = new Map<string, string>()
+      const orderedElements = [
+        ...jiix.elements.filter((e) => e.type === JIIXElementType.Node),
+        ...jiix.elements.filter((e) => e.type !== JIIXElementType.Node),
+      ]
 
-      for (const el of jiix.elements) {
+      for (const el of orderedElements) {
         let conversionResults: {
           symbol: TSymbol
           strokes: TStroke[]
@@ -766,11 +814,12 @@ export class IIConversionManager extends IIAbstractManager {
             const conversion = this.convertNode(el, strokesToConvert)
             if (conversion) {
               conversionResults = [conversion]
+              blockIdToNewSymbolId.set(el.id, conversion.symbol.id)
             }
             break
           }
           case JIIXElementType.Edge: {
-            const conversion = this.convertEdge(el, strokesToConvert)
+            const conversion = this.convertEdge(el, strokesToConvert, blockIdToNewSymbolId)
             if (conversion) {
               conversionResults = [conversion]
             }
@@ -802,7 +851,7 @@ export class IIConversionManager extends IIAbstractManager {
 
     // Add single history entry for the entire conversion
     if (allAddedSymbols.length) {
-      this.canvas.history.push(this.model, {
+      this.canvas.history.push({
         added: allAddedSymbols,
         erased: allErasedStrokes,
       })

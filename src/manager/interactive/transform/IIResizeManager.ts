@@ -1,16 +1,14 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import { ResizeDirection } from "@/Constants"
-import type { TBox, TEdge, TMath, TPoint, TShape, TStroke, TText } from "@/symbol"
-import { cloneSymbol, EdgeKind, isMath, isText, ShapeKind } from "@/symbol"
-import { EdgeOps } from "@/symbol/edge/Edge"
-import { MathOps } from "@/symbol/math/Math"
-import { BoxOps } from "@/symbol/primitives/Box"
-import { ShapeOps } from "@/symbol/shape/Shape"
-import { StrokeOps } from "@/symbol/stroke/Stroke"
-import { TextOps } from "@/symbol/text/Text"
-import { MatrixTransform } from "@/transform"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import type { TBox, TPoint } from "@/core"
+import { BoxOps, MatrixTransform, type TOBB } from "@/core"
+import type { TIIHistoryChanges } from "@/history"
+import { appendUpdated } from "@/history"
+import type { TSymbol } from "@/symbol"
+import { cloneSymbol } from "@/symbol"
+import { SymbolGeometry, symbolRegistry } from "@/symbol-utils"
 
 import { IIAbstractTransformManager } from "./AbstractTransformManager"
+import { ResizeDirection } from "./ResizeDirection"
 
 const isEasternResize = (direction: ResizeDirection): boolean =>
   [ResizeDirection.East, ResizeDirection.NorthEast, ResizeDirection.SouthEast].includes(direction)
@@ -29,7 +27,6 @@ const isSouthernResize = (direction: ResizeDirection): boolean =>
  */
 export class IIResizeManager extends IIAbstractTransformManager {
   protected managerName = "IIResizeManager"
-  protected transformName = "resize"
   direction!: ResizeDirection
   boundingBox!: TBox
   transformOrigin!: TPoint
@@ -39,139 +36,13 @@ export class IIResizeManager extends IIAbstractTransformManager {
     super(canvas)
   }
 
-  protected applyToStroke(stroke: TStroke, matrix: MatrixTransform): TStroke {
-    this.logger.debug("applyToStroke", { stroke })
-    this.applyMatrixToPoints(stroke.pointers, matrix)
-    StrokeOps.updateBounds(stroke)
-    return stroke
-  }
-
-  protected applyToShape(shape: TShape, matrix: MatrixTransform): TShape {
-    this.logger.debug("applyToShape", { shape })
-    switch (shape.kind) {
-      case ShapeKind.Ellipse: {
-        const cosPhi = Math.cos(shape.orientation)
-        const sinPhi = Math.sin(shape.orientation)
-        const scaleX = matrix.xx
-        const scaleY = matrix.yy
-        const ox = this.transformOrigin.x
-        const oy = this.transformOrigin.y
-        shape.center.x = +(
-          shape.center.x +
-          ((scaleX - 1) * cosPhi + (scaleY - 1) * sinPhi) * (shape.center.x - ox)
-        ).toFixed(3)
-        shape.center.y = +(
-          shape.center.y +
-          ((scaleX - 1) * -sinPhi + (scaleY - 1) * cosPhi) * (shape.center.y - oy)
-        ).toFixed(3)
-        shape.radiusX = +Math.abs(shape.radiusX * (scaleX * cosPhi - scaleY * sinPhi)).toFixed(3)
-        shape.radiusY = +Math.abs(shape.radiusY * (scaleX * sinPhi + scaleY * cosPhi)).toFixed(3)
-        ShapeOps.updateShapeDerivedFields(shape)
-        return shape
-      }
-      case ShapeKind.Circle: {
-        shape.radius = +((shape.radius * (matrix.xx + matrix.yy)) / 2).toFixed(3)
-        shape.center = matrix.applyToPoint(shape.center)
-        ShapeOps.updateShapeDerivedFields(shape)
-        return shape
-      }
-      case ShapeKind.Polygon: {
-        this.applyMatrixToPoints(shape.points, matrix)
-        ShapeOps.updateShapeDerivedFields(shape)
-        return shape
-      }
-      default:
-        throw new Error(`Can't apply resize on shape, kind unknown: ${JSON.stringify(shape)}`)
-    }
-  }
-
-  protected applyToEdge(edge: TEdge, matrix: MatrixTransform): TEdge {
-    this.logger.debug("applyToEdge", { edge })
-    switch (edge.kind) {
-      case EdgeKind.Arc: {
-        const cosPhi = Math.cos(edge.phi)
-        const sinPhi = Math.sin(edge.phi)
-        const scaleX = matrix.xx
-        const scaleY = matrix.yy
-        const ox = this.transformOrigin.x
-        const oy = this.transformOrigin.y
-        edge.center.x = +(
-          edge.center.x +
-          ((scaleX - 1) * cosPhi + (scaleY - 1) * sinPhi) * (edge.center.x - ox)
-        ).toFixed(3)
-        edge.center.y = +(
-          edge.center.y +
-          ((scaleX - 1) * -sinPhi + (scaleY - 1) * cosPhi) * (edge.center.y - oy)
-        ).toFixed(3)
-        edge.radiusX = +(edge.radiusX * Math.abs(scaleX * cosPhi + scaleY * sinPhi)).toFixed(3)
-        edge.radiusY = +(edge.radiusY * Math.abs(scaleX * sinPhi + scaleY * cosPhi)).toFixed(3)
-        if (scaleX < 0) {
-          edge.startAngle = +(Math.PI - edge.startAngle).toFixed(3)
-          edge.sweepAngle *= -1
-        } else if (scaleY < 0) {
-          edge.sweepAngle *= -1
-        }
-        EdgeOps.updateEdgeDerivedFields(edge)
-        return edge
-      }
-      case EdgeKind.Line: {
-        this.applyMatrixToPoints([edge.start, edge.end], matrix)
-        EdgeOps.updateEdgeDerivedFields(edge)
-        return edge
-      }
-      case EdgeKind.PolyEdge: {
-        this.applyMatrixToPoints(edge.points, matrix)
-        EdgeOps.updateEdgeDerivedFields(edge)
-        return edge
-      }
-      default:
-        throw new Error(`Can't apply resize on edge, kind unknown: ${JSON.stringify(edge)}`)
-    }
-  }
-
-  private applyOnTypeset(symbol: TText | TMath, matrix: MatrixTransform): TText | TMath {
-    const np = matrix.applyToPoint(symbol.point)
-    symbol.point.x = +np.x.toFixed(3)
-    symbol.point.y = +np.y.toFixed(3)
-    const scale = (matrix.xx + matrix.yy) / 2
-    if (isText(symbol)) {
-      symbol.chars.forEach((c) => (c.fontSize = +(c.fontSize * scale).toFixed(3)))
-    } else {
-      symbol.elements.forEach((e) => (e.fontSize = +(e.fontSize * scale).toFixed(3)))
-    }
-    const newCenter = matrix.applyToPoint(symbol.bounds.center)
-    symbol.bounds = {
-      center: {
-        x: +newCenter.x.toFixed(3),
-        y: +newCenter.y.toFixed(3),
-      },
-      width: +(symbol.bounds.width * Math.abs(matrix.xx)).toFixed(3),
-      height: +(symbol.bounds.height * Math.abs(matrix.yy)).toFixed(3),
-      angle: 0,
-    }
-    if (isText(symbol)) {
-      TextOps.updateDerivedFields(symbol)
-    } else {
-      MathOps.updateDerivedFields(symbol)
-    }
-    return symbol
-  }
-
-  protected applyOnText(text: TText, matrix: MatrixTransform): TText {
-    return this.applyOnTypeset(text, matrix) as TText
-  }
-
-  protected applyOnMath(math: TMath, matrix: MatrixTransform): TMath {
-    return this.applyOnTypeset(math, matrix) as TMath
-  }
-
-  scaleElement(id: string, sx: number, sy: number): void {
-    this.logger.info("scaleElement", {
-      id,
-      sx,
-      sy,
-    })
-    this.canvas.renderer.setAttribute(id, "transform", `scale(${sx},${sy})`)
+  /**
+   * One hook, like the other two managers'. `transformOrigin` is passed here, which is
+   * what lets the ellipse and the arc scale their centre about it from inside their own util.
+   */
+  protected applyThroughUtil(symbol: TSymbol, matrix: MatrixTransform): void {
+    this.logger.debug("applyToSymbol", { symbol })
+    symbolRegistry.getUtilFor(symbol).resize(symbol, { matrix })
   }
 
   start(target: Element, origin: TPoint): void {
@@ -183,16 +54,20 @@ export class IIResizeManager extends IIAbstractTransformManager {
     this.interactElementsGroup = this.resolveInteractGroup(target)
     this.direction = target.getAttribute("resize-direction") as ResizeDirection
 
-    this.keepRatio = this.model.symbolsSelected.some(
-      (s) => isText(s) || isMath(s) || (ShapeOps.isShape(s) && ShapeOps.isCircleShape(s))
-    )
+    // selectAll() populates symbolsSelected with no registry check ahead of it (see
+    // IISelectionManager.createInteractElementsGroup) — a symbol type missing its util must not
+    // abort starting the resize. One filtered list feeds both the ratio question and the bounding
+    // box below: a symbol excluded from one must be excluded from the other, or the two disagree
+    // about what "the selection" even is.
+    const registeredSymbols = this.model.symbolsSelected.filter((s) => symbolRegistry.has(s.type))
+
+    // One symbol that needs its ratio locked locks it for the whole selection, which is what the
+    // three type tests here used to say. Asked of each symbol's util now, so a custom symbol can
+    // require it too.
+    this.keepRatio = registeredSymbols.some((s) => symbolRegistry.getUtilFor(s).keepsAspectRatio(s))
 
     this.transformOrigin = origin
-    this.boundingBox = BoxOps.createFromPoints(this.model.symbolsSelected.flatMap((s) => s.vertices))
-    this.setTransformOrigin(this.interactElementsGroup!.id, this.transformOrigin.x, this.transformOrigin.y)
-    this.model.symbolsSelected.forEach((s) => {
-      this.setTransformOrigin(s.id, this.transformOrigin.x, this.transformOrigin.y)
-    })
+    this.boundingBox = BoxOps.createFromPoints(registeredSymbols.flatMap((s) => SymbolGeometry.verticesOf(s)))
   }
 
   continue(point: TPoint): {
@@ -250,14 +125,18 @@ export class IIResizeManager extends IIAbstractTransformManager {
         scaleY = scaleX
       }
     }
-    this.scaleElement(this.interactElementsGroup.id, scaleX, scaleY)
-    this.model.symbolsSelected.forEach((s) => {
-      this.scaleElement(s.id, scaleX, scaleY)
-    })
-    this.getGhostStrokeIdsForSelectedMath(this.model.symbolsSelected).forEach((id) => {
-      this.scaleElement(id, scaleX, scaleY)
-    })
+    // Built before the preview, and carrying `transformOrigin` explicitly, so one matrix serves both
+    // the preview and the connector below — and so the preview needs no `transform-origin`.
     const matrix = MatrixTransform.identity().scale(scaleX, scaleY, this.transformOrigin)
+
+    this.previewElementTransform(this.interactElementsGroup.id, matrix)
+    this.model.symbolsSelected.forEach((s) => {
+      this.previewTransform(s, matrix)
+    })
+    this.previewDecorators(this.model.symbolsSelected, matrix)
+    this.getGhostStrokeIdsForSelectedMath(this.model.symbolsSelected).forEach((id) => {
+      this.previewElementTransform(id, matrix)
+    })
     this.canvas.connector.drawAnchoredEdgesForMatrix(
       this.model.symbolsSelected.map((s) => s.id),
       matrix
@@ -273,29 +152,61 @@ export class IIResizeManager extends IIAbstractTransformManager {
     this.canvas.endOperation("Resizing")
     const { scaleX, scaleY } = this.continue(point)
     this.canvas.snaps.clearSnapToElementLines()
-    const oldSymbols = this.model.symbolsSelected.map((s) => cloneSymbol(s))
-    const matrix = MatrixTransform.identity().scale(scaleX, scaleY, this.transformOrigin)
-    this.applyAndDraw(this.model.symbolsSelected, matrix)
-    this.applyTransformToGhostStrokesForSelectedMath(this.model.symbolsSelected, matrix)
-    this.canvas.connector.updateAnchoredEdges(this.model.symbolsSelected.map((s) => s.id))
-    const strokesFromSymbols = this.canvas.extractStrokesFromSymbols(this.model.symbolsSelected)
-    await this.canvas.client.transformScale(
-      strokesFromSymbols.map((s) => s.id),
-      scaleX,
-      scaleY,
-      this.transformOrigin.x,
-      this.transformOrigin.y
+    // Queried before anything is mutated: the pre-convert edge strokes that will rigidly follow
+    // this resize need a pre-transform snapshot in history, like the selection itself. Gradient-
+    // followed strokes are excluded — their shift isn't a uniform scale, so they get their own
+    // pre-mutation snapshot via `updated` below instead, like the anchored converted edges.
+    const followedStrokeIds = this.canvas.connector.getRigidFollowedStrokeIds(
+      this.model.symbolsSelected.map((s) => s.id)
     )
-    this.canvas.history.push(this.model, {
-      scale: [
-        {
-          symbols: oldSymbols,
-          origin: { ...this.transformOrigin },
-          scaleX,
-          scaleY,
-        },
-      ],
+    const oldSymbols = [
+      ...this.model.symbolsSelected,
+      ...this.resolveFollowedSymbols(followedStrokeIds, this.model.symbolsSelected),
+    ].map((s) => cloneSymbol(s))
+    // Snapshotted before applyAndDraw mutates the selection below: gradient-follow needs the
+    // moving target's PRE-transform center (same reference point the drag preview used), not
+    // its already-resized bounds, or the committed shape would snap to a different form than
+    // what was just shown while dragging.
+    const preTransformBoundsById = new Map<string, TOBB>()
+    this.model.symbolsSelected.forEach((s) => {
+      // Same selectAll() gap as start()'s bounding box — an unregistered symbol has no snapshot
+      // taken, so updateAnchoredEdges below leaves it untouched rather than throwing.
+      if (!symbolRegistry.has(s.type)) {
+        return
+      }
+      const bounds = SymbolGeometry.boundsOf(s)
+      preTransformBoundsById.set(s.id, { ...bounds, center: { ...bounds.center } })
     })
+    const matrix = MatrixTransform.identity().scale(scaleX, scaleY, this.transformOrigin)
+    const movedDecorators = this.applyAndDraw(this.model.symbolsSelected, matrix)
+    this.applyTransformToGhostStrokesForSelectedMath(this.model.symbolsSelected, matrix)
+    const { oldSymbols: anchoredOldSymbols, newSymbols: anchoredNewSymbols } =
+      this.canvas.connector.updateAnchoredEdges(
+        this.model.symbolsSelected.map((s) => s.id),
+        matrix,
+        preTransformBoundsById
+      )
+    const strokesFromSymbols = this.canvas.extractStrokesFromSymbols(this.model.symbolsSelected)
+    await Promise.all([
+      this.canvas.client.transformScale(
+        [...new Set([...strokesFromSymbols.map((s) => s.id), ...followedStrokeIds])],
+        scaleX,
+        scaleY,
+        this.transformOrigin.x,
+        this.transformOrigin.y
+      ),
+      ...this.replaceGradientFollowedStrokes(anchoredOldSymbols, anchoredNewSymbols),
+    ])
+    const changes: TIIHistoryChanges = {}
+    this.recordTransformed(changes, [...oldSymbols, ...movedDecorators])
+    // Converted Line/PolyEdge/Arc anchors are recomputed from the target's new bounds, and
+    // gradient-followed raw strokes are reshaped non-uniformly. They join the same `updated` pair
+    // as the resized selection — appended, not assigned, or one of the two sets would be lost.
+    appendUpdated(
+      changes,
+      anchoredOldSymbols.map((before, index) => ({ before, after: anchoredNewSymbols[index] }))
+    )
+    this.canvas.history.push(changes)
     this.finalizeTransform()
   }
 }

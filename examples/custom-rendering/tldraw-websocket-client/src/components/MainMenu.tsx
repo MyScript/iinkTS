@@ -27,6 +27,8 @@ export function MainMenu()
 	{
 		const shapesToConvert = editor.getCurrentPageShapes().filter(s => s.type === "draw") as TLDrawShape[]
 		const { toConvert, toRemove } = converter.convert(shapesToConvert)
+		// Own undo step: otherwise undo also removes the last stroke drawn
+		editor.markHistoryStoppingPoint("convert")
 		editor.run(() => {
 			editor.deleteShapes(toRemove)
 			editor.createShapes(toConvert)

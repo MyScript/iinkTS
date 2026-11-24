@@ -20,14 +20,63 @@ const contentTab = document.getElementById("content-tab")
 
 const BACKEND_MODEL_EMPTY = `<div style="display: flex; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; color: #666;">The backend model is empty</div>`
 
+// Built on demand rather than on every refresh: serializing the symbols eagerly cost a 169KB
+// string per change that nothing read unless the user actually pressed copy.
+let currentDataProvider = () => ""
+
 copyTabToClipboard.addEventListener("pointerup", () => {
   try {
-    navigator.clipboard.writeText(contentTab.getAttribute("data-string"))
+    navigator.clipboard.writeText(currentDataProvider())
   } catch (err) {
     console.error(err)
     alert("Copy to clipboard disabled")
   }
 })
+
+/**
+ * Identifies the in-flight tab render. A newer render bumps it, which makes any pending chunk of
+ * the previous one give up instead of appending into a container that is no longer on screen.
+ */
+let renderToken = 0
+
+const whenIdle = (fn) =>
+  typeof requestIdleCallback === "function"
+    ? requestIdleCallback(fn, { timeout: 1000 })
+    : setTimeout(() => fn({ timeRemaining: () => 8 }), 0)
+
+/**
+ * Appends `items` to `container` a few at a time, handing the thread back between batches.
+ *
+ * renderjson builds ~96 DOM nodes per symbol, so rendering 200 of them in one go costs ~140ms
+ * with layout. The panel refresh is debounced 300ms after the last change, which is right inside
+ * the pause between two strokes - so that 140ms landed on the next `pointerdown` and swallowed
+ * the start of the stroke. Chunking keeps every task short enough to never eat pointer input.
+ */
+function appendChunked(container, items, renderItem, token) {
+  if (!items.length) return
+  let i = 0
+  const step = (deadline) => {
+    if (token !== renderToken) return
+    do {
+      container.appendChild(renderItem(items[i]))
+      i++
+    } while (i < items.length && deadline.timeRemaining() > 4)
+    if (i < items.length) whenIdle(step)
+  }
+  whenIdle(step)
+}
+
+/**
+ * One symbol, rendered with its own properties visible but their contents collapsed - the depth
+ * the whole array used to get when rendered as a single `renderjson` call. Without this the
+ * per-symbol call would sit one level higher and expand every `pointers` array.
+ */
+function renderSymbolCollapsed(symbol) {
+  renderjson.set_show_to_level(1)
+  const el = renderjson(symbol)
+  renderjson.set_show_to_level(2)
+  return el
+}
 
 function isPanelVisible() {
   // Desktop: panel is always visible (width > 0); Mobile: needs .open class
@@ -40,8 +89,9 @@ async function updateTabContent() {
     contentTab.innerHTML = "<p>No canvas available</p>"
     return
   }
+  const token = ++renderToken
   let content
-  let dataString = ""
+  let fillContent
   contentTab.innerHTML = `<div class="loader"></div>`
   copyTabToClipboard.disabled = true
 
@@ -50,7 +100,7 @@ async function updateTabContent() {
       const exports = await canvas.export(["application/vnd.myscript.jiix"])
       const jiix = exports?.["application/vnd.myscript.jiix"] || {}
       content = renderjson(jiix)
-      dataString = JSON.stringify(jiix)
+      currentDataProvider = () => JSON.stringify(jiix)
       break
     }
     case "symbols-tab":
@@ -65,26 +115,22 @@ async function updateTabContent() {
           banner.textContent = `Showing ${MAX_SYMBOLS} of ${symbols.length} symbols`
           wrapper.appendChild(banner)
         }
-        wrapper.appendChild(renderjson(sliced))
         content = wrapper
-        dataString = JSON.stringify(sliced)
+        fillContent = () => appendChunked(wrapper, sliced, renderSymbolCollapsed, token)
+        currentDataProvider = () => JSON.stringify(sliced)
       } else {
         const mes = document.createElement("p")
         mes.textContent = "No symbols"
-        dataString = "No symbols"
+        currentDataProvider = () => "No symbols"
         content = mes
       }
       break
-    case "history-tab":
-      content = renderjson({
-        context: canvas.history.context,
-        stack: canvas.history.stack,
-      })
-      dataString = JSON.stringify({
-        context: canvas.history.context,
-        stack: canvas.history.stack,
-      })
+    case "history-tab": {
+      const history = { context: canvas.history.context, stack: canvas.history.stack }
+      content = renderjson(history)
+      currentDataProvider = () => JSON.stringify(history)
       break
+    }
     case "selection-tab":
       if (canvas.model.symbolsSelected.length) {
         const list = document.createElement("ul")
@@ -105,20 +151,24 @@ async function updateTabContent() {
           list.appendChild(listItem)
         })
         content = list
-        dataString = JSON.stringify(canvas.model.symbolsSelected)
+        const selected = canvas.model.symbolsSelected
+        currentDataProvider = () => JSON.stringify(selected)
       } else {
         const mes = document.createElement("p")
         mes.textContent = "No symbols selected"
-        dataString = "No symbols selected"
+        currentDataProvider = () => "No symbols selected"
         content = mes
       }
       break
   }
+  // A tab switch or a later change may have started its own render while the `jiix-tab` export
+  // above was in flight; that render owns the panel now, so drop this one rather than overwrite it.
+  if (token !== renderToken) return
   while (contentTab.firstChild) {
     contentTab.firstChild.remove()
   }
-  contentTab.setAttribute("data-string", dataString)
   contentTab.appendChild(content)
+  fillContent?.()
   copyTabToClipboard.disabled = false
 }
 
@@ -169,7 +219,7 @@ function createSymbolInputColor(symbol) {
   inputColor.value = symbol.style.color
   inputColor.classList.add("symbol-input")
   inputColor.addEventListener("change", (evt) => {
-    canvas?.updateSymbolsStyle([symbol.id], { color: evt.target.value })
+    canvas?.updateSymbols([symbol.id], { style: { color: evt.target.value } })
   })
   return inputColor
 }
@@ -194,13 +244,13 @@ function createSymbolInputWidth(symbol) {
   minus.addEventListener("pointerup", () => {
     symbol.style.width--
     syncMinusState()
-    canvas?.updateSymbolsStyle([symbol.id], { width: symbol.style.width })
+    canvas?.updateSymbols([symbol.id], { style: { width: symbol.style.width } })
   })
 
   plus.addEventListener("pointerup", () => {
     symbol.style.width++
     syncMinusState()
-    canvas?.updateSymbolsStyle([symbol.id], { width: symbol.style.width })
+    canvas?.updateSymbols([symbol.id], { style: { width: symbol.style.width } })
   })
 
   syncMinusState()

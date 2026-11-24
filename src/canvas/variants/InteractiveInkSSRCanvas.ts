@@ -1,23 +1,28 @@
-import type { TCanvasOptionsBase } from "@/canvas/AbstractCanvas"
-import { AbstractCanvas } from "@/canvas/AbstractCanvas"
-import type { TConverstionState, TMarginConfiguration, TWebSocketSSRClientMessageSVGPatch } from "@/client"
+import type {
+  TConverstionState,
+  TExport,
+  TJIIXExport,
+  TMarginConfiguration,
+  TWebSocketSSRClientMessageSVGPatch,
+} from "@/client"
 import { DefaultMarginConfiguration, WebSocketSSRClient } from "@/client"
-import { CanvasTool } from "@/Constants"
+import type { TPartialDeep, TPointer } from "@/core"
+import { DeferredPromise, resolvePointerDelta } from "@/core"
 import type { TPointerInfo } from "@/grabber"
 import { PointerEventGrabber } from "@/grabber"
 import type { THistoryContext } from "@/history"
 import { HistoryManager } from "@/history"
-import type { TExport, TJIIXExport } from "@/model"
+import { CanvasTool } from "@/manager"
 import { Model } from "@/model"
 import { InteractiveInkSSRSVGRenderer } from "@/renderer"
 import { InteractiveInkSSRSmartGuide } from "@/smartguide"
 import type { TPenStyle, TTheme } from "@/style"
 import { DefaultPenStyle, StyleManager } from "@/style"
-import type { TLegacyStroke, TPointer } from "@/symbol"
+import type { TLegacyStroke } from "@/symbol"
 import { Stroke } from "@/symbol"
-import type { TPartialDeep } from "@/utils"
-import { DeferredPromise } from "@/utils"
 
+import type { TCanvasOptionsBase } from "../AbstractCanvas"
+import { AbstractCanvas } from "../AbstractCanvas"
 import { InteractiveInkSSRCanvasConfiguration } from "./InteractiveInkSSRCanvasConfiguration"
 
 /**
@@ -74,7 +79,9 @@ export class InteractiveInkSSRCanvas extends AbstractCanvas {
 
     this.tool = CanvasTool.Write
     this.#model = new Model()
-    this.history = new HistoryManager(this.#configuration["undo-redo"], this.event)
+    // The server owns the undo/redo state: only its contentChanged emits "changed", the local
+    // stack, which holds no symbols here, would otherwise overwrite it with empty/canRedo wrong.
+    this.history = new HistoryManager(this.#configuration["undo-redo"], { emitChanged: () => {} })
   }
 
   get initializationPromise(): Promise<void> {
@@ -87,19 +94,6 @@ export class InteractiveInkSSRCanvas extends AbstractCanvas {
   set tool(i: CanvasTool) {
     this.#tool = i
     this.setCursorStyle()
-  }
-
-  protected setCursorStyle(): void {
-    switch (this.tool) {
-      case CanvasTool.Erase:
-        this.layers.root.classList.remove("draw")
-        this.layers.root.classList.add("erase")
-        break
-      default:
-        this.layers.root.classList.add("draw")
-        this.layers.root.classList.remove("erase")
-        break
-    }
   }
 
   get model(): Model {
@@ -394,7 +388,8 @@ export class InteractiveInkSSRCanvas extends AbstractCanvas {
         errors.push(`stroke ${strokeIndex + 1} has not pointers`)
       }
       let flag = true
-      s.pointers?.forEach((pp, pIndex) => {
+      const sourcePointers = s.pointers ?? []
+      sourcePointers.forEach((pp, pIndex) => {
         flag = true
         if (!pp) {
           errors.push(`stroke ${strokeIndex + 1} has no pointer at ${pIndex}`)
@@ -402,7 +397,7 @@ export class InteractiveInkSSRCanvas extends AbstractCanvas {
         }
         const pointer: TPointer = {
           p: pp.p || 1,
-          t: pp.t || pIndex,
+          dt: resolvePointerDelta(sourcePointers, pIndex),
           x: 0,
           y: 0,
         }
@@ -444,18 +439,14 @@ export class InteractiveInkSSRCanvas extends AbstractCanvas {
     width?: number
   } = {}): Promise<void> {
     this.logger.info("resize", { height, width })
-    const compStyles = window.getComputedStyle(this.layers.root)
-    const heightValue =
-      height || Math.max(parseInt(compStyles.height.replace("px", "")), this.configuration.rendering.minHeight)
-    const widthValue =
-      width || Math.max(parseInt(compStyles.width.replace("px", "")), this.configuration.rendering.minWidth)
-    if (heightValue === this.model.height && widthValue === this.model.width) {
+    const dims = this.resolveDimensions(height, width)
+    if (dims.height === this.model.height && dims.width === this.model.width) {
       this.logger.debug("resize", "no change")
       return
     }
     const deferredResize = new DeferredPromise<Model>()
-    this.model.height = heightValue
-    this.model.width = widthValue
+    this.model.height = dims.height
+    this.model.width = dims.width
     const clonedModel = this.model.clone()
     this.renderer.resize(clonedModel)
     clearTimeout(this.#resizeTimer)
@@ -477,6 +468,10 @@ export class InteractiveInkSSRCanvas extends AbstractCanvas {
     this.smartGuide?.resize()
     this.event.emitExported(this.model.exports as TExport)
     this.logger.debug("resize", this.model)
+  }
+
+  protected get minDimensions(): { minHeight: number; minWidth: number } {
+    return this.configuration.rendering
   }
 
   async undo(): Promise<Model> {
@@ -516,13 +511,11 @@ export class InteractiveInkSSRCanvas extends AbstractCanvas {
 
   async destroy(): Promise<void> {
     this.logger.info("destroy")
-    this.stopResizeObserver()
-    this.event.removeAllListeners()
     this.grabber.detach()
-    this.layers.destroy()
-    this.renderer.destroy()
+    this.teardownCommon()
     this.client.destroy()
     this.smartGuide?.destroy()
+    this.clearRootElementReference()
     return Promise.resolve()
   }
 }

@@ -1,5 +1,5 @@
 import ArrowDown from "@/assets/svg/nav-arrow-down.svg"
-import { DOMFactory } from "@/components/dom"
+import { DOMFactory } from "@/dom"
 
 /**
  * @group Menu

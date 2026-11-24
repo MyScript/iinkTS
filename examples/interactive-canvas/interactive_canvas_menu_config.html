@@ -56,7 +56,7 @@
         justify-content: center;
       }
     </style>
-    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+    <script src="../assets/js/theme-init.js"></script>
 </head>
 
   <body>
@@ -190,6 +190,19 @@
               <label class="toggle"><input type="checkbox" id="toggle-action-math" checked /><span class="toggle-slider"></span></label>
             </div>
             <div class="config-subsection" id="subsection-math">
+              <div class="config-row">
+                <label><strong>Solver</strong></label>
+                <label class="toggle"><input type="checkbox" id="toggle-math-solver" checked /><span class="toggle-slider"></span></label>
+              </div>
+              <div class="config-subsection" id="subsection-math-solver">
+                <div class="config-row"><label>Angle unit</label><label class="toggle"><input type="checkbox" id="toggle-solver-angleUnit" checked /><span class="toggle-slider"></span></label></div>
+                <div class="config-row"><label>Fractional digits</label><label class="toggle"><input type="checkbox" id="toggle-solver-fractionalDigits" checked /><span class="toggle-slider"></span></label></div>
+                <div class="config-row"><label>Decimal separator</label><label class="toggle"><input type="checkbox" id="toggle-solver-decimalSeparator" checked /><span class="toggle-slider"></span></label></div>
+                <div class="config-row"><label>Rounding mode</label><label class="toggle"><input type="checkbox" id="toggle-solver-roundingMode" checked /><span class="toggle-slider"></span></label></div>
+                <div class="config-row"><label>Options</label><label class="toggle"><input type="checkbox" id="toggle-solver-options" checked /><span class="toggle-slider"></span></label></div>
+                <div class="config-row"><label>Auto variable</label><label class="toggle"><input type="checkbox" id="toggle-solver-autoVariable" checked /><span class="toggle-slider"></span></label></div>
+                <div class="config-row"><label>Scoping policy</label><label class="toggle"><input type="checkbox" id="toggle-solver-scopingPolicy" checked /><span class="toggle-slider"></span></label></div>
+              </div>
               <div class="config-row"><label>Auto-compute</label><label class="toggle"><input type="checkbox" id="toggle-math-autoCompute" checked /><span class="toggle-slider"></span></label></div>
               <div class="config-row"><label>Result mode</label><label class="toggle"><input type="checkbox" id="toggle-math-resultMode" checked /><span class="toggle-slider"></span></label></div>
               <div class="config-row"><label>Result color</label><label class="toggle"><input type="checkbox" id="toggle-math-resultColor" checked /><span class="toggle-slider"></span></label></div>
@@ -197,6 +210,7 @@
               <div class="config-row"><label>Highlight on select</label><label class="toggle"><input type="checkbox" id="toggle-math-highlightOnSelect" checked /><span class="toggle-slider"></span></label></div>
               <div class="config-row"><label>Edit variables</label><label class="toggle"><input type="checkbox" id="toggle-math-editVariables" checked /><span class="toggle-slider"></span></label></div>
               <div class="config-row"><label>Capabilities</label><label class="toggle"><input type="checkbox" id="toggle-math-capabilities" checked /><span class="toggle-slider"></span></label></div>
+              <div class="config-row"><label>Force compute all</label><label class="toggle"><input type="checkbox" id="toggle-math-forceComputeAll" checked /><span class="toggle-slider"></span></label></div>
             </div>
 
             <!-- Overlay sub-menu -->
@@ -325,6 +339,7 @@
               <div class="config-row"><label>Edit variables</label><label class="toggle"><input type="checkbox" id="toggle-ctx-math-editVariables" checked /><span class="toggle-slider"></span></label></div>
               <div class="config-row"><label>Compute</label><label class="toggle"><input type="checkbox" id="toggle-ctx-math-compute" checked /><span class="toggle-slider"></span></label></div>
               <div class="config-row"><label>Evaluate</label><label class="toggle"><input type="checkbox" id="toggle-ctx-math-evaluate" checked /><span class="toggle-slider"></span></label></div>
+              <div class="config-row"><label>Force compute</label><label class="toggle"><input type="checkbox" id="toggle-ctx-math-forceCompute" checked /><span class="toggle-slider"></span></label></div>
             </div>
           </div>
         </div>
@@ -418,6 +433,18 @@
                   highlightOnSelect: checked('toggle-math-highlightOnSelect'),
                   editVariables:     checked('toggle-math-editVariables'),
                   capabilities:      checked('toggle-math-capabilities'),
+                  forceComputeAll:   checked('toggle-math-forceComputeAll'),
+                  solver: checked('toggle-math-solver')
+                    ? {
+                        angleUnit:        checked('toggle-solver-angleUnit'),
+                        fractionalDigits: checked('toggle-solver-fractionalDigits'),
+                        decimalSeparator: checked('toggle-solver-decimalSeparator'),
+                        roundingMode:     checked('toggle-solver-roundingMode'),
+                        options:          checked('toggle-solver-options'),
+                        autoVariable:     checked('toggle-solver-autoVariable'),
+                        scopingPolicy:    checked('toggle-solver-scopingPolicy'),
+                      }
+                    : false,
                 }
               : false,
             overlay: checked('toggle-action-overlay')
@@ -492,6 +519,7 @@
                   editVariables:   checked('toggle-ctx-math-editVariables'),
                   compute:         checked('toggle-ctx-math-compute'),
                   evaluate:        checked('toggle-ctx-math-evaluate'),
+                  forceCompute:    checked('toggle-ctx-math-forceCompute'),
                 }
               : false,
           }

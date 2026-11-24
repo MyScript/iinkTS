@@ -54,11 +54,11 @@ test.describe("Interactive ink canvas Stroke Playback", () => {
     })
 
     test("should defer pause until the in-progress stroke completes, then resume with it intact", async ({ page }) => {
+      // Half speed: the first stroke (points at 0/500/1000ms) lasts 2 s. A fixed 300 ms wait at
+      // full speed let a loaded run click after that stroke ended, and the pause applied at once.
+      await page.locator("#speed").selectOption("0.5")
       await page.locator("#play").click()
-
-      // mid-way through the first stroke (points at 0/500/1000ms)
-      // eslint-disable-next-line playwright/no-wait-for-timeout
-      await page.waitForTimeout(300)
+      await expect.poll(() => page.evaluate(() => rootEl.iink.playback.state)).toEqual("playing")
       await page.locator("#pauseResume").click()
 
       // pause is only requested: still playing, still labeled "Pause", nothing cut short
@@ -66,7 +66,7 @@ test.describe("Interactive ink canvas Stroke Playback", () => {
       await expect(page.locator("#pauseResume")).toHaveText("Pause")
 
       // once the current stroke's last point fires, the pause actually applies
-      await expect(page.locator("#pauseResume")).toHaveText("Resume", { timeout: 3000 })
+      await expect(page.locator("#pauseResume")).toHaveText("Resume", { timeout: 6000 })
       expect(await page.evaluate(() => rootEl.iink.playback.state)).toEqual("paused")
 
       let symbols = await page.evaluate(() => rootEl.iink.model.symbols)
@@ -76,16 +76,17 @@ test.describe("Interactive ink canvas Stroke Playback", () => {
       await page.locator("#pauseResume").click()
       await expect(page.locator("#pauseResume")).toHaveText("Pause")
 
-      await expect(page.locator("#progressLabel")).toHaveText("2 / 2 strokes", { timeout: 3000 })
+      await expect(page.locator("#progressLabel")).toHaveText("2 / 2 strokes", { timeout: 6000 })
       symbols = await page.evaluate(() => rootEl.iink.model.symbols)
       expect(symbols).toHaveLength(2)
     })
 
     test("should stop, finalize the in-progress stroke, and discard the rest", async ({ page }) => {
+      // Half speed: only the first point of the first stroke (points at 0/500/1000ms) has fired
+      // for its first second, wide enough for a loaded run to stop in it
+      await page.locator("#speed").selectOption("0.5")
       await page.locator("#play").click()
-      // mid-way through the first stroke (points at 0/500/1000ms): only the first point fired
-      // eslint-disable-next-line playwright/no-wait-for-timeout
-      await page.waitForTimeout(300)
+      await expect.poll(() => page.evaluate(() => rootEl.iink.playback.state)).toEqual("playing")
       await page.locator("#stop").click()
 
       await expect(page.locator("#play")).toBeEnabled()

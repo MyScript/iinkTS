@@ -1,17 +1,18 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import type { TInteractiveInkCanvas } from "@/canvas"
 import type { WebSocketClient } from "@/client"
 import type { IIHistoryManager } from "@/history"
 import { type Logger, LoggerCategory, LoggerManager } from "@/logger"
-import type { TGesture, TGestureType } from "@/manager/interactive/gestures/GestureTypes"
-import type { IITypesetManager } from "@/manager/interactive/IITypesetManager"
-import type { IITranslateManager } from "@/manager/interactive/transform/IITranslateManager"
 import type { IIModel } from "@/model"
 import type { SVGRenderer } from "@/renderer"
 import { isDecorator, isStroke, type TStroke, type TSymbol } from "@/symbol"
+import { SymbolGeometry } from "@/symbol-utils"
 
 import type { IIGestureManager } from "../IIGestureManager"
+import type { IITypesetManager } from "../IITypesetManager"
+import type { IITranslateManager } from "../transform/IITranslateManager"
 import { IIGestureAnnotationProcessor } from "./GestureAnnotation"
 import type { GestureHelpers } from "./GestureHelpers"
+import type { TGesture, TGestureType } from "./GestureTypes"
 
 /**
  * Base interface for gesture handlers
@@ -114,7 +115,7 @@ export abstract class GestureHandler implements TGestureHandler {
     // (ascenders/descenders/slant) and can misclassify a stroke's row near boundaries.
     const strokeId = isStroke(symbol) ? symbol.id : isDecorator(symbol) ? symbol.targetIds[0] : undefined
     const lineCenterY = strokeId ? this.canvas.jiix.getLineCenterYForStroke(strokeId) : null
-    const y = lineCenterY ?? symbol.bounds.center.y
+    const y = lineCenterY ?? SymbolGeometry.boundsOf(symbol).center.y
     return Math.round(y / this.rowHeight)
   }
 
@@ -140,7 +141,7 @@ export abstract class GestureHandler implements TGestureHandler {
           return previous
         } else if (
           this.getSymbolRowIndex(previous) == this.getSymbolRowIndex(current) &&
-          previous.bounds.center.x < current.bounds.center.x
+          SymbolGeometry.boundsOf(previous).center.x < SymbolGeometry.boundsOf(current).center.x
         ) {
           return previous
         }
@@ -160,7 +161,7 @@ export abstract class GestureHandler implements TGestureHandler {
         }
         if (this.getSymbolRowIndex(previous) < this.getSymbolRowIndex(current)) {
           return current
-        } else if (previous.bounds.center.x > current.bounds.center.x) {
+        } else if (SymbolGeometry.boundsOf(previous).center.x > SymbolGeometry.boundsOf(current).center.x) {
           return previous
         }
       }

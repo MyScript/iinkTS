@@ -1,9 +1,10 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import type { TMenuButtonList } from "@/menu/items"
-import { ButtonListMenuItem, CollapsibleWrapper } from "@/menu/items"
-import { BaseMenuItem } from "@/menu/items/BaseMenuItem"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import { CanvasTool } from "@/manager"
 import { isText } from "@/symbol"
 
+import type { TMenuButtonList } from "../items"
+import { ButtonListMenuItem, CollapsibleWrapper } from "../items"
+import { BaseMenuItem } from "../items/BaseMenuItem"
 /**
  * @group Menu
  * @remarks Font weight style menu
@@ -27,6 +28,7 @@ export class FontWeightStyle extends BaseMenuItem<HTMLDivElement> {
       type: "fontweight" as const,
       id: `${idPrefix}-font-weight`,
       label: "Font Weight",
+      visible: (canvas: TInteractiveInkCanvas) => [CanvasTool.Write, CanvasTool.Select].includes(canvas.tool),
     }
     super(config, canvas)
     this.fontWeightList = fontWeightList
@@ -45,11 +47,9 @@ export class FontWeightStyle extends BaseMenuItem<HTMLDivElement> {
         canvas.configuration.fontStyle.weight = value as "auto" | "normal" | "bold"
         if (value !== "auto") {
           const textSymbols = canvas.model.symbolsSelected.filter((s) => isText(s))
-          canvas.updateTextFontStyle(
+          canvas.updateSymbols(
             textSymbols.map((s) => s.id),
-            {
-              fontWeight: value as "normal" | "bold",
-            }
+            { font: { weight: value as "normal" | "bold" } }
           )
           canvas.selector.redrawSelectedGroup()
         }

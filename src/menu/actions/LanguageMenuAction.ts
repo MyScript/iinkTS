@@ -1,7 +1,8 @@
 import languageIcon from "@/assets/svg/language.svg"
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import { BaseMenuItem } from "@/menu/items/BaseMenuItem"
-import { getAvailableLanguageList } from "@/utils"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import { getAvailableLanguageList } from "@/client"
+
+import { BaseMenuItem } from "../items/BaseMenuItem"
 
 /**
  * @group Menu
@@ -18,6 +19,9 @@ export class LanguageMenuAction extends BaseMenuItem<HTMLDivElement> {
       type: "language" as const,
       id: `${idPrefix}-language`,
       label: "Language",
+      menuTitle: "Language",
+      position: "right-top",
+      items: [],
     }
     super(config, canvas)
   }
@@ -35,21 +39,24 @@ export class LanguageMenuAction extends BaseMenuItem<HTMLDivElement> {
       className: "select-language",
       onChange: (value) => {
         this.logger.info(`${this.config.id}.change`)
-        this.canvas.changeLanguage(value)
+        this.canvas.updateRecognitionConfiguration({ lang: value })
       },
     })
 
     // Chargement asynchrone des langues disponibles
-    getAvailableLanguageList(this.canvas.configuration).then((json) => {
-      const languages = json.result as {
-        [key: string]: string
-      }
-      for (const key in languages) {
-        const selected = key === this.canvas.configuration.recognition.lang
-        const opt = new Option(languages[key], key, selected, selected)
-        this.select.appendChild(opt)
-      }
-    })
+    getAvailableLanguageList(this.canvas.configuration)
+      .then((json) => {
+        const languages = json.result as {
+          [key: string]: string
+        }
+        for (const key in languages) {
+          const selected = key === this.canvas.configuration.recognition.lang
+          const opt = new Option(languages[key], key, selected, selected)
+          this.select.appendChild(opt)
+        }
+      })
+      // No list to pick from: the select stays empty and recognition keeps its language
+      .catch((error) => this.logger.error("getAvailableLanguageList", error))
 
     this.subMenuWrapper = this.dom.div({
       className: "sub-menu",
@@ -57,7 +64,7 @@ export class LanguageMenuAction extends BaseMenuItem<HTMLDivElement> {
     this.subMenuWrapper.appendChild(triggerBtn)
 
     this.subMenuContent = this.dom.div({
-      className: ["sub-menu-content", "bottom-right"],
+      className: ["sub-menu-content", this.openPosition ?? "bottom-right"],
     })
     this.subMenuContent.appendChild(this.select)
     this.subMenuWrapper.appendChild(this.subMenuContent)

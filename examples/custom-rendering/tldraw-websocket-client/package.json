@@ -1,6 +1,6 @@
 {
   "name": "iink-ts-with-tldraw",
-  "version": "4.1.0",
+  "private": true,
   "homepage": "https://myscript.github.io/iinkTS/",
   "repository": "git://github.com/MyScript/iinkTS.git",
   "license": "Apache-2.0",
@@ -13,10 +13,9 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.11.2",
-    "iink-ts": "^3.2.1",
+    "iink-ts": "5.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-json-view": "^1.21.3",
     "react-portal": "^4.3.0",
     "react-redux": "^9.2.0",
     "tldraw": "^3.15.6"

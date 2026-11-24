@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="../assets/style/panel.css" />
   <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
 
-  <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+  <script src="../assets/js/theme-init.js"></script>
 </head>
 
 <body>
@@ -47,7 +47,7 @@
         <div class="ex-panel-item-desc">
           Result shown as SVG overlay at 50% opacity — not in model, not sent to backend, non-interactive (view only, can't be clicked or selected directly).<br>
           <strong>Live preview:</strong> recomputed only when the recognized result actually changes (no needless flicker) — as long as the block has no draw result yet.<br>
-          Automatically cleared when the block no longer ends with <span class="highlight">=</span> or <span class="highlight">?</span>. Once a block gets a draw result it freezes too: the ghost stops updating for that block entirely.
+          Automatically cleared when the block no longer ends with <span class="highlight">=</span>. Once a block gets a draw result it freezes too: the ghost stops updating for that block entirely.
         </div>
       </div>
 
@@ -57,7 +57,7 @@
 
       <div class="ex-panel-item">
         <div class="ex-panel-item-desc">
-          Automatically compute expressions when finishing a block ending with <code>=</code> or <code>?</code>. After writing, the synchronized event triggers an auto-compute check — no manual "Compute" click needed.
+          Automatically compute every block that asks for a result: an expression ending with <code>=</code>, or a vertical operation underlined with an empty result row. After writing, the synchronized event triggers an auto-compute check — no manual "Compute" click needed.
         </div>
       </div>
 
@@ -103,7 +103,8 @@
         2. With auto-compute on → result appears instantly<br>
         3. Toggle <strong>Auto-compute</strong> via ≡ → Math to see difference<br>
         4. Switch <strong>Result mode</strong> to compare Draw vs Ghost<br>
-        5. Toggle <strong>Show Block Overlays</strong> to see block boundaries
+        5. Toggle <strong>Show Block Overlays</strong> to see block boundaries<br>
+        6. Write a vertical operation: <code>12</code>, <code>+23</code> below, then underline → computed too
       </div>
 
       <div class="ex-panel-item">
@@ -184,14 +185,7 @@
             shape: false,
             edge: false
           },
-          style: {
-            strokeColor: true,
-            fillColor: false,
-            thickness: false,
-            fontSize: false,
-            fontWeight: false,
-            opacity: false,
-          },
+          style: false,
           context: {
             edit: false,
             decorator: false,
@@ -205,7 +199,7 @@
             // "draw"  → result is added to the canvas as ink strokes
             // "ghost" → result is shown as a semi-transparent SVG overlay (not sent to backend)
             resultMode: "ghost",
-            // Automatically compute when a block ends with = or ?
+            // Automatically compute when a block ends with =
             autoCompute: true,
             // Color applied to result strokes (both draw and ghost modes)
             resultColor: "#9c27b0"

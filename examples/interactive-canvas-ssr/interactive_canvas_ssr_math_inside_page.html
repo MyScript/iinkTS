@@ -125,12 +125,8 @@
         transition-duration: 150ms;
       }
 
-      #close {
-        background-color: black !important;
-      }
-
     </style>
-    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+    <script src="../assets/js/theme-init.js"></script>
 </head>
 
   <body>
@@ -315,7 +311,7 @@
         canvas.event.addEventListener('changed', (event) => {
           undoElement.disabled = !event.detail.canUndo
           redoElement.disabled = !event.detail.canRedo
-          convertElement.disabled = !event.detail.empty
+          convertElement.disabled = event.detail.empty
         })
         hideMainLoader()
       }

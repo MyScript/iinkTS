@@ -1,14 +1,15 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import { GestureHandler } from "@/manager/interactive/gestures/GestureHandler"
-import type { GestureHelpers } from "@/manager/interactive/gestures/GestureHelpers"
-import type { TGesture } from "@/manager/interactive/gestures/GestureTypes"
-import { UnderlineAction } from "@/manager/interactive/gestures/GestureTypes"
+import type { TInteractiveInkCanvas } from "@/canvas"
 import type { TStroke } from "@/symbol"
 import { DecoratorKind } from "@/symbol"
 
+import { GestureHandler } from "../GestureHandler"
+import type { GestureHelpers } from "../GestureHelpers"
+import type { TGesture } from "../GestureTypes"
+import { UnderlineAction } from "../GestureTypes"
 /**
  * Handler for UNDERLINE gesture type
- * Supports two actions: Draw (apply decorator) and Thicken (increase stroke width)
+ * Supports two actions: Draw (apply decorator) and Thicken (one level up the thickness menu for a
+ * stroke, the font weight menu for a text or math block, back to the first past the last)
  * @group Manager
  */
 export class UnderlineGestureHandler extends GestureHandler {
@@ -35,15 +36,17 @@ export class UnderlineGestureHandler extends GestureHandler {
           decoratorKind: DecoratorKind.Underline,
         })
         if (changes) {
-          this.history.push(this.model, changes)
+          this.history.push(changes)
         }
         break
       }
       case UnderlineAction.Thicken: {
-        const changes = await this.processor.apply(gesture.strokeIds, { kind: "thicken", factor: 2 })
-        if (changes) {
-          this.history.push(this.model, changes)
-        }
+        const { thicknessList = [], fontWeightList = [] } = this.canvas.configuration.menu.style
+        await this.processor.apply(gesture.strokeIds, {
+          kind: "thicken",
+          widths: thicknessList.map((t) => t.value),
+          fontWeights: fontWeightList.map((f) => f.value).filter((w): w is "normal" | "bold" => w !== "auto"),
+        })
         break
       }
       default:

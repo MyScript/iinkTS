@@ -21,13 +21,13 @@ Clients handle the transport layer between iinkTS and a MyScript-compatible back
 | `HTTPClientV2` | HTTP REST, stateless batch | `InkCanvas` |
 | `HTTPClientV1` | HTTP REST (deprecated) | `InkCanvasDeprecated` |
 
-`WebSocketSSRClient` is **not** a subclass of `WebSocketClient` — independent implementation, own config type. See `recognizer-system` skill for full protocol detail on `WebSocketClient`/`HTTPClientV2`.
+`WebSocketSSRClient` is **not** a subclass of `WebSocketClient` — independent implementation, own config type. See the `client-system` skill for full protocol detail on `WebSocketClient`/`HTTPClientV2`.
 
 ## Steps
 
 ### 1. Define the interface contract
 
-Reference `src/client/WebSocketClient.ts` for the full real surface (see `recognizer-system` skill for the verified method list — `addStrokes`, `eraseStrokes`, `replaceStrokes`, `transformTranslate/Rotate/Scale/Matrix`, `export`, `clear`, `undo`/`redo`, `close`, `destroy`). Minimum required for a stateful (WebSocket-style) client:
+Reference `src/client/websocket/WebSocketClient.ts` for the full real surface (see the `client-system` skill for the verified method list — `addStrokes`, `eraseStrokes`, `replaceStrokes`, `transformTranslate/Rotate/Scale/Matrix`, `export`, `clear`, `undo`/`redo`, `close`, `destroy`). Minimum required for a stateful (WebSocket-style) client:
 
 ```typescript
 interface IYourClient {
@@ -50,34 +50,38 @@ A stateless (HTTP-batch-style) client needs far less: see `HTTPClientV2` — a s
 
 ### 2. Create the client file
 
-`src/client/YourClient.ts`:
+`src/client/<protocol>/YourClient.ts` (`http/` or `websocket/`):
 
 ```typescript
-import { LoggerManager, LoggerCategory } from "@/logger"
-import { DeferredPromise } from "@/utils/DeferredPromise"
-import { ClientEvent } from "./ClientEvent"
+import { DeferredPromise } from "@/core"
+import { LoggerCategory, LoggerManager } from "@/logger"
+
+import { ClientEvent } from "../shared/ClientEvent"
+import { resolveHmac } from "../shared/HmacAuth"
 
 export class YourClient {
-  #logger = LoggerManager.getLogger(LoggerCategory.CLIENT)
+  protected logger = LoggerManager.getLogger(LoggerCategory.CLIENT)
   event = new ClientEvent()
   initialized = new DeferredPromise<void>()
 
   constructor(configuration: TConfiguration) { ... }
 
   async init(): Promise<void> {
-    // handshake, auth (HMAC via computeHmac if needed)
+    // handshake, auth (resolveHmac if needed)
     this.initialized.resolve()
   }
 }
 ```
 
-**Authentication**: Use `computeHmac(message, applicationKey, hmacKey)` from `@/utils/crypto` — note the argument order, `message` comes first.
+Imports follow the `iink/barrel-imports` lint rule: other `src/` folders through their barrel (`@/core`, `@/logger`), relative paths inside `src/client/`. Members are `protected`, never `#private`: integrators subclass clients and pass them through `options.override.client`.
+
+**Authentication**: Use `resolveHmac(server, message)` (`src/client/shared/HmacAuth.ts`): it calls `server.sign` (signature computed on the integrator's server, the production default) and falls back to a string `hmacKey` via `computeHmac(message, applicationKey, hmacKey)` — note the argument order, `message` comes first.
 
 **Error handling**: Emit via `this.event.emitError(error)` — never throw uncaught. `ClientEvent` also exposes `CONNECTION_STATUS_CHANGED` for connectivity-state consumers.
 
-### 3. Export from client index
+### 3. Export from the protocol folder's barrel
 
-`src/client/index.ts`:
+`src/client/<protocol>/index.ts` (`src/client/index.ts` already re-exports every protocol folder):
 ```typescript
 export * from "./YourClient"
 ```
@@ -97,26 +101,10 @@ case "YOURTYPE":
 
 Add `"YOURTYPE"` to `TCanvasType` in `src/canvas/AbstractCanvas.ts`, and to `TCanvasVariantMap`/`TCanvasOptionsMap` in `src/canvas/CanvasFactory.ts`.
 
-### 5. Future: monorepo package split
+### 5. Write tests
 
-When client packages are split (planned), the structure will be:
-
-```
-packages/
-  client-websocket/      → WebSocketClient
-  client-websocket-ssr/  → WebSocketSSRClient
-  client-http-v2/        → HTTPClientV2
-  client-http-v1/        → HTTPClientV1 (deprecated)
-```
-
-Each package will have its own `package.json` with peer dep on `iink-ts` core.
-
-At that point, add a `package.json` and barrel `index.ts` to the package directory, and reference it from the root `package.json` `workspaces` field.
-
-### 6. Write tests
-
-`test/unit/client/YourClient.test.ts` (see existing `WebSocketClient.test.ts`, `HTTPClientV2.test.ts` for the real patterns in `test/unit/client/`):
-- Mock WebSocket or fetch (see `test/unit/__config__/`)
+`test/unit/client/<protocol>/YourClient.test.ts`, mirroring the `src/` path (see `test/unit/client/websocket/WebSocketClient.test.ts`, `test/unit/client/http/HTTPClientV2.test.ts` for the real patterns). Import the library through `@/iink` only:
+- Mock WebSocket (`jest-websocket-mock`, `test/unit/__mocks__/ServerWebSocketMock.ts`) or fetch (`jest-fetch-mock`)
 - Test: init/handshake success and failure
 - Test: `addStrokes()` sends correct message format
 - Test: response parsing
@@ -128,10 +116,12 @@ At that point, add a `package.json` and barrel `index.ts` to the package directo
 - [ ] Client class created in `src/client/`
 - [ ] `initialized: DeferredPromise<void>` exposed (stateful clients)
 - [ ] `event: ClientEvent` exposed (stateful clients)
-- [ ] HMAC auth wired if needed (`computeHmac`)
+- [ ] HMAC auth wired if needed (`resolveHmac`)
+- [ ] Members `protected`, not `#private`
 - [ ] All errors emitted via `event.emitError()`, none thrown uncaught
-- [ ] Exported from `src/client/index.ts`
+- [ ] Exported from its folder barrel (`src/client/<protocol>/index.ts`)
 - [ ] Canvas variant created if needed
 - [ ] Registered in `CanvasFactory`
-- [ ] Tests written (≥80% coverage)
+- [ ] Tests written (global threshold: 88% branches/lines/statements, 86% functions)
+- [ ] `yarn lint` clean (barrel imports)
 - [ ] `yarn typecheck` clean

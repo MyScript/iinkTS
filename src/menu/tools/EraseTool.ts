@@ -1,9 +1,10 @@
 import eraseIcon from "@/assets/svg/erase.svg"
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import { CanvasTool } from "@/Constants"
-import type { TMenuItemBase } from "@/menu/items/BaseMenuItem"
-import { BaseMenuItem } from "@/menu/items/BaseMenuItem"
-import { DEFAULT_ERASER_SIZE_LIST } from "@/menu/MenuConstants"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import { CanvasTool } from "@/manager"
+
+import type { TMenuItemBase } from "../items/BaseMenuItem"
+import { BaseMenuItem } from "../items/BaseMenuItem"
+import { DEFAULT_ERASER_SIZE_LIST } from "../MenuConstants"
 
 /**
  * @group Menu
@@ -77,7 +78,7 @@ export class EraseTool extends BaseMenuItem<HTMLDivElement> {
     })
 
     const content = this.dom.div({
-      className: ["sub-menu-content", "top"],
+      className: ["sub-menu-content", this.openPosition ?? "top"],
     })
     content.appendChild(subMenuContent)
 

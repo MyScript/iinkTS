@@ -1,10 +1,9 @@
-import uploadIcon from "@/assets/svg/upload.svg"
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import type { TMenuSubMenu } from "@/menu/items/SubMenuItem"
-import { SubMenuItem } from "@/menu/items/SubMenuItem"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import type { TPartialDeep } from "@/core"
 import type { TSymbol } from "@/symbol"
-import type { TPartialDeep } from "@/utils"
 
+import type { TMenuSubMenu } from "../items/SubMenuItem"
+import { SubMenuItem } from "../items/SubMenuItem"
 /**
  * @group Menu
  * @remarks Menu action Import - Import de fichiers JSON
@@ -16,7 +15,6 @@ export class ImportMenuAction extends SubMenuItem {
       id: `${idPrefix}-import`,
       label: "Import",
       menuTitle: "Import",
-      icon: uploadIcon,
       position: "right-top",
       items: [
         {

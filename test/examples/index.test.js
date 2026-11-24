@@ -76,7 +76,6 @@ test.describe.skip("Home Page", () => {
     const codeLinks = page.locator("text=Get source code")
     const exampleLinks = page.locator("text=View example")
     for (let i = 0; i < await exampleLinks.count(); i++) {
-      // const exampleHref = await exampleLinks.nth(i).getAttribute("href")
       const linkHref = await codeLinks.nth(i).getAttribute("href")
       expect(linkHref).toContain(`https://github.com/MyScript/iinkTS/blob/master/examples/`)
     }

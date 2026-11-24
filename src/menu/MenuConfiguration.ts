@@ -1,6 +1,7 @@
+import type { TMenuLayoutConfig } from "./IIAbstractMenu"
 import type { TMenuActionConfig } from "./IIMenuAction"
 import type { TMenuContextConfig } from "./IIMenuContext"
-import type { TMenuStyleConfig } from "./IIMenuStyle"
+import type { TMenuStyleConfig, TMenuStyleLayoutConfig } from "./IIMenuStyle"
 import type { TMenuToolConfig } from "./IIMenuTool"
 import {
   DEFAULT_FONT_SIZE_LIST,
@@ -14,9 +15,9 @@ import {
  */
 export type TMenuConfiguration = {
   enable: boolean
-  style: TMenuStyleConfig & { enable: boolean }
-  tool: TMenuToolConfig & { enable: boolean }
-  action: TMenuActionConfig & { enable: boolean }
+  style: TMenuStyleConfig & TMenuStyleLayoutConfig & { enable: boolean }
+  tool: TMenuToolConfig & TMenuLayoutConfig & { enable: boolean }
+  action: TMenuActionConfig & TMenuLayoutConfig & { enable: boolean }
   context: TMenuContextConfig & {
     enable: boolean
   }

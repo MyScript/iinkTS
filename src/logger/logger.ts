@@ -55,8 +55,7 @@ export class Logger {
     level: LoggerLevel,
     levelName: "debug" | "info" | "warn" | "error",
     functionName: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ...data: any
+    ...data: unknown[]
   ): void {
     if (level >= this.level) {
       const dataLog = {
@@ -68,23 +67,19 @@ export class Logger {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  debug(functionName: string, ...data: any): void {
+  debug(functionName: string, ...data: unknown[]): void {
     this.log(LoggerLevel.DEBUG, "debug", functionName, ...data)
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  info(functionName: string, ...data: any): void {
+  info(functionName: string, ...data: unknown[]): void {
     this.log(LoggerLevel.INFO, "info", functionName, ...data)
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  warn(functionName: string, ...data: any): void {
+  warn(functionName: string, ...data: unknown[]): void {
     this.log(LoggerLevel.WARN, "warn", functionName, ...data)
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  error(functionName: string, ...error: any): void {
+  error(functionName: string, ...error: unknown[]): void {
     this.log(LoggerLevel.ERROR, "error", functionName, ...error)
   }
 }

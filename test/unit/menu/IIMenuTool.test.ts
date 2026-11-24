@@ -1,6 +1,7 @@
 import { createCanvasMock, asCanvas } from "../__mocks__/createCanvasMock"
 import { LeftClickEventMock } from "../__mocks__/EventMock"
-import { CanvasTool, IIMenuTool, CanvasWriteTool } from "@/iink"
+import { CanvasTool, IIMenuTool, CanvasWriteTool, TMenuItemOptions } from "@/iink"
+import { StubMenuItem } from "../helpers"
 
 describe("IIMenuTool.ts", () => {
   test("should create", () => {
@@ -252,5 +253,38 @@ describe("IIMenuTool.ts", () => {
       menu.destroy()
       expect(menu.wrapper).toBeUndefined()
     })
+  })
+})
+
+describe("IIMenuTool zones", () => {
+  class ExtendedMenuTool extends IIMenuTool {
+    extra: { key: string; options?: TMenuItemOptions }[] = []
+    render(layer: HTMLElement): void {
+      super.render(layer)
+      this.extra.forEach(({ key, options }) => this.addItem(key, new StubMenuItem(key, this.canvas), options))
+    }
+  }
+
+  function render(extra: { key: string; options?: TMenuItemOptions }[]) {
+    const layer = document.createElement("div")
+    const menu = new ExtendedMenuTool(asCanvas(createCanvasMock()))
+    menu.extra = extra
+    menu.render(layer)
+    return { menu, layer }
+  }
+
+  test("should have no \"…\" dropdown while nothing goes to the dropdown zone", () => {
+    const { layer } = render([{ key: "extra-bar" }])
+    expect(layer.querySelector("#ms-menu-tool-more")).toBeNull()
+    expect(layer.querySelector("#extra-bar")?.parentElement).toBe(layer.querySelector(".ms-menu-tool"))
+  })
+
+  test("should open a \"…\" dropdown upwards for an item in the dropdown zone, last in the row", () => {
+    const { menu, layer } = render([{ key: "extra-dropdown", options: { zone: "dropdown" } }, { key: "extra-bar" }])
+    const more = layer.querySelector("#ms-menu-tool-more")?.parentElement
+    expect(more?.querySelector("#extra-dropdown")).not.toBeNull()
+    expect(more?.querySelector(".sub-menu-content")?.classList.contains("top")).toBe(true)
+    // A bar item added after the dropdown still lands before it
+    expect(menu.wrapper?.lastElementChild).toBe(more)
   })
 })

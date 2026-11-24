@@ -124,6 +124,40 @@ describe("Minimap", () => {
     })
   })
 
+  describe("mutation sync throttling", () => {
+    it("coalesces multiple mutation batches within the same animation frame into a single sync", async () => {
+      const canvas = buildMockCanvas()
+      new Minimap(canvas)
+      const mainLayer = canvas.renderer.getRenderingContext()
+
+      mainLayer.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "g"))
+      await Promise.resolve()
+      mainLayer.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "g"))
+      await Promise.resolve()
+
+      // Both mutations landed before the animation frame fired — sync must not have run yet.
+      expect(canvas.renderer.getBounds).not.toHaveBeenCalled()
+
+      await new Promise((resolve) => requestAnimationFrame(resolve))
+
+      expect(canvas.renderer.getBounds).toHaveBeenCalledTimes(1)
+    })
+
+    it("does not sync after destroy even if a frame was already scheduled", async () => {
+      const canvas = buildMockCanvas()
+      const minimap = new Minimap(canvas)
+      const mainLayer = canvas.renderer.getRenderingContext()
+
+      mainLayer.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "g"))
+      await Promise.resolve()
+
+      minimap.destroy()
+      await new Promise((resolve) => requestAnimationFrame(resolve))
+
+      expect(canvas.renderer.getBounds).not.toHaveBeenCalled()
+    })
+  })
+
   describe("DEFAULT_WIDTH / DEFAULT_HEIGHT", () => {
     it("should have sensible defaults", () => {
       expect(Minimap.DEFAULT_WIDTH).toBeGreaterThan(0)

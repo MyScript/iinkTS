@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="../assets/style/reset.css" />
   <link rel="stylesheet" href="../assets/style/components.css" />
   <link rel="stylesheet" href="../assets/style/examples.css" />
-    <link rel="stylesheet" href="../assets/style/inputs.css" />
+  <link rel="stylesheet" href="../assets/style/inputs.css" />
   <link rel="stylesheet" href="../assets/style/panel.css" />
   <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
 
@@ -19,14 +19,11 @@
     }
 
     #dependencies {
-      width: 260px;
-      flex-shrink: 0;
+      --ex-side-panel-width: 260px;
       padding: 12px;
       background: var(--ex-surface-alt);
-      border-left: 1px solid var(--ex-border);
       font-family: monospace;
       font-size: 12px;
-      overflow-y: auto;
     }
 
     #dependencies strong {
@@ -66,7 +63,7 @@
     :root[data-theme="dark"] #dependencies strong { color: #90caf9; }
     :root[data-theme="dark"] .dep-group           { background: #052e16; }
   </style>
-  <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+  <script src="../assets/js/theme-init.js"></script>
 </head>
 
 <body>
@@ -76,6 +73,9 @@
     </button>
     <button id="showModalBtn" class="btn-keys">API Keys</button>
     <h1 class="header-title">Math Dependencies Example</h1>
+    <button id="sidePanelToggleBtn" class="btn-panel-toggle btn-side-panel-toggle" aria-expanded="false" aria-controls="dependencies">
+      🧮 Dependencies
+    </button>
   </header>
 
   <div class="ex-page-layout">
@@ -100,9 +100,9 @@
         <div class="ex-panel-item-desc"><strong>Try it:</strong><br>
           1. Write a variable definition like <span class="highlight">x=2</span><br>
           2. Write an expression using that variable like <span class="highlight">3x+2=</span><br>
-          3. The result computes automatically when you end with <span class="highlight">=</span> or <span class="highlight">?</span> (if Auto-compute is enabled)<br>
-          4. Toggle "Auto-compute" to switch between automatic and manual computation<br>
-          5. Change the variable value using "Edit Variables"<br>
+          3. The result computes automatically when you end with <span class="highlight">=</span> (Auto-compute is on by default)<br>
+          4. Toggle <strong>Auto-compute</strong> in the menu (≡ → Math) to switch between automatic and manual computation<br>
+          5. Change the variable value: scratch out <span class="highlight">2</span> in <span class="highlight">x=2</span> and write <span class="highlight">3</span><br>
           6. Watch dependent expressions recalculate in real-time<br>
           7. <strong>Hover over math blocks</strong> to see dependencies highlighted (sources in green, dependents in orange)
         </div>
@@ -110,7 +110,7 @@
     </aside>
     <div class="main-layout">
       <div id="rootEl"></div>
-      <div id="dependencies">
+      <div id="dependencies" class="ex-side-panel">
         <strong>Dependencies:</strong><br>
         <span id="dependency-list">No dependencies yet</span>
       </div>
@@ -123,6 +123,13 @@
     panelToggleBtn.addEventListener('click', () => {
       const open = infoPanel.classList.toggle('open')
       panelToggleBtn.setAttribute('aria-expanded', open)
+    })
+
+    const sidePanelToggleBtn = document.getElementById('sidePanelToggleBtn')
+    const sidePanel = document.getElementById('dependencies')
+    sidePanelToggleBtn.addEventListener('click', () => {
+      const open = sidePanel.classList.toggle('open')
+      sidePanelToggleBtn.setAttribute('aria-expanded', open)
     })
 
     import { Canvas } from '../../dist/iink.esm.js'
@@ -169,14 +176,7 @@
             shape: false,
             edge: false
           },
-          style: {
-            strokeColor: true,
-            fillColor: false,
-            thickness: false,
-            fontSize: false,
-            fontWeight: false,
-            opacity: false,
-          },
+          style: false,
           context: {
             edit: false,
             decorator: false,
@@ -340,6 +340,10 @@
 
       dependenciesList.innerHTML = html
     }
+
+    showModalBtn.addEventListener('click', () => {
+      ModalCanvasOptions.show(loadCanvas, canvasOptions)
+    })
 
     ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
   </script>

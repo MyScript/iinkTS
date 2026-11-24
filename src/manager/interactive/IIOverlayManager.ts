@@ -1,12 +1,12 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import type { TJIIXMathElement } from "@/client"
+import type { TBox, TPoint } from "@/core"
+import { BoxOps, convertBoundingBoxMillimeterToPixel, OBBOps } from "@/core"
 import { LoggerCategory } from "@/logger"
-import type { TJIIXMathElement } from "@/model"
 import { SVGBuilder, SVGRendererConst } from "@/renderer"
-import type { TBox, TPoint, TStroke } from "@/symbol"
+import type { TStroke } from "@/symbol"
 import { isStroke } from "@/symbol"
-import { BoxOps } from "@/symbol/primitives/Box"
-import { OBBOps } from "@/symbol/primitives/OBB"
-import { convertBoundingBoxMillimeterToPixel } from "@/utils"
+import { SymbolGeometry } from "@/symbol-utils"
 
 import { ColorPaletteManager } from "../base"
 import { IIAbstractManager } from "./IIAbstractManager"
@@ -307,7 +307,7 @@ export class IIOverlayManager extends IIAbstractManager {
       this.logger.warn("getMathBlockBounds", `Math block ${mathBlock.id} has no bounding box and no strokes`)
       return null
     }
-    return BoxOps.createFromBoxes(blockStrokes.map((s) => OBBOps.toBox(s.bounds)))
+    return BoxOps.createFromBoxes(blockStrokes.map((s) => OBBOps.toBox(SymbolGeometry.boundsOf(s))))
   }
 
   refresh(): void {

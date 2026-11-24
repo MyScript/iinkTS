@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Export Files</title>
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        height: 100dvh;
+        overflow: hidden;
+      }
+
+      #rootEl {
+        flex: 1;
+        min-width: 0;
+        min-height: 0;
+      }
+    </style>
+    <script src="../assets/js/theme-init.js"></script>
+  </head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="showModalBtn" class="btn-keys">API Keys</button>
+      <h1 class="header-title">Export Files</h1>
+    </header>
+
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">Download the current content</p>
+        <p class="ex-panel-intro">Write something on the canvas, then either open the <strong>Export</strong> menu (top-right of the canvas) or use the buttons above the canvas. Both go through the same single entry point: <code>canvas.download(format, options)</code>.</p>
+        <div class="ex-panel-divider"></div>
+
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-label">JSON <code>canvas.download("json")</code></div>
+          <div class="ex-panel-item-desc">The raw symbol model — every stroke, shape and text with full geometry. Best for re-importing content or custom post-processing.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-label">SVG <code>canvas.download("svg")</code></div>
+          <div class="ex-panel-item-desc">A vector image of the current content. Scales to any size without losing quality — good for embedding in web pages or documents.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-label">PNG <code>canvas.download("png")</code></div>
+          <div class="ex-panel-item-desc">A raster image snapshot of the current content at fixed resolution — good for sharing as a plain picture.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-label">Text <code>canvas.download("text")</code></div>
+          <div class="ex-panel-item-desc">Plain text extracted from recognized words only — no drawing or shape data, just what was read.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-label">JIIX <code>canvas.download("jiix")</code></div>
+          <div class="ex-panel-item-desc">The raw recognition result from the server, as returned. The source every text/markdown/diagram export is derived from.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-label">PDF <code>canvas.download("pdf")</code></div>
+          <div class="ex-panel-item-desc">A print-ready document via the browser's native print dialog. Called without PDF settings it opens a settings dialog first (format/orientation/page mode/scale) — same as the Export menu. The returned promise settles when the dialog closes, cancellation included.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-label">PDF, no dialog <code>canvas.download("pdf", options)</code></div>
+          <div class="ex-panel-item-desc">Passing any PDF setting (<code>format</code>/<code>orientation</code>/<code>mode</code>/<code>scale</code>) prints immediately with those values, skipping the dialog entirely.</div>
+        </div>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-label">Options</div>
+          <div class="ex-panel-item-desc"><code>{ scope: "selection" }</code> exports only the selected symbols, <code>{ symbols: [...] }</code> an explicit list, and <code>{ filename: "notes" }</code> names the file. Without a name, the file is timestamped: <code>iink-ts-2026-08-26T14-30-15.svg</code>.</div>
+        </div>
+        <div class="ex-panel-hint">To get the content instead of a file, use <code>canvas.exportAs(format)</code> — it resolves with symbols, a string or a Blob depending on the format. <code>"pdf"</code> is the one format it does not accept: printing produces no value.</div>
+      </aside>
+
+      <div class="page-content">
+        <nav class="flex-container wrap gap">
+          <button id="btn-export-json" class="classic-btn">Download JSON</button>
+          <button id="btn-export-svg" class="classic-btn">Download SVG</button>
+          <button id="btn-export-png" class="classic-btn">Download PNG</button>
+          <button id="btn-export-text" class="classic-btn">Download Text</button>
+          <button id="btn-export-jiix" class="classic-btn">Download JIIX</button>
+          <button id="btn-export-pdf" class="classic-btn">Download PDF (dialog)</button>
+          <button id="btn-export-pdf-no-dialog" class="classic-btn">Download PDF (no dialog)</button>
+          <button id="btn-export-selection" class="classic-btn">Download selection as SVG</button>
+        </nav>
+        <div id="rootEl"></div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { Canvas } from "../../dist/iink.esm.js"
+      import { ModalCanvasOptions } from "../components/modal/modalCanvasOptions.js"
+
+      const rootElement = document.getElementById("rootEl")
+      const showModalBtn = document.getElementById("showModalBtn")
+      const panelToggleBtn = document.getElementById("panelToggleBtn")
+      const infoPanel = document.getElementById("info-panel")
+
+      panelToggleBtn.addEventListener("click", () => {
+        const open = infoPanel.classList.toggle("open")
+        panelToggleBtn.setAttribute("aria-expanded", open)
+      })
+
+      let canvas
+
+      const canvasOptions = {
+        configuration: {
+          menu: {
+            action: {
+              clear: false,
+              language: false,
+              undoRedo: false,
+              zoom: false,
+              convert: false,
+              gesture: false,
+              guide: false,
+              diagram: false,
+              snap: false,
+              math: false,
+              overlay: false,
+              selection: false,
+              import: false,
+              minimap: false,
+              export: true,
+            },
+            context: {
+              enable: false,
+            },
+          },
+        },
+      }
+
+      async function loadCanvas(options) {
+        await canvas?.destroy()
+        canvas = await Canvas.load(rootElement, "INTERACTIVE_INK", options)
+        window.canvas = canvas
+      }
+
+      const download = (format, options) => () => canvas?.download(format, options)
+
+      document.getElementById("btn-export-json").addEventListener("click", download("json"))
+      document.getElementById("btn-export-svg").addEventListener("click", download("svg"))
+      document.getElementById("btn-export-png").addEventListener("click", download("png"))
+      document.getElementById("btn-export-text").addEventListener("click", download("text"))
+      document.getElementById("btn-export-jiix").addEventListener("click", download("jiix"))
+      document.getElementById("btn-export-pdf").addEventListener("click", download("pdf"))
+      document
+        .getElementById("btn-export-pdf-no-dialog")
+        .addEventListener(
+          "click",
+          download("pdf", { format: "A4", orientation: "portrait", mode: "single", scale: 100 })
+        )
+      document
+        .getElementById("btn-export-selection")
+        .addEventListener("click", download("svg", { scope: "selection", filename: "iink-selection" }))
+
+      showModalBtn.addEventListener("click", () => {
+        ModalCanvasOptions.show(loadCanvas, canvasOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.canvasOptions = canvasOptions
+      window.loadCanvas = loadCanvas
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+  </body>
+
+</html>

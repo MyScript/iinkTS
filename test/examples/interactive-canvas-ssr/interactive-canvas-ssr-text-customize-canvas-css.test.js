@@ -1,6 +1,5 @@
 import { test, expect } from "@playwright/test"
-import { waitForCanvasInit, passModalKey } from "../helper"
-import TextNavActions from "../_partials/text-nav-actions"
+import { passModalKey } from "../helper"
 
 test.describe("Interactive Canvas SSR Styling canvas", () => {
 

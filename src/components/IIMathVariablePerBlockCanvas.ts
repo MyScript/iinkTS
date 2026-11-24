@@ -1,11 +1,11 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import type { TInteractiveInkCanvas } from "@/canvas"
 import type { TMathVariable, TMathVariableDefinition } from "@/client"
-import { DOMFactory } from "@/components/dom"
+import { DOMFactory } from "@/dom"
 import { LoggerCategory, LoggerManager } from "@/logger"
+import { Modal } from "@/ui"
 
 import type { TVariableInputItem } from "./IIMathVariableInputList"
 import { IIMathVariableInputList } from "./IIMathVariableInputList"
-import { Modal } from "./Modal"
 
 /**
  * @group Components
@@ -165,10 +165,13 @@ export class IIMathVariablePerBlockCanvas {
         await Promise.all(updates)
         this.logger.info("applyChanges", `Updated variables for ${updates.length} symbol(s)`)
       }
+    } catch (error) {
+      // Writes may have landed partially, so the user has to be told rather than only the log.
+      this.canvas.manageError(error as Error)
+    } finally {
+      // Closes either way: a log-only catch left the dialog open with no feedback at all.
       this.close()
       this.canvas.menu.context.update()
-    } catch (error) {
-      this.logger.error("applyChanges", "Error applying variable changes:", error)
     }
   }
 

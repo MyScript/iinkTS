@@ -1,3 +1,162 @@
+# Changelog
+
+One line per change. The full record of a version is in `changelog/<version>.md`; step-by-step upgrade instructions are in [MIGRATION.md](./MIGRATION.md).
+
+Badges: **breaking** = code stops compiling or behaves differently · **behaviour** = same API, different result · **type** = signature change only · **subclass** = only affects a class you extend.
+
+# [v5.0.0](https://github.com/MyScript/iinkTS/tree/v5.0.0)
+
+Full record: [changelog/5.0.0.md](changelog/5.0.0.md)
+
+## ✨ What's new
+
+**Writing**
+- **Pen nibs**: `ballpoint`, `pencil`, `fountain`, `brush`, for ink that responds to speed and pressure; width no longer changes with the sampling rate. `TStyle.pen`, per-stroke `penAngle`/`penSmoothing`/`penSpeed`, nib picker in the tool and style menus · Try `interactive_canvas_pen_nibs.html` · [details](changelog/5.0.0.md#strokes-pen-nibs-width-and-timing)
+- **Pen-only input on tablets**: a resting palm no longer inks nor takes over the pen stroke. `grabber.inputMode`: `"any"` | `"pen"` | `"auto"` · [details](changelog/5.0.0.md#pen-only-input-for-tablets)
+- **Writing near the edge** no longer drags the view away from the pen, and a stroke that leaves the canvas keeps going until the pen lifts · [details](changelog/5.0.0.md#bug-fixes)
+
+**Interface**
+- **Menus where you want them**: 8 slots for the menus, the connection state and the minimap, changeable at runtime. `configuration.layout`, `canvas.layout.set/add/remove` · Try `interactive_canvas_menu_layout.html` · [details](changelog/5.0.0.md#place-the-menus-where-you-want-configurationlayout)
+- **Your own menu items** in the action, tool, style or context menu, without subclassing and without a flash on load. `canvas.menu.addItem(menu, key, factory, { zone, before, after, replace })`, `options.extend` · [details](changelog/5.0.0.md#add-your-own-items-to-the-menus)
+- **Math solver settings** in the Math menu: angle unit, decimals, decimal separator, rounding, each item can be hidden. `TMathActionItemsConfig.solver`, new `overrideDeep` · [details](changelog/5.0.0.md#math-solver-settings-in-the-math-menu)
+- **Gesture menu**: turn each gesture on or off and choose what it does; a new join mode closes the gap between words. `JoinAction.CloseGap`, `IIGestureManager.isGestureEnabled` · [details](changelog/5.0.0.md#gesture-menu-one-submenu-per-gesture)
+
+**Content**
+- **One export API** for 10 formats, now including Markdown, Mermaid, PlantUML, LLM and JIIX. `exportAs(format)` returns typed content, `download(format)` saves it; `ExportManager`, `IIExportManager` · [details](changelog/5.0.0.md#export)
+- **PDF export** through the browser's print dialog, with a page-settings dialog. `download("pdf")`, `PDFExportManager` · [details](changelog/5.0.0.md#pdf-export-via-native-browser-print)
+- **Shapes and edges stay connected** when moved, resized or rotated, before and after conversion. `IIConnectorManager.getFollowedStrokeIds` · [details](changelog/5.0.0.md#shape--edge-connections)
+- **Change the language or any recognition setting live**, without reloading the canvas. `updateRecognitionConfiguration(partial)` · [details](changelog/5.0.0.md#one-call-changes-the-recognition-configuration-changelanguage-is-gone)
+- **Update symbols by id with a patch**: one call for style, font or any change. `updateSymbols(ids, patch)`, `updateSymbol(id, patch)`, patch object or draft function · [details](changelog/5.0.0.md#one-call-updates-symbols-by-id-with-a-patch)
+
+**Reliability and security**
+- **Offline resilience**: every change made while the connection is down (strokes, transforms, undo/redo, clear) is replayed in order on reconnection, and requests wait instead of failing · [details](changelog/5.0.0.md#bug-fixes)
+- **Large imports** no longer close the session: messages are split under the server's size limit (`maxMessageBytes`) · [details](changelog/5.0.0.md#bug-fixes)
+- **The HMAC key stays on your server**. `server.sign(message, applicationKey)` (`THmacSigner`) · Try `examples/server-signing/` · [details](changelog/5.0.0.md#the-hmac-signature-is-computed-on-your-server-serversign)
+- **No more crashes on Safari/WebKit** when selecting or erasing many strokes · [details](changelog/5.0.0.md#bug-fixes)
+
+**Performance**
+- **10 000× faster reads** on large documents (`model.symbols` on 500 strokes: 11.59 ms → 0.0012 ms) · [details](changelog/5.0.0.md#the-document-is-immutable)
+- **Synchronizing an unchanged 4000-stroke document**: 1.3 s → 27 ms · [details](changelog/5.0.0.md#performance)
+- **Lighter DOM**: one SVG element per stroke instead of two · [details](changelog/5.0.0.md#a-path-symbol-is-its-path-with-no-group-around-it)
+- **Shorter strokes on the wire** from server 4.6.0: `t0` + `dt` instead of absolute `t` · [details](changelog/5.0.0.md#shorter-strokes-on-the-wire-t0--dt)
+
+**Extending the library**
+- **Custom symbol types** now move, rotate and resize like the built-in ones: a custom util implements `getGeometry` only and inherits `translate`/`rotate`/`resize`; new `SymbolUtil.getResizePoints`, `keepsAspectRatio` · [details](changelog/5.0.0.md#everything-a-symbol-type-knows-lives-on-its-util)
+- **Every module is exported**: `resolveHmac`, `parseApiError`, `TApiError`; `defineKind`, `resolveKind` (`@experimental`) · [details](changelog/5.0.0.md#every-module-is-exported)
+- **Any client can be overridden**: no `#private` member left, all protected · [details](changelog/5.0.0.md#bug-fixes)
+- **Return types can be named**: `TAnchoredEdgesUpdateResult`, `TFollowedStroke`, `TShift`, `TSplitOutcome` · [details](changelog/5.0.0.md#types-returned-by-public-methods-can-be-named)
+
+**New examples**
+- **Math Tutor**: a handwritten math workbook that checks each line as it is written and hints at the first mistake. `interactive_canvas_math_tutor.html` · [details](changelog/5.0.0.md#math-tutor-example)
+- **Excalidraw**: recognition and conversion into Excalidraw elements, on `WebSocketClient`. `examples/custom-rendering/excalidraw-websocket-client/` · [details](changelog/5.0.0.md#excalidraw-integration-example)
+- **Pen nibs**, **menu layout**, **server-side signing**: see their entries above
+
+## ⚠️ Upgrading from v4
+- **breaking** Strokes: `TPointer.t` → `TPointer.dt` (ms since the stroke began), width computed at draw time, `TStroke.length` removed. Old documents still load; strokes from earlier versions render differently. [details](changelog/5.0.0.md#strokes-pen-nibs-width-and-timing)
+- **breaking** Symbols read from `model` are frozen: write through `draftSymbol(id)` → `commitSymbol(draft)`; `getRootSymbol` → `getSymbol`. [details](changelog/5.0.0.md#the-document-is-immutable) · [migration](MIGRATION.md#the-document-is-immutable-symbols-you-read-are-frozen)
+- **breaking** `*Ops` objects removed, their members moved to the family's util (`ShapeCircleOps.create` → `ShapeUtil.createCircle`…); transform managers implement one `applyThroughUtil`; `getSVGElement` is abstract. [details](changelog/5.0.0.md#everything-a-symbol-type-knows-lives-on-its-util) · [migration](MIGRATION.md#a-ops-object-is-now-its-familys-util)
+- **breaking** `bounds`, `vertices`, `snapPoints`, `edges` removed from strokes, shapes and edges: read them through `SymbolGeometry`. [details](changelog/5.0.0.md#a-symbols-geometry-is-computed-and-answers-for-itself) · [migration](MIGRATION.md#geometry-is-computed-not-stored)
+- **breaking** A symbol's position is a matrix in `transform`; `TText.rotation`, `TMath.rotation` removed. [details](changelog/5.0.0.md#a-symbol-carries-where-it-sits-as-a-matrix) · [migration](MIGRATION.md#a-symbol-carries-where-it-sits-as-a-matrix)
+- **breaking** Strokes, shapes and edges render as a bare `<path>`: selectors such as `#<id> path` no longer match. [details](changelog/5.0.0.md#a-path-symbol-is-its-path-with-no-group-around-it) · [migration](MIGRATION.md#a-stroke-shape-or-edge-is-drawn-as-a-bare-path)
+- **breaking** `TDecorator.bounds` → `targetBounds`, `hasBounds` removed. [details](changelog/5.0.0.md#a-decorators-box-is-named-for-where-it-comes-from) · [migration](MIGRATION.md#a-decorators-box-is-renamed-for-where-it-comes-from)
+- **breaking** History stores diffs only: `history.push(changes)`, `updated` holds `{ before, after }` pairs. [details](changelog/5.0.0.md#history-diff-only-records-what-changed) · [migration](MIGRATION.md#history-one-form-for-every-change)
+- **breaking** `StrokeOps.formatToSend` → `toWireStroke`; `TStrokeMinimal` → `TStrokeCapture`. [details](changelog/5.0.0.md#the-client-owns-the-stroke-shape-it-sends) · [migration](MIGRATION.md#the-client-owns-the-stroke-shape-it-sends)
+- **breaking** `src/utils/` dissolved: deep imports only, the exported names are unchanged. [details](changelog/5.0.0.md#internal-layout-srcutils-dissolved) · [migration](MIGRATION.md#internal-layout-srcutils-no-longer-exists)
+- **breaking** `SELECTION_MARGIN` split into `SELECTION_PADDING`, `HIT_TOLERANCE`, `DUPLICATE_OFFSET`, `TESSELLATION_SEGMENT_LENGTH`. [details](changelog/5.0.0.md#selection_margin-split-by-meaning-constants-dissolved) · [migration](MIGRATION.md#selection_margin-is-split-by-meaning)
+- **breaking** `IIConnectorManager.updateAnchoredEdges()` returns what it moved, to include in the history entry. [details](changelog/5.0.0.md#shape--edge-connections-1)
+- **breaking** `updateSymbolsStyle` / `updateTextFontStyle` → `updateSymbols(ids, patch)`. [details](changelog/5.0.0.md#one-call-updates-symbols-by-id-with-a-patch) · [migration](MIGRATION.md#one-call-updates-symbols-by-id-with-a-patch)
+- **breaking** `changeLanguage(code)` → `updateRecognitionConfiguration({ lang })`. [details](changelog/5.0.0.md#one-call-changes-the-recognition-configuration-changelanguage-is-gone) · [migration](MIGRATION.md#changelanguage-becomes-updaterecognitionconfiguration)
+- **behaviour** The math solver works in radians by default. [details](changelog/5.0.0.md#the-math-solver-works-in-radians-by-default) · [migration](MIGRATION.md#the-math-solver-defaults-to-radians)
+- **behaviour** Math results are auto-computed and shown as a ghost by default, so they follow the variables they use. [details](changelog/5.0.0.md#math-results-are-auto-computed-as-a-ghost-by-default)
+- **breaking** Nine export methods → `exportAs` / `download`. [details](changelog/5.0.0.md#export-one-exportas-one-download) · [migration](MIGRATION.md#exports-nine-methods-become-two)
+- **breaking** `hmacKey` is a string only, the function form is removed: sign with `server.sign`. [details](changelog/5.0.0.md#the-hmac-signature-is-computed-on-your-server-serversign) · [migration](MIGRATION.md#hmackey-is-a-string-only-sign-on-your-server-with-serversign)
+- **breaking** `CanvasEventName.POINTEREVENTS` removed (never emitted). [details](changelog/5.0.0.md#canvaseventnamepointerevents-is-removed)
+- **breaking** `server.websocket.offlineQueueEnabled` removed: `autoReconnect` is the only reconnection switch. [details](changelog/5.0.0.md#bug-fixes) · [migration](MIGRATION.md#autoreconnect-is-the-only-reconnection-switch)
+- **behaviour** `isOffline` is true whenever the connection is down after a first success, queued changes or not. [details](changelog/5.0.0.md#bug-fixes)
+- **behaviour** A network drop is a connection state (`offline`/`syncing`), no longer an `error`. [details](changelog/5.0.0.md#bug-fixes)
+- **behaviour** Writing never pans the view; a stroke goes on past the canvas edge until `pointerup`. [details](changelog/5.0.0.md#bug-fixes)
+- **behaviour** Auto-compute asks the server for every math block (vertical operations included). [details](changelog/5.0.0.md#bug-fixes)
+- **behaviour** The `changed` event of `InteractiveInkCanvas` carries the local history state, not the backend's. [details](changelog/5.0.0.md#bug-fixes)
+- **behaviour** `mergeDeep` drops `__proto__`, `constructor`, `prototype` keys; `WebSocketSSRClient` reports `restore.session.not.found` as `NO_SESSION_FOUND`. [details](changelog/5.0.0.md#bug-fixes)
+- **breaking** Selection and erase effects are CSS classes: `selectionFilterId` → `selectedClassName`, `removalFilterId` → `deletingClassName`. [details](changelog/5.0.0.md#bug-fixes)
+- **breaking** CSS: menu position classes → `ms-menu-action`, `ms-menu-style`, `ms-menu-tool`. [details](changelog/5.0.0.md#place-the-menus-where-you-want-configurationlayout) · [migration](MIGRATION.md#menus-sit-in-a-layout-position-classes-are-gone)
+- **type** `options.override.menu` takes menu classes (`TMenuOverride`); thicken gesture takes `widths`/`fontWeights`; `clearSolverOutputs()` returns the removed strokes; `SYNC_YIELD_CHUNK_SIZE` → `SYNC_YIELD_BUDGET_MS`. [details](changelog/5.0.0.md#bug-fixes)
+- **type** History event, `override.client`, `Logger`, websocket messages, `mergeDeep` typings; `override.grabber` removed. [details](changelog/5.0.0.md#type-only)
+- **subclass** Clients: `#private` members become protected (`sendOnSocket`, `offlineQueue`…), one pending-request queue replaces the `*Deferred` fields, `reconnectionCount` removed; menus share `IIAbstractMenu`. [details](changelog/5.0.0.md#bug-fixes)
+
+## ⚡ Performance
+- `InteractiveInkCanvas.select(ids)`: O(n·m) → O(n)
+- Removing symbols: one pass over the document instead of two copies
+- Synchronizing an unchanged 4000-stroke document: 128 ms → 94 ms of work, 80 frames → 1
+- Conversion deduplicates strokes in O(n) (`uniqueById`)
+- One `RafCoalescer` replaces six hand-written frame throttles
+
+[details](changelog/5.0.0.md#performance)
+
+## 🐛 Bug fixes
+
+**Math**
+- Undo to an empty page then redo showed every result ever computed; variable values are now in the history
+- Auto-compute never computed a vertical operation
+
+**Writing and gestures**
+- Writing within 20 px of the edge made the view run away from the pen
+- A gesture leaving the canvas with the button down drove the page around it
+- The underline gesture in `Thicken` mode did nothing on text or math
+- A gesture missing from `raw-content.gestures` was still applied without context
+- A JOIN gesture between non-text symbols left the next one in place (since 4.0.0)
+- `replaceSymbols()` mutated the array it was handed
+- A rotated text or math block reported a mirrored box, so surrounding it did not select it
+
+**Connection**
+- A failed HMAC resolution left `init()` waiting forever
+- An application key holding `&`, `=` or `#` broke the websocket URL
+- The HTTP clients signed the body before adapting it to old servers: wrong signature
+- `send()` resolved, or silently dropped, a message the socket failed to send
+- `WebSocketSSRClient.destroy()` left pending requests hanging
+- Math solver and support requests never settled after an abnormal drop
+- A late handshake failure broke every following reconnection attempt
+- A network drop reopened the error modal every `reconnectDelay`, losing the strokes drawn meanwhile
+- Two concurrent exports of the same type: the first never resolved
+- An export superseded by a change hung every caller, and recognition stopped
+- An idle healthy connection closed after 5 minutes (ping counter)
+- `newSession()` duplicated every array of the configuration
+- A message sent during `close()` leaked into the next session
+- Messages over 500 KB made the backend close the session
+- `HTTPClientV2` did not strip `jiix.text.lines` for servers below 3.2.0
+- `HTTPClientV1` turned a non-JSON error body into a generic connection error
+- `getAvailableLanguageList()` / `getAvailableFontList()` failures were not reported as errors
+- `updateRecognitionConfiguration()` on an empty sheet stayed "Recognizing" forever
+
+**Security**
+- The clients logged `applicationKey` / `hmacKey` in plaintext
+- `mergeDeep` could pollute `Object.prototype`
+- `InteractiveInkSSRSmartGuide` executed script from a crafted JIIX label
+
+**Leaks and lifecycle**
+- `InteractiveInkCanvas.destroy()` left thirteen managers alive
+- `IISynchronizerManager` left a 5 s timer per math block on every sync
+- `IDebugSVGManager` leaked pointer listeners on every drag
+- `IIMenuContext.destroy()` leaked `document` listeners
+- Nine swallowed errors and floating promises now reach the caller
+- `clear()` did not await the server
+
+**Rendering and model**
+- Selecting or erasing many strokes crashed WebKit
+- `pan()` left symbols scrolled into view undrawn
+- `Minimap` cloned the whole layer on every change
+- `EraseManager` threw on Safari < 18.4
+- Shape/edge type picker never closed its dropdown
+- `emit()` turned any falsy payload into `null`
+- `override.menu` was lost on the first `setConfig`
+- Synchronizer metadata left stale after a throw, or cleared exports
+- Word/char grouping returned `[]` after an exports clear
+- Translating an unknown edge kind failed silently
+- `Model.addStroke()` accepted a duplicate id
+
+[details](changelog/5.0.0.md#bug-fixes)
+
+
 # [v4.1.0](https://github.com/MyScript/iinkTS/tree/v4.1.0)
 
 ## Features
@@ -9,7 +168,6 @@
 
 ### virtualization
 - throttle pan and cull off-screen symbols on large documents
-
 
 # [v4.0.0](https://github.com/MyScript/iinkTS/tree/v4.0.0)
 

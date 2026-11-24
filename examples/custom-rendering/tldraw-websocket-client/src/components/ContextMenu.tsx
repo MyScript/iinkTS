@@ -20,6 +20,8 @@ export function ContextMenu()
     if (!shapesToConvert?.length) return
 
 		const { toConvert, toRemove } = converter.convert(shapesToConvert)
+		// Own undo step: otherwise undo also removes the last stroke drawn
+		editor.markHistoryStoppingPoint("convert")
 		if (toRemove.length) {
 			editor.deleteShapes(toRemove)
 		}

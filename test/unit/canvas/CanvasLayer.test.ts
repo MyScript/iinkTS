@@ -1,4 +1,4 @@
-import { CanvasLayer } from "@/canvas/CanvasLayer"
+import { CanvasLayer } from "@/iink"
 
 describe("CanvasLayer.ts", () => {
   describe("canvas state badge", () => {
@@ -20,7 +20,7 @@ describe("CanvasLayer.ts", () => {
       expect(layer.ui.state.root.className).toEqual("ms-ink-state ms-ink-state-syncing")
       expect(layer.ui.state.count.textContent).toEqual("3")
       expect(layer.ui.state.count.style.display).toEqual("flex")
-      expect(layer.ui.state.tooltip.textContent).toContain("3 stroke batch(es) waiting to be sent")
+      expect(layer.ui.state.tooltip.textContent).toContain("3 change(s) waiting to be sent")
     })
 
     test("should hide the count when syncing has nothing queued yet", () => {

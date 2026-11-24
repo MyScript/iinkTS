@@ -1,8 +1,9 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import type { TPointer } from "@/core"
+import { resolvePointerDelta, resolveStrokeOrigin } from "@/core"
 import type { TPointerInfo } from "@/grabber"
 import { LoggerCategory } from "@/logger"
-import type { TPointer, TStroke } from "@/symbol"
-import type { TPartialDeep } from "@/utils"
+import type { TStrokeImport } from "@/symbol"
 
 import { IIAbstractManager } from "./IIAbstractManager"
 
@@ -17,6 +18,8 @@ export type TPlaybackState = "idle" | "playing" | "paused"
 type TScheduledPoint = {
   /** Timeline offset (ms, unscaled) relative to the first point of the first stroke. */
   offset: number
+  /** Epoch instant the stroke this point belongs to began — the origin its `dt` counts from. */
+  origin: number
   point: TPointer
   isFirstOfStroke: boolean
   isLastOfStroke: boolean
@@ -103,7 +106,7 @@ export class IIPlaybackManager extends IIAbstractManager {
     }
   }
 
-  #toPointerInfo(point: TPointer, type: string): TPointerInfo {
+  #toPointerInfo(point: TPointer, type: string, gestureStartTime: number): TPointerInfo {
     return {
       clientX: point.x,
       clientY: point.y,
@@ -111,9 +114,10 @@ export class IIPlaybackManager extends IIAbstractManager {
       type,
       pointerType: "pen",
       target: this.#target,
-      pointer: { x: point.x, y: point.y, t: point.t, p: point.p },
+      pointer: { x: point.x, y: point.y, dt: point.dt, p: point.p },
       button: 0,
       buttons: 1,
+      gestureStartTime,
     }
   }
 
@@ -133,16 +137,16 @@ export class IIPlaybackManager extends IIAbstractManager {
   #fire(index: number): void {
     const entry = this.#schedule[index]
     if (entry.isFirstOfStroke) {
-      this.canvas.writer.start(this.#toPointerInfo(entry.point, "pointerdown"))
+      this.canvas.writer.start(this.#toPointerInfo(entry.point, "pointerdown", entry.origin))
       this.#strokeInProgress = true
     }
     if (entry.isLastOfStroke) {
-      Promise.resolve(this.canvas.writer.end(this.#toPointerInfo(entry.point, "pointerup"))).catch((error: Error) =>
-        this.canvas.manageError(error)
+      Promise.resolve(this.canvas.writer.end(this.#toPointerInfo(entry.point, "pointerup", entry.origin))).catch(
+        (error: Error) => this.canvas.manageError(error)
       )
       this.#strokeInProgress = false
     } else if (!entry.isFirstOfStroke) {
-      this.canvas.writer.continue(this.#toPointerInfo(entry.point, "pointermove"))
+      this.canvas.writer.continue(this.#toPointerInfo(entry.point, "pointermove", entry.origin))
     }
 
     this.#firedIndex = index + 1
@@ -167,8 +171,8 @@ export class IIPlaybackManager extends IIAbstractManager {
       return
     }
     const lastFired = this.#schedule[this.#firedIndex - 1]
-    Promise.resolve(this.canvas.writer.end(this.#toPointerInfo(lastFired.point, "pointerup"))).catch((error: Error) =>
-      this.canvas.manageError(error)
+    Promise.resolve(this.canvas.writer.end(this.#toPointerInfo(lastFired.point, "pointerup", lastFired.origin))).catch(
+      (error: Error) => this.canvas.manageError(error)
     )
     this.#strokeInProgress = false
   }
@@ -190,10 +194,11 @@ export class IIPlaybackManager extends IIAbstractManager {
   /**
    * Start replaying `strokes` in order of their first point's timestamp.
    * Stops any run already in progress.
-   * @param strokes - Recorded strokes to replay (same shape as `importPointEvents`).
+   * @param strokes - Recorded strokes to replay (same shape as `importPointEvents`), including
+   * recordings saved before pointers stored a delta.
    * @param speed - Playback speed multiplier (1 = original timing, 2 = twice as fast).
    */
-  play(strokes: TPartialDeep<TStroke>[], speed = 1): void {
+  play(strokes: TStrokeImport[], speed = 1): void {
     this.logger.info("play", { count: strokes.length, speed })
     this.stop()
     this.#speed = speed
@@ -201,21 +206,35 @@ export class IIPlaybackManager extends IIAbstractManager {
       this.onEnd?.()
       return
     }
-    const sortedStrokes = [...strokes].sort((a, b) => (a.pointers?.[0]?.t ?? 0) - (b.pointers?.[0]?.t ?? 0))
-    const t0 = sortedStrokes[0].pointers?.[0]?.t ?? 0
+    // Ordered by when each stroke began, not by its first pointer: every stroke's first pointer is
+    // at dt 0, so it says nothing about where the stroke sits on the timeline. That lives in
+    // `creationTime` — or, for a recording saved before pointers stored a delta, in the absolute
+    // `t` its first pointer still carries.
+    const timed = strokes.map((stroke) => ({
+      stroke,
+      origin: resolveStrokeOrigin(stroke.pointers ?? [], stroke.creationTime) ?? 0,
+    }))
+    timed.sort((a, b) => a.origin - b.origin)
+    const t0 = timed[0].origin
 
-    this.#schedule = sortedStrokes.flatMap((stroke) => {
-      const points = (stroke.pointers ?? []).filter(
-        (p): p is TPointer => p?.x !== undefined && p?.y !== undefined && p?.t !== undefined && p?.p !== undefined
-      )
+    this.#schedule = timed.flatMap(({ stroke, origin }) => {
+      const sourcePointers = stroke.pointers ?? []
+      const points = sourcePointers
+        .map((p, i) =>
+          p?.x !== undefined && p?.y !== undefined && p?.p !== undefined
+            ? { x: p.x, y: p.y, p: p.p, dt: resolvePointerDelta(sourcePointers, i) }
+            : undefined
+        )
+        .filter((p): p is TPointer => p !== undefined)
       return points.map((point, i) => ({
-        offset: point.t - t0,
+        offset: origin - t0 + point.dt,
+        origin,
         point,
         isFirstOfStroke: i === 0,
         isLastOfStroke: i === points.length - 1,
       }))
     })
-    this.#totalStrokes = sortedStrokes.length
+    this.#totalStrokes = timed.length
     this.#firedIndex = 0
     this.#firedStrokes = 0
     this.#elapsedOffset = 0

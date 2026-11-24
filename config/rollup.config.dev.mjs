@@ -4,7 +4,11 @@ import serve from "rollup-plugin-serve"
 import config from "./rollup.config.mjs"
 import generateDevEnv from "./rollup-plugin-dev-env.mjs"
 
-config[0].plugins.push(
+const [bundle] = config
+// The examples load the bundle, nothing reads the declaration file or needs it minified,
+// so a rebuild skips both
+const plugins = bundle.plugins.filter((plugin) => plugin.name !== "terser")
+plugins.push(
   generateDevEnv(),
   serve({
     open: true,
@@ -26,8 +30,10 @@ config[0].plugins.push(
   })
 )
 
-config.watch = {
-  include: "src/**"
+export default {
+  ...bundle,
+  plugins,
+  watch: {
+    include: "src/**"
+  }
 }
-
-export default config

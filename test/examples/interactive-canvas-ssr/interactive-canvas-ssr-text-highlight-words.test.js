@@ -7,7 +7,6 @@ import {
 } from "../helper"
 import helloOneStroke from "../__dataset__/helloOneStroke"
 import helloOneStrokeSurrounded from "../__dataset__/helloOneStrokeSurrounded"
-import TextNavActions from "../_partials/text-nav-actions"
 
 const getComputedStyle = async (locator) => {
   return locator.evaluate((el) => {

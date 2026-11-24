@@ -2,26 +2,7 @@
  * @group Manager
  * @summary List all authorized gestures
  */
-export type TGestureType = "UNDERLINE" | "SCRATCH" | "JOIN" | "INSERT" | "STRIKETHROUGH" | "SURROUND"
-
-/**
- * @group Manager
- * @remarks
- *  when gestureType = "INSERT", subStrokes represent the two parts
- *  when gestureType = "SCRATCH", subStrokes represent the part to substract at the stroke corresponding fullStrokeId
- */
-export type TGesture = {
-  gestureType: TGestureType
-  gestureStrokeId: string
-  strokeIds: string[]
-  strokeBeforeIds: string[]
-  strokeAfterIds: string[]
-  subStrokes?: {
-    fullStrokeId: string
-    x: number[]
-    y: number[]
-  }[]
-}
+export type { TGesture, TGestureType } from "@/client"
 
 /**
  * @group Manager
@@ -80,6 +61,24 @@ export enum InsertAction {
 
 /**
  * @group Manager
+ * @summary
+ * List all action allowed on join detected
+ * @remarks
+ * only usable in the case of interactive ink canvas
+ */
+export enum JoinAction {
+  /**
+   * @remarks Glue the two words around the gesture into one, or pull the next row up to the end of the row
+   */
+  Join = "join",
+  /**
+   * @remarks Close the gap around the gesture down to a single word space, keeping words apart and rows in place
+   */
+  CloseGap = "close-gap",
+}
+
+/**
+ * @group Manager
  * @source
  */
 export type TGestureConfiguration = {
@@ -87,6 +86,7 @@ export type TGestureConfiguration = {
   strikeThrough: StrikeThroughAction
   underline: UnderlineAction
   insert: InsertAction
+  join: JoinAction
 }
 
 /**
@@ -98,4 +98,5 @@ export const DefaultGestureConfiguration: TGestureConfiguration = {
   strikeThrough: StrikeThroughAction.Draw,
   underline: UnderlineAction.Draw,
   insert: InsertAction.LineBreak,
+  join: JoinAction.Join,
 }

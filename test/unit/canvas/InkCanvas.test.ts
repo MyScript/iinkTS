@@ -1,5 +1,5 @@
 import { buildIIStroke } from "../helpers"
-import { InkCanvas, TInkCanvasOptions, HTTPClientV2, DefaultInkCanvasConfiguration, IModel } from "@/iink"
+import { CanvasTool, InkCanvas, TInkCanvasOptions, HTTPClientV2, DefaultInkCanvasConfiguration } from "@/iink"
 
 describe("InkCanvas.ts", () => {
   const DefaultInkCanvasRestClientOptions: TInkCanvasOptions = {
@@ -20,13 +20,26 @@ describe("InkCanvas.ts", () => {
       name = "custom-client"
     }
     const customBehaviorsOptions = structuredClone(DefaultInkCanvasRestClientOptions)
-    //@ts-ignore
     customBehaviorsOptions.override = { client: CustomClient }
     //@ts-ignore IIC-1006 Type instantiation is excessively deep and possibly infinite.
     const canvas = new InkCanvas(document.createElement("div"), customBehaviorsOptions)
     expect(canvas).toBeDefined()
     expect(canvas.client).toBeDefined()
     expect(canvas.client instanceof CustomClient).toBe(true)
+  })
+
+  describe("tool", () => {
+    //@ts-ignore IIC-1006 Type instantiation is excessively deep and possibly infinite.
+    const canvas = new InkCanvas(document.createElement("div"), DefaultInkCanvasRestClientOptions)
+    test("should set class draw on root element by default", () => {
+      expect(canvas.layers.root.classList.contains("draw")).toBe(true)
+      expect(canvas.layers.root.classList.contains("erase")).toBe(false)
+    })
+    test("should set class erase when set tool eraser", () => {
+      canvas.tool = CanvasTool.Erase
+      expect(canvas.layers.root.classList.contains("draw")).toBe(false)
+      expect(canvas.layers.root.classList.contains("erase")).toBe(true)
+    })
   })
 
   describe("init", () => {
@@ -87,12 +100,10 @@ describe("InkCanvas.ts", () => {
       const canvas = new InkCanvas(document.createElement("div"), DefaultInkCanvasRestClientOptions)
       await canvas.initialize()
       const stroke1 = buildIIStroke()
-      const firstModel = canvas.model.clone()
-      firstModel.addStroke(stroke1)
       canvas.client.send = jest.fn()
       canvas.renderer.drawSymbol = jest.fn()
       canvas.renderer.removeSymbol = jest.fn()
-      canvas.history.undo = jest.fn(() => ({ model: firstModel, changes: { added: [stroke1] } }))
+      canvas.history.undo = jest.fn(() => ({ added: [stroke1] }))
       canvas.history.context.canUndo = true
       await canvas.undo()
       expect(canvas.client.send).toHaveBeenNthCalledWith(1, [stroke1], undefined)
@@ -101,12 +112,10 @@ describe("InkCanvas.ts", () => {
       const canvas = new InkCanvas(document.createElement("div"), DefaultInkCanvasRestClientOptions)
       await canvas.initialize()
       const stroke1 = buildIIStroke()
-      const firstModel = canvas.model.clone()
-      firstModel.addStroke(stroke1)
       canvas.client.send = jest.fn()
       canvas.renderer.drawSymbol = jest.fn()
       canvas.renderer.removeSymbol = jest.fn()
-      canvas.history.undo = jest.fn(() => ({ model: firstModel, changes: { added: [stroke1] } }))
+      canvas.history.undo = jest.fn(() => ({ added: [stroke1] }))
       canvas.history.context.canUndo = true
       await canvas.undo()
       expect(canvas.renderer.drawSymbol).toHaveBeenNthCalledWith(1, stroke1)
@@ -116,30 +125,27 @@ describe("InkCanvas.ts", () => {
       const canvas = new InkCanvas(document.createElement("div"), DefaultInkCanvasRestClientOptions)
       await canvas.initialize()
       const stroke1 = buildIIStroke()
-      const firstModel = canvas.model.clone()
-      firstModel.addStroke(stroke1)
+      canvas.model.addStroke(stroke1)
       canvas.client.send = jest.fn()
       canvas.renderer.drawSymbol = jest.fn()
       canvas.renderer.removeSymbol = jest.fn()
-      canvas.history.undo = jest.fn(() => ({ model: firstModel, changes: { removed: [stroke1] } }))
+      canvas.history.undo = jest.fn(() => ({ removed: [stroke1] }))
       canvas.history.context.canUndo = true
       await canvas.undo()
-      expect(canvas.renderer.drawSymbol).toHaveBeenNthCalledWith(1, stroke1)
-      expect(canvas.renderer.removeSymbol).toHaveBeenCalledTimes(0)
+      expect(canvas.renderer.removeSymbol).toHaveBeenNthCalledWith(1, stroke1.id)
+      expect(canvas.renderer.drawSymbol).toHaveBeenCalledTimes(0)
     })
   })
 
   describe("redo", () => {
-    test("should call renderer.drawSymbol when added stroke", async () => {
+    test("should call client.send", async () => {
       const canvas = new InkCanvas(document.createElement("div"), DefaultInkCanvasRestClientOptions)
       await canvas.initialize()
       const stroke1 = buildIIStroke()
-      const firstModel = canvas.model.clone()
-      firstModel.addStroke(stroke1)
       canvas.client.send = jest.fn()
       canvas.renderer.drawSymbol = jest.fn()
       canvas.renderer.removeSymbol = jest.fn()
-      canvas.history.redo = jest.fn(() => ({ model: firstModel, changes: { added: [stroke1] } }))
+      canvas.history.redo = jest.fn(() => ({ added: [stroke1] }))
       canvas.history.context.canRedo = true
       await canvas.redo()
       expect(canvas.client.send).toHaveBeenNthCalledWith(1, [stroke1], undefined)
@@ -148,12 +154,10 @@ describe("InkCanvas.ts", () => {
       const canvas = new InkCanvas(document.createElement("div"), DefaultInkCanvasRestClientOptions)
       await canvas.initialize()
       const stroke1 = buildIIStroke()
-      const firstModel = canvas.model.clone()
-      firstModel.addStroke(stroke1)
       canvas.client.send = jest.fn()
       canvas.renderer.drawSymbol = jest.fn()
       canvas.renderer.removeSymbol = jest.fn()
-      canvas.history.redo = jest.fn(() => ({ model: firstModel, changes: { added: [stroke1] } }))
+      canvas.history.redo = jest.fn(() => ({ added: [stroke1] }))
       canvas.history.context.canRedo = true
       await canvas.redo()
       expect(canvas.renderer.drawSymbol).toHaveBeenNthCalledWith(1, stroke1)
@@ -167,7 +171,7 @@ describe("InkCanvas.ts", () => {
       canvas.client.send = jest.fn()
       canvas.renderer.drawSymbol = jest.fn()
       canvas.renderer.removeSymbol = jest.fn()
-      canvas.history.redo = jest.fn(() => ({ model: new IModel(), changes: { removed: [stroke1] } }))
+      canvas.history.redo = jest.fn(() => ({ removed: [stroke1] }))
       canvas.history.context.canRedo = true
       await canvas.redo()
       expect(canvas.renderer.drawSymbol).toHaveBeenCalledTimes(0)

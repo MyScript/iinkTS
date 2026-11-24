@@ -3,10 +3,11 @@ import ellipseIcon from "@/assets/svg/ellipse.svg"
 import rectangleIcon from "@/assets/svg/rectangle.svg"
 import rhombusIcon from "@/assets/svg/rhombus.svg"
 import triangleIcon from "@/assets/svg/triangle.svg"
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import { CanvasTool, CanvasWriteTool } from "@/Constants"
-import type { TMenuItemBase } from "@/menu/items/BaseMenuItem"
-import { BaseMenuItem } from "@/menu/items/BaseMenuItem"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import { CanvasTool, CanvasWriteTool } from "@/manager"
+
+import type { TMenuItemBase } from "../items/BaseMenuItem"
+import { BaseMenuItem } from "../items/BaseMenuItem"
 
 type TShapeToolConfig = TMenuItemBase & {
   type: "shape"
@@ -51,7 +52,7 @@ export class ShapeTool extends BaseMenuItem<HTMLDivElement> {
       }
       button.classList.add("active")
 
-      const subMenuContent = this.element?.querySelector(".sub-menu-content-shape")
+      const subMenuContent = this.element?.querySelector(".sub-menu-content")
       subMenuContent?.classList.remove("open")
     })
 
@@ -77,7 +78,7 @@ export class ShapeTool extends BaseMenuItem<HTMLDivElement> {
     subMenuContent.appendChild(this.createShapeButton(rhombusIcon, CanvasWriteTool.Rhombus, "Rhombus"))
 
     const content = this.dom.div({
-      className: ["sub-menu-content", "top"],
+      className: ["sub-menu-content", this.openPosition ?? "top"],
     })
     content.appendChild(subMenuContent)
 
@@ -88,7 +89,10 @@ export class ShapeTool extends BaseMenuItem<HTMLDivElement> {
     wrapper.appendChild(content)
 
     // Event listeners
-    this.triggerButton.addEventListener("pointerdown", () => content.classList.toggle("open"))
+    this.triggerButton.addEventListener("pointerdown", () => {
+      this.canvas.tool = CanvasTool.Write
+      content.classList.toggle("open")
+    })
     this.#documentPointerdownHandler = (e: PointerEvent) => {
       if (!wrapper.contains(e.target as HTMLElement)) {
         content.classList.remove("open")
@@ -122,13 +126,14 @@ export class ShapeTool extends BaseMenuItem<HTMLDivElement> {
         CanvasWriteTool.Rhombus,
       ].includes(this.canvas.writer.tool)
 
+    this.subMenuButtons.forEach((btn) => btn.classList.remove("active"))
+
     if (isShapeTool) {
       this.triggerButton.classList.add("active")
       const activeButton = this.subMenuButtons.get(this.canvas.writer.tool)
       activeButton?.classList.add("active")
     } else {
       this.triggerButton.classList.remove("active")
-      this.subMenuButtons.forEach((btn) => btn.classList.remove("active"))
     }
 
     this.updateDisabled()

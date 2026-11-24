@@ -1,0 +1,63 @@
+name: Bug report
+description: Something does not work as documented
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Never paste your application key or HMAC key here.
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: How to reproduce
+      description: Steps, a minimal code sample or a link to a page that shows the problem. For a recognition issue, attach the strokes as JSON (`canvas.exportAs("json")` on INTERACTIVE_INK).
+      placeholder: |
+        1. Load the canvas with this configuration: ...
+        2. Write ...
+        3. See ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: iinkTS version
+      placeholder: "5.0.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: canvas
+    attributes:
+      label: Canvas type
+      options:
+        - INTERACTIVE_INK
+        - INK_V2
+        - INTERACTIVE_INK_SSR
+        - INK_V1
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Browser, OS and input device
+      placeholder: "Chrome 141, Windows 11, Wacom pen"
+    validations:
+      required: true
+  - type: input
+    id: server
+    attributes:
+      label: Server
+      description: MyScript Cloud, or the version of your own server.
+      placeholder: "cloud.myscript.com"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Console output
+      description: Errors from the browser console, if any.
+      render: shell

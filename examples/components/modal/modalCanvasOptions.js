@@ -31,7 +31,7 @@ export class ModalCanvasOptions {
     this.container.appendChild(header)
 
     this.message = el("a", {
-      href: "https://developer.myscript.com/getting-started/",
+      href: "https://developer.myscript.com/#getting-started",
       className: "modal-message",
       target: "_blank",
       rel: "noopener noreferrer",

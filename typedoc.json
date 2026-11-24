@@ -15,13 +15,14 @@
   "plugin": [
     "typedoc-plugin-missing-exports",
     "typedoc-plugin-expand-object-like-types",
-    "typedoc-plugin-inline-sources"
+    "typedoc-plugin-inline-sources",
+    "./config/typedoc-plugin-require-group.mjs"
   ],
   "sort": [
     "alphabetical",
   ],
   "excludeExternals": true,
-  "intentionallyNotExported": ["AbstractCanvas.resize"],
+  "treatWarningsAsErrors": true,
   "readme": "README.md",
   "includeVersion": true,
   "disableSources": false,
@@ -29,17 +30,32 @@
   "cleanOutputDir": true,
   "categorizeByGroup": false,
   "categoryOrder": [],
-  // "groupOrder": [
-  //   "Canvas",
-  //   "Canvas/variants",
-  //   "Renderer",
-  //   "Client",
-  //   "Grabber",
-  //   "Model",
-  //   "Model/Export",
-  //   "Constants",
-  //   "*"
-  // ],
+  "groupOrder": [
+    "Canvas",
+    "Client",
+    "Client/Export",
+    "Symbol",
+    "SymbolUtils",
+    "Styles",
+    "Model",
+    "Store",
+    "History",
+    "Manager",
+    "Renderer",
+    "Grabber",
+    "Menu",
+    "SmartGuide",
+    "UI",
+    "Components",
+    "DOM",
+    "Export",
+    "Core",
+    "Core/Geometry",
+    "Core/Math",
+    "Core/Std",
+    "Constants",
+    "Logger"
+  ],
   "navigation": {
     "includeCategories": false,
     "includeGroups": true

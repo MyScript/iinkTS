@@ -1,10 +1,10 @@
 import { DecoratorUtil } from "./decorator/DecoratorUtil"
 import { EdgeUtil } from "./edge/EdgeUtil"
-import { MathUtil } from "./math/MathUtil"
 import { ShapeUtil } from "./shape/ShapeUtil"
 import { StrokeUtil } from "./stroke/StrokeUtil"
 import { symbolRegistry } from "./SymbolRegistry"
-import { TextUtil } from "./text/TextUtil"
+import { MathUtil } from "./typeset/MathUtil"
+import { TextUtil } from "./typeset/TextUtil"
 
 /**
  * @group SymbolUtils

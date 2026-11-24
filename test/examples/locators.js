@@ -3,15 +3,18 @@ export default {
   menu: {
     action: {
       gesture: {
-        triggerBtn: "#ms-menu-action-gesture button" ,
+        triggerBtn: "#ms-menu-action-gesture-trigger",
         detectCheckbox: "#ms-menu-action-gesture-detect-input",
+        strikeThroughMenuBtn: "#ms-menu-action-gesture-strikethrough-menu-trigger",
+        surroundMenuBtn: "#ms-menu-action-gesture-surround-menu-trigger",
+        insertMenuBtn: "#ms-menu-action-gesture-insert-menu-trigger",
         strikeThroughSelect: "#ms-menu-action-gesture-strikethrough-input",
         surroundSelect: "#ms-menu-action-gesture-surround-input",
         insertSelect: "#ms-menu-action-gesture-insert-input"
       },
       guide: {
         triggerBtn: "#ms-menu-action-guide button",
-        enable: "#ms-menu-action-guide-enable",
+        enable: "#ms-menu-action-guide-enable-input",
         types: "#ms-menu-action-guide-type-input",
         sizeS: "#ms-menu-action-guide-size-25",
         sizeM: "#ms-menu-action-guide-size-50",
@@ -31,6 +34,10 @@ export default {
       language: {
         trigger: "#ms-menu-action-language-trigger",
         inputSelect: "#ms-menu-action-language"
+      },
+      export: {
+        triggerBtn: "#ms-menu-action-export-trigger",
+        pdfBtn: "#ms-menu-action-export-pdf"
       },
       triggerBtn: "#ms-menu-action"
     },

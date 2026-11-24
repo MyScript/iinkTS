@@ -1,10 +1,9 @@
+import type { TExport } from "@/client"
+import type { TPoint, TPointer } from "@/core"
+import { computeDistanceSquared, isBetween, mergeExports } from "@/core"
 import { LoggerCategory, LoggerManager } from "@/logger"
 import type { TPenStyle } from "@/style"
-import type { TPoint, TPointer } from "@/symbol"
 import { Stroke } from "@/symbol"
-import { computeDistance, computeDistanceSquared, isBetween } from "@/utils"
-
-import type { TExport } from "./Export"
 
 /**
  * @group Model
@@ -46,19 +45,6 @@ export class Model {
       lastSentPosition: 0,
       lastReceivedPosition: 0,
     }
-  }
-
-  protected computePressure(distance: number, globalDistance: number): number {
-    let ratio = 1.0
-    if (distance === globalDistance) {
-      ratio = 1.0
-    } else if (distance < 10) {
-      ratio = 0.2 + Math.pow(0.1 * distance, 0.4)
-    } else if (distance > globalDistance - 10) {
-      ratio = 0.2 + Math.pow(0.1 * (globalDistance - distance), 0.4)
-    }
-    const pressure = ratio * Math.max(0.1, 1.0 - 0.1 * Math.sqrt(distance))
-    return isNaN(pressure) ? 0.5 : Math.round(pressure * 100) / 100
   }
 
   protected filterPointByAcquisitionDelta(stroke: Stroke, point: TPointer, lastPointer?: TPointer): boolean {
@@ -107,9 +93,8 @@ export class Model {
     })
     const lastPointer = stroke.pointers.at(-1)
     if (this.filterPointByAcquisitionDelta(stroke, pointer, lastPointer)) {
-      const distance = lastPointer ? computeDistance(pointer, lastPointer) : 0
-      stroke.length += distance
-      pointer.p = this.computePressure(distance, stroke.length)
+      // `p` stays as the device reported it — see `StrokeUtil.addPointer` for why deriving it from
+      // the gap to the previous pointer made thickness depend on the sampling rate.
       stroke.pointers.push(pointer)
       stroke.modificationDate = Date.now()
     }
@@ -117,6 +102,9 @@ export class Model {
 
   addStroke(stroke: Stroke): void {
     this.#logger.info("addStroke", { stroke })
+    if (this.symbols.some((s) => s.id === stroke.id)) {
+      throw new Error(`Stroke id already exist: ${stroke.id}`)
+    }
     this.symbols.push(stroke)
     this.modificationDate = Date.now()
     this.converts = undefined
@@ -231,11 +219,7 @@ export class Model {
 
   mergeExport(exports: TExport) {
     this.#logger.info("mergeExport", { exports })
-    if (this.exports) {
-      Object.assign(this.exports, exports)
-    } else {
-      this.exports = exports
-    }
+    this.exports = mergeExports(this.exports, exports)
     this.#logger.debug("mergeExport", this.exports)
   }
 
@@ -243,11 +227,7 @@ export class Model {
     this.#logger.info("mergeConvert", {
       converts,
     })
-    if (this.converts) {
-      Object.assign(this.converts, converts)
-    } else {
-      this.converts = converts
-    }
+    this.converts = mergeExports(this.converts, converts)
     this.#logger.debug("mergeConvert", this.converts)
   }
 

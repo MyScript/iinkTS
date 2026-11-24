@@ -125,6 +125,29 @@ describe("IIMathVariableCanvas.ts", () => {
       expect(canvas.math.setVariableValue).toHaveBeenCalledWith("block-1", "x", 99)
     })
 
+    test("should surface a failing write and still close the dialog", async () => {
+      const usage = makeUsage({ id: "u1", name: "x", value: 1, isEditable: true, targetBlockId: "block-1" })
+      canvas.math.getAllVariableUsages = jest.fn().mockResolvedValue([usage])
+      const boom = new Error("backend refused the variable write")
+      canvas.math.setVariableValue = jest.fn().mockRejectedValue(boom)
+      const component = new IIMathVariableCanvas(asCanvas(canvas))
+      await component.show()
+
+      const input = document.querySelector("input[type='number']") as HTMLInputElement
+      input.value = "99"
+
+      const applyBtn = Array.from(document.querySelectorAll("button")).find(
+        (b) => b.textContent === "Apply"
+      ) as HTMLButtonElement
+      applyBtn.click()
+      await new Promise((r) => setTimeout(r, 20))
+
+      // Writes may already have landed partially, so the user must be told; and the dialog must
+      // not be left open with no feedback, which is what a log-only catch produced.
+      expect(canvas.manageError).toHaveBeenCalledWith(boom)
+      expect(document.querySelector("input[type='number']")).toBeNull()
+    })
+
     test("should skip non-editable usages", async () => {
       const usage = makeUsage({ id: "u1", name: "x", value: 1, isEditable: false })
       canvas.math.getAllVariableUsages = jest.fn().mockResolvedValue([usage])

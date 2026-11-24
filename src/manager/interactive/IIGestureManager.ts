@@ -1,11 +1,12 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import type { TRecognitionGesture } from "@/client"
+import type { TPartialDeep } from "@/core"
+import { isBetween, OBBOps } from "@/core"
 import type { IIHistoryManager } from "@/history"
 import { LoggerCategory } from "@/logger"
 import type { TStroke } from "@/symbol"
 import { isDecorator, isStroke, SymbolType } from "@/symbol"
-import { OBBOps } from "@/symbol/primitives/OBB"
-import type { TPartialDeep } from "@/utils"
-import { isBetween } from "@/utils"
+import { SymbolGeometry, symbolRegistry } from "@/symbol-utils"
 
 import type { IITranslateManager, IITypesetManager } from "."
 import type { TGestureHandler } from "./gestures"
@@ -22,6 +23,7 @@ import type { TGesture, TGestureConfiguration, TGestureType } from "./gestures/G
 import {
   DefaultGestureConfiguration,
   InsertAction,
+  JoinAction,
   StrikeThroughAction,
   SurroundAction,
   UnderlineAction,
@@ -38,15 +40,26 @@ export class IIGestureManager extends IIAbstractManager {
   #handlers: Map<TGestureType, TGestureHandler> = new Map()
   #helpers: GestureHelpers
 
-  static readonly #TEXT_STROKE_GROUP_TYPES = new Set([SymbolType.Text, SymbolType.Stroke, SymbolType.Group])
-  static readonly #SURROUND_SELECT_TYPES = new Set([SymbolType.Group, SymbolType.Stroke, SymbolType.Text])
-  static readonly #ERASE_OVERLAY_TYPES = new Set([SymbolType.Stroke, SymbolType.Text, SymbolType.Group])
+  static readonly #TEXT_STROKE_GROUP_TYPES = new Set([SymbolType.Text, SymbolType.Stroke])
+  // Thicken also bolds a math block; a decorator has no place on one
+  static readonly #THICKEN_TYPES = new Set([SymbolType.Text, SymbolType.Stroke, SymbolType.Math])
+  static readonly #SURROUND_SELECT_TYPES = new Set([SymbolType.Stroke, SymbolType.Text])
+  static readonly #ERASE_OVERLAY_TYPES = new Set([SymbolType.Stroke, SymbolType.Text])
   static readonly #ERASE_CONTAIN_TYPES = new Set([SymbolType.Shape, SymbolType.Edge])
+  static readonly #RECOGNITION_GESTURES: Record<TGestureType, TRecognitionGesture> = {
+    UNDERLINE: "underline",
+    SCRATCH: "scratch-out",
+    JOIN: "join",
+    INSERT: "insert",
+    STRIKETHROUGH: "strike-through",
+    SURROUND: "surround",
+  }
 
   insertAction: InsertAction = InsertAction.LineBreak
   surroundAction: SurroundAction = SurroundAction.Select
   strikeThroughAction: StrikeThroughAction = StrikeThroughAction.Draw
   underlineAction: UnderlineAction = UnderlineAction.Draw
+  joinAction: JoinAction = JoinAction.Join
 
   constructor(canvas: TInteractiveInkCanvas, gestureAction?: TPartialDeep<TGestureConfiguration>) {
     super(canvas, LoggerCategory.GESTURE)
@@ -55,6 +68,7 @@ export class IIGestureManager extends IIAbstractManager {
     this.strikeThroughAction = gestureAction?.strikeThrough || DefaultGestureConfiguration.strikeThrough
     this.underlineAction = gestureAction?.underline || DefaultGestureConfiguration.underline
     this.insertAction = gestureAction?.insert || DefaultGestureConfiguration.insert
+    this.joinAction = gestureAction?.join || DefaultGestureConfiguration.join
 
     // Initialize helpers with reference to this manager and register handlers
     this.#helpers = new GestureHelpers(canvas)
@@ -103,7 +117,7 @@ export class IIGestureManager extends IIAbstractManager {
   async #applyInternal(gesture: TGesture): Promise<void> {
     this.logger.info("apply", { gesture })
 
-    const gestureSymbol = this.model.getRootSymbol(gesture.gestureStrokeId)
+    const gestureSymbol = this.model.getSymbol(gesture.gestureStrokeId)
     if (!gestureSymbol || !isStroke(gestureSymbol)) {
       this.logger.warn("apply", `Gesture stroke not found in model: ${gesture.gestureStrokeId}`)
       return
@@ -138,9 +152,20 @@ export class IIGestureManager extends IIAbstractManager {
    * @returns The detected gesture or undefined
    */
   async getGestureFromContextLess(gestureStroke: TStroke): Promise<TGesture | undefined> {
-    return this.canvas.trackOperation("Applying gesture", async () =>
-      this.#getGestureFromContextLessInternal(gestureStroke)
-    )
+    return this.canvas.trackOperation("Applying gesture", async () => {
+      const gesture = await this.#getGestureFromContextLessInternal(gestureStroke)
+      return gesture && this.isGestureEnabled(gesture.gestureType) ? gesture : undefined
+    })
+  }
+
+  /**
+   * Whether a gesture is listed in the recognition configuration's `raw-content.gestures`.
+   * The server only detects the listed ones; the contextless path must honor the same list,
+   * or a gesture turned off would still be applied next to typeset content.
+   */
+  isGestureEnabled(gestureType: TGestureType): boolean {
+    const gestures = this.canvas.configuration.recognition["raw-content"]?.gestures ?? []
+    return gestures.includes(IIGestureManager.#RECOGNITION_GESTURES[gestureType])
   }
 
   async #getGestureFromContextLessInternal(gestureStroke: TStroke): Promise<TGesture | undefined> {
@@ -148,10 +173,23 @@ export class IIGestureManager extends IIAbstractManager {
     if (!gesture) {
       return
     }
+    // Computed once: `gestureStroke` is an unfrozen working copy (see `interactWithBackend`'s
+    // `cloneSymbol`), so `SymbolGeometry.boundsOf` never caches it — calling it from inside the
+    // `.some`/`.filter` predicates below, once per candidate symbol, would recompute it that many
+    // times over.
+    const gestureBounds = SymbolGeometry.boundsOf(gestureStroke)
     switch (gesture.gestureType) {
       case "surround": {
+        // Scans every symbol in the document regardless of type, so an integrator's custom symbol
+        // type missing its util must not abort gesture recognition for the whole stroke — skip it
+        // like a non-candidate instead of throwing.
         const hasSymbolsToSurrond = this.model.symbols.some((s) => {
-          if (s.id !== gestureStroke.id && !isDecorator(s) && OBBOps.contains(gestureStroke.bounds, s.bounds)) {
+          if (
+            s.id !== gestureStroke.id &&
+            !isDecorator(s) &&
+            symbolRegistry.has(s.type) &&
+            OBBOps.contains(gestureBounds, SymbolGeometry.boundsOf(s))
+          ) {
             return this.surroundAction === SurroundAction.Select || IIGestureManager.#SURROUND_SELECT_TYPES.has(s.type)
           }
           return false
@@ -169,19 +207,25 @@ export class IIGestureManager extends IIAbstractManager {
       }
       case "left-right":
       case "right-left": {
+        const underlineTypes =
+          this.underlineAction === UnderlineAction.Thicken
+            ? IIGestureManager.#THICKEN_TYPES
+            : IIGestureManager.#TEXT_STROKE_GROUP_TYPES
         const symbolsToUnderline = this.model.symbols.filter((s) => {
+          if (s.id === gestureStroke.id || !underlineTypes.has(s.type)) {
+            return false
+          }
+          const sBounds = SymbolGeometry.boundsOf(s)
           return (
-            s.id !== gestureStroke.id &&
-            IIGestureManager.#TEXT_STROKE_GROUP_TYPES.has(s.type) &&
             isBetween(
-              s.bounds.center.x,
-              gestureStroke.bounds.center.x - gestureStroke.bounds.width / 2,
-              gestureStroke.bounds.center.x + gestureStroke.bounds.width / 2
+              sBounds.center.x,
+              gestureBounds.center.x - gestureBounds.width / 2,
+              gestureBounds.center.x + gestureBounds.width / 2
             ) &&
             isBetween(
-              gestureStroke.bounds.center.y,
-              s.bounds.center.y + s.bounds.height / 4,
-              s.bounds.center.y + (s.bounds.height * 3) / 4
+              gestureBounds.center.y,
+              sBounds.center.y + sBounds.height / 4,
+              sBounds.center.y + (sBounds.height * 3) / 4
             )
           )
         })
@@ -195,18 +239,20 @@ export class IIGestureManager extends IIAbstractManager {
           }
         }
         const symbolsToStrikeThrough = this.model.symbols.filter((s) => {
+          if (s.id === gestureStroke.id || !IIGestureManager.#TEXT_STROKE_GROUP_TYPES.has(s.type)) {
+            return false
+          }
+          const sBounds = SymbolGeometry.boundsOf(s)
           return (
-            s.id !== gestureStroke.id &&
-            IIGestureManager.#TEXT_STROKE_GROUP_TYPES.has(s.type) &&
             isBetween(
-              s.bounds.center.x,
-              gestureStroke.bounds.center.x - gestureStroke.bounds.width / 2,
-              gestureStroke.bounds.center.x + gestureStroke.bounds.width / 2
+              sBounds.center.x,
+              gestureBounds.center.x - gestureBounds.width / 2,
+              gestureBounds.center.x + gestureBounds.width / 2
             ) &&
             isBetween(
-              gestureStroke.bounds.center.y,
-              s.bounds.center.y - s.bounds.height / 4,
-              s.bounds.center.y + s.bounds.height / 4
+              gestureBounds.center.y,
+              sBounds.center.y - sBounds.height / 4,
+              sBounds.center.y + sBounds.height / 4
             )
           )
         })
@@ -222,11 +268,17 @@ export class IIGestureManager extends IIAbstractManager {
         return
       }
       case "scratch": {
+        // Scans every symbol in the document regardless of type, so an integrator's custom symbol
+        // type missing its util must not abort gesture recognition for the whole stroke — skip it
+        // like a non-candidate instead of throwing.
         const symbolsToErase = this.model.symbols.filter((s) => {
+          if (s.id === gestureStroke.id || !symbolRegistry.has(s.type)) {
+            return false
+          }
+          const sBounds = SymbolGeometry.boundsOf(s)
           return (
-            s.id !== gestureStroke.id &&
-            ((OBBOps.overlaps(gestureStroke.bounds, s.bounds) && IIGestureManager.#ERASE_OVERLAY_TYPES.has(s.type)) ||
-              (OBBOps.contains(gestureStroke.bounds, s.bounds) && IIGestureManager.#ERASE_CONTAIN_TYPES.has(s.type)))
+            (OBBOps.overlaps(gestureBounds, sBounds) && IIGestureManager.#ERASE_OVERLAY_TYPES.has(s.type)) ||
+            (OBBOps.contains(gestureBounds, sBounds) && IIGestureManager.#ERASE_CONTAIN_TYPES.has(s.type))
           )
         })
 
@@ -247,9 +299,9 @@ export class IIGestureManager extends IIAbstractManager {
             s.id !== gestureStroke.id &&
             IIGestureManager.#TEXT_STROKE_GROUP_TYPES.has(s.type) &&
             isBetween(
-              s.bounds.center.y,
-              gestureStroke.bounds.center.y - gestureStroke.bounds.height / 2,
-              gestureStroke.bounds.center.y + gestureStroke.bounds.height / 2
+              SymbolGeometry.boundsOf(s).center.y,
+              gestureBounds.center.y - gestureBounds.height / 2,
+              gestureBounds.center.y + gestureBounds.height / 2
             )
         )
         if (hasSymbolsInRow) {
@@ -269,9 +321,9 @@ export class IIGestureManager extends IIAbstractManager {
             s.id !== gestureStroke.id &&
             IIGestureManager.#TEXT_STROKE_GROUP_TYPES.has(s.type) &&
             isBetween(
-              s.bounds.center.y,
-              gestureStroke.bounds.center.y - gestureStroke.bounds.height / 2,
-              gestureStroke.bounds.center.y + gestureStroke.bounds.height / 2
+              SymbolGeometry.boundsOf(s).center.y,
+              gestureBounds.center.y - gestureBounds.height / 2,
+              gestureBounds.center.y + gestureBounds.height / 2
             )
         )
         if (hasSymbolsInRow) {

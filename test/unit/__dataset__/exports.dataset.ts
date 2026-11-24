@@ -1,7 +1,7 @@
 //@ts-nocheck
-import { TPartialDeep, TJIIXExport } from "@/@types"
+import type { TJIIXExport } from "@/iink"
 
-export const jiixText: TPartialDeep<TJIIXExport> = {
+export const jiixText: TJIIXExport = {
   type: "Raw Content",
   "bounding-box": {
     x: 83.9312439,
@@ -107,7 +107,7 @@ export const jiixText: TPartialDeep<TJIIXExport> = {
   version: "3",
 }
 
-export const jiixMathDuplicateStrokes: TPartialDeep<TJIIXExport> = {
+export const jiixMathDuplicateStrokes: TJIIXExport = {
   type: "Math",
   elements: [
     {

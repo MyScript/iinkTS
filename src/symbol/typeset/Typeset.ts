@@ -1,16 +1,5 @@
-import type { TBox } from "@/symbol/primitives/Box"
-import { BoxOps } from "@/symbol/primitives/Box"
-import type { TPoint, TSegment } from "@/symbol/primitives/Point"
-import { computeRotatedPoint, convertDegreeToRadian } from "@/utils"
-
-/**
- * @group Symbol
- */
-export type TRotation = {
-  degree: number
-  center: TPoint
-}
-
+import type { TBox, TPoint, TSegment } from "@/core"
+import { BoxOps, findIntersectionBetween2Segment, isPointInsidePolygon } from "@/core"
 /**
  * @group Symbol
  */
@@ -24,35 +13,31 @@ export type TTypesetChild = {
 }
 
 /**
+ * The quad a typeset symbol occupies on screen, **before** its matrix is applied —
+ * `OBBOps.toUnrotatedBox`, not `OBBOps.toBox`, which would hand over an envelope already grown for
+ * an angle and have `SymbolGeometry` grow it a second time. Turning a typeset symbol is composing
+ * its matrix now, not recording an angle here, so this is always the axis-aligned box.
+ *
  * @group Symbol
  */
-export function computeTypesetVertices(bounds: TBox, rotation?: TRotation): TPoint[] {
-  if (rotation) {
-    const rad = convertDegreeToRadian(-rotation.degree)
-    return BoxOps.getCorners(bounds).map((p) => computeRotatedPoint(p, rotation.center, rad))
-  }
+export function computeTypesetVertices(bounds: TBox): TPoint[] {
   return BoxOps.getCorners(bounds)
 }
 
 /**
  * @group Symbol
  */
-export function computeTypesetSnapPoints(bounds: TBox, point: TPoint, rotation?: TRotation): TPoint[] {
+export function computeTypesetSnapPoints(bounds: TBox, point: TPoint): TPoint[] {
   const yMax = bounds.y + bounds.height
   const xMax = bounds.x + bounds.width
   const offsetY = yMax - point.y
-  const points: TPoint[] = [
+  return [
     { x: bounds.x, y: bounds.y + offsetY },
     { x: xMax, y: bounds.y + offsetY },
     { x: xMax, y: yMax - offsetY },
     { x: bounds.x, y: yMax - offsetY },
     BoxOps.getCenter(bounds),
   ]
-  if (rotation) {
-    const rad = convertDegreeToRadian(-rotation.degree)
-    return points.map((p) => computeRotatedPoint(p, rotation.center, rad))
-  }
-  return points
 }
 
 /**
@@ -63,4 +48,29 @@ export function computeClosedEdges(vertices: TPoint[]): TSegment[] {
     p1: p,
     p2: vertices[(i + 1) % vertices.length],
   }))
+}
+
+/**
+ * Whether a typeset symbol (its own `vertices`/`edges`, from {@link computeTypesetVertices}/
+ * {@link computeClosedEdges}) overlaps `box` — either a vertex lands inside `box`, or one of its
+ * edges crosses one of `box`'s sides.
+ * @group Symbol
+ */
+export function typesetOverlapsBox(vertices: TPoint[], edges: TSegment[], box: TBox): boolean {
+  return (
+    vertices.some((p) => BoxOps.containsPoint(box, p)) ||
+    edges.some((e1) => BoxOps.getSides(box).some((e2) => !!findIntersectionBetween2Segment(e1, e2)))
+  )
+}
+
+/**
+ * Filters `children` (Text chars / Math elements — anything shaped like {@link TTypesetChild})
+ * to those whose bounds contain at least one of `points`.
+ * @group Symbol
+ */
+export function computeChildrenOverlaps<T extends TTypesetChild>(children: T[], points: TPoint[]): T[] {
+  return children.filter((c) => {
+    const corners = computeTypesetVertices(c.bounds)
+    return points.some((p) => isPointInsidePolygon(p, corners))
+  })
 }

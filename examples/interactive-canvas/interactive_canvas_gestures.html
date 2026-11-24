@@ -67,6 +67,13 @@
         opacity: 0.75;
       }
 
+      .gesture-menu-tree {
+        margin: 0 0 var(--ex-space-sm);
+        flex-shrink: 0;
+        white-space: pre;
+        overflow-x: auto;
+      }
+
       /* ── Canvas fills remaining space ──────────────────────────────── */
       #rootEl {
         flex: 1;
@@ -95,7 +102,7 @@
       <aside class="ex-panel" id="gesturePanel">
 
         <p class="ex-panel-heading">Gestures</p>
-        <p class="ex-panel-intro">Write normally — the canvas detects gestures in the ink stream. Configure each via the ✌️ Gesture menu in the toolbar.</p>
+        <p class="ex-panel-intro">Write normally — the canvas detects gestures in the ink stream. Use the Gesture menu of the canvas to enable or disable each gesture and choose the action run on detection.</p>
 
         <div class="gesture-cards">
 
@@ -105,7 +112,7 @@
             </div>
             <div class="gesture-body">
               <strong>Scratch-out</strong>
-              <p>Scribble rapidly back and forth over content to erase it.</p>
+              <p>Scribble rapidly back and forth over content to erase it. Can be turned off.</p>
             </div>
           </div>
 
@@ -178,7 +185,7 @@
             </div>
             <div class="gesture-body">
               <strong>Join</strong>
-              <p>Vertical stroke <em>upward</em> between elements to merge lines or words.</p>
+              <p>Vertical stroke <em>upward</em> between elements. Configurable: merge lines or words, or close the gap to one space.</p>
             </div>
           </div>
 
@@ -190,16 +197,42 @@
         <p class="ex-panel-heading">Gesture menu</p>
 
         <div class="ex-panel-hint">
-          Open via the menu in the canvas toolbar to configure gesture behavior.
+          Open the <strong>Gesture</strong> submenu of the canvas menu. Each gesture has its own submenu where you
+          turn it on or off and pick what happens when it is detected.
         </div>
+
+        <pre class="ex-panel-code gesture-menu-tree">Gesture
+├─ Detect gesture
+├─ Scratch-out ▸
+│    └─ Enable
+├─ Surround ▸
+├─ Strikethrough ▸
+├─ Underline ▸
+├─ Insert ▸
+└─ Join ▸
+     ├─ Enable
+     └─ Action on detection</pre>
 
         <div class="ex-panel-item">
           <div class="ex-panel-item-label">Detect gesture</div>
-          <div class="ex-panel-item-desc">Master toggle — enables or disables all gesture recognition.</div>
+          <div class="ex-panel-item-desc">Master toggle — when off, every stroke is kept as ink and no gesture is recognized.</div>
         </div>
 
         <div class="ex-panel-item">
-          <div class="ex-panel-item-label">On surround</div>
+          <div class="ex-panel-item-label">Enable</div>
+          <div class="ex-panel-item-desc">
+            Turns one gesture on or off. Off removes it from the recognition gestures, so the stroke stays as
+            ink; its action selector is then disabled.
+          </div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-label">Action on detection</div>
+          <div class="ex-panel-item-desc">What the canvas does when this gesture is recognized:</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-label">Surround</div>
           <div class="ex-panel-item-values">
             Select<span class="ex-panel-item-default">default</span> · Surround · Highlight
           </div>
@@ -211,18 +244,18 @@
         </div>
 
         <div class="ex-panel-item">
-          <div class="ex-panel-item-label">On strikethrough</div>
+          <div class="ex-panel-item-label">Strikethrough</div>
           <div class="ex-panel-item-values">
-            Erase<span class="ex-panel-item-default">default</span> · Draw
+            Draw<span class="ex-panel-item-default">default</span> · Erase
           </div>
           <div class="ex-panel-item-desc">
-            <strong>Erase</strong> — delete struck content.<br>
-            <strong>Draw</strong> — add strikethrough decoration.
+            <strong>Draw</strong> — add strikethrough decoration.<br>
+            <strong>Erase</strong> — delete struck content.
           </div>
         </div>
 
         <div class="ex-panel-item">
-          <div class="ex-panel-item-label">On underline</div>
+          <div class="ex-panel-item-label">Underline</div>
           <div class="ex-panel-item-values">
             Draw<span class="ex-panel-item-default">default</span> · Thicken
           </div>
@@ -233,7 +266,7 @@
         </div>
 
         <div class="ex-panel-item">
-          <div class="ex-panel-item-label">On insert</div>
+          <div class="ex-panel-item-label">Insert</div>
           <div class="ex-panel-item-values">
             Line break<span class="ex-panel-item-default">default</span> · Insert
           </div>
@@ -241,6 +274,22 @@
             <strong>Line break</strong> — split across lines.<br>
             <strong>Insert</strong> — insert word space.
           </div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-label">Join</div>
+          <div class="ex-panel-item-values">
+            Join<span class="ex-panel-item-default">default</span> · CloseGap
+          </div>
+          <div class="ex-panel-item-desc">
+            <strong>Join</strong> — glue the two words into one, or pull the next line up.<br>
+            <strong>CloseGap</strong> — shrink the gap to one word space; lines stay in place.
+          </div>
+        </div>
+
+        <div class="ex-panel-hint">
+          Scratch-out has a single behavior, so its submenu only has <strong>Enable</strong>.
+          A gesture only gets a submenu if it is listed in <code>recognition["raw-content"].gestures</code> when the canvas loads.
         </div>
 
       </aside>
@@ -274,7 +323,33 @@
             "raw-content": {
               gestures: ["scratch-out", "surround", "strike-through", "underline", "insert", "join"]
             }
-          }
+          },
+          menu: {
+            action: {
+              clear: true,
+              language: false,
+              undoRedo: true,
+              zoom: false,
+              convert: false,
+              gesture: true,
+              guide: false,
+              diagram: false,
+              snap: false,
+              math: false,
+              overlay: false,
+              selection: false,
+              import: false,
+              minimap: false,
+              export: false,
+              pen: false,
+            },
+            context: {
+              enable: false,
+            },
+            style: {
+              enable: false
+            }
+          },
         }
       }
 

@@ -1,6 +1,8 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import type { DOMFactory } from "@/components/dom"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import type { DOMFactory } from "@/dom"
 import { LoggerCategory, LoggerManager } from "@/logger"
+
+import type { TMenuPosition } from "./SubMenuItem"
 
 /**
  * @group Menu
@@ -30,7 +32,13 @@ export abstract class BaseMenuItem<T extends HTMLElement = HTMLElement> {
   protected config: TGenericMenuItem
   protected canvas: TInteractiveInkCanvas
   protected element?: T
+  /**
+   * Where this item opens its sub-menu, set by its menu from the menu's slot before the element is built;
+   * an item that opens one reads it before its own default
+   */
+  openPosition?: TMenuPosition
 
+  /** @hidden */
   protected get dom(): typeof DOMFactory {
     return this.canvas.dom
   }
@@ -91,6 +99,8 @@ export abstract class BaseMenuItem<T extends HTMLElement = HTMLElement> {
 
     if (typeof this.config.visible === "function") {
       this.element.style.display = this.config.visible(this.canvas) ? "" : "none"
+    } else {
+      this.element.style.display = this.config.visible === false ? "none" : ""
     }
   }
 

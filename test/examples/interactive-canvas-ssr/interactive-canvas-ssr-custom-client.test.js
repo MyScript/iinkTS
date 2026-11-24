@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test"
-import { writeStrokes, waitForCanvasInit, waitForExportedEvent, getCanvasConfiguration, passModalKey } from "../helper"
+import { writeStrokes, waitForExportedEvent, getCanvasConfiguration, passModalKey } from "../helper"
 import h from "../__dataset__/h"
 
 test.describe("Interactive Canvas SSR with custom client", () => {

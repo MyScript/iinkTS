@@ -23,11 +23,8 @@
       }
 
       #minimap-container {
-        width: 260px;
-        flex-shrink: 0;
-        position: relative;
+        --ex-side-panel-width: 260px;
         background: var(--ex-surface);
-        border-left: 1px solid var(--ex-border);
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -48,7 +45,7 @@
         text-transform: uppercase;
       }
     </style>
-    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+    <script src="../assets/js/theme-init.js"></script>
 </head>
 
   <body>
@@ -58,6 +55,9 @@
       </button>
       <button id="showModalBtn" class="btn-keys">API Keys</button>
       <h1 class="header-title">Interactive Ink Canvas - External Minimap</h1>
+      <button id="sidePanelToggleBtn" class="btn-panel-toggle btn-side-panel-toggle" aria-expanded="false" aria-controls="minimap-container">
+        🗺 Minimap
+      </button>
     </header>
     <div class="ex-page-layout">
       <aside id="info-panel" class="ex-panel">
@@ -70,7 +70,7 @@
       </aside>
       <div class="main-layout">
         <div id="rootEl"></div>
-        <div id="minimap-container">
+        <div id="minimap-container" class="ex-side-panel">
           <span id="minimap-label">Minimap</span>
         </div>
       </div>
@@ -85,6 +85,13 @@
       panelToggleBtn.addEventListener('click', () => {
         const open = infoPanel.classList.toggle('open')
         panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      const sidePanelToggleBtn = document.getElementById('sidePanelToggleBtn')
+      const sidePanel = document.getElementById('minimap-container')
+      sidePanelToggleBtn.addEventListener('click', () => {
+        const open = sidePanel.classList.toggle('open')
+        sidePanelToggleBtn.setAttribute('aria-expanded', open)
       })
 
       const rootElement = document.getElementById('rootEl')

@@ -16,6 +16,7 @@ import {
 import locator from "../locators"
 import sum from "../__dataset__/sum"
 import numbers from "../__dataset__/numbers"
+import sqrt5 from "../__dataset__/math_context_menu._sqrt_5"
 
 const sumStrokes = sum.strokes
 const surroundSumStrokes = buildSurroundPointers(sum.strokes)
@@ -57,7 +58,7 @@ const writeSumExpressionAndGetBlockId = async (page) => {
   return jiix.elements[0].id
 }
 
-test.describe("Math Computation Modes", () => {
+test.describe("Math Computation Modes", { tag: "@touch" }, () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/interactive-canvas/interactive_canvas_math_computation_modes.html`)
     await passModalKey(page)
@@ -86,7 +87,7 @@ test.describe("Math Computation Modes", () => {
         }, { timeout: 10000 })
         .toBe(2)
       await expect(ghostStrokes.first()).toBeVisible()
-      await expect(ghostStrokes.locator("path").first()).toHaveCSS("opacity", "0.5")
+      await expect(ghostStrokes.first()).toHaveCSS("opacity", "0.5")
     })
     
     let boundsBefore
@@ -246,6 +247,62 @@ test.describe("Math Computation Modes", () => {
           return ids.length > 0 && ids.join() !== firstResultStrokeIds.join()
         }, { timeout: 8000 })
         .toBe(true)
+    })
+  })
+
+  // Changing a solver setting opens a new session and replays the ink: the drawn result, computed
+  // with the previous setting, must be replaced — not sent back as ink. No verified stroke dataset
+  // for a trigonometric expression exists yet, so the number of decimals stands in for the angle
+  // unit: same resynchronization path, and "√5=" draws a result that visibly shrinks ("2.236" → "2.2").
+  // Not the decimal separator: the backend ignores it and keeps drawing "2.236" (checked on the wire).
+  test("Solver — a changed setting replaces the drawn result instead of resending it as ink", async ({ page }) => {
+    let firstResultStrokeIds
+
+    // Not filtered by block: the new session gives the block a new id, and "√5=" is the only one.
+    const getResultStrokeIds = async () => {
+      const symbols = await getCanvasSymbols(page)
+      return symbols
+        .filter((s) => s.isSolverOutput)
+        .map((s) => s.id)
+        .sort()
+    }
+
+    await test.step('1. Select "Draw result" + enable "Auto-compute"', async () => {
+      await openMathActionMenu(page)
+      await page.locator("#ms-menu-action-math-result-mode-input").selectOption("draw")
+      await page.locator("#ms-menu-action-math-auto-compute-input").check()
+      await page.locator("#ms-menu-action").click()
+    })
+
+    await test.step('2. Write "√5=" → "2.236" drawn as ink strokes', async () => {
+      await writeStrokes(page, sqrt5.strokes)
+      await callCanvasIdle(page)
+      await pollJiix(page, 1)
+      await expect.poll(async () => (await getResultStrokeIds()).length, { timeout: 8000 }).toBeGreaterThan(0)
+      firstResultStrokeIds = await getResultStrokeIds()
+    })
+
+    await test.step("3. Math > Solver > Decimals → 1", async () => {
+      await openMathActionMenu(page)
+      await page.locator("#ms-menu-action-math-solver-trigger").click()
+      await page.locator("#ms-menu-action-math-solver-fractional-digits-input").fill("1")
+      await page.locator("#ms-menu-action").click()
+    })
+
+    await test.step('4. The previous result is gone and a shorter "2.2" is drawn', async () => {
+      await expect
+        .poll(
+          async () => {
+            const ids = await getResultStrokeIds()
+            return ids.length > 0 && ids.every((id) => !firstResultStrokeIds.includes(id))
+          },
+          { timeout: 15000 }
+        )
+        .toBe(true)
+      expect((await getResultStrokeIds()).length).toBeLessThan(firstResultStrokeIds.length)
+      for (const id of firstResultStrokeIds) {
+        await expect(page.locator(`#${id}`)).toHaveCount(0)
+      }
     })
   })
 })

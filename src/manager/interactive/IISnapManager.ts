@@ -1,9 +1,9 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import type { TPartialDeep, TPoint, TSegment } from "@/core"
+import { BoxOps } from "@/core"
 import { LoggerCategory } from "@/logger"
-import { SVGRendererConst } from "@/renderer/svg/utils/SVGRendererConst"
-import type { TPoint, TSegment } from "@/symbol"
-import { BoxOps } from "@/symbol/primitives/Box"
-import type { TPartialDeep } from "@/utils"
+import { SVGRendererConst } from "@/renderer"
+import { SymbolGeometry, symbolRegistry } from "@/symbol-utils"
 
 import { IIAbstractManager } from "./IIAbstractManager"
 
@@ -62,6 +62,15 @@ export class IISnapManager extends IIAbstractManager {
   protected managerName = "IISnapManager"
 
   snapConfiguration: SnapConfiguration
+  #otherSnapPointsCache: TPoint[] = []
+  #selectionSnapPointsCache: TPoint[] = []
+  /**
+   * `(content version, selection version)` the two caches above were built from. Both getters are
+   * read on every `pointermove` of every drag and neither of their inputs can change during a
+   * gesture: `continue()` moves DOM elements, the model is written at commit.
+   */
+  #cacheVersion = -1
+  #cacheSelectionVersion = -1
 
   constructor(canvas: TInteractiveInkCanvas, config?: TPartialDeep<TSnapConfiguration>) {
     super(canvas, LoggerCategory.SNAP)
@@ -69,13 +78,58 @@ export class IISnapManager extends IIAbstractManager {
     this.snapConfiguration = new SnapConfiguration(config)
   }
 
+  /**
+   * Snap points of the selection's own bounding box. Rebuilt only when the model content or the
+   * selection changed — reading it lists the whole document to filter the selection out of it, and
+   * a drag asks for it once per pointermove.
+   */
   get selectionSnapPoints(): TPoint[] {
-    return BoxOps.getSnapPoints(BoxOps.createFromPoints(this.model.symbolsSelected.flatMap((s) => s.snapPoints)))
+    this.#refreshCaches()
+    return this.#selectionSnapPointsCache
   }
 
+  /**
+   * Snap points of every non-selected symbol, rebuilt only when the model content or the
+   * selection actually changed. Called on every pointermove while drawing/resizing/translating —
+   * neither `model.version` (content) nor selection changes mid-drag, so this reuses the cache
+   * for the whole gesture instead of re-scanning every symbol per move.
+   */
   get otherSnapPoints(): TPoint[] {
-    const selectedIds = new Set(this.model.symbolsSelected.map((s) => s.id))
-    return this.model.symbols.filter((s) => !selectedIds.has(s.id)).flatMap((s) => s.snapPoints)
+    this.#refreshCaches()
+    return this.#otherSnapPointsCache
+  }
+
+  /**
+   * Rebuilds both snap point sets if either the document content or the selection moved on.
+   *
+   * The previous validity check built its selection key as `Array.from(selectedIds).sort().join()`.
+   * On a drag of the whole document that is a 4419-entry array, a sort and a ~180 kB string per
+   * pointermove — the check cost more than the work it was guarding. `model.selectionVersion` is an
+   * integer maintained by the model instead.
+   */
+  #refreshCaches(): void {
+    const version = this.model.version
+    const selectionVersion = this.model.selectionVersion
+    if (this.#cacheVersion === version && this.#cacheSelectionVersion === selectionVersion) {
+      return
+    }
+    this.#cacheVersion = version
+    this.#cacheSelectionVersion = selectionVersion
+
+    const selectedIds = this.model.selectedIds
+    const other: TPoint[] = []
+    const selectedSnapPoints: TPoint[] = []
+    // One pass over the document rather than one per getter: `symbols` and `symbolsSelected` each
+    // list the whole store, and the two sets partition it. An unregistered custom type is skipped
+    // silently rather than let `SymbolGeometry.snapPointsOf` throw and abort the whole pass.
+    this.model.symbols.forEach((symbol) => {
+      if (!symbolRegistry.has(symbol.type)) {
+        return
+      }
+      ;(selectedIds.has(symbol.id) ? selectedSnapPoints : other).push(...SymbolGeometry.snapPointsOf(symbol))
+    })
+    this.#otherSnapPointsCache = other
+    this.#selectionSnapPointsCache = BoxOps.getSnapPoints(BoxOps.createFromPoints(selectedSnapPoints))
   }
 
   get snapThreshold(): number {

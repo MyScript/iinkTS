@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Menu items and overrides</title>
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <style>
+      /* Badge of the StrokeCountItem added to the action bar */
+      .custom-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #4c6ef5;
+        color: white;
+        font-size: 10px;
+        font-weight: 700;
+        border-radius: 4px;
+        padding: 2px 5px;
+        margin-left: 4px;
+        vertical-align: middle;
+        pointer-events: none;
+      }
+
+      /* Notification toast */
+      #toast {
+        position: fixed;
+        bottom: 60px;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        background: #212529;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 13px;
+        opacity: 0;
+        transition: opacity 0.2s, transform 0.2s;
+        pointer-events: none;
+        z-index: 9999;
+      }
+
+      #toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    </style>
+    <script src="../assets/js/theme-init.js"></script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="showModalBtn" class="btn-keys">API Keys</button>
+      <h1 class="header-title">Interactive Ink Canvas — Menu items and overrides</h1>
+    </header>
+
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">Adding items to the menus, and replacing a menu</p>
+        <p class="ex-panel-intro">Items declared in <code>canvasOptions.extend.menuItems</code> are in the <code>action</code>, <code>tool</code>, <code>style</code> or <code>context</code> menu from the first render, without subclassing it; <code>canvas.menu.addItem(menu, key, factory, options)</code> adds one later. Each menu has a <code>"bar"</code> and a <code>"dropdown"</code> zone; an item can also go <code>before</code>/<code>after</code> another one, or <code>replace</code> a built-in one.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">The action bar gets a <strong>Download PNG</strong> button (a plain <code>HTMLElement</code>: static) and a <strong>stroke count</strong> whose badge follows the document (a <code>BaseMenuItem</code>: the menu updates it).</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">The tool bar gets a <strong>Reset zoom</strong> button.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">The context menu (right-click or long press) gets a <strong>Count the selection</strong> quick action, in the row above its list.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">A built-in item can move: the configuration hides undo/redo (and the other action bar buttons), and a <code>UndoRedoMenuAction</code> joins the <strong>tool</strong> bar instead.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">For what adding items cannot do, the menu class is replaced through <code>canvasOptions.override.menu</code>: <strong>CustomMenuStyle</strong> extends <code>IIMenuStyle</code> to allow six brand colors only, without font controls.</div>
+        </div>
+      </aside>
+      <div id="rootEl"></div>
+      <div id="toast"></div>
+    </div>
+
+    <script type="module">
+      import { BaseMenuItem, Canvas, IIMenuStyle, UndoRedoMenuAction } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
+
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      // ─── Toast helper ────────────────────────────────────────────────────────────
+
+      function showToast(message) {
+        const toast = document.getElementById('toast')
+        toast.textContent = message
+        toast.classList.add('show')
+        setTimeout(() => toast.classList.remove('show'), 2500)
+      }
+
+      function menuButton(id, title, icon, onPointerdown) {
+        const button = document.createElement('button')
+        button.id = id
+        button.classList.add('ms-menu-button')
+        button.title = title
+        button.innerHTML = icon
+        button.addEventListener('pointerdown', onPointerdown)
+        return button
+      }
+
+      const icons = {
+        download: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
+        list: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`,
+        zoomReset: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
+        zoomIn: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>`,
+        zoomOut: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>`,
+        count: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12l2 2 4-4"/></svg>`,
+      }
+
+      // ─── Added items ──────────────────────────────────────────────────────────────
+      // canvas.menu.addItem(menu, key, factory, options) adds an item without subclassing the menu.
+      // The factory runs on every render of that menu, so the item survives canvas.menu.setConfig().
+
+      // An item that follows the canvas state is a BaseMenuItem: the menu calls its update() on every render cycle.
+      class StrokeCountItem extends BaseMenuItem {
+        constructor(canvas) {
+          super({ id: 'stroke-count', type: 'button' }, canvas)
+        }
+
+        createElement() {
+          const button = menuButton('stroke-count', 'Stroke count', icons.list, () => {
+            const count = this.canvas.model.symbols.length
+            showToast(`${count} symbol${count !== 1 ? 's' : ''} on canvas`)
+          })
+          this.badge = document.createElement('span')
+          this.badge.classList.add('custom-badge')
+          button.appendChild(this.badge)
+          return button
+        }
+
+        update() {
+          if (this.badge) {
+            this.badge.textContent = String(this.canvas.model.symbols.length)
+          }
+        }
+      }
+
+      // canvas.zoom() sets an absolute level; the menus then refresh the level the action bar shows
+      function zoomTo(canvas, level) {
+        canvas.zoom(level)
+        canvas.menu.update()
+      }
+
+      // Declared in canvasOptions.extend.menuItems: the items are in their menus from the first render.
+      // canvas.menu.addItem(menu, key, factory, options) does the same once the canvas is loaded.
+      // Each factory gets the canvas and runs on every render of its menu.
+      const menuItems = [
+        // A raw element is for static content: removed with the menu, never updated
+        {
+          menu: 'action', key: 'download-png', options: { zone: 'bar' },
+          factory: (canvas) => menuButton('download-png', 'Download as PNG', icons.download, async () => {
+            try {
+              await canvas.download('png')
+              showToast('PNG downloaded')
+            }
+            catch (e) {
+              showToast('Export failed: ' + e.message)
+            }
+          })
+        },
+        { menu: 'action', key: 'stroke-count', options: { zone: 'bar' }, factory: (canvas) => new StrokeCountItem(canvas) },
+        {
+          menu: 'tool', key: 'reset-zoom',
+          factory: (canvas) => menuButton('reset-zoom', 'Reset zoom', icons.zoomReset, () => {
+            zoomTo(canvas, 1)
+            showToast('Zoom reset to 100%')
+          })
+        },
+        // A built-in item can move to another menu: undo/redo, hidden from the action bar by the
+        // configuration below, sits in the tool bar. Its id prefix keeps its ids unique there.
+        { menu: 'tool', key: 'undoRedo', factory: (canvas) => new UndoRedoMenuAction(canvas, 'ms-menu-tool') },
+        // A quick action above the context menu list
+        {
+          menu: 'context', key: 'count-selected', options: { zone: 'bar' },
+          factory: (canvas) => menuButton('count-selected', 'Count the selection', icons.count, () => {
+            const count = canvas.model.symbolsSelected.length
+            showToast(`${count} symbol${count !== 1 ? 's' : ''} selected`)
+          })
+        },
+      ]
+
+      // ─── Overridden menu ─────────────────────────────────────────────────────────
+      // For what adding items cannot do, replace the menu class through canvasOptions.override.menu.
+      // Here the style menu is restricted to brand colors, without font controls.
+
+      class CustomMenuStyle extends IIMenuStyle {
+        constructor(canvas) {
+          super(canvas, 'ms-menu-style', {
+            strokeColor: true,
+            fillColor: true,
+            thickness: true,
+            fontSize: false,
+            fontWeight: false,
+            opacity: true,
+            pen: false,
+            colors: ['#000000', '#e03131', '#1971c2', '#2f9e44', '#f08c00', '#ffffff'],
+          })
+        }
+      }
+
+      // ─── Canvas setup ─────────────────────────────────────────────────────────────
+
+      const rootElement = document.getElementById('rootEl')
+      const showModalBtn = document.getElementById('showModalBtn')
+
+      const canvasOptions = {
+        configuration: {
+          recognition: {
+            lang: 'en_US',
+            'raw-content': {
+              recognition: { types: ['text', 'shape', 'math'] },
+              gestures: ['surround', 'strike-through', 'underline', 'insert']
+            }
+          },
+          menu: {
+            action: {
+              convert: false,
+              zoom: false,
+              clear: false,
+              language: false,
+              undoRedo: false,
+              minimap: false,
+            }
+          }
+        },
+        override: {
+          menu: {
+            style: CustomMenuStyle
+          }
+        },
+        extend: { menuItems }
+      }
+
+      let canvas
+
+      async function loadCanvas(options) {
+        await canvas?.destroy()
+        canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK', options)
+        window.canvas = canvas
+      }
+      showModalBtn.addEventListener('click', () => {
+        ModalCanvasOptions.show(loadCanvas, canvasOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>

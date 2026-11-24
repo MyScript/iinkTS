@@ -1,9 +1,10 @@
 ---
 name: symbol-system
 description: >
-  Deep guide to the iinkTS symbol system: TSymbol union, type guards, the Ops/Util
-  two-layer pattern, SymbolFactory, symbolRegistry. Use when writing type-safe symbol
-  code, adding symbol behavior, or debugging type confusion between variants.
+  Deep guide to the iinkTS symbol system: TSymbol union, type guards, the util that
+  holds everything a type knows, Geometry2d, SymbolFactory, symbolRegistry. Use when
+  writing type-safe symbol code, adding symbol behavior, or debugging type confusion
+  between variants.
 ---
 
 # Symbol System
@@ -22,10 +23,22 @@ TSymbol (union, src/symbol/Symbol.ts)
 
 **Not in `TSymbol`**: `TEraser` (separate), legacy `Stroke`/`CanvasSymbol` (deprecated v1, `src/symbol/legacy/`), `TPoint`/`TBox`/`OBB` (primitives).
 
-## Two layers of per-type logic
+## One place per type: the util
 
-1. **`*Ops`** — pure functions/objects co-located with the type definition in `src/symbol/{type}/{Type}.ts`: `StrokeOps`, `TextOps`, `MathOps`, `DecoratorOps`, `EraserOps`, `BoxOps`, `ShapeOps`, `EdgeOps`. This is where `create`/update/overlap logic actually lives — usable standalone, no registry dependency.
-2. **`*Util`** — adapter classes in `src/symbol-utils/{type}/{Type}Util.ts` (`StrokeUtil`, `TextUtil`, `MathUtil`, `ShapeUtil`, `EdgeUtil`, `DecoratorUtil`), extending abstract `SymbolUtil`. Mostly delegate to the matching `*Ops`, plus implement `getSVGElement()` for rendering. All 6 register into `symbolRegistry` via `registerBuiltinSymbolUtils()`.
+`src/symbol/{type}/{Type}.ts` holds the **type and its guards, and nothing else**.
+
+`src/symbol-utils/{type}/{Type}Util.ts` holds **everything a type knows** — `StrokeUtil`, `TextUtil`,
+`MathUtil`, `ShapeUtil`, `EdgeUtil`, `DecoratorUtil`, all extending `SymbolUtil`. Instance methods are
+the contract the registry dispatches (`getGeometry`, `getSVGElement`, `canSelect`…); statics are
+construction and editing, which have no symbol to dispatch on — `StrokeUtil.createEmpty`,
+`ShapeUtil.createCircleBetweenPoints`, `EdgeUtil.moveLineVertex`. All 6 register via
+`registerBuiltinSymbolUtils()`.
+
+There is **no `*Ops` object for a symbol any more**. The two that remain are not symbols: `BoxOps` and
+`OBBOps` are geometry primitives, and `EraserOps` belongs to a transient tool with no util.
+
+A type describes its shape with `getGeometry(symbol): Geometry2d` and inherits overlap, containment
+and distance from it — see `src/core/geometry/shapes/`.
 
 `SVGRenderer` dispatches rendering with `symbolRegistry.getUtil(symbol.type).getSVGElement(symbol)` — no `switch` on `SymbolType` in the renderer.
 
@@ -33,11 +46,10 @@ TSymbol (union, src/symbol/Symbol.ts)
 
 Co-located with each type, not centralized:
 
+Defined in `src/symbol/stroke/Stroke.ts` (`isStroke`, `isRecognizedMath`, `isRecognizedText`, `isStrokeSolverOutput`), `src/symbol/typeset/Text.ts` (`isText`), `src/symbol/typeset/Math.ts` (`isMath`), `src/symbol/decorator/Decorator.ts` (`isDecorator`). Import them through the barrel (`iink/barrel-imports` lint rule):
+
 ```typescript
-import { isStroke, isRecognizedMath, isRecognizedText } from "@/symbol/stroke/Stroke"
-import { isText } from "@/symbol/text/Text"
-import { isMath } from "@/symbol/math/Math"
-import { isDecorator } from "@/symbol/decorator/Decorator"
+import { isDecorator, isMath, isStroke, isText } from "@/symbol"
 
 // Narrow before accessing type-specific properties
 if (isStroke(symbol)) {
@@ -51,38 +63,46 @@ If a type guard you need doesn't exist, add it next to the type definition — n
 
 ## IIModel Interactions
 
-`IIModel` stores symbols in a `Map<string, TSymbol>` (keyed by `symbol.id`):
+`IIModel` keeps symbols in a `SymbolStore` (`src/store/`), in stacking order. Committed records are **frozen**: never mutate one, draft it and commit it back.
 
 ```typescript
-model.addSymbol(symbol)      // adds to map + updates bounding box cache
-model.getSymbol(id)          // returns TSymbol | undefined
-model.symbols                // returns TSymbol[] (from map values)
+model.getSymbol(id)                 // TSymbol | undefined — the frozen record
+model.symbols                       // TSymbol[] in stacking order (the records themselves)
+model.symbolCount                   // count without building the list
+model.addSymbol(symbol)
+const draft = model.draftSymbol(id) // mutable copy (TDraft<TSymbol>)
+model.commitSymbol(draft)           // stores it back, same position, bumps modificationDate
+model.updateSymbol(symbol)          // replace by id
+model.replaceSymbol(id, symbols)
+model.changeOrderSymbol(id, position)
 model.removeSymbol(id)
-model.updateSymbol(symbol)   // replace by id
 ```
 
-**Cache invalidation**: `IIModel` caches bounding boxes. After bulk mutations, call `model.resetBoundingBox()`.
+Geometry (bounds, vertices…) is not stored on the model or the symbol: ask `SymbolGeometry` (`src/symbol-utils/SymbolGeometry.ts`), which caches a `Geometry2d` per frozen record. On a canvas, prefer `canvas.addSymbol`/`updateSymbol`/`removeSymbol` — they also render, sync the backend and record history.
 
 ## SymbolFactory
 
-Use `SymbolFactory` (`src/symbol-utils/SymbolFactory.ts`) to create symbols — never construct a type literal directly:
+`src/symbol-utils/SymbolFactory.ts` holds two functions (no class) that ask the registry which util owns `partial.type` — never construct a type literal directly:
 
 ```typescript
-import { SymbolFactory } from "@/symbol-utils"
+import { createSymbolFromPartial, createSymbolsFromPartial } from "@/symbol-utils"
+
+const symbol = createSymbolFromPartial({ type: "shape", kind: "circle", /* … */ })
+const symbols = createSymbolsFromPartial(partials) // accumulates errors, throws once
 ```
 
-Creating symbols by hand bypasses ID generation and default style merging.
+Requires `registerBuiltinSymbolUtils()` to have run (canvases do it in `initialize()`). For a known type, the util's statics work too (`StrokeUtil.createEmpty`, `ShapeUtil.createCircleBetweenPoints`). Creating symbols by hand bypasses ID generation and default style merging.
 
 ## Common Mistakes
 
 | Mistake | Fix |
 |---------|-----|
-| `symbol.type === "stroke"` inline check | Use `isStroke(symbol)` from `@/symbol/stroke/Stroke` |
+| `symbol.type === "stroke"` inline check | Use `isStroke(symbol)` from `@/symbol` |
 | Assuming `SymbolHelpers` dispatches by type | It only has `cloneSymbol()` — use `symbolRegistry` |
-| Branching on `SymbolType` in a manager/renderer | Add/extend the type's `*Ops`/`*Util` pair instead |
-| Mutating `model.symbols` array directly | Use `model.addSymbol()` / `model.removeSymbol()` |
+| Branching on `SymbolType` in a manager/renderer | Add/extend the type's util instead |
+| Mutating a record from `model.symbols` / `getSymbol()` (frozen) | `draftSymbol(id)` → change → `commitSymbol(draft)` |
 | Looking for per-type logic in `src/symbol/` only | Rendering + capability flags live in `src/symbol-utils/` |
 
 ## Adding a New Symbol Type
 
-See the `add-symbol-type` skill for the full step-by-step (enum → type+Ops → Util adapter → registry → renderer → tests).
+See the `add-symbol-type` skill for the full step-by-step (enum → type + guard → util → registry → renderer → tests).

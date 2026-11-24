@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Menu layout</title>
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <style>
+      .layout-presets {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .layout-presets button {
+        padding: 6px 10px;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        background: white;
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .layout-presets button[aria-pressed="true"] {
+        border-color: #1971c2;
+        background: #e7f5ff;
+        font-weight: 600;
+      }
+
+      /* The custom occupant: it reads its slot's orientation to lay itself out */
+      .notebook-title {
+        padding: 6px 12px;
+        border-radius: 5px;
+        background: #1971c2;
+        color: white;
+        font-size: 13px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .notebook-title.vertical {
+        writing-mode: vertical-rl;
+        padding: 12px 6px;
+      }
+    </style>
+    <script src="../assets/js/theme-init.js"></script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="showModalBtn" class="btn-keys">API Keys</button>
+      <h1 class="header-title">Interactive Ink Canvas — Menu layout</h1>
+    </header>
+
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">Placing the menus with <code>configuration.layout</code></p>
+        <p class="ex-panel-intro">The canvas UI has 8 slots: <code>top-left</code>, <code>top-center</code>, <code>top-right</code>, <code>middle-left</code>, <code>middle-right</code>, <code>bottom-left</code>, <code>bottom-center</code>, <code>bottom-right</code>. <code>configuration.layout</code> says what goes in each, in stacking order; an occupant left out keeps its default slot. <code>canvas.layout.set(table)</code> changes it at runtime.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-label">Layout</div>
+          <div class="layout-presets" id="layoutPresets"></div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">The slot shapes the menu: bars lie flat at the top and bottom and stand up on the sides, and every dropdown opens away from the edge — try the tool menu's shape picker on the side. Two menus in one slot stack: with <strong>One bottom bar</strong>, undo/redo sits right above the tools.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">The <strong>Notebook</strong> title is a custom occupant, declared in <code>canvasOptions.extend.layout</code>: its factory gets the canvas and its slot (<code>slot</code>, <code>orientation</code>, <code>openTowards</code>), and runs again when it moves.</div>
+        </div>
+      </aside>
+      <div id="rootEl"></div>
+    </div>
+
+    <script type="module">
+      import { Canvas } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
+
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      // Each preset names every slot it uses; set() keeps the slots a table leaves out, so a preset clears the others
+      const EMPTY = {
+        'top-left': [], 'top-center': [], 'top-right': [],
+        'middle-left': [], 'middle-right': [],
+        'bottom-left': [], 'bottom-center': [], 'bottom-right': [],
+      }
+      const presets = {
+        'Default': {
+          'top-left': ['action'], 'top-center': ['notebook'], 'top-right': ['style'],
+          'bottom-left': ['state'], 'bottom-center': ['tool'], 'bottom-right': ['minimap'],
+        },
+        'One bottom bar': {
+          'top-center': ['notebook'], 'top-right': ['style'],
+          'bottom-left': ['state'], 'bottom-center': ['action', 'tool'], 'bottom-right': ['minimap'],
+        },
+        'Tools on the side': {
+          'top-left': ['action'], 'top-center': ['notebook'],
+          'middle-left': ['tool'], 'middle-right': ['style'],
+          'bottom-left': ['state'], 'bottom-right': ['minimap'],
+        },
+        'Everything at the bottom': {
+          'middle-right': ['notebook'],
+          'bottom-left': ['state'], 'bottom-center': ['style', 'action', 'tool'], 'bottom-right': ['minimap'],
+        },
+      }
+      const INITIAL = 'One bottom bar'
+
+      // A custom occupant: built again whenever it changes slot, so it can fit it
+      const layoutOccupants = [
+        {
+          key: 'notebook',
+          factory: (canvas, { orientation }) => {
+            const title = document.createElement('div')
+            title.id = 'notebook-title'
+            title.className = `notebook-title ${orientation}`
+            title.textContent = 'Notebook'
+            return title
+          },
+        },
+      ]
+
+      const presetsEl = document.getElementById('layoutPresets')
+      function renderPresets(active) {
+        presetsEl.replaceChildren(...Object.keys(presets).map((name) => {
+          const button = document.createElement('button')
+          button.textContent = name
+          button.dataset.preset = name
+          button.setAttribute('aria-pressed', String(name === active))
+          button.addEventListener('click', () => {
+            canvas.layout.set({ ...EMPTY, ...presets[name] })
+            renderPresets(name)
+          })
+          return button
+        }))
+      }
+
+      const rootElement = document.getElementById('rootEl')
+      const showModalBtn = document.getElementById('showModalBtn')
+
+      const canvasOptions = {
+        configuration: {
+          recognition: {
+            lang: 'en_US',
+            'raw-content': {
+              recognition: { types: ['text', 'shape', 'math'] },
+              gestures: ['surround', 'strike-through', 'underline', 'insert']
+            }
+          },
+          layout: { ...EMPTY, ...presets[INITIAL] },
+        },
+        extend: { layout: layoutOccupants },
+      }
+
+      let canvas
+
+      async function loadCanvas(options) {
+        await canvas?.destroy()
+        canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK', options)
+        window.canvas = canvas
+        renderPresets(INITIAL)
+      }
+      showModalBtn.addEventListener('click', () => {
+        ModalCanvasOptions.show(loadCanvas, canvasOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>

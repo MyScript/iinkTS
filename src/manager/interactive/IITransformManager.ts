@@ -1,5 +1,7 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import type { MatrixTransform } from "@/core"
 import { LoggerCategory } from "@/logger"
+import type { TSymbol } from "@/symbol"
 
 import { IIAbstractManager } from "./IIAbstractManager"
 import { IIResizeManager } from "./transform/IIResizeManager"
@@ -23,5 +25,13 @@ export class IITransformManager extends IIAbstractManager {
     this.translate = new IITranslateManager(canvas)
     this.resize = new IIResizeManager(canvas)
     this.rotation = new IIRotationManager(canvas)
+  }
+
+  /**
+   * Applies a matrix transform locally (model + redraw), without backend or history side
+   * effects. Used by InteractiveInkCanvas's undo/redo replay dispatcher.
+   */
+  applyMatrix(symbols: TSymbol[], matrix: MatrixTransform): void {
+    this.translate.applyMatrix(symbols, matrix)
   }
 }

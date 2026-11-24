@@ -1,44 +1,81 @@
+import type { TExport, TJIIXMathElement, TJIIXTextElement } from "@/client"
+import { JIIXElementType } from "@/client"
+import { mergeExports, type TDraft } from "@/core"
 import { LoggerCategory, LoggerManager } from "@/logger"
+import { SymbolStore, type TSymbolOrder } from "@/store"
 import type { TSymbol } from "@/symbol"
-import { cloneSymbol } from "@/symbol"
+import { isDecorator } from "@/symbol"
 
-import type { TExport, TJIIXMathElement, TJIIXTextElement } from "./Export"
-import { JIIXElementType } from "./Export"
+/** Held at module level so it is a stable cache key for {@link SymbolStore.listBy}. */
+const targetIdsOf = (symbol: TSymbol): string[] => (isDecorator(symbol) ? symbol.targetIds : [])
 
 /**
  * @group Model
  */
 export class IIModel {
   #logger = LoggerManager.getLogger(LoggerCategory.MODEL)
-  #symbolsMap = new Map<string, TSymbol>()
-  #version = 0
+  #store = new SymbolStore<TSymbol>()
+  #selectedIds = new Set<string>()
+  #selectionVersion = 0
+  #modificationDate: number
+  #exports?: TExport
   readonly creationTime: number
-  modificationDate: number
-  symbols: TSymbol[]
-  exports?: TExport
-  selectedIds: Set<string>
 
   constructor(creationDate = Date.now()) {
     this.creationTime = creationDate
-    this.modificationDate = creationDate
-    this.symbols = []
-    this.exports = undefined
-    this.selectedIds = new Set()
+    this.#modificationDate = creationDate
   }
 
   /**
-   * Synchronize the internal Map with the symbols array
-   * Useful when symbols are modified directly (e.g., in tests)
+   * Bumped on every mutation that invalidates `exports` (add/remove/update/replace/order/clear).
+   * Lets an in-flight export request detect that the model changed while it was waiting
+   * for a server response, so a now-stale response isn't cached as if it were current.
    */
-  #syncMap(): void {
-    if (this.#symbolsMap.size !== this.symbols.length) {
-      this.#symbolsMap.clear()
-      this.symbols.forEach((s) => this.#symbolsMap.set(s.id, s))
-    }
+  get version(): number {
+    return this.#store.version
+  }
+
+  get modificationDate(): number {
+    return this.#modificationDate
+  }
+
+  get exports(): TExport | undefined {
+    return this.#exports
+  }
+
+  /**
+   * Bumped whenever the selection changes. `selectedIds` is a live `Set` whose identity never
+   * changes, so a reader that caches per-selection work has no way to notice a mutation — and
+   * building a key out of the ids costs a sort and a string over the whole selection, on every
+   * `pointermove` of every drag. Compare this integer instead.
+   */
+  get selectionVersion(): number {
+    return this.#selectionVersion
+  }
+
+  /** The ids of the selected symbols. Change the selection through {@link selectSymbol} and friends. */
+  get selectedIds(): ReadonlySet<string> {
+    return this.#selectedIds
+  }
+
+  /** How many symbols the document holds, without building — and cloning — the list to count it. */
+  get symbolCount(): number {
+    return this.#store.size
+  }
+
+  /**
+   * The document's symbols, in stacking order.
+   *
+   * These are the stored records themselves, not copies: the store freezes them at commit, so a
+   * reader cannot corrupt the document by holding one. To change a symbol, ask for a
+   * {@link draftSymbol} and commit it back.
+   */
+  get symbols(): TSymbol[] {
+    return this.#store.list()
   }
 
   get symbolsSelected(): TSymbol[] {
-    return this.symbols.filter((s) => this.selectedIds.has(s.id))
+    return this.#store.list().filter((s) => this.#selectedIds.has(s.id))
   }
 
   /**
@@ -46,7 +83,7 @@ export class IIModel {
    * @returns Array of Text elements from the JIIX export, or empty array if no export available
    */
   get textBlocks(): TJIIXTextElement[] {
-    const jiixExport = this.exports?.["application/vnd.myscript.jiix"]
+    const jiixExport = this.#exports?.["application/vnd.myscript.jiix"]
     if (!jiixExport?.elements) {
       return []
     }
@@ -58,7 +95,7 @@ export class IIModel {
    * @returns Array of Math elements from the JIIX export, or empty array if no export available
    */
   get mathBlocks(): TJIIXMathElement[] {
-    const jiixExport = this.exports?.["application/vnd.myscript.jiix"]
+    const jiixExport = this.#exports?.["application/vnd.myscript.jiix"]
     if (!jiixExport?.elements) {
       return []
     }
@@ -66,116 +103,91 @@ export class IIModel {
   }
 
   selectSymbol(id: string): void {
-    this.selectedIds.add(id)
+    const before = this.#selectedIds.size
+    this.#selectedIds.add(id)
+    if (this.#selectedIds.size !== before) {
+      this.#selectionVersion++
+    }
   }
 
   unselectSymbol(id: string): void {
-    this.selectedIds.delete(id)
+    if (this.#selectedIds.delete(id)) {
+      this.#selectionVersion++
+    }
   }
 
   resetSelection(): void {
-    this.selectedIds.clear()
-  }
-
-  getRootSymbol(id: string): TSymbol | undefined {
-    this.#syncMap()
-    const directMatch = this.#symbolsMap.get(id)
-    if (directMatch) {
-      return directMatch
-    }
-    return undefined
-  }
-
-  addSymbol(symbol: TSymbol): void {
-    this.#logger.info("addSymbol", { symbol })
-    if (this.#symbolsMap.has(symbol.id)) {
-      throw new Error(`Symbol id already exist: ${symbol.id}`)
-    }
-    this.symbols.push(symbol)
-    this.#symbolsMap.set(symbol.id, symbol)
-    this.#markDirty()
-    this.#logger.debug("addSymbol", this.symbols)
-  }
-
-  updateSymbol(updatedSymbol: TSymbol): void {
-    this.#logger.info("updateSymbol", {
-      updatedSymbol,
-    })
-    const sIndex = this.symbols.findIndex((s) => s.id === updatedSymbol.id)
-    if (sIndex !== -1) {
-      updatedSymbol.modificationDate = Date.now()
-      this.symbols.splice(sIndex, 1, updatedSymbol)
-      this.#symbolsMap.set(updatedSymbol.id, updatedSymbol)
-      this.#markDirty()
-    }
-    this.#logger.debug("updateSymbol", this.symbols)
-  }
-
-  replaceSymbol(id: string, symbols: TSymbol[]): void {
-    const sIndex = this.symbols.findIndex((s) => s.id === id)
-    if (sIndex !== -1) {
-      this.symbols.splice(sIndex, 1, ...symbols)
-      this.#symbolsMap.delete(id)
-      symbols.forEach((s) => this.#symbolsMap.set(s.id, s))
-      this.#markDirty()
-    }
-  }
-
-  changeOrderSymbol(id: string, position: "first" | "last" | "forward" | "backward") {
-    const fromIndex = this.symbols.findIndex((s) => s.id === id)
-    if (fromIndex > -1) {
-      let toIndex = fromIndex
-      switch (position) {
-        case "first":
-          toIndex = 0
-          break
-        case "last":
-          toIndex = this.symbols.length - 1
-          break
-        case "forward":
-          toIndex = Math.min(toIndex + 1, this.symbols.length - 1)
-          break
-        case "backward":
-          toIndex = Math.max(toIndex - 1, 0)
-          break
-      }
-      const sym = this.symbols.splice(fromIndex, 1)[0]
-      this.symbols.splice(toIndex, 0, sym)
-    }
-  }
-
-  removeSymbol(id: string): void {
-    this.#logger.info("removeSymbol", { id })
-    this.#syncMap()
-    const symbolIndex = this.symbols.findIndex((s) => s.id === id)
-    if (symbolIndex !== -1) {
-      this.symbols.splice(symbolIndex, 1)
-      this.#symbolsMap.delete(id)
-      this.#markDirty()
-    }
-    this.#logger.debug("removeSymbol", this.symbols)
-  }
-
-  extractDifferenceSymbols(model: IIModel): {
-    added: TSymbol[]
-    removed: TSymbol[]
-  } {
-    const modelKeys = new Set(model.symbols.map((s) => `${s.id}:${s.modificationDate}`))
-    const thisKeys = new Set(this.symbols.map((s) => `${s.id}:${s.modificationDate}`))
-
-    return {
-      added: this.symbols.filter((s) => !modelKeys.has(`${s.id}:${s.modificationDate}`)),
-      removed: model.symbols.filter((s) => !thisKeys.has(`${s.id}:${s.modificationDate}`)),
+    if (this.#selectedIds.size > 0) {
+      this.#selectedIds.clear()
+      this.#selectionVersion++
     }
   }
 
   /**
-   * Bumped on every mutation that invalidates `exports` (add/remove/update/replace/clear).
-   * Lets an in-flight export request detect that the model changed while it was waiting
-   * for a server response, so a now-stale response isn't cached as if it were current.
+   * The decorators claiming each target id, memoized against {@link version}.
+   *
+   * Transform paths need this per `pointermove`; scanning the document for it was a full pass — and,
+   * before IIC-1968, a full deep clone — on every frame.
    */
-  get version(): number {
-    return this.#version
+  get decoratorsByTargetId(): ReadonlyMap<string, TSymbol[]> {
+    return this.#store.listBy(targetIdsOf)
+  }
+
+  getSymbol(id: string): TSymbol | undefined {
+    return this.#store.get(id)
+  }
+
+  /**
+   * A mutable copy of a committed symbol, yours to change until you {@link commitSymbol} it.
+   *
+   * This is the replacement for the read-a-clone-then-mutate-it pattern: same cost, but the type
+   * says which side of the commit boundary you are on, so IIC-1974 can freeze committed records
+   * without every caller having to be re-read to find out whether it writes.
+   */
+  draftSymbol(id: string): TDraft<TSymbol> | undefined {
+    return this.#store.draft(id)
+  }
+
+  /** Stores a draft back into the document, in the position the symbol already held. */
+  commitSymbol(draft: TDraft<TSymbol>, markDirty: boolean = true): void {
+    this.updateSymbol(draft, markDirty)
+  }
+
+  addSymbol(symbol: TSymbol): void {
+    this.#logger.info("addSymbol", { symbol })
+    this.#commit(() => this.#store.add(symbol))
+  }
+
+  updateSymbol(updatedSymbol: TSymbol, markDirty: boolean = true): void {
+    this.#logger.info("updateSymbol", { updatedSymbol, markDirty })
+    if (markDirty && this.#store.has(updatedSymbol.id)) {
+      updatedSymbol.modificationDate = Date.now()
+    }
+    this.#commit(() => this.#store.update(updatedSymbol, markDirty))
+  }
+
+  replaceSymbol(id: string, symbols: TSymbol[]): void {
+    this.#commit(() => this.#store.replace(id, symbols))
+  }
+
+  changeOrderSymbol(id: string, position: TSymbolOrder): void {
+    this.#commit(() => this.#store.changeOrder(id, position))
+  }
+
+  removeSymbol(id: string): void {
+    this.#logger.info("removeSymbol", { id })
+    this.#commit(() => this.#store.remove(id))
+  }
+
+  /**
+   * Stamps the model as changed without going through a mutator.
+   *
+   * Its one caller mutates committed records in place and needs the change to be visible downstream.
+   * That pattern is what IIC-1970 converts to draft-then-commit and IIC-1974 makes impossible, and
+   * this method goes with it.
+   */
+  touch(): void {
+    this.#modificationDate = Date.now()
   }
 
   /**
@@ -183,43 +195,32 @@ export class IIModel {
    * going through a symbol mutation.
    */
   invalidateExports(): void {
-    this.#markDirty()
-  }
-
-  #markDirty(): void {
-    this.modificationDate = Date.now()
-    this.exports = undefined
-    this.#version++
+    this.#modificationDate = Date.now()
+    this.#exports = undefined
   }
 
   mergeExport(exports: TExport) {
     this.#logger.info("mergeExport", { exports })
-    if (this.exports) {
-      Object.assign(this.exports, exports)
-    } else {
-      this.exports = exports
-    }
-    this.#logger.debug("mergeExport", this.exports)
-  }
-
-  clone(): IIModel {
-    this.#logger.info("clone")
-    const clonedModel = new IIModel(this.creationTime)
-    clonedModel.modificationDate = this.modificationDate
-    clonedModel.symbols = this.symbols.map((s) => {
-      const c = cloneSymbol(s)
-      clonedModel.#symbolsMap.set(c.id, c)
-      return c
-    })
-    clonedModel.exports = structuredClone(this.exports)
-    this.#logger.debug("clone", { clonedModel })
-    return clonedModel
+    this.#exports = mergeExports(this.#exports, exports)
+    this.#logger.debug("mergeExport", this.#exports)
   }
 
   clear(): void {
     this.#logger.info("clear")
-    this.symbols = []
-    this.#symbolsMap.clear()
-    this.#markDirty()
+    this.#commit(() => this.#store.clear())
+  }
+
+  /**
+   * Runs a store mutation and applies the model-level consequences — but only if the store says
+   * something actually changed. The store's version is the single source of truth for that, so a
+   * no-op (an unknown id, a move that was already at the edge) does not invalidate an export.
+   */
+  #commit(mutate: () => void): void {
+    const before = this.#store.version
+    mutate()
+    if (this.#store.version !== before) {
+      this.#modificationDate = Date.now()
+      this.#exports = undefined
+    }
   }
 }

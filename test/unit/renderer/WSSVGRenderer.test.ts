@@ -1,26 +1,12 @@
 import { delay } from "../helpers"
-import {
-  InteractiveInkSSRSVGRenderer,
-  DefaultRendererConfiguration,
-  Model,
-  Stroke,
-  DefaultPenStyle,
-  TUpdatePatchAppendChild,
-  TUpdatePatchInsertBefore,
-  TUpdatePatchRemoveAttribut,
-  TUpdatePatchRemoveChild,
-  TUpdatePatchRemoveElement,
-  TUpdatePatchReplaceAll,
-  TUpdatePatchReplaceELement,
-  TUpdatePatchSetAttribut,
-} from "@/iink"
+import { InteractiveInkSSRSVGRenderer, DefaultRendererConfiguration, Model, Stroke, DefaultPenStyle, TUpdatePatchAppendChild, TUpdatePatchInsertBefore, TUpdatePatchRemoveAttribut, TUpdatePatchRemoveChild, TUpdatePatchRemoveElement, TUpdatePatchReplaceAll, TUpdatePatchReplaceELement, TUpdatePatchSetAttribut } from "@/iink"
 
 describe("InteractiveInkSSRSVGRenderer.ts", () => {
   const stroke = new Stroke(DefaultPenStyle)
   stroke.pointers = [
-    { x: 604, y: 226, t: 1693494025427, p: 0.1 },
-    { x: 611, y: 222, t: 1693494025467, p: 0.8 },
-    { x: 621, y: 222, t: 1693494025484, p: 0.68 },
+    { x: 604, y: 226, dt: 1693494025427, p: 0.1 },
+    { x: 611, y: 222, dt: 1693494025467, p: 0.8 },
+    { x: 621, y: 222, dt: 1693494025484, p: 0.68 },
   ]
 
   test("should instanciate", () => {
@@ -418,9 +404,9 @@ describe("InteractiveInkSSRSVGRenderer.ts", () => {
 
     const eraseStroke = new Stroke(DefaultPenStyle, "eraser")
     eraseStroke.pointers = [
-      { x: 604, y: 226, t: 1693494025427, p: 0.1 },
-      { x: 611, y: 222, t: 1693494025467, p: 0.8 },
-      { x: 621, y: 222, t: 1693494025484, p: 0.68 },
+      { x: 604, y: 226, dt: 1693494025427, p: 0.1 },
+      { x: 611, y: 222, dt: 1693494025467, p: 0.8 },
+      { x: 621, y: 222, dt: 1693494025484, p: 0.68 },
     ]
     renderer.drawPendingStroke(eraseStroke)
 
@@ -444,9 +430,9 @@ describe("InteractiveInkSSRSVGRenderer.ts", () => {
 
     const eraseStroke = new Stroke(DefaultPenStyle, "eraser")
     eraseStroke.pointers = [
-      { x: 604, y: 226, t: 1693494025427, p: 0.1 },
-      { x: 611, y: 222, t: 1693494025467, p: 0.8 },
-      { x: 621, y: 222, t: 1693494025484, p: 0.68 },
+      { x: 604, y: 226, dt: 1693494025427, p: 0.1 },
+      { x: 611, y: 222, dt: 1693494025467, p: 0.8 },
+      { x: 621, y: 222, dt: 1693494025484, p: 0.68 },
     ]
     renderer.drawPendingStroke(eraseStroke)
     expect(domElement.querySelectorAll("[type=eraser]").length).toStrictEqual(1)

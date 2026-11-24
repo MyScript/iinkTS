@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Interactive Ink Canvas - Live PDF Document</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css" integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>
+    <style>
+      /* The --doc-* colors are copied from the canvas theme (--ms-ink-*) at runtime */
+      :root {
+        --doc-page-margin: 20mm;
+        --doc-paper: #fff;
+        --doc-ink: #000;
+        --doc-muted: #8a93a3;
+        --doc-accent: #1a9fff;
+      }
+
+      .main-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      #rootEl {
+        min-width: 0;
+        border-right: 1px solid var(--ex-border);
+      }
+
+      .doc-column {
+        min-width: 0;
+        overflow: auto;
+        background: var(--ex-surface-alt);
+        padding: 24px 16px;
+      }
+
+      .doc-pages {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+      }
+
+      /* One A4 sheet. mm units map 1:1 onto the JIIX coordinates, which are millimeters too. */
+      .doc-page {
+        width: 210mm;
+        height: 297mm;
+        padding: var(--doc-page-margin);
+        background: var(--doc-paper);
+        color: var(--doc-ink);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 12pt;
+        line-height: 1.5;
+        position: relative;
+      }
+
+      .doc-page-body {
+        height: 100%;
+        overflow: hidden;
+      }
+
+      .doc-page-number {
+        position: absolute;
+        bottom: 10mm;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 9pt;
+        color: var(--doc-muted);
+      }
+
+      .doc-block {
+        margin: 0 0 4mm;
+        padding: 1mm 2mm;
+        border-radius: 4px;
+        transition: background-color 0.3s, box-shadow 0.3s;
+      }
+
+      .doc-block h1 {
+        font-size: 24pt;
+        line-height: 1.2;
+        margin: 0 0 2mm;
+        border-bottom: 2px solid var(--doc-accent);
+        padding-bottom: 2mm;
+      }
+
+      .doc-block h2 {
+        font-size: 16pt;
+        line-height: 1.3;
+        margin: 2mm 0 0;
+        color: var(--doc-accent);
+      }
+
+      .doc-block p {
+        margin: 0;
+        text-align: justify;
+      }
+
+      .doc-block ul,
+      .doc-block ol {
+        margin: 0;
+        padding-left: 8mm;
+      }
+
+      .doc-block ul {
+        list-style: disc;
+      }
+
+      .doc-block ol {
+        list-style: decimal;
+      }
+
+      .doc-block .katex-display {
+        margin: 0;
+      }
+
+      .doc-figure {
+        text-align: center;
+      }
+
+      .doc-figure svg,
+      .doc-figure img {
+        display: block;
+        margin: 0 auto;
+        max-width: 100%;
+        /* A figure taller than the page is scaled down instead of split */
+        max-height: calc(297mm - 2 * var(--doc-page-margin) - 30mm);
+        height: auto;
+      }
+
+      .doc-figure figcaption {
+        margin-top: 2mm;
+        font-size: 10pt;
+        font-style: italic;
+        color: var(--doc-muted);
+      }
+
+      .doc-block.is-new {
+        animation: doc-appear 0.45s ease-out;
+      }
+
+      .doc-block.is-changed {
+        animation: doc-flash 0.9s ease-out;
+      }
+
+      .doc-block.is-removing {
+        animation: doc-vanish 0.25s ease-in forwards;
+      }
+
+      .doc-block.is-linked {
+        background: color-mix(in srgb, var(--doc-accent) 12%, transparent);
+        box-shadow: inset 3px 0 0 var(--doc-accent);
+      }
+
+      @keyframes doc-appear {
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: none; }
+      }
+
+      @keyframes doc-flash {
+        from { background-color: color-mix(in srgb, var(--doc-accent) 25%, transparent); }
+        to { background-color: transparent; }
+      }
+
+      @keyframes doc-vanish {
+        to { opacity: 0; transform: scale(0.98); }
+      }
+
+      .doc-placeholder {
+        color: var(--doc-muted);
+      }
+
+      .doc-placeholder-title {
+        font-size: 24pt;
+        border-bottom: 2px dashed color-mix(in srgb, var(--doc-ink) 20%, transparent);
+        padding-bottom: 2mm;
+        margin-bottom: 6mm;
+      }
+
+      .doc-placeholder-line {
+        height: 3mm;
+        margin: 4mm 0;
+        border-radius: 2px;
+        background: color-mix(in srgb, var(--doc-ink) 8%, transparent);
+      }
+
+      .doc-placeholder-hint {
+        margin-top: 8mm;
+        font-style: italic;
+      }
+
+      @media (max-width: 900px) {
+        .main-layout {
+          grid-template-columns: 1fr;
+          grid-template-rows: 1fr 1fr;
+        }
+
+        #rootEl {
+          border-right: none;
+          border-bottom: 1px solid var(--ex-border);
+        }
+      }
+
+      @page {
+        size: A4;
+        margin: 0;
+      }
+
+      @media print {
+        header,
+        .page-content > nav.flex-container,
+        #info-panel,
+        #rootEl,
+        .cv-panel,
+        .doc-page-number {
+          display: none !important;
+        }
+
+        html,
+        body,
+        .ex-page-layout,
+        .page-content,
+        .main-layout,
+        .doc-column {
+          display: block !important;
+          height: auto !important;
+          overflow: visible !important;
+          padding: 0 !important;
+          background: none !important;
+        }
+
+        .doc-pages {
+          display: block;
+          zoom: 1 !important;
+        }
+
+        .doc-page {
+          box-shadow: none;
+          overflow: hidden;
+        }
+
+        .doc-page + .doc-page {
+          break-before: page;
+        }
+
+        .doc-block.is-linked {
+          background: none;
+          box-shadow: none;
+        }
+      }
+    </style>
+    <script src="../assets/js/theme-init.js"></script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">
+        Interactive Ink Canvas - Live PDF Document
+      </h1>
+    </header>
+
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">Handwriting → typeset document</p>
+        <p class="ex-panel-intro">Every <code>exported</code> event rebuilds an A4 document from <code>canvas.exportAs("jiix")</code>, entirely in the browser.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Underline a line by hand to make it a heading: the first one is the title, the next ones are section headings. Lines starting with <code>-</code> or <code>1.</code> become lists.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Equations are typeset with KaTeX from the recognized LaTeX; shapes and arrows are redrawn from the JIIX geometry as numbered figures.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Hover a block of the document to find its ink, or hover the ink to find its block.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">The pages follow the canvas theme, and every word, equation and shape keeps the color of its strokes.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc"><strong>Print / PDF</strong> prints only the pages — pick "Save as PDF" in the print dialog.</div>
+        </div>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-hint">Write and underline a title, add a few lines, a list, an equation and a small diagram, and watch the pages fill up.</div>
+      </aside>
+      <div class="page-content">
+        <nav class="flex-container wrap gap between">
+          <div class="flex-container wrap gap">
+            <button class="classic-btn primary" id="printPdf">
+              Print / PDF
+            </button>
+            <button class="classic-btn" id="clear">
+              Clear
+            </button>
+          </div>
+        </nav>
+        <div class="main-layout">
+          <div id="rootEl"></div>
+          <div class="doc-column" id="docColumn">
+            <div class="doc-pages" id="docPages"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import {
+        Canvas,
+        JIIXElementType,
+        JIIXEdgeKind,
+        JIIXNodeKind,
+        EdgeDecoration,
+        DecoratorKind,
+        isDecorator,
+        computePointOnEllipse,
+        convertBoundingBoxMillimeterToPixel,
+        convertPixelToMillimeter,
+      } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from "../components/modal/modalCanvasOptions.js";
+
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      const rootElement = document.getElementById("rootEl");
+      const docColumn = document.getElementById("docColumn");
+      const docPages = document.getElementById("docPages");
+      const printPdfBtn = document.getElementById("printPdf");
+      const clearBtn = document.getElementById("clear");
+      const showModalBtn = document.getElementById("showModalBtn");
+
+      const SVG_NS = "http://www.w3.org/2000/svg";
+      /** Shapes closer than this (mm) belong to the same figure */
+      const FIGURE_GAP = 4;
+      const BULLET = /^[-–—•*]\s*(.+)$/;
+      const NUMBERED = /^\d+[.)]\s*(.+)$/;
+      /** Math written inside a text flow comes back in the Text label as `$latex$` */
+      const DISPLAY_MATH = /^\$([^$]+)\$$/;
+      const INLINE_MATH = /\$([^$]+)\$/g;
+
+      let canvas;
+      const canvasOptions = {
+        configuration: {
+          recognition: { types: ['text', 'math', 'shape'] },
+          // An underline gesture leaves an underline decorator on the words: that is what marks a heading
+          gesture: { underline: 'draw' },
+          menu: {
+            action: {
+              language: true,
+              gesture: false,
+              snap: false,
+              export: false,
+              import: false,
+              convert: false,
+              math: false,
+              guide: false,
+              selection: true,
+              diagram: false,
+              overlay: false,
+              pen: false,
+              minimap: false
+            },
+            tool: {
+              write: true,
+              move: true,
+              select: true,
+              erase: true,
+              shape: false,
+              edge: false,
+            },
+            style: {
+              strokeColor: true,
+              fillColor: false,
+              thickness: false,
+              fontSize: false,
+              fontWeight: false,
+              opacity: false,
+              pen: false
+            },
+            context: {
+              edit: false,
+              decorator: false,
+              reorder: false,
+              export: false,
+              convert: false,
+            },
+          },
+        },
+      };
+
+      // ---------------------------------------------------------------------------------------
+      // JIIX → document blocks
+      // A block is { key, kind, elementIds, box (mm), signature, content }; `key` drives the diff,
+      // `signature` tells whether a kept block changed, `box` locates its ink on the canvas.
+      // ---------------------------------------------------------------------------------------
+
+      function unionBoxes(boxes) {
+        const valid = boxes.filter(Boolean);
+        if (!valid.length) return undefined;
+        const x = Math.min(...valid.map((b) => b.x));
+        const y = Math.min(...valid.map((b) => b.y));
+        const right = Math.max(...valid.map((b) => b.x + b.width));
+        const bottom = Math.max(...valid.map((b) => b.y + b.height));
+        return { x, y, width: right - x, height: bottom - y };
+      }
+
+      function boxCenter(box) {
+        return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+      }
+
+      function isInside(point, box) {
+        return !!box && point.x >= box.x && point.x <= box.x + box.width && point.y >= box.y && point.y <= box.y + box.height;
+      }
+
+      function boxesTouch(a, b, gap) {
+        return a.x - gap <= b.x + b.width && b.x - gap <= a.x + a.width && a.y - gap <= b.y + b.height && b.y - gap <= a.y + a.height;
+      }
+
+      /** A plain-text JIIX (root label, no elements) is handled as one Text element */
+      function getElements(jiix) {
+        if (jiix.elements?.length) return jiix.elements;
+        if (!jiix.label) return [];
+        return [{ type: JIIXElementType.Text, id: jiix.id ?? "root", label: jiix.label, "bounding-box": jiix["bounding-box"] }];
+      }
+
+      /** `skip` is where the kept text starts in the line, once a bullet or `$` is dropped */
+      function classifyLine(label, underlined, context) {
+        const math = label.match(DISPLAY_MATH);
+        if (math) return { kind: "math", text: math[1], skip: 1 };
+        // The first underlined line is the document title, the next ones are section headings
+        if (underlined) {
+          const kind = context.titleDone ? "h2" : "h1";
+          context.titleDone = true;
+          return { kind, text: label, skip: 0 };
+        }
+        const item = label.match(BULLET) ?? label.match(NUMBERED);
+        if (item) {
+          return { kind: label.match(BULLET) ? "ul" : "ol", text: item[1], skip: label.length - item[1].length };
+        }
+        return { kind: "p", text: label, skip: 0 };
+      }
+
+      /** The color used by most of the given strokes */
+      function dominantColor(strokeIds, colorOf) {
+        const counts = new Map();
+        strokeIds.forEach((id) => {
+          const color = colorOf.get(id);
+          if (color) counts.set(color, (counts.get(color) ?? 0) + 1);
+        });
+        return [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
+      }
+
+      function itemIds(element) {
+        return (element.items ?? []).map((item) => item.id);
+      }
+
+      /**
+       * What the ink says about each character of a Text label: its color (the color of the word's
+       * strokes, or of the Math element an inline `$latex$` stands for) and whether it is underlined.
+       */
+      function labelInk(element, ink) {
+        const colors = new Array(element.label.length).fill(undefined);
+        const underlined = new Array(element.label.length).fill(false);
+        const paint = (from, length, color) => colors.fill(color, from, from + length);
+        let cursor = 0;
+        (element.words ?? []).forEach((word) => {
+          const at = word.label.trim() ? element.label.indexOf(word.label, cursor) : -1;
+          if (at < 0) return;
+          const strokeIds = itemIds(word);
+          paint(at, word.label.length, dominantColor(strokeIds, ink.colorOf));
+          if (strokeIds.some((id) => ink.underlinedIds.has(id))) underlined.fill(true, at, at + word.label.length);
+          cursor = at + word.label.length;
+        });
+        const inlineMath = [...element.label.matchAll(INLINE_MATH)];
+        (element.children ?? []).forEach((childId, index) => {
+          const match = inlineMath[index];
+          if (!match) return;
+          const strokeIds = canvas.jiix.getStrokeSymbolsForElement(childId).map((stroke) => stroke.id);
+          paint(match.index, match[0].length, dominantColor(strokeIds, ink.colorOf));
+        });
+        return { colors, underlined };
+      }
+
+      /** Split one Text element into heading / paragraph / list blocks, line by line */
+      /** Split one Text element into heading / paragraph / list blocks, line by line */
+      function textBlocks(element, context, ink) {
+        const { colors, underlined } = labelInk(element, ink);
+        const blocks = [];
+        let lineStart = 0;
+        element.label.split("\n").forEach((rawLabel, index) => {
+          const label = rawLabel.trim();
+          const start = lineStart + rawLabel.indexOf(label);
+          lineStart += rawLabel.length + 1;
+          if (!label) return;
+          const line = element.lines?.[index];
+          const isUnderlined = underlined.slice(start, start + label.length).some(Boolean);
+          const { kind, text, skip } = classifyLine(label, isUnderlined, context);
+          // A segment is a run of text plus the ink color of each of its characters
+          const segment = { text, colors: colors.slice(start + skip, start + skip + text.length) };
+          const box = line?.["bounding-box"] ?? element["bounding-box"];
+          const previous = blocks[blocks.length - 1];
+          const mergeable = previous && previous.kind === kind && ["p", "ul", "ol"].includes(kind);
+          if (mergeable) {
+            previous.segments.push(segment);
+            previous.box = unionBoxes([previous.box, box]);
+          } else {
+            blocks.push({ kind, segments: [segment], box });
+          }
+        });
+        return blocks.map((block, index) => ({
+          key: `${element.id}#${index}`,
+          kind: block.kind,
+          elementIds: [element.id],
+          box: block.box,
+          signature: `${block.kind}:${JSON.stringify(block.segments)}`,
+          content: block.kind === "math"
+            ? { latex: block.segments[0].text, color: block.segments[0].colors[0] }
+            : block.segments,
+        }));
+      }
+
+      function mathBlock(element, colorOf) {
+        const strokeIds = canvas.jiix.getStrokeSymbolsForElement(element.id).map((stroke) => stroke.id);
+        const color = dominantColor(strokeIds, colorOf);
+        return {
+          key: element.id,
+          kind: "math",
+          elementIds: [element.id],
+          box: element["bounding-box"],
+          signature: `math:${element.label}:${color}`,
+          content: { latex: element.label, color },
+        };
+      }
+
+      function rawBlock(element) {
+        const strokeIds = itemIds(element);
+        return {
+          key: element.id,
+          kind: "raw",
+          elementIds: [element.id],
+          box: element["bounding-box"],
+          signature: `raw:${strokeIds.join(",")}`,
+          content: strokeIds,
+        };
+      }
+
+      /** Group nodes, edges and the texts written inside nodes into connected figures */
+      function figureBlocks(nodes, edges, labels, colorOf) {
+        const parts = [...nodes, ...edges].filter((element) => element["bounding-box"]);
+        const groupOf = new Map(parts.map((part) => [part.id, part.id]));
+        const find = (id) => (groupOf.get(id) === id ? id : find(groupOf.get(id)));
+        const join = (a, b) => groupOf.has(a) && groupOf.has(b) && groupOf.set(find(a), find(b));
+
+        edges.forEach((edge) => edge.connected?.forEach((nodeId) => join(edge.id, nodeId)));
+        parts.forEach((a, i) => parts.slice(i + 1).forEach((b) => {
+          if (boxesTouch(a["bounding-box"], b["bounding-box"], FIGURE_GAP)) join(a.id, b.id);
+        }));
+
+        const groups = new Map();
+        parts.forEach((part) => {
+          const root = find(part.id);
+          groups.set(root, [...(groups.get(root) ?? []), part]);
+        });
+
+        return [...groups.values()].map((groupParts) => {
+          const groupNodes = groupParts.filter((part) => part.type === JIIXElementType.Node);
+          const groupLabels = labels.filter((label) => groupNodes.some((node) => isInside(boxCenter(label["bounding-box"]), node["bounding-box"])));
+          const all = [...groupParts, ...groupLabels];
+          const ids = all.map((element) => element.id).sort();
+          const colors = Object.fromEntries(all.map((element) => [element.id, dominantColor(itemIds(element), colorOf)]));
+          return {
+            key: `figure:${ids[0]}`,
+            kind: "figure",
+            elementIds: ids,
+            box: unionBoxes(all.map((element) => element["bounding-box"])),
+            signature: `figure:${JSON.stringify(all, ["id", "kind", "label", "x", "y", "width", "height", "cx", "cy", "r", "rx", "ry", "points", "x1", "y1", "x2", "y2"])}:${JSON.stringify(colors)}`,
+            content: { parts: groupParts, labels: groupLabels, colors },
+          };
+        });
+      }
+
+      function buildBlocks(jiix) {
+        const elements = getElements(jiix);
+        const colorOf = new Map(canvas.model.symbols.map((symbol) => [symbol.id, symbol.style?.color]));
+        const underlinedIds = new Set(canvas.model.symbols
+          .filter((symbol) => isDecorator(symbol) && symbol.kind === DecoratorKind.Underline)
+          .flatMap((decorator) => decorator.targetIds));
+        const ink = { colorOf, underlinedIds };
+        const nodes = elements.filter((e) => e.type === JIIXElementType.Node);
+        const edges = elements.filter((e) => e.type === JIIXElementType.Edge);
+        const texts = elements.filter((e) => e.type === JIIXElementType.Text);
+        const isLabel = (text) => text["bounding-box"] && nodes.some((node) => isInside(boxCenter(text["bounding-box"]), node["bounding-box"]));
+        const labels = texts.filter(isLabel);
+        const bodyTexts = texts.filter((text) => !isLabel(text));
+
+        const context = { titleDone: false };
+
+        // Each entry is placed on the page by the top-left corner of its ink
+        const entries = [
+          ...bodyTexts.map((element) => ({ box: element["bounding-box"], build: () => textBlocks(element, context, ink) })),
+          // A Math element with a parent is already part of that Text element's label
+          ...elements.filter((e) => e.type === JIIXElementType.Math && e.label && !e.parent).map((element) => ({ box: element["bounding-box"], build: () => [mathBlock(element, colorOf)] })),
+          ...elements.filter((e) => e.type === JIIXElementType.RawContent).map((element) => ({ box: element["bounding-box"], build: () => [rawBlock(element)] })),
+          ...figureBlocks(nodes, edges, labels, colorOf).map((block) => ({ box: block.box, build: () => [block] })),
+        ];
+        entries.sort((a, b) => (a.box?.y ?? 0) - (b.box?.y ?? 0) || (a.box?.x ?? 0) - (b.box?.x ?? 0));
+        // Built after sorting so the title is the first underlined line in reading order
+        return entries.flatMap((entry) => entry.build());
+      }
+
+      // ---------------------------------------------------------------------------------------
+      // Figures: nodes and edges redrawn clean from the JIIX geometry
+      // ---------------------------------------------------------------------------------------
+
+      function svgElement(name, attributes) {
+        const element = document.createElementNS(SVG_NS, name);
+        Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+        return element;
+      }
+
+      function pointsAttribute(points) {
+        const pairs = [];
+        for (let i = 0; i + 1 < points.length; i += 2) pairs.push(`${points[i]},${points[i + 1]}`);
+        return pairs.join(" ");
+      }
+
+      function nodeShape(node) {
+        switch (node.kind) {
+          case JIIXNodeKind.Circle:
+            return svgElement("circle", { cx: node.cx, cy: node.cy, r: node.r });
+          case JIIXNodeKind.Ellipse:
+            return svgElement("ellipse", {
+              cx: node.cx, cy: node.cy, rx: node.rx, ry: node.ry,
+              transform: `rotate(${(node.orientation * 180) / Math.PI} ${node.cx} ${node.cy})`,
+            });
+          case JIIXNodeKind.Rectangle:
+            return svgElement("rect", { x: node.x, y: node.y, width: node.width, height: node.height, rx: 1 });
+          default:
+            return svgElement("polygon", { points: pointsAttribute(node.points ?? []) });
+        }
+      }
+
+      function lineShape(line, arrows) {
+        const attributes = { x1: line.x1, y1: line.y1, x2: line.x2, y2: line.y2 };
+        if (line.p1Decoration === EdgeDecoration.Arrow) attributes["marker-start"] = arrows.start;
+        if (line.p2Decoration === EdgeDecoration.Arrow) attributes["marker-end"] = arrows.end;
+        return svgElement("line", attributes);
+      }
+
+      function edgeShape(edge, arrows) {
+        switch (edge.kind) {
+          case JIIXEdgeKind.Line:
+            return lineShape(edge, arrows);
+          case JIIXEdgeKind.PolyEdge: {
+            const group = svgElement("g", {});
+            edge.edges.forEach((segment) => group.appendChild(lineShape(segment, arrows)));
+            return group;
+          }
+          case JIIXEdgeKind.Arc: {
+            const center = { x: edge.cx, y: edge.cy };
+            const start = computePointOnEllipse(center, edge.rx, edge.ry, edge.phi, edge.startAngle);
+            const end = computePointOnEllipse(center, edge.rx, edge.ry, edge.phi, edge.startAngle + edge.sweepAngle);
+            const largeArc = Math.abs(edge.sweepAngle) > Math.PI ? 1 : 0;
+            const sweep = edge.sweepAngle > 0 ? 1 : 0;
+            const path = svgElement("path", {
+              d: `M ${start.x} ${start.y} A ${edge.rx} ${edge.ry} ${(edge.phi * 180) / Math.PI} ${largeArc} ${sweep} ${end.x} ${end.y}`,
+            });
+            if (edge.startDecoration === EdgeDecoration.Arrow) path.setAttribute("marker-start", arrows.start);
+            if (edge.endDecoration === EdgeDecoration.Arrow) path.setAttribute("marker-end", arrows.end);
+            return path;
+          }
+        }
+      }
+
+      /** Marker ids must be unique in the whole page: every figure is inline in the same document */
+      let markerCount = 0;
+
+      /**
+       * A marker paints with the color of where it is defined, not of the line using it, so each
+       * ink color gets its own pair of arrowheads.
+       */
+      function arrowMarkers(defs, color) {
+        const make = (orient) => {
+          const id = `doc-arrow-${++markerCount}`;
+          const marker = svgElement("marker", { id, viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient });
+          marker.appendChild(svgElement("path", { d: "M 0 0 L 10 5 L 0 10 z", fill: color, stroke: "none" }));
+          defs.appendChild(marker);
+          return `url(#${id})`;
+        };
+        return { end: make("auto"), start: make("auto-start-reverse") };
+      }
+
+      function renderFigureSvg({ parts, labels, colors }, box) {
+        const padding = 3;
+        const svg = svgElement("svg", {
+          viewBox: `${box.x - padding} ${box.y - padding} ${box.width + 2 * padding} ${box.height + 2 * padding}`,
+          style: `width: ${box.width + 2 * padding}mm`,
+          fill: "none",
+          stroke: "currentColor",
+          "stroke-width": 0.5,
+          "stroke-linejoin": "round",
+        });
+        const defs = svgElement("defs", {});
+        svg.appendChild(defs);
+        const arrowsByColor = new Map();
+        const arrowsFor = (color) => {
+          if (!arrowsByColor.has(color)) arrowsByColor.set(color, arrowMarkers(defs, color));
+          return arrowsByColor.get(color);
+        };
+        parts.forEach((part) => {
+          const color = colors[part.id] ?? "currentColor";
+          const shape = part.type === JIIXElementType.Node ? nodeShape(part) : edgeShape(part, arrowsFor(color));
+          shape.setAttribute("stroke", color);
+          svg.appendChild(shape);
+        });
+        labels.forEach((label) => {
+          const labelBox = label["bounding-box"];
+          const center = boxCenter(labelBox);
+          const text = svgElement("text", {
+            x: center.x, y: center.y,
+            "text-anchor": "middle", "dominant-baseline": "central",
+            "font-size": Math.max(3, labelBox.height * 0.7),
+            fill: colors[label.id] ?? "currentColor", stroke: "none",
+          });
+          text.textContent = label.label;
+          svg.appendChild(text);
+        });
+        return svg;
+      }
+
+      // ---------------------------------------------------------------------------------------
+      // Block rendering
+      // ---------------------------------------------------------------------------------------
+
+      function appendInk(parent, node, color) {
+        if (!color) return parent.append(node);
+        const span = document.createElement("span");
+        span.style.color = color;
+        span.append(node);
+        parent.appendChild(span);
+      }
+
+      /** One span per run of characters written with the same ink color */
+      function appendColoredText(parent, text, colors) {
+        let runStart = 0;
+        for (let i = 1; i <= text.length; i++) {
+          if (i < text.length && colors[i] === colors[runStart]) continue;
+          appendInk(parent, text.slice(runStart, i), colors[runStart]);
+          runStart = i;
+        }
+      }
+
+      /** A segment's text in its ink colors, with its inline `$latex$` parts typeset by KaTeX */
+      function appendSegment(parent, { text, colors }) {
+        let position = 0;
+        text.split(INLINE_MATH).forEach((part, index) => {
+          // split() with a capture group puts the captured LaTeX at odd indexes
+          if (index % 2 === 0) {
+            appendColoredText(parent, part, colors.slice(position, position + part.length));
+            position += part.length;
+          } else {
+            const math = document.createElement("span");
+            window.katex.render(part, math, { throwOnError: false });
+            appendInk(parent, math, colors[position]);
+            position += part.length + 2;
+          }
+        });
+      }
+
+      function inlineElement(tag, segments) {
+        const element = document.createElement(tag);
+        segments.forEach((segment, index) => {
+          if (index > 0) element.append(" ");
+          appendSegment(element, segment);
+        });
+        return element;
+      }
+
+      function listElement(tag, segments) {
+        const list = document.createElement(tag);
+        segments.forEach((segment) => list.appendChild(inlineElement("li", [segment])));
+        return list;
+      }
+
+      /** The ink itself, colors included; the JIIX stroke index does not cover Raw Content, its items do */
+      async function rawImage(strokeIds, box) {
+        const ids = new Set(strokeIds);
+        const strokes = canvas.model.symbols.filter((symbol) => ids.has(symbol.id));
+        const img = document.createElement("img");
+        img.alt = "Handwritten drawing";
+        if (strokes.length) {
+          const svg = await canvas.exportAs("svg", { symbols: strokes });
+          img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+        }
+        if (box) img.style.width = `${box.width}mm`;
+        return img;
+      }
+
+      function figureElement(visual, number) {
+        const figure = document.createElement("figure");
+        figure.className = "doc-figure";
+        const caption = document.createElement("figcaption");
+        caption.textContent = `Figure ${number}`;
+        figure.append(visual, caption);
+        return figure;
+      }
+
+      async function renderContent(block, figureNumber) {
+        switch (block.kind) {
+          case "h1":
+          case "h2":
+          case "p":
+            return inlineElement(block.kind, block.content);
+          case "ul":
+          case "ol":
+            return listElement(block.kind, block.content);
+          case "math": {
+            const math = document.createElement("div");
+            window.katex.render(block.content.latex, math, { displayMode: true, throwOnError: false });
+            if (block.content.color) math.style.color = block.content.color;
+            return math;
+          }
+          case "figure":
+            return figureElement(renderFigureSvg(block.content, block.box), figureNumber);
+          case "raw":
+            return figureElement(await rawImage(block.content, block.box), figureNumber);
+        }
+      }
+
+      // ---------------------------------------------------------------------------------------
+      // Live update: per-block diff, then pagination
+      // ---------------------------------------------------------------------------------------
+
+      /** key → { element, signature, block } of the blocks currently on the pages */
+      const rendered = new Map();
+      /** Keys in reading order, from the last render */
+      let order = [];
+      let renderQueue = Promise.resolve();
+
+      function createPage() {
+        const page = document.createElement("section");
+        page.className = "doc-page";
+        const body = document.createElement("div");
+        body.className = "doc-page-body";
+        const number = document.createElement("div");
+        number.className = "doc-page-number";
+        page.append(body, number);
+        docPages.appendChild(page);
+        return page;
+      }
+
+      function createPlaceholder() {
+        const placeholder = document.createElement("div");
+        placeholder.className = "doc-placeholder";
+        placeholder.innerHTML = `
+          <div class="doc-placeholder-title">Write a title and underline it…</div>
+          <div class="doc-placeholder-line"></div>
+          <div class="doc-placeholder-line"></div>
+          <div class="doc-placeholder-line" style="width: 70%"></div>
+          <p class="doc-placeholder-hint">Then add some text, a list (<code>- item</code>), an equation or a diagram.</p>`;
+        return placeholder;
+      }
+
+      const placeholder = createPlaceholder();
+
+      function pageBody(index) {
+        const pages = docPages.querySelectorAll(".doc-page");
+        const page = pages[index] ?? createPage();
+        return page.querySelector(".doc-page-body");
+      }
+
+      /** Flow the blocks into A4 pages; a block never splits, it moves to the next page instead */
+      function paginate(elements) {
+        elements.forEach((element) => element.remove());
+        placeholder.remove();
+        let pageIndex = 0;
+        let body = pageBody(0);
+        if (!elements.length) body.appendChild(placeholder);
+        elements.forEach((element) => {
+          body.appendChild(element);
+          if (body.scrollHeight > body.clientHeight && body.children.length > 1) {
+            pageIndex += 1;
+            body = pageBody(pageIndex);
+            body.appendChild(element);
+          }
+        });
+        [...docPages.querySelectorAll(".doc-page")]
+          .slice(pageIndex + 1)
+          .filter((page) => !page.querySelector(".is-removing"))
+          .forEach((page) => page.remove());
+        const pages = docPages.querySelectorAll(".doc-page");
+        pages.forEach((page, index) => {
+          page.querySelector(".doc-page-number").textContent = `${index + 1} / ${pages.length}`;
+        });
+      }
+
+      function animate(element, className) {
+        element.classList.remove("is-new", "is-changed");
+        // Restart the animation even when the same class is applied twice in a row
+        void element.offsetWidth;
+        element.classList.add(className);
+        element.addEventListener("animationend", () => element.classList.remove(className), { once: true });
+      }
+
+      function createBlockElement(block) {
+        const element = document.createElement("div");
+        element.className = "doc-block";
+        element.dataset.key = block.key;
+        element.dataset.kind = block.kind;
+        element.addEventListener("mouseenter", () => highlightInk(element.dataset.key));
+        element.addEventListener("mouseleave", () => clearInkHighlight());
+        return element;
+      }
+
+      function removeBlock(element) {
+        element.classList.add("is-removing");
+        element.addEventListener("animationend", () => {
+          element.remove();
+          paginate(order.filter((key) => rendered.has(key)).map((key) => rendered.get(key).element));
+        }, { once: true });
+      }
+
+      function boxesOverlap(a, b) {
+        return !!a && !!b && (isInside(boxCenter(a), b) || isInside(boxCenter(b), a));
+      }
+
+      /**
+       * Find the block already on the pages that a new block continues. Same key and kind first;
+       * then, since the server renames an element when it regroups ink (two Text elements merged
+       * into one), any unclaimed block of the same kind at the same place. The block then updates
+       * in place instead of disappearing and reappearing.
+       */
+      function claimPrevious(block, unclaimed) {
+        const sameKey = unclaimed.get(block.key);
+        const match = sameKey?.block.kind === block.kind
+          ? sameKey
+          : [...unclaimed.values()].find((entry) => entry.block.kind === block.kind && boxesOverlap(entry.block.box, block.box));
+        if (match) unclaimed.delete(match.block.key);
+        return match;
+      }
+
+      async function renderDocument(jiix) {
+        const blocks = buildBlocks(jiix);
+        const unclaimed = new Map(rendered);
+        const next = new Map();
+
+        let figureNumber = 0;
+        const updates = [];
+        for (const block of blocks) {
+          const isFigure = block.kind === "figure" || block.kind === "raw";
+          if (isFigure) figureNumber += 1;
+          const previous = claimPrevious(block, unclaimed);
+          const signature = isFigure ? `${block.signature}|${figureNumber}` : block.signature;
+          const element = previous?.element ?? createBlockElement(block);
+          element.dataset.key = block.key;
+          if (!previous || previous.signature !== signature) {
+            element.replaceChildren(await renderContent(block, figureNumber));
+            updates.push([element, previous ? "is-changed" : "is-new"]);
+          }
+          next.set(block.key, { element, signature, block });
+        }
+        unclaimed.forEach(({ element }) => removeBlock(element));
+        rendered.clear();
+        next.forEach((entry, key) => rendered.set(key, entry));
+
+        const nextOrder = blocks.map((block) => block.key);
+        // A render that changed nothing (a new stroke not recognized yet) leaves the pages alone
+        const unchanged = !updates.length && !unclaimed.size && nextOrder.join() === order.join();
+        order = nextOrder;
+        if (unchanged) return;
+        paginate(order.map((key) => rendered.get(key).element));
+        updates.forEach(([element, className]) => animate(element, className));
+      }
+
+      /** The JIIX of the last render, reused when only the ink style changed */
+      let lastJiix;
+
+      /** Serialize renders: a slow render (raw ink image) must not interleave with the next one */
+      function queueRender(getJiix) {
+        renderQueue = renderQueue
+          .then(async () => {
+            if (!canvas) return;
+            lastJiix = await getJiix();
+            await renderDocument(lastJiix);
+          })
+          .catch((error) => console.error(error));
+      }
+
+      function refreshDocument() {
+        queueRender(() => canvas.exportAs("jiix"));
+      }
+
+      /**
+       * A color change is recorded in the history (`changed`) but leaves the recognition as is,
+       * so no `exported` follows: render the last JIIX again, the colors are read from the model.
+       */
+      function refreshColors() {
+        if (lastJiix) queueRender(() => lastJiix);
+      }
+
+      function resetDocument() {
+        rendered.forEach(({ element }) => element.remove());
+        rendered.clear();
+        order = [];
+        lastJiix = undefined;
+        docPages.replaceChildren();
+        paginate([]);
+      }
+
+      // ---------------------------------------------------------------------------------------
+      // Canvas ↔ document link
+      // ---------------------------------------------------------------------------------------
+
+      const INK_HIGHLIGHT_ID = "live-document";
+
+      function highlightInk(key) {
+        const box = rendered.get(key)?.block.box;
+        if (!canvas || !box) return;
+        canvas.overlays.highlightPrimary(INK_HIGHLIGHT_ID, convertBoundingBoxMillimeterToPixel(box));
+      }
+
+      function clearInkHighlight() {
+        canvas?.overlays.clearHighlights();
+      }
+
+      /** Screen point → canvas model coordinates (px, zoom and pan applied) → millimeters, like the JIIX */
+      function clientPointToMillimeters(clientX, clientY) {
+        const layer = rootElement.querySelector(".ms-layer-rendering svg");
+        const matrix = layer?.getScreenCTM();
+        if (!matrix) return undefined;
+        const point = new DOMPoint(clientX, clientY).matrixTransform(matrix.inverse());
+        return { x: convertPixelToMillimeter(point.x), y: convertPixelToMillimeter(point.y) };
+      }
+
+      /** The smallest block whose ink box holds the point: a line wins over the figure around it */
+      function findBlockAt(point) {
+        const area = (box) => box.width * box.height;
+        return [...rendered.values()]
+          .filter((entry) => isInside(point, entry.block.box))
+          .sort((a, b) => area(a.block.box) - area(b.block.box))[0];
+      }
+
+      function linkBlock(entry) {
+        docPages.querySelectorAll(".is-linked").forEach((element) => element !== entry?.element && element.classList.remove("is-linked"));
+        if (!entry || entry.element.classList.contains("is-linked")) return;
+        entry.element.classList.add("is-linked");
+        entry.element.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      }
+
+      rootElement.addEventListener("pointermove", (event) => {
+        // Only while hovering: a pressed pointer is writing
+        if (!canvas || event.buttons !== 0) return;
+        const point = clientPointToMillimeters(event.clientX, event.clientY);
+        linkBlock(point && findBlockAt(point));
+      });
+      rootElement.addEventListener("pointerleave", () => linkBlock(undefined));
+
+      // ---------------------------------------------------------------------------------------
+      // Page scale: the A4 sheets shrink to fit the column
+      // ---------------------------------------------------------------------------------------
+
+      new ResizeObserver(() => {
+        const page = docPages.querySelector(".doc-page");
+        if (!page) return;
+        const available = docColumn.clientWidth - 32;
+        docPages.style.zoom = Math.min(1, available / page.offsetWidth);
+      }).observe(docColumn);
+
+      // ---------------------------------------------------------------------------------------
+      // Canvas theme: the pages take the canvas background and colors
+      // ---------------------------------------------------------------------------------------
+
+      const THEME_VARS = {
+        "--doc-paper": "--ms-ink-canvas-bg",
+        "--doc-ink": "--ms-ink-color",
+        "--doc-accent": "--ms-ink-primary",
+        "--doc-muted": "--ms-ink-text-muted",
+      };
+
+      function syncTheme() {
+        const style = getComputedStyle(rootElement);
+        Object.entries(THEME_VARS).forEach(([docVar, inkVar]) => {
+          const value = style.getPropertyValue(inkVar).trim();
+          if (value) docPages.style.setProperty(docVar, value);
+          else docPages.style.removeProperty(docVar);
+        });
+      }
+
+      // A theme picked in the canvas menu lands as inline --ms-ink-* variables on its root
+      new MutationObserver(syncTheme).observe(rootElement, { attributes: true, attributeFilter: ["style", "class"] });
+
+      async function loadCanvas(options) {
+        await canvas?.destroy();
+        canvas = await Canvas.load(rootElement, "INTERACTIVE_INK", options);
+        window.canvas = canvas;
+        syncTheme();
+        resetDocument();
+        canvas.event.addEventListener("exported", () => refreshDocument());
+        canvas.event.addEventListener("changed", () => refreshColors());
+      }
+
+      printPdfBtn.addEventListener("click", () => window.print());
+
+      clearBtn.addEventListener("click", async () => {
+        if (!canvas) return;
+        await canvas.clear();
+        resetDocument();
+      });
+
+      showModalBtn.addEventListener("click", () => {
+        ModalCanvasOptions.show(loadCanvas, canvasOptions);
+      });
+
+      resetDocument();
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions);
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.canvasOptions = canvasOptions
+      window.loadCanvas = loadCanvas
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>

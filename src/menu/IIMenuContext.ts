@@ -1,10 +1,9 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import { DOMFactory } from "@/components/dom"
-import { LoggerCategory, LoggerManager } from "@/logger"
-import type { TJIIXMathElement } from "@/model"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import type { TJIIXMathElement } from "@/client"
+import { DOMFactory } from "@/dom"
 import type { TStroke, TSymbol, TText } from "@/symbol"
 import { isStroke, isText } from "@/symbol"
-import { TextOps } from "@/symbol/text/Text"
+import { TextUtil } from "@/symbol-utils"
 
 import type {
   TContextDecoratorConfig,
@@ -23,6 +22,7 @@ import {
   ReorderContextMenu,
   SelectAllContextMenu,
 } from "./context"
+import { IIAbstractMenu, type TMenuLayoutConfig, type TMenuZone } from "./IIAbstractMenu"
 
 /**
  * @group Menu
@@ -66,48 +66,21 @@ export const DefaultMenuContextConfig: Required<TMenuContextConfig> = {
   selectAll: true,
 }
 
-function extractSubConfig<T>(config: boolean | T): T | undefined {
-  return typeof config === "object" && config !== null ? config : undefined
-}
 /**
  * @group Menu
  */
-export class IIMenuContext {
-  #logger = LoggerManager.getLogger(LoggerCategory.MENU)
-  canvas: TInteractiveInkCanvas
-  id: string
-  wrapper?: HTMLElement
-  config: Required<TMenuContextConfig>
-
-  // Context menu instances
-  private contextMenus: Map<
-    string,
-    | EditContextMenu
-    | DecoratorContextMenu
-    | ReorderContextMenu
-    | ExportContextMenu
-    | ConvertContextMenu
-    | MathContextMenu
-    | DuplicateContextMenu
-    | RemoveContextMenu
-    | SelectAllContextMenu
-  > = new Map()
-
-  #scrollHandler?: () => void
+export class IIMenuContext extends IIAbstractMenu<Required<TMenuContextConfig> & TMenuLayoutConfig> {
+  readonly defaultZone: TMenuZone = "dropdown"
+  /** Hides the menu when the rendering layer scrolls, as the element it points at moves */
+  protected scrollHandler?: () => void
 
   position: {
     x: number
     y: number
   }
 
-  constructor(canvas: TInteractiveInkCanvas, id = "ms-menu-context", config?: TMenuContextConfig) {
-    this.id = id
-    this.#logger.info("constructor")
-    this.canvas = canvas
-    this.config = {
-      ...DefaultMenuContextConfig,
-      ...config,
-    }
+  constructor(canvas: TInteractiveInkCanvas, id = "ms-menu-context", config?: TMenuContextConfig & TMenuLayoutConfig) {
+    super(canvas, id, { ...DefaultMenuContextConfig, ...config })
     this.position = { x: 0, y: 0 }
   }
 
@@ -151,7 +124,7 @@ export class IIMenuContext {
   }
 
   protected async updateMathMenu(): Promise<void> {
-    const mathMenuInstance = this.contextMenus.get("math") as MathContextMenu | undefined
+    const mathMenuInstance = this.items.get("math") as MathContextMenu | undefined
     if (!mathMenuInstance) {
       return
     }
@@ -231,11 +204,11 @@ export class IIMenuContext {
 
     if (this.haveSymbolsSelected) {
       // Update edit menu
-      const editMenuInstance = this.contextMenus.get("edit") as EditContextMenu | undefined
+      const editMenuInstance = this.items.get("edit") as EditContextMenu | undefined
       if (editMenuInstance) {
         const textSymbol = this.canvas.model.symbolsSelected.find((s) => isText(s))
         if (editMenuInstance.editInput && this.canvas.model.symbolsSelected.length === 1 && textSymbol) {
-          editMenuInstance.editInput.value = TextOps.getLabel(textSymbol as TText)
+          editMenuInstance.editInput.value = TextUtil.getLabel(textSymbol as TText)
           editMenuInstance.getElement().style.removeProperty("display")
         } else {
           editMenuInstance.getElement().style.setProperty("display", "none")
@@ -244,103 +217,84 @@ export class IIMenuContext {
 
       // Show convert button only if there are strokes AND not only math selected
       if (this.canvas.extractStrokesFromSymbols(this.symbolsSelected).length) {
-        this.contextMenus.get("convert")?.getElement().style.removeProperty("display")
+        this.items.get("convert")?.getElement().style.removeProperty("display")
       } else {
-        this.contextMenus.get("convert")?.getElement().style.setProperty("display", "none")
+        this.items.get("convert")?.getElement().style.setProperty("display", "none")
       }
 
-      this.contextMenus.get("reorder")?.getElement().style.removeProperty("display")
-      this.contextMenus.get("duplicate")?.getElement().style.removeProperty("display")
-      this.contextMenus.get("remove")?.getElement().style.removeProperty("display")
-      this.contextMenus.get("export")?.getElement().style.removeProperty("display")
+      this.items.get("reorder")?.getElement().style.removeProperty("display")
+      this.items.get("duplicate")?.getElement().style.removeProperty("display")
+      this.items.get("remove")?.getElement().style.removeProperty("display")
+      this.items.get("export")?.getElement().style.removeProperty("display")
     } else {
-      this.contextMenus.get("edit")?.getElement().style.setProperty("display", "none")
-      this.contextMenus.get("convert")?.getElement().style.setProperty("display", "none")
-      this.contextMenus.get("reorder")?.getElement().style.setProperty("display", "none")
-      this.contextMenus.get("duplicate")?.getElement().style.setProperty("display", "none")
-      this.contextMenus.get("remove")?.getElement().style.setProperty("display", "none")
-      this.contextMenus.get("export")?.getElement().style.setProperty("display", "none")
+      this.items.get("edit")?.getElement().style.setProperty("display", "none")
+      this.items.get("convert")?.getElement().style.setProperty("display", "none")
+      this.items.get("reorder")?.getElement().style.setProperty("display", "none")
+      this.items.get("duplicate")?.getElement().style.setProperty("display", "none")
+      this.items.get("remove")?.getElement().style.setProperty("display", "none")
+      this.items.get("export")?.getElement().style.setProperty("display", "none")
     }
 
     // Update menu instances
-    this.contextMenus.get("edit")?.update()
-    this.contextMenus.get("decorator")?.update()
-    this.contextMenus.get("duplicate")?.update()
+    this.items.get("edit")?.update()
+    this.items.get("decorator")?.update()
+    this.items.get("duplicate")?.update()
     this.updateMathMenu()
   }
 
   render(layer: HTMLElement): void {
-    this.#logger.info("Rendering context menu with config", this.config)
+    this.logger.info("Rendering context menu with config", this.config)
+    const wrapper = DOMFactory.div({ id: `${this.id}-wrapper`, className: ["ms-menu", "ms-menu-context"] })
+    this.wrapper = wrapper
+    this.renderDropdownItems()
 
-    this.wrapper = DOMFactory.div({
-      id: `${this.id}-wrapper`,
-      className: ["ms-menu", "ms-menu-context"],
-    })
-
-    if (this.config.edit) {
-      const editMenuInstance = new EditContextMenu(this.canvas, this.id)
-      this.contextMenus.set("edit", editMenuInstance)
-      this.wrapper.appendChild(editMenuInstance.getElement())
-    }
-
-    if (this.config.decorator) {
-      const decoratorMenuInstance = new DecoratorContextMenu(
-        this.canvas,
-        this.id,
-        extractSubConfig(this.config.decorator)
-      )
-      this.contextMenus.set("decorator", decoratorMenuInstance)
-      this.wrapper.appendChild(decoratorMenuInstance.getElement())
-    }
-
-    if (this.config.reorder) {
-      const reorderMenuInstance = new ReorderContextMenu(this.canvas, this.id, extractSubConfig(this.config.reorder))
-      this.contextMenus.set("reorder", reorderMenuInstance)
-      this.wrapper.appendChild(reorderMenuInstance.getElement())
-    }
-
-    if (this.config.export) {
-      const exportMenuInstance = new ExportContextMenu(this.canvas, this.id, extractSubConfig(this.config.export))
-      this.contextMenus.set("export", exportMenuInstance)
-      this.wrapper.appendChild(exportMenuInstance.getElement())
-    }
-
-    if (this.config.convert) {
-      const convertMenuInstance = new ConvertContextMenu(this.canvas, this.id)
-      this.contextMenus.set("convert", convertMenuInstance)
-      this.wrapper.appendChild(convertMenuInstance.getElement())
-    }
-
-    if (this.config.math) {
-      const mathMenuInstance = new MathContextMenu(this.canvas, this.id, extractSubConfig(this.config.math))
-      this.contextMenus.set("math", mathMenuInstance)
-      this.wrapper.appendChild(mathMenuInstance.getElement())
-    }
-
-    if (this.config.duplicate) {
-      const duplicateMenuInstance = new DuplicateContextMenu(this.canvas, this.id)
-      this.contextMenus.set("duplicate", duplicateMenuInstance)
-      this.wrapper.appendChild(duplicateMenuInstance.getElement())
-    }
-
-    if (this.config.remove) {
-      const removeMenuInstance = new RemoveContextMenu(this.canvas, this.id)
-      this.contextMenus.set("remove", removeMenuInstance)
-      this.wrapper.appendChild(removeMenuInstance.getElement())
-    }
-
-    if (this.config.selectAll) {
-      const selectAllMenuInstance = new SelectAllContextMenu(this.canvas, this.id)
-      this.contextMenus.set("selectAll", selectAllMenuInstance)
-      this.wrapper.appendChild(selectAllMenuInstance.getElement())
-    }
-
-    this.wrapper.style.setProperty("display", "none")
-    layer.appendChild(this.wrapper)
+    wrapper.style.setProperty("display", "none")
+    layer.appendChild(wrapper)
 
     // Hide context menu when scrolling as the referenced element moves
-    this.#scrollHandler = () => this.hide()
-    this.canvas.layers.rendering.addEventListener("scroll", this.#scrollHandler)
+    this.scrollHandler = () => this.hide()
+    this.canvas.layers.rendering.addEventListener("scroll", this.scrollHandler)
+  }
+
+  protected createZone(zone: TMenuZone, wrapper: HTMLElement): HTMLElement {
+    if (zone === "dropdown") {
+      return wrapper
+    }
+    // A row of quick actions above the list
+    const bar = DOMFactory.div({ className: ["ms-menu-row", "ms-menu-context-bar"] })
+    wrapper.prepend(bar)
+    return bar
+  }
+
+  protected renderDropdownItems(): void {
+    const { config, canvas, id } = this
+    if (config.edit) {
+      this.addItem("edit", new EditContextMenu(canvas, id))
+    }
+    if (config.decorator) {
+      this.addItem("decorator", new DecoratorContextMenu(canvas, id, this.subConfig(config.decorator)))
+    }
+    if (config.reorder) {
+      this.addItem("reorder", new ReorderContextMenu(canvas, id, this.subConfig(config.reorder)))
+    }
+    if (config.export) {
+      this.addItem("export", new ExportContextMenu(canvas, id, this.subConfig(config.export)))
+    }
+    if (config.convert) {
+      this.addItem("convert", new ConvertContextMenu(canvas, id))
+    }
+    if (config.math) {
+      this.addItem("math", new MathContextMenu(canvas, id, this.subConfig(config.math)))
+    }
+    if (config.duplicate) {
+      this.addItem("duplicate", new DuplicateContextMenu(canvas, id))
+    }
+    if (config.remove) {
+      this.addItem("remove", new RemoveContextMenu(canvas, id))
+    }
+    if (config.selectAll) {
+      this.addItem("selectAll", new SelectAllContextMenu(canvas, id))
+    }
   }
 
   show(): void {
@@ -353,13 +307,10 @@ export class IIMenuContext {
   }
 
   destroy(): void {
-    if (this.#scrollHandler) {
-      this.canvas.layers.rendering.removeEventListener("scroll", this.#scrollHandler)
-      this.#scrollHandler = undefined
+    if (this.scrollHandler) {
+      this.canvas.layers.rendering.removeEventListener("scroll", this.scrollHandler)
+      this.scrollHandler = undefined
     }
-    while (this.wrapper?.lastChild) {
-      this.wrapper.removeChild(this.wrapper.lastChild)
-    }
-    this.wrapper?.remove()
+    super.destroy()
   }
 }

@@ -4,10 +4,11 @@ import syncIcon from "@/assets/svg/sync.svg"
 import warningTriangleIcon from "@/assets/svg/warning-triangle.svg"
 import wifiIcon from "@/assets/svg/wifi.svg"
 import wifiOffIcon from "@/assets/svg/wifi-off.svg"
-import type { TCanvasConnectionState } from "@/canvas/CanvasEvent"
-import { DOMFactory } from "@/components/dom"
-import { Modal } from "@/components/Modal"
+import { DOMFactory } from "@/dom"
 import style from "@/iink.css"
+import { Modal } from "@/ui"
+
+import type { TCanvasConnectionState } from "./CanvasEvent"
 
 /**
  * @group Canvas
@@ -161,7 +162,7 @@ export class CanvasLayer {
     root.className = `ms-ink-state ms-ink-state-${state}`
     icon.innerHTML = info.icon
     if (state === "syncing" && detail.queuedCount > 0) {
-      tooltip.textContent = `${info.tooltip} — ${detail.queuedCount} stroke batch(es) waiting to be sent`
+      tooltip.textContent = `${info.tooltip} — ${detail.queuedCount} change(s) waiting to be sent`
       count.textContent = String(detail.queuedCount)
       count.style.display = "flex"
     } else if (state === "online-working" && detail.activeOperations.length > 0) {

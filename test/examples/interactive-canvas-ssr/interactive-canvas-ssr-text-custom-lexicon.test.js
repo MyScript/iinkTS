@@ -5,7 +5,6 @@ import {
   callCanvasIdle,
   passModalKey
 } from "../helper"
-import TextNavAction from "../_partials/text-nav-actions"
 import covfefe from "../__dataset__/covfefe"
 
 test.describe("Interactive Canvas SSR Text Custom Lexicon", () => {

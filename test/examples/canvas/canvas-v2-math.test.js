@@ -10,7 +10,7 @@ import {
 import one from "../__dataset__/1"
 import equation from "../__dataset__/equation"
 
-test.describe("Ink Canvas v2 Math", () => {
+test.describe("Ink Canvas v2 Math", { tag: "@minimal" }, () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/canvas/canvas_v2_math.html`)
     await passModalKey(page)
@@ -131,12 +131,9 @@ test.describe("Ink Canvas v2 Math", () => {
         await expect(page.locator("#result .katex-html")).toHaveText(equation.exports.LATEX.at(-1))
       })
 
-      // Undo multiple times
       await test.step("undo multiple times and verify result is empty", async () => {
         for(let i = 0; i < equation.strokes.length; i++) {
           await page.locator("#undo").click()
-          // eslint-disable-next-line playwright/no-wait-for-timeout
-          await page.waitForTimeout(100) // wait for the undo to process
         }
         await expect(page.locator("#result")).toBeEmpty()
       })

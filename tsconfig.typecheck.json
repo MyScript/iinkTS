@@ -1,0 +1,39 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    // Example modules are plain JS typed with JSDoc; their unit tests import them. `composite`
+    // (from the base) would then check declaration emit on every JS file, eslint configs included,
+    // and nothing is emitted here
+    "allowJs": true,
+    "composite": false,
+    // A run with nothing changed rereads the last result instead of checking everything again.
+    // The cache sits in node_modules so it never shows up in the git tree
+    "incremental": true,
+    "tsBuildInfoFile": "./node_modules/.cache/tsc/typecheck.tsbuildinfo",
+    "rootDir": "./",
+    "types": ["jest", "node"],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  // `perf` is excluded below: it imports `#iink`, which needs `dist/` built, and uses `.ts` import
+  // specifiers. It used to need a `files` list here too, naming the modules its unit tests reached
+  // into from `test/unit/perf`. Those tests now live beside what they test, inside `perf`, so
+  // nothing in this project reaches across the boundary and the exception is gone.
+  // `yarn typecheck:perf` is what covers that tree.
+  "include": [
+    "src",
+    "test",
+    "config",
+    "examples/**/*.ts",
+    "./eslint.config.mjs"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "perf",
+    "examples/custom-rendering/tldraw-websocket-client",
+    "examples/custom-rendering/excalidraw-websocket-client"
+  ]
+}

@@ -1,7 +1,9 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import type { TMenuRange } from "@/menu/items"
-import { CollapsibleWrapper, RangeMenuItem } from "@/menu/items"
-import { BaseMenuItem } from "@/menu/items/BaseMenuItem"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import { CanvasTool } from "@/manager"
+
+import type { TMenuRange } from "../items"
+import { CollapsibleWrapper, RangeMenuItem } from "../items"
+import { BaseMenuItem } from "../items/BaseMenuItem"
 
 /**
  * @group Menu
@@ -15,6 +17,7 @@ export class OpacityStyle extends BaseMenuItem<HTMLDivElement> {
       type: "opacity" as const,
       id: `${idPrefix}-opacity`,
       label: "Opacity",
+      visible: (canvas: TInteractiveInkCanvas) => [CanvasTool.Write, CanvasTool.Select].includes(canvas.tool),
     }
     super(config, canvas)
   }
@@ -37,9 +40,9 @@ export class OpacityStyle extends BaseMenuItem<HTMLDivElement> {
       onChange: (value: number, canvas) => {
         canvas.penStyle = { opacity: value / 100 }
         if (canvas.model.symbolsSelected.length) {
-          canvas.updateSymbolsStyle(
+          canvas.updateSymbols(
             canvas.model.symbolsSelected.map((s) => s.id),
-            { opacity: value / 100 }
+            { style: { opacity: value / 100 } }
           )
         }
       },

@@ -1,21 +1,6 @@
 import { WebSocketSSRClientMock } from "../__mocks__/WebSocketSSRClientMock"
 import { buildStroke, delay } from "../helpers"
-import {
-  InteractiveInkSSRCanvas,
-  Model,
-  DefaultInteractiveInkSSRCanvasConfiguration,
-  DefaultPenStyle,
-  TInteractiveInkSSRCanvasConfiguration,
-  TExport,
-  TWebSocketSSRClientMessageSVGPatch,
-  TPointer,
-  TPenStyle,
-  TTheme,
-  WebSocketSSRClient,
-  PointerEventGrabber,
-  CanvasTool,
-  TInteractiveInkSSRCanvasOptions,
-} from "@/iink"
+import { InteractiveInkSSRCanvas, Model, DefaultInteractiveInkSSRCanvasConfiguration, DefaultPenStyle, TInteractiveInkSSRCanvasConfiguration, TExport, TWebSocketSSRClientMessageSVGPatch, TPointer, TPenStyle, TTheme, WebSocketSSRClient, PointerEventGrabber, CanvasTool, TInteractiveInkSSRCanvasOptions } from "@/iink"
 
 describe("InteractiveInkSSRCanvas.ts", () => {
   const height = 100,
@@ -148,7 +133,7 @@ describe("InteractiveInkSSRCanvas.ts", () => {
       await expect(canvas.renderer.drawPendingStroke).toHaveBeenCalledTimes(0)
     })
     test("should call renderer.drawPendingStroke", async () => {
-      const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
+      const p1: TPointer = { dt: 1, p: 1, x: 1, y: 1 }
       canvas.model.initCurrentStroke(p1, "pen", DefaultPenStyle)
       canvas.drawCurrentStroke()
       await expect(canvas.renderer.drawPendingStroke).toHaveBeenCalledTimes(1)
@@ -173,6 +158,17 @@ describe("InteractiveInkSSRCanvas.ts", () => {
       test("should call renderer.clearErasingStrokes", async () => {
         await canvas.synchronizeModelWithBackend()
         await expect(canvas.renderer.clearErasingStrokes).toHaveBeenCalledTimes(1)
+      })
+      test("should keep the server content state once the strokes are answered", async () => {
+        const serverContext = { canUndo: true, canRedo: false, empty: false, stackIndex: 1, possibleUndoCount: 1 }
+        canvas.client.addStrokes = jest.fn(() => {
+          canvas.client.event.emitContentChanged(serverContext)
+          return Promise.resolve({} as TExport)
+        })
+        const changedDetails: { empty: boolean }[] = []
+        canvas.event.addEventListener("changed", (e) => changedDetails.push((e as CustomEvent).detail))
+        await canvas.synchronizeModelWithBackend()
+        expect(changedDetails.at(-1)).toMatchObject({ empty: false, canUndo: true, canRedo: false })
       })
     })
     describe("with exportContent = 'DEMAND", () => {
@@ -515,7 +511,7 @@ describe("InteractiveInkSSRCanvas.ts", () => {
     })
     test("should updatesLayer when client emit SVG_PATCH", async () => {
       const svgPatch: TWebSocketSSRClientMessageSVGPatch = {
-        type: "REPLACE_ALL",
+        type: "svgPatch",
         layer: "MODEL",
         updates: [],
       }

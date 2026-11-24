@@ -2,125 +2,109 @@
 name: manager-patterns
 description: >
   Patterns for creating and extending managers in iinkTS. Use when adding a new manager,
-  extending AbstractTransformManager, or understanding dependency injection and manager lifecycle.
+  extending IIAbstractTransformManager, or understanding manager dependencies and lifecycle.
 ---
 
 # Manager Patterns
 
 ## Responsibility Rule
 
-One manager = one responsibility. If a manager exceeds ~200 lines, it's doing too much — extract a sub-manager or utility.
+One manager = one responsibility. When a manager grows several unrelated concerns, extract a sub-manager (see `manager/interactive/math/`) or move per-type logic onto the symbol's util.
 
 | Manager family | Location | Responsibility |
 |----------------|----------|----------------|
-| Base managers | `src/manager/base/` | Shared by all variants (ColorPalette, Erase) |
-| Simple managers | `src/manager/simple/` | INKV2 variant (IWriterManager, IHistoryManager) |
-| Interactive managers | `src/manager/interactive/` | INTERACTIVEINK variant (16+ managers) |
+| Base managers | `src/manager/base/` | Shared by several variants: `AbstractWriterManager`, `EraseManager`, `ExportManager`, `PDFExportManager`, `LayoutManager`, `ColorPaletteManager` |
+| Simple managers | `src/manager/simple/` | `INK_V2` variant (`IWriterManager`) — its history is `IHistoryManager` in `src/history/` |
+| Interactive managers | `src/manager/interactive/` | `INTERACTIVE_INK` variant (~20 managers) |
+| Debug | `src/manager/debug/` | `IDebugSVGManager` |
 
-## Creating a New Manager
+## Creating a New Interactive Manager
 
-Minimal structure:
+Interactive managers extend `IIAbstractManager` (`src/manager/interactive/IIAbstractManager.ts`). They receive the **canvas** and read their dependencies from it through inherited getters — `model`, `renderer`, `client`, `configuration` — so a manager always sees the canvas's current instances.
 
 ```typescript
-import { LoggerManager, LoggerCategory } from "@/logger"
-import type { IIModel } from "@/model"
-import type { SVGRenderer } from "@/renderer/svg"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import { LoggerCategory } from "@/logger"
 
-export class IIMyFeatureManager {
-  #logger = LoggerManager.getLogger(LoggerCategory.CANVAS)
-  #model: IIModel
-  #renderer: SVGRenderer
+import { IIAbstractManager } from "./IIAbstractManager"
 
-  constructor(model: IIModel, renderer: SVGRenderer) {
-    this.#model = model
-    this.#renderer = renderer
+export class IIMyFeatureManager extends IIAbstractManager {
+  protected managerName = "IIMyFeatureManager"
+
+  constructor(canvas: TInteractiveInkCanvas) {
+    super(canvas, LoggerCategory.MANAGER)
   }
 
-  // Public API — all effects explicit
   async doThing(symbolId: string): Promise<void> {
-    const symbol = this.#model.getSymbol(symbolId)
+    const symbol = this.model.getSymbol(symbolId)
     if (!symbol) return
+    this.logger.info("doThing", { symbolId })
     // ... logic
+  }
+
+  protected onDestroy(): void {
+    // remove listeners, clear timers
   }
 }
 ```
 
 Rules:
-- Private fields with `#` (not `_`)
-- Logger always first private field
-- Constructor receives dependencies — never reach for singletons
+- Members `protected`, not `#private`, unless truly internal state: integrators subclass managers
+- `this.logger` comes from the base (`LoggerManager.getLogger(category)`), pick the matching `LoggerCategory`
+- Optional hooks: `onInit()` (end of the base constructor) and `onDestroy()` (called by `destroy()`)
 - Async methods return `Promise<void>` or `Promise<T>`, never fire-and-forget
-- No hidden side-effects — if you emit an event or mutate model, it must be obvious from the method name
+- No hidden side-effects — if you emit an event or mutate the model, it must be obvious from the method name
+- Never mutate a committed symbol: `model.draftSymbol(id)` → change → `model.commitSymbol(draft)`
 
-## Extending AbstractTransformManager
+## Extending IIAbstractTransformManager
 
-For managers that apply a geometric transform to symbols:
+For managers that apply a geometric transform to symbols. The class is `IIAbstractTransformManager`, in `src/manager/interactive/transform/AbstractTransformManager.ts`:
 
 ```typescript
-import { AbstractTransformManager } from "@/manager/interactive/transform/AbstractTransformManager"
-import type { TMyParams } from "./types"
+import type { MatrixTransform } from "@/core"
+import { symbolRegistry } from "@/symbol-utils"
+import type { TSymbol } from "@/symbol"
 
-export class IIMyTransformManager extends AbstractTransformManager<TMyParams> {
-  // Template method — implement the actual transform
-  protected applyToSymbol(symbol: TSymbol, params: TMyParams): TSymbol {
-    // return transformed copy of symbol
+import { IIAbstractTransformManager } from "./AbstractTransformManager"
+
+export class IIMyTransformManager extends IIAbstractTransformManager {
+  protected managerName = "IIMyTransformManager"
+
+  // The one abstract member: delegate to the symbol's util, never switch on symbol.type
+  protected applyThroughUtil(symbol: TSymbol, matrix: MatrixTransform): void {
+    symbolRegistry.getUtilFor(symbol).translate(symbol, { matrix })
   }
 }
 ```
 
-`AbstractTransformManager` handles: selection iteration, model update, renderer refresh, history push. You only implement `applyToSymbol`.
+The base provides `applyMatrix(symbols, matrix)`, `applyToSymbol(symbol, matrix)`, live preview (`previewTransform`, `previewElementTransform`), history recording (`recordTransformed`), followed/anchored symbols and `finalizeTransform()`. Read an existing subclass before writing a new one.
 
-Existing subclasses: `IITranslateManager`, `IIRotationManager`, `IIResizeManager`.
-
-## Using DeferredPromise for Initialization
-
-When manager needs async setup before it can be used:
-
-```typescript
-import { DeferredPromise } from "@/utils/DeferredPromise"
-
-export class IIMyManager {
-  initialized = new DeferredPromise<void>()
-
-  async init(): Promise<void> {
-    await doAsyncSetup()
-    this.initialized.resolve()
-  }
-}
-
-// Caller:
-await manager.initialized.promise
-```
-
-## Dependency Injection — What to Accept
-
-Prefer narrow interfaces over concrete classes:
-
-```typescript
-// Good — accepts the interface
-constructor(model: IIModel, renderer: SVGRenderer) {}
-
-// Avoid — grabs canvas from global or passes whole canvas
-constructor(canvas: InteractiveInkCanvas) {}
-```
+Existing subclasses: `IITranslateManager`, `IIRotationManager`, `IIResizeManager`, orchestrated by `IITransformManager`.
 
 ## Manager Registration
 
-New managers are instantiated in `InteractiveInkCanvas` constructor and stored as public properties:
+Managers are instantiated in the `InteractiveInkCanvas` constructor with the canvas, and exposed as public properties:
 
 ```typescript
 // In InteractiveInkCanvas.ts
-this.myFeature = new IIMyFeatureManager(this.model, this.renderer)
+this.myFeature = new IIMyFeatureManager(this)
+
+// In destroy()
+this.myFeature.destroy()
 ```
 
-Export the manager class from `src/manager/index.ts` so consumers can type-hint it.
+Also:
+- declare the property on `TInteractiveInkCanvas` (`src/canvas/TInteractiveInkCanvas.ts`) — managers are typed against it, and `test/unit/__mocks__/createCanvasMock.ts` must provide it
+- export the class from its folder barrel (`src/manager/interactive/index.ts`)
+- call its `destroy()` from the canvas's `destroy()` if it holds listeners or timers
 
 ## Anti-Patterns
 
 | Anti-pattern | Fix |
 |--------------|-----|
-| `this.canvas.model.getSymbol(id)` inside manager | Accept `model` in constructor |
+| Caching `this.canvas.model` / `renderer` in a field | Use the inherited getters, they follow the canvas |
+| Branching on `symbol.type` in a manager | Ask the util: `symbolRegistry.getUtilFor(symbol)` |
 | Emitting events from inside a private helper | Emit only from public methods |
 | `setTimeout` / fire-and-forget async | Return Promise, let caller await |
-| Manager calling another manager directly | Route through canvas or use events |
+| Listener added without cleanup | Remove it in `onDestroy()` (or at the end of the gesture) |
 | Logic > 20 lines in one method | Extract named helper |

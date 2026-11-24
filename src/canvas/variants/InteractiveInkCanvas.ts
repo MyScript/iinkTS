@@ -1,15 +1,19 @@
-import type { TCanvasOperationLabel, TCanvasOptionsBase } from "@/canvas/AbstractCanvas"
-import { AbstractCanvas, GESTURE_OPERATION_LABELS } from "@/canvas/AbstractCanvas"
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import type { TExport, TRecognitionWebSocketConfiguration } from "@/client"
 import { WebSocketClient } from "@/client"
-import { DOMFactory } from "@/components/dom"
-import { CanvasTool, SELECTION_MARGIN } from "@/Constants"
-import type { THistoryContext, TIIHistoryBackendChanges, TIIHistoryChanges, TIIHistoryStackItem } from "@/history"
-import { extractIIBackendChanges, IIHistoryManager } from "@/history"
+import { DUPLICATE_OFFSET, SELECTION_PADDING } from "@/constants"
+import type { TBox, TDraft, TPartialDeep } from "@/core"
+import { BoxOps, createUUID, isIdentityMatrix, MatrixTransform, mergeDeep, OBBOps, overrideDeep } from "@/core"
+import { DOMFactory, RafCoalescer } from "@/dom"
+import type { TIIHistoryBackendChanges, TIIHistoryChanges } from "@/history"
+import { appendUpdated, extractIIBackendChanges, IIHistoryManager } from "@/history"
+import type { TDownloadFormat, TExportFormat, TExportOptions, TExportResultMap, TPDFDownloadOptions } from "@/manager"
 import {
+  CanvasTool,
   EraseManager,
+  GESTURE_OPERATION_LABELS,
   IIConnectorManager,
   IIConversionManager,
+  IIExportManager,
   IIGestureManager,
   IIJiixQueryManager,
   IIKeyboardManager,
@@ -23,40 +27,56 @@ import {
   IITransformManager,
   IITypesetManager,
   IIWriterManager,
+  LayoutManager,
+  PDFExportManager,
+  type TLayoutOccupant,
 } from "@/manager"
-import type { IIMenuAction, IIMenuStyle, IIMenuTool } from "@/menu"
+import type { TMenuItemRegistration, TMenuOverride } from "@/menu"
 import { IIMenuManager } from "@/menu"
-import type { TExport } from "@/model"
 import { IIModel } from "@/model"
 import type { TIIRendererConfiguration } from "@/renderer"
-import { SVGBuilder, SVGRenderer } from "@/renderer"
+import { SVGRenderer } from "@/renderer"
 import type { TStyle } from "@/style"
-import type { TBox, TDecorator, TMath, TStroke, TSymbol, TText } from "@/symbol"
-import type { TBaseSymbol } from "@/symbol"
+import type { TAnchor, TBaseSymbol, TDecorator, TMath, TStroke, TSymbol, TText } from "@/symbol"
+import { cloneSymbol, extractStrokes, isDecorator, isMath, isStroke, isStrokeSolverOutput, isText } from "@/symbol"
+import type { SymbolUtil } from "@/symbol-utils"
 import {
-  cloneSymbol,
-  extractStrokes,
-  isDecorator,
-  isMath,
-  isStroke,
-  isStrokeSolverOutput,
-  isText,
-  StrokeOps,
-} from "@/symbol"
-import { DecoratorOps } from "@/symbol/decorator/Decorator"
-import { MathOps } from "@/symbol/math/Math"
-import { BoxOps } from "@/symbol/primitives/Box"
-import { OBBOps } from "@/symbol/primitives/OBB"
-import { TextOps } from "@/symbol/text/Text"
-import { createSymbolFromPartial, createSymbolsFromPartial, registerBuiltinSymbolUtils } from "@/symbol-utils"
-import { symbolRegistry } from "@/symbol-utils/SymbolRegistry"
-import type { SymbolUtil } from "@/symbol-utils/SymbolUtil"
-import { MatrixTransform } from "@/transform"
-import type { TPartialDeep } from "@/utils"
-import { createUUID, mergeDeep } from "@/utils"
+  createSymbolFromPartial,
+  createSymbolsFromPartial,
+  DecoratorUtil,
+  EdgeUtil,
+  registerBuiltinSymbolUtils,
+  StrokeUtil,
+  SymbolGeometry,
+  symbolRegistry,
+  TextUtil,
+} from "@/symbol-utils"
 
+import type { TCanvasOptionsBase } from "../AbstractCanvas"
+import { AbstractCanvas } from "../AbstractCanvas"
+import type { TCanvasOperationLabel } from "../TCanvasOperationLabel"
+import type { TInteractiveInkCanvas, TSymbolPatch, TSymbolUpdate } from "../TInteractiveInkCanvas"
 import type { TInteractiveInkCanvasConfiguration } from "./InteractiveInkCanvasConfiguration"
 import { InteractiveInkCanvasConfiguration } from "./InteractiveInkCanvasConfiguration"
+
+/**
+ * What cleaning up after a removal changed, for the history entry of that removal
+ * @hidden
+ */
+type TRemovalCleanup = {
+  erased: TDecorator[]
+  updated: NonNullable<TIIHistoryChanges["updated"]>
+}
+
+/** The cursor class of each tool; any other one draws */
+const TOOL_CURSOR_CLASSES: Partial<Record<CanvasTool, string>> = {
+  [CanvasTool.Erase]: "erase",
+  [CanvasTool.Select]: "select",
+  [CanvasTool.Move]: "move",
+}
+
+/** The occupants the layout of an interactive ink canvas can place */
+const INTERACTIVE_INK_LAYOUT_OCCUPANTS = ["action", "style", "tool", "state", "minimap"] as const
 
 /**
  * @group Canvas
@@ -67,12 +87,16 @@ export type TInteractiveInkCanvasOptions = TPartialDeep<
   }
 > & {
   override?: {
-    client?: WebSocketClient
-    menu?: {
-      style?: IIMenuStyle
-      tool?: IIMenuTool
-      action?: IIMenuAction
-    }
+    /** A `WebSocketClient` subclass, instantiated by the canvas with its configuration */
+    client?: typeof WebSocketClient
+    menu?: TMenuOverride
+  }
+  /** Content added at load, so it is there from the first render (functions: hence not in `configuration`) */
+  extend?: {
+    /** Items added to the menus, like `canvas.menu.addItem` */
+    menuItems?: TMenuItemRegistration[]
+    /** Custom occupants of the layout, like `canvas.layout.add` */
+    layout?: TLayoutOccupant<TInteractiveInkCanvas>[]
   }
 }
 
@@ -87,15 +111,21 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
   #model: IIModel
   #tool: CanvasTool = CanvasTool.Write
   #readOnly = false
+  #recognitionUpdate: Promise<void> = Promise.resolve()
+  #pendingRecognitionOverride?: TPartialDeep<TRecognitionWebSocketConfiguration>
   #layerUITimer?: ReturnType<typeof setTimeout>
   #recognizeStrokeTimer?: ReturnType<typeof setTimeout>
   #exportRetryTimer?: ReturnType<typeof setTimeout>
   #pendingExportRetry?: Promise<TExport>
+  #settleExportRetry?: { resolve: (exports: TExport) => void; reject: (reason: unknown) => void }
   #pendingExportRetryMimeTypes = new Set<string>()
   static readonly EXPORT_RETRY_DEBOUNCE_MS = 300
   #clipboard: TSymbol[] = []
   #renderedWidth = 0
   #renderedHeight = 0
+  #wheelZoomCoalescer = new RafCoalescer()
+  #pendingWheelDeltaY = 0
+  #pendingWheelOffset?: { x: number; y: number }
 
   /** SVG renderer responsible for drawing symbols onto the canvas layer. */
   renderer: SVGRenderer
@@ -112,6 +142,8 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
   keyboard: IIKeyboardManager
   /** Handles erasing strokes and symbols via pointer interaction. */
   eraser: EraseManager
+  /** Builds print-only DOM/CSS layers and drives PDF export via native browser print. */
+  pdfExport: PDFExportManager
   /** Detects and processes touch/pointer gestures (scratch-out, join, insert, etc.). */
   gesture: IIGestureManager
   /** Orchestrates translate, resize, and rotation transforms on selected symbols. */
@@ -132,10 +164,14 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
   synchronizer: IISynchronizerManager
   /** Queries and maps JIIX data to local symbols for math/text label resolution. */
   jiix: IIJiixQueryManager
+  /** Produces every export format and drives the file downloads. */
+  exportManager: IIExportManager
   /** Manages math recognition: variables, computation, and evaluation rendering. */
   math: IIMathManager
   /** Manages smart connectors and anchor-based endpoint updates. */
   connector: IIConnectorManager
+  /** Where the menus, the connection state and the minimap sit */
+  layout: LayoutManager<TInteractiveInkCanvas>
   /** Manages the floating UI menu (tool selector, style panel, action buttons). */
   menu: IIMenuManager
   /** Replays a recorded set of strokes with play/pause/speed control. */
@@ -155,12 +191,8 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
     registerBuiltinSymbolUtils()
     this.#configuration = new InteractiveInkCanvasConfiguration(options?.configuration)
     this.#penStyle = Object.assign({}, this.#configuration.penStyle)
-    if (options?.override?.client) {
-      const CustomRecognizer = options?.override.client as unknown as typeof WebSocketClient
-      this.client = new CustomRecognizer(this.#configuration)
-    } else {
-      this.client = new WebSocketClient(this.#configuration)
-    }
+    const Client = options?.override?.client ?? WebSocketClient
+    this.client = new Client(this.#configuration)
     this.client.event.addErrorListener(this.manageError.bind(this))
     this.client.event.addExportedListener(this.event.emitExported.bind(this.event))
     this.client.event.addContentChangedListener(this.onContentChanged.bind(this))
@@ -182,6 +214,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
     this.keyboard = new IIKeyboardManager(this)
     this.writer = new IIWriterManager(this)
     this.eraser = new EraseManager(this)
+    this.pdfExport = new PDFExportManager(this)
     this.selector = new IISelectionManager(this)
     this.move = new IIMoveManager(this)
 
@@ -193,9 +226,17 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
     this.snaps = new IISnapManager(this, this.#configuration.snap)
     this.synchronizer = new IISynchronizerManager(this)
     this.jiix = new IIJiixQueryManager(this)
+    this.exportManager = new IIExportManager(this, this.pdfExport)
     this.math = new IIMathManager(this, this.#configuration.math)
-    this.connector = new IIConnectorManager(this)
-    this.menu = new IIMenuManager(this, options?.override?.menu)
+    this.connector = new IIConnectorManager(this, this.#configuration.connector)
+    this.layout = new LayoutManager<TInteractiveInkCanvas>(
+      this.layers,
+      INTERACTIVE_INK_LAYOUT_OCCUPANTS,
+      options?.configuration?.layout,
+      this,
+      options?.extend?.layout
+    )
+    this.menu = new IIMenuManager(this, options?.override?.menu, options?.extend?.menuItems)
     this.playback = new IIPlaybackManager(this)
   }
 
@@ -208,7 +249,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
   }
 
   /**
-   * True while strokes are queued locally waiting for reconnection.
+   * True while the connection is down after a first one succeeded, changes queued or not.
    * Listen to `event.addConnectionStatusChangedListener` for change notifications.
    */
   get isOffline(): boolean {
@@ -225,7 +266,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
   }
   set tool(i: CanvasTool) {
     this.#tool = i
-    this.menu.tool.update()
+    this.menu.update()
     this.setCursorStyle()
     this.unselectAll()
 
@@ -233,24 +274,8 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
       this.keyboard.resetStoredTool()
     }
 
-    this.eraser.detach()
-    this.selector.detach()
-    this.move.detach()
-    this.writer.detach()
-    switch (this.#tool) {
-      case CanvasTool.Erase:
-        this.eraser.attach(this.layers.rendering)
-        break
-      case CanvasTool.Select:
-        this.selector.attach(this.layers.rendering)
-        break
-      case CanvasTool.Move:
-        this.move.attach(this.layers.rendering)
-        break
-      default:
-        this.writer.attach(this.layers.rendering)
-        break
-    }
+    this.#detachToolManagers()
+    this.#toolManager(i).attach(this.layers.rendering)
     this.event.emitToolChanged(i)
   }
 
@@ -289,7 +314,10 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
    * @param renderingConfiguration - Partial rendering config to merge
    */
   set renderingConfiguration(renderingConfiguration: TIIRendererConfiguration) {
-    this.configuration.rendering = mergeDeep(this.configuration.rendering, renderingConfiguration)
+    this.configuration.rendering = mergeDeep<TIIRendererConfiguration>(
+      this.configuration.rendering,
+      renderingConfiguration
+    )
     const height = Math.max(this.renderer.parent.clientHeight, this.configuration.rendering.minHeight)
     const width = Math.max(this.renderer.parent.clientWidth, this.configuration.rendering.minWidth)
     this.renderer.resize(height, width)
@@ -306,6 +334,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
   set penStyle(penStyle: TPartialDeep<TStyle>) {
     this.logger.info("set penStyle", { penStyle })
     this.#penStyle = Object.assign({}, this.#penStyle, penStyle)
+    this.menu.update()
   }
 
   /**
@@ -325,9 +354,17 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
    * Display an error in the canvas overlay and emit an `error` event.
    * @param error - Error to display and emit
    */
-  manageError(error: Error): void {
-    this.layers.showMessageError(error)
-    this.event.emitError(error)
+  manageError(error: unknown): void {
+    const reason = error instanceof Error ? error : new Error(String(error))
+    this.layers.showMessageError(reason)
+    this.event.emitError(reason)
+  }
+
+  /** Reports a failed call on the canvas, then rethrows it to the caller */
+  #reportAndThrow(label: string, error: unknown): never {
+    this.logger.error(label, error)
+    this.manageError(error)
+    throw error
   }
 
   registerSymbolUtil<T extends TBaseSymbol>(util: SymbolUtil<T>): void {
@@ -338,33 +375,29 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
     return symbolRegistry.getUtil<T>(type)
   }
 
-  protected setCursorStyle(): void {
-    switch (this.#tool) {
-      case CanvasTool.Erase:
-        this.layers.root.classList.remove("draw")
-        this.layers.root.classList.add("erase")
-        this.layers.root.classList.remove("select")
-        this.layers.root.classList.remove("move")
-        break
-      case CanvasTool.Select:
-        this.layers.root.classList.remove("draw")
-        this.layers.root.classList.remove("erase")
-        this.layers.root.classList.add("select")
-        this.layers.root.classList.remove("move")
-        break
-      case CanvasTool.Move:
-        this.layers.root.classList.remove("draw")
-        this.layers.root.classList.remove("erase")
-        this.layers.root.classList.remove("select")
-        this.layers.root.classList.add("move")
-        break
-      default:
-        this.layers.root.classList.add("draw")
-        this.layers.root.classList.remove("erase")
-        this.layers.root.classList.remove("select")
-        this.layers.root.classList.remove("move")
-        break
+  protected get cursorClasses(): string[] {
+    return ["draw", "erase", "select", "move"]
+  }
+
+  protected getCursorClass(): string {
+    return TOOL_CURSOR_CLASSES[this.#tool] ?? "draw"
+  }
+
+  /** The manager handling pointer input for a tool; writing is the default */
+  #toolManager(tool: CanvasTool): EraseManager | IISelectionManager | IIMoveManager | IIWriterManager {
+    const managers: Partial<Record<CanvasTool, EraseManager | IISelectionManager | IIMoveManager>> = {
+      [CanvasTool.Erase]: this.eraser,
+      [CanvasTool.Select]: this.selector,
+      [CanvasTool.Move]: this.move,
     }
+    return managers[tool] ?? this.writer
+  }
+
+  #detachToolManagers(): void {
+    this.eraser.detach()
+    this.selector.detach()
+    this.move.detach()
+    this.writer.detach()
   }
 
   /**
@@ -380,11 +413,18 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
     }
   }
 
-  protected async onContentChanged(undoRedoContext: THistoryContext): Promise<void> {
+  // The backend's undo/redo state is ignored: in this variant the local history drives undo/redo,
+  // and `changed` must agree with what the history itself emits on push/undo/redo
+  protected async onContentChanged(): Promise<void> {
     clearTimeout(this.#recognizeStrokeTimer)
     this.#recognizeStrokeTimer = setTimeout(async () => {
       try {
         await this.synchronize()
+      } catch (error) {
+        // Without this the rejection escapes the async setTimeout callback as an unhandled
+        // rejection, and the two calls after the finally never run — so the UI never refreshes
+        // and consumers never get `changed`, even though the local content did change.
+        this.manageError(error)
       } finally {
         // Clears every "Recognizing" started since the last synchronize (writer/transform pointerDown,
         // programmatic API calls) in one shot — not a matched start/end pair, since several may have
@@ -392,7 +432,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
         this.clearOperation("Recognizing")
       }
       this.updateLayerUI(0)
-      this.event.emitChanged(undoRedoContext)
+      this.event.emitChanged(this.history.context)
     }, 500)
   }
 
@@ -422,6 +462,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
       this.layers.showLoader()
       this.tool = CanvasTool.Write
       this.renderer.init(this.layers.rendering)
+      this.layout.render()
       this.menu.render(this.layers.ui.root)
       this.setCssVars(this.#configuration.cssVars)
 
@@ -448,32 +489,76 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
   }
 
   /**
-   * Switch the recognition language without destroying the canvas.
-   * Opens a new backend session and re-sends all existing strokes.
-   * @param code - BCP 47 language code (e.g. `"en_US"`, `"fr_FR"`)
-   * @throws If the new session fails to open
+   * Change the recognition configuration (language, math solver…) without destroying the canvas.
+   * Opens a new backend session with it and re-sends every user stroke; the canvas is read-only
+   * meanwhile. Calls are serialized, and those waiting for a running one are applied together.
+   * @param partial - Keys to change; an array replaces the current one, `undefined` clears a key
+   * @throws If the new session fails to open; the previous configuration is then restored
+   * @example
+   * ```ts
+   * await canvas.updateRecognitionConfiguration({ lang: "fr_FR" })
+   * await canvas.updateRecognitionConfiguration({ math: { solver: { "angle-unit": "deg" } } })
+   * ```
    */
-  async changeLanguage(code: string): Promise<void> {
+  updateRecognitionConfiguration(partial: TPartialDeep<TRecognitionWebSocketConfiguration>): Promise<void> {
+    const isAlreadyQueued = this.#pendingRecognitionOverride !== undefined
+    this.#pendingRecognitionOverride = overrideDeep(this.#pendingRecognitionOverride ?? {}, partial)
+    if (!isAlreadyQueued) {
+      this.#recognitionUpdate = this.#recognitionUpdate
+        .catch(() => undefined)
+        .then(() => this.#applyPendingRecognitionOverride())
+    }
+    return this.#recognitionUpdate
+  }
+
+  async #applyPendingRecognitionOverride(): Promise<void> {
+    const override = this.#pendingRecognitionOverride ?? {}
+    this.#pendingRecognitionOverride = undefined
+    const snapshot = structuredClone(this.configuration.recognition)
+    const wasReadOnly = this.readOnly
+    // Read before overrideDeep: afterwards the override's lang always equals the configured one
+    const isLangChanged = !!override.lang && override.lang !== this.configuration.recognition.lang
     try {
-      this.logger.info("changeLanguage", { code })
-      this.manageIdleState(false)
-      // Reset the export when changing language to force synchronization.
-      this.model.invalidateExports()
-      this.configuration.recognition.lang = code
+      this.logger.info("updateRecognitionConfiguration", { override })
+      this.readOnly = true
+      overrideDeep(this.configuration.recognition, override)
+      await this.#resynchronizeSession(isLangChanged)
+    } catch (error) {
+      this.configuration.recognition = snapshot
+      this.#reportAndThrow("updateRecognitionConfiguration", error)
+    } finally {
+      this.readOnly = wasReadOnly
+      this.updateLayerUI()
+    }
+  }
+
+  /**
+   * Opens a session with the current configuration and replays the user's strokes into it.
+   * Solver outputs are cleared first: they were computed with the previous configuration and,
+   * being strokes, would otherwise be sent back as ink.
+   */
+  async #resynchronizeSession(needNewSession: boolean): Promise<void> {
+    this.manageIdleState(false)
+    await this.math.clearAllSolverOutputs()
+    // Reset the export to force synchronization.
+    this.model.invalidateExports()
+    if (needNewSession) {
       await this.client.newSession(this.configuration)
-      const strokes = this.extractStrokesFromSymbols(this.model.symbols)
+      const strokes = this.extractStrokesFromSymbols(this.model.symbols).filter((s) => !isStrokeSolverOutput(s))
       if (strokes.length > 0) {
         this.startOperation("Recognizing")
         await this.client.addStrokes(strokes, false)
       }
-      this.layers.hideLoader()
-      this.event.emitLoaded()
-    } catch (error) {
-      this.logger.error("changeLanguage", error)
-      this.manageError(error as Error)
-      throw error
-    } finally {
-      this.updateLayerUI()
+      if (strokes.length === 0) {
+        this.clearOperation("Recognizing")
+      }
+    } else {
+      await this.client.changeConfiguration(this.configuration)
+    }
+    this.layers.hideLoader()
+    this.event.emitLoaded()
+    if (this.math.getComputationConfig().autoCompute) {
+      await this.math.tryAutoCompute()
     }
   }
 
@@ -486,9 +571,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
     try {
       return createSymbolFromPartial(partialSymbol)
     } catch (error) {
-      this.logger.error("buildSymbol", error)
-      this.manageError(error as Error)
-      throw error
+      this.#reportAndThrow("buildSymbol", error)
     }
   }
 
@@ -497,8 +580,9 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
    * and calling the most appropriate method (erase, add, or replace)
    * @param oldStrokes - Strokes before the change
    * @param newStrokes - Strokes after the change
+   * @returns Whether anything was sent
    */
-  #optimizeClientCall(oldStrokes: TStroke[], newStrokes: TStroke[]): void {
+  #optimizeClientCall(oldStrokes: TStroke[], newStrokes: TStroke[]): boolean {
     const oldStrokeIds = new Set(oldStrokes.map((s) => s.id))
     const newStrokeIds = new Set(newStrokes.map((s) => s.id))
 
@@ -515,6 +599,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
       this.startOperation("Recognizing")
       this.client.addStrokes(addedStrokes, false)
     }
+    return removedStrokeIds.length > 0 || addedStrokes.length > 0
   }
 
   /**
@@ -526,9 +611,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
     try {
       return await this.addSymbol(this.buildSymbol(partialSymbol))
     } catch (error) {
-      this.logger.error("createSymbol", error)
-      this.manageError(error as Error)
-      throw error
+      this.#reportAndThrow("createSymbol", error)
     } finally {
       this.updateLayerUI()
     }
@@ -544,9 +627,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
       const symbols = createSymbolsFromPartial(partialSymbols)
       return await this.addSymbols(symbols)
     } catch (error) {
-      this.logger.error("createSymbols", error)
-      this.manageError(error as Error)
-      throw error
+      this.#reportAndThrow("createSymbols", error)
     }
   }
 
@@ -559,24 +640,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
 
   /** @hidden */
   async addSymbol(sym: TSymbol, addToHistory = true): Promise<TSymbol> {
-    this.logger.info("addSymbol", { sym })
-    this.manageIdleState(false)
-    this.updateTypesetBounds(sym)
-    this.model.addSymbol(sym)
-    this.renderer.drawSymbol(sym)
-
-    const strokes = this.extractStrokesFromSymbols([sym])
-    if (strokes.length > 0) {
-      this.startOperation("Recognizing")
-    }
-    this.client.addStrokes(strokes, false)
-
-    if (addToHistory) {
-      this.history.push(this.model, {
-        added: [sym],
-      })
-    }
-    this.updateLayerUI()
+    await this.addSymbols([sym], addToHistory)
     return sym
   }
 
@@ -587,7 +651,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
    * @returns Promise resolving to array of added symbols
    */
   async addSymbols(symList: TSymbol[], addToHistory = true): Promise<TSymbol[]> {
-    this.logger.info("addSymbol", { symList })
+    this.logger.info("addSymbols", { symList })
     this.manageIdleState(false)
     symList.forEach((s) => {
       this.updateTypesetBounds(s)
@@ -600,7 +664,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
     }
     this.client.addStrokes(strokes, false)
     if (addToHistory) {
-      this.history.push(this.model, {
+      this.history.push({
         added: symList,
       })
     }
@@ -609,173 +673,111 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
   }
 
   /**
-   * Update an existing symbol
-   * @param sym - Symbol to update
-   * @param addToHistory - Whether to add to history (default: true)
-   * @returns Promise resolving to updated symbol
+   * Update one symbol: `updateSymbols([id], patch, addToHistory)`.
+   * @returns The updated record, or undefined when no symbol has this id
    */
-  async updateSymbol(sym: TSymbol, addToHistory = true): Promise<TSymbol> {
-    this.logger.info("updateSymbol", { sym })
-    this.manageIdleState(false)
-    this.updateTypesetBounds(sym)
+  async updateSymbol(id: string, patch: TSymbolUpdate, addToHistory = true): Promise<TSymbol | undefined> {
+    const [updated] = await this.updateSymbols([id], patch, addToHistory)
+    return updated
+  }
 
-    const oldSymbol = this.history.stack.at(-1)?.model.getRootSymbol(sym.id) ?? this.model.getRootSymbol(sym.id)
-    const oldStrokes = oldSymbol ? this.extractStrokesFromSymbols([oldSymbol]) : []
-
-    this.model.updateSymbol(sym)
-    this.renderer.drawSymbol(sym)
-
-    const newStrokes = this.extractStrokesFromSymbols([sym])
-
-    this.#optimizeClientCall(oldStrokes, newStrokes)
-
-    if (addToHistory) {
-      this.history.push(this.model, {
-        updated: [sym],
-      })
+  /**
+   * Update symbols by id, each with the same patch.
+   *
+   * - an object patch: `style` is merged into each symbol's style, `font` is applied to the texts
+   *   (any other symbol ignores it);
+   * - a function patch: called with a draft of each symbol, to change it at will.
+   *
+   * Texts and maths are re-measured, and a text that gets wider or narrower slides the texts after it
+   * on its row. The backend hears only of strokes that appeared or disappeared: style is not
+   * recognized. Only the symbols named are touched, whatever the size of the document.
+   * @param addToHistory - Whether to add to history (default: true). Texts slid along are part of the same entry.
+   * @returns The updated records; an id with no symbol is skipped
+   * @example
+   * ```ts
+   * await canvas.updateSymbols(ids, { style: { color: "#ff0000" } })
+   * await canvas.updateSymbols(ids, { font: { size: 18, weight: "bold" } })
+   * await canvas.updateSymbols([text.id], (draft) => { if (isText(draft)) draft.decorators = [] })
+   * ```
+   */
+  async updateSymbols(ids: string[], patch: TSymbolUpdate, addToHistory = true): Promise<TSymbol[]> {
+    this.logger.info("updateSymbols", { ids, patch })
+    const befores: TSymbol[] = []
+    const afters: TSymbol[] = []
+    // One flat list of before/after pairs: the symbols patched, and the texts that had to slide along
+    // because a text got wider or narrower. Both are just symbols whose record changed.
+    const updated: NonNullable<TIIHistoryChanges["updated"]> = []
+    // Driven by the id list rather than by a scan of the document: drafting by id is O(m).
+    ids.forEach((id) => {
+      // The committed record is frozen, so it is the snapshot: nothing to clone
+      const before = this.model.getSymbol(id)
+      const draft = before && this.#isChangedBy(before, patch) ? this.model.draftSymbol(id) : undefined
+      if (!before || !draft) {
+        return
+      }
+      updated.push(...this.#applyPatch(draft, patch))
+      this.renderer.drawSymbol(draft)
+      const after = this.model.getSymbol(id) ?? draft
+      updated.push({ before, after })
+      befores.push(before)
+      afters.push(after)
+    })
+    if (this.#optimizeClientCall(this.extractStrokesFromSymbols(befores), this.extractStrokesFromSymbols(afters))) {
+      this.manageIdleState(false)
+    }
+    if (addToHistory && updated.length) {
+      this.history.push({ updated })
     }
     this.updateLayerUI()
-    return sym
+    return afters
+  }
+
+  /** A font alone changes nothing but a text */
+  #isChangedBy(symbol: TSymbol, patch: TSymbolUpdate): boolean {
+    return typeof patch === "function" || !!patch.style || isText(symbol)
+  }
+
+  /** Applies the patch to the draft and commits it. Returns the texts it slid along. */
+  #applyPatch(draft: TDraft<TSymbol>, patch: TSymbolUpdate): NonNullable<TIIHistoryChanges["updated"]> {
+    if (typeof patch === "function") {
+      patch(draft)
+    } else if (patch.style) {
+      draft.style = { ...draft.style, ...patch.style }
+    }
+    if (isText(draft)) {
+      return this.#retypesetText(draft, typeof patch === "function" ? {} : patch)
+    }
+    if (isMath(draft)) {
+      // Measures the math and commits the draft in one call
+      this.typeset.updateBounds(draft)
+    } else {
+      this.model.commitSymbol(draft)
+    }
+    return []
   }
 
   /**
-   * Update multiple existing symbols
-   * @param symList - Array of symbols to update
-   * @param addToHistory - Whether to add to history (default: true)
-   * @returns Promise resolving to array of updated symbols
+   * Hands a text's new style and font down to its chars, re-measures it, commits the draft, and
+   * slides the texts after it on its row by the width it gained or lost. Returns those moves.
    */
-  async updateSymbols(symList: TSymbol[], addToHistory = true): Promise<TSymbol[]> {
-    this.logger.info("updateSymbol", { symList })
-    this.manageIdleState(false)
-
-    const oldSymbolsMap = new Map<string, TSymbol>()
-    symList.forEach((sym) => {
-      const oldSymbol = this.history.stack.at(-1)?.model.getRootSymbol(sym.id) ?? this.model.getRootSymbol(sym.id)
-      if (oldSymbol) {
-        oldSymbolsMap.set(sym.id, oldSymbol)
-      }
-    })
-    const oldStrokes = this.extractStrokesFromSymbols(Array.from(oldSymbolsMap.values()))
-
-    symList.forEach((s) => {
-      this.updateTypesetBounds(s)
-      this.model.updateSymbol(s)
-      this.renderer.drawSymbol(s)
-    })
-
-    const newStrokes = this.extractStrokesFromSymbols(symList)
-    this.#optimizeClientCall(oldStrokes, newStrokes)
-
-    if (addToHistory) {
-      this.history.push(this.model, {
-        updated: symList,
+  #retypesetText(text: TText, { style, font }: TSymbolPatch): NonNullable<TIIHistoryChanges["updated"]> {
+    if (style) {
+      TextUtil.updateChildrenStyle(text)
+    }
+    if (font) {
+      TextUtil.updateChildrenFont(text, {
+        fontSize: font.size,
+        fontWeight: font.weight === "auto" ? undefined : font.weight,
       })
     }
-    this.updateLayerUI()
-    return symList
-  }
-
-  /**
-   * Update style of multiple symbols
-   * @param symbolIds - Array of symbol IDs to update
-   * @param style - Partial style to apply
-   * @param addToHistory - Whether to add to history (default: true)
-   */
-  updateSymbolsStyle(symbolIds: string[], style: TPartialDeep<TStyle>, addToHistory = true): void {
-    this.logger.info("updateSymbolsStyle", {
-      symbolIds,
-      style,
-    })
-    const symbols: TSymbol[] = []
-    this.model.symbols.forEach((s) => {
-      if (symbolIds.includes(s.id)) {
-        s.style = Object.assign({}, s.style, style)
-        if (isText(s)) {
-          TextOps.updateChildrenStyle(s)
-        }
-        this.renderer.drawSymbol(s)
-        this.model.updateSymbol(s)
-        s.modificationDate = Date.now()
-        symbols.push(s)
-      }
-    })
-    if (symbols.length) {
-      symbols.forEach((s) => {
-        if (isText(s)) {
-          const lastWidth = s.bounds.width
-          this.typeset.updateBounds(s)
-          const tx = s.bounds.width - lastWidth
-          if (tx !== 0) {
-            this.typeset.moveTextAfter(s, tx)
-          }
-        }
-      })
-    }
-    if (addToHistory && symbols.length) {
-      this.history.push(this.model, {
-        style: { symbols, style },
-      })
-    }
-  }
-
-  /**
-   * Update font style of text symbols
-   * @param textIds - Array of text symbol IDs
-   * @param options - Font style options (fontSize, fontWeight)
-   */
-  updateTextFontStyle(
-    textIds: string[],
-    {
-      fontSize,
-      fontWeight,
-    }: {
-      fontSize?: number
-      fontWeight?: "normal" | "bold" | "auto"
-    }
-  ): void {
-    this.logger.info("updateTextFontStyle", {
-      textIds,
-      fontSize,
-      fontWeight,
-    })
-    const symbols: TText[] = []
-    const translate: {
-      symbols: TSymbol[]
-      tx: number
-      ty: number
-    }[] = []
-    this.model.symbols.forEach((s) => {
-      if (textIds.includes(s.id)) {
-        if (isText(s)) {
-          TextOps.updateChildrenFont(s, {
-            fontSize,
-            fontWeight: fontWeight === "auto" ? undefined : fontWeight,
-          })
-          const lastWidth = s.bounds.width
-          this.typeset.updateBounds(s)
-          this.renderer.drawSymbol(s)
-          const tx = s.bounds.width - lastWidth
-          if (tx !== 0) {
-            const symbolsTranslated = this.typeset.moveTextAfter(s, tx)
-            if (symbolsTranslated?.length) {
-              translate.push({
-                symbols: symbolsTranslated,
-                tx,
-                ty: 0,
-              })
-            }
-          }
-          s.modificationDate = Date.now()
-          symbols.push(s)
-        }
-      }
-    })
-    if (symbols.length) {
-      this.history.push(this.model, {
-        style: { symbols, fontSize },
-        translate,
-      })
-    }
+    // `typeset.updateBounds` measures the fresh box and commits the draft in the same call —
+    // reading the width before and after *that* call, rather than after a separate
+    // `commitSymbol`, is what keeps `text` mutable long enough for `updateBounds` to write
+    // `bounds` at all: a committed symbol is frozen, and assigning into a frozen `bounds` throws.
+    const lastWidth = SymbolGeometry.boundsOf(text).width
+    this.typeset.updateBounds(text)
+    const tx = SymbolGeometry.boundsOf(text).width - lastWidth
+    return tx !== 0 ? (this.typeset.moveTextAfter(text, tx) ?? []) : []
   }
 
   /**
@@ -785,19 +787,17 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
    * @param addToHistory - Whether to add this operation to history (default: true)
    */
   async replaceSymbols(oldSymbols: TSymbol[], newSymbols: TSymbol[], addToHistory = true): Promise<void> {
-    this.logger.info("replaceSymbol", {
-      oldSymbols,
-      newSymbols,
-    })
+    this.logger.info("replaceSymbols", { oldSymbols, newSymbols })
     this.manageIdleState(false)
 
     const oldStrokes = this.extractStrokesFromSymbols(oldSymbols)
     const newStrokes = this.extractStrokesFromSymbols(newSymbols)
 
-    const symToReplace = oldSymbols.shift()
+    // Destructured, not shifted: the caller's array is left as it was handed over
+    const [symToReplace, ...otherOldSymbols] = oldSymbols
 
     if (symToReplace) {
-      oldSymbols.forEach((s) => {
+      otherOldSymbols.forEach((s) => {
         this.renderer.removeSymbol(s.id)
         this.model.removeSymbol(s.id)
       })
@@ -807,27 +807,11 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
 
       this.#optimizeClientCall(oldStrokes, newStrokes)
 
-      // All old symbols (including symToReplace) are gone; new symbols replace them
-      const allOldIds = new Set([symToReplace.id, ...oldSymbols.map((s) => s.id)])
+      // Only clean up what pointed at symbols fully gone (not re-created by newSymbols)
       const newIds = new Set(newSymbols.map((s) => s.id))
-      // Only clean up decorators whose targets are fully gone (not re-created by newSymbols)
-      const removedIds = new Set([...allOldIds].filter((id) => !newIds.has(id)))
-      const { erased: decErased, updated: decUpdated } = this.#cleanupDecoratorsForRemovedIds(removedIds)
-
+      const cleanup = this.#cleanupAfterRemoval(oldSymbols.filter((s) => !newIds.has(s.id)))
       if (addToHistory) {
-        const changes: TIIHistoryChanges = {
-          replaced: {
-            oldSymbols: [symToReplace, ...oldSymbols],
-            newSymbols,
-          },
-        }
-        if (decErased.length) {
-          changes.erased = decErased
-        }
-        if (decUpdated.length) {
-          changes.updated = decUpdated
-        }
-        this.history.push(this.model, changes)
+        this.history.push(this.#withRemovalCleanup({ replaced: { oldSymbols: [...oldSymbols], newSymbols } }, cleanup))
       }
       this.updateLayerUI()
     }
@@ -839,11 +823,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
    * @param position - New position (first, last, forward, backward)
    */
   changeOrderSymbol(symbol: TSymbol, position: "first" | "last" | "forward" | "backward"): void {
-    this.model.changeOrderSymbol(symbol.id, position)
-    this.renderer.changeOrderSymbol(symbol, position)
-    this.history.push(this.model, {
-      order: { symbols: [symbol], position },
-    })
+    this.changeOrderSymbols([symbol], position)
   }
 
   /**
@@ -851,14 +831,12 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
    * @param symbols - Symbols to reorder
    * @param position - New position (first, last, forward, backward)
    */
-  changeOrderSymbols(symbols: TSymbol[], position: "first" | "last" | "forward" | "backward") {
+  changeOrderSymbols(symbols: TSymbol[], position: "first" | "last" | "forward" | "backward"): void {
     symbols.forEach((s) => {
       this.model.changeOrderSymbol(s.id, position)
       this.renderer.changeOrderSymbol(s, position)
     })
-    this.history.push(this.model, {
-      order: { symbols, position },
-    })
+    this.history.push({ order: { symbols, position } })
   }
 
   /**
@@ -872,39 +850,117 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
   }
 
   /**
-   * After removing strokes, clean up orphaned/partial standalone decorators.
-   * Returns erased and updated decorators so callers can include them in history.
+   * After removing symbols, cleans up what pointed at them, in one pass over the document: a
+   * standalone decorator left with no target is erased, one losing some shrinks to the rest, and an
+   * edge anchor on a removed target is cleared. Returns what changed so callers can include it in
+   * history - undoing the removal then also restores the decorator and the anchor.
+   * `removedSymbols` must be the symbol objects captured *before* they left the model: their
+   * `jiixBlockId` is what pre-convert anchors point at, and it can no longer be looked up here.
    */
-  #cleanupDecoratorsForRemovedIds(removedIds: Set<string>): {
-    erased: TDecorator[]
-    updated: TDecorator[]
-  } {
-    const erased: TDecorator[] = []
-    const updated: TDecorator[] = []
-
-    for (const sym of [...this.model.symbols]) {
-      if (!isDecorator(sym)) {
-        continue
-      }
-      const dec = sym as TDecorator
-      const remaining = dec.targetIds.filter((id) => !removedIds.has(id))
-      if (remaining.length === 0) {
-        this.model.removeSymbol(dec.id)
-        this.renderer.removeElement(dec.id)
-        erased.push(dec)
-      } else if (remaining.length < dec.targetIds.length) {
-        dec.targetIds = remaining
-        const targetSyms = remaining.map((id) => this.model.getRootSymbol(id)).filter((s): s is TSymbol => !!s)
-        if (targetSyms.length) {
-          DecoratorOps.setBounds(dec, OBBOps.createFromOBBs(targetSyms.map((s) => s.bounds)))
-        }
-        this.model.updateSymbol(dec)
-        this.renderer.drawSymbol(dec)
-        updated.push(dec)
+  #cleanupAfterRemoval(removedSymbols: TSymbol[]): TRemovalCleanup {
+    const cleanup: TRemovalCleanup = { erased: [], updated: [] }
+    if (!removedSymbols.length) {
+      return cleanup
+    }
+    const removedIds = new Set(removedSymbols.map((s) => s.id))
+    const removedBlockIds = new Set(
+      removedSymbols.flatMap((s) => (isStroke(s) && s.jiixBlockId ? [s.jiixBlockId] : []))
+    )
+    const isTargetRemoved = (symbolId: string): boolean => removedIds.has(symbolId) || removedBlockIds.has(symbolId)
+    // `model.symbols` is a fresh array: removing or updating a symbol during the loop does not disturb it
+    for (const sym of this.model.symbols) {
+      if (isDecorator(sym)) {
+        this.#detachRemovedTargets(sym, removedIds, cleanup)
+      } else {
+        this.#detachRemovedAnchors(sym, isTargetRemoved, cleanup)
       }
     }
+    return cleanup
+  }
 
-    return { erased, updated }
+  #detachRemovedTargets(dec: TDecorator, removedIds: Set<string>, cleanup: TRemovalCleanup): void {
+    const remaining = dec.targetIds.filter((id) => !removedIds.has(id))
+    if (remaining.length === dec.targetIds.length) {
+      return
+    }
+    if (!remaining.length) {
+      this.model.removeSymbol(dec.id)
+      this.renderer.removeElement(dec.id)
+      cleanup.erased.push(dec)
+      return
+    }
+    // Drafted rather than mutated where it lies: `model.symbols` hands out the store's
+    // deep-frozen committed records, so writing `targetIds` straight onto `dec` threw
+    // `TypeError: Cannot assign to read only property`. That made this whole branch — losing
+    // one target out of several — dead from the moment the store began freezing, and nothing
+    // exercised it to say so.
+    const draft = this.model.draftSymbol(dec.id)
+    if (!draft || !isDecorator(draft)) {
+      return
+    }
+    draft.targetIds = remaining
+    // Whole-document scan (`this.model.symbols`): an unregistered target type must not
+    // abort cleanup for every other decorator, so it is filtered out silently rather
+    // than let `SymbolGeometry.boundsOf` throw.
+    const geometryTargets = remaining
+      .map((id) => this.model.getSymbol(id))
+      .filter((s): s is TSymbol => !!s && symbolRegistry.has(s.type))
+    if (geometryTargets.length) {
+      // Losing a target shrinks the decorator: its box is an input, so nothing else would
+      // narrow it and the underline would keep spanning the erased stroke.
+      DecoratorUtil.refitTargetBounds(
+        draft,
+        geometryTargets.map((s) => SymbolGeometry.boundsOf(s))
+      )
+    }
+    this.model.updateSymbol(draft)
+    this.renderer.drawSymbol(draft)
+    cleanup.updated.push({ before: { ...dec }, after: draft })
+  }
+
+  /** The anchors of an edge, or of a pre-convert Edge stroke; undefined for any other symbol */
+  #anchorsOf(sym: TSymbol): { startAnchor?: TAnchor; endAnchor?: TAnchor } | undefined {
+    if (EdgeUtil.isEdge(sym) && (EdgeUtil.isLineEdge(sym) || EdgeUtil.isPolyEdge(sym) || EdgeUtil.isArcEdge(sym))) {
+      return sym
+    }
+    return isStroke(sym) && sym.jiixBlockType === "Edge" ? sym : undefined
+  }
+
+  #detachRemovedAnchors(sym: TSymbol, isTargetRemoved: (id: string) => boolean, cleanup: TRemovalCleanup): void {
+    const anchors = this.#anchorsOf(sym)
+    const hitStart = !!anchors?.startAnchor && isTargetRemoved(anchors.startAnchor.symbolId)
+    const hitEnd = !!anchors?.endAnchor && isTargetRemoved(anchors.endAnchor.symbolId)
+    if (!hitStart && !hitEnd) {
+      return
+    }
+    // Guarded above on the committed record, drafted only now that it is actually losing an
+    // anchor: the record itself is frozen.
+    const draft = this.model.draftSymbol(sym.id)
+    const draftAnchors = draft && this.#anchorsOf(draft)
+    if (!draft || !draftAnchors) {
+      return
+    }
+    if (hitStart) {
+      draftAnchors.startAnchor = undefined
+    }
+    if (hitEnd) {
+      draftAnchors.endAnchor = undefined
+    }
+    this.model.commitSymbol(draft)
+    // A pre-convert stroke draws no anchor, so it has nothing to redraw
+    if (!isStroke(draft)) {
+      this.renderer.drawSymbol(draft)
+    }
+    cleanup.updated.push({ before: { ...sym }, after: draft })
+  }
+
+  /** Adds what cleaning up after a removal changed to the removal's own history entry */
+  #withRemovalCleanup(changes: TIIHistoryChanges, { erased, updated }: TRemovalCleanup): TIIHistoryChanges {
+    if (erased.length) {
+      changes.erased = [...(changes.erased ?? []), ...erased]
+    }
+    appendUpdated(changes, updated)
+    return changes
   }
 
   /**
@@ -915,33 +971,17 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
    */
   async removeSymbol(id: string, addToHistory = true): Promise<void> {
     this.logger.info("removeSymbol", { id })
-    const symbol = this.model.getRootSymbol(id)
+    const symbol = this.model.getSymbol(id)
     if (symbol) {
       this.manageIdleState(false)
       this.startOperation("Recognizing")
       this.client.eraseStrokes([id])
-      if (
-        isStroke(symbol) &&
-        symbol.jiixBlockType === "Math" &&
-        symbol.jiixBlockId &&
-        this.math.hasGhostStrokes(symbol.jiixBlockId)
-      ) {
-        this.math.clearGhostStrokes(symbol.jiixBlockId)
-      }
+      this.#clearGhostOf(symbol)
       this.model.removeSymbol(symbol.id)
       this.renderer.removeSymbol(symbol.id)
-      const { erased: decErased, updated: decUpdated } = this.#cleanupDecoratorsForRemovedIds(new Set([id]))
+      const cleanup = this.#cleanupAfterRemoval([symbol])
       if (addToHistory) {
-        const changes: TIIHistoryChanges = {
-          erased: [symbol],
-        }
-        if (decErased.length) {
-          changes.erased = [...changes.erased!, ...decErased]
-        }
-        if (decUpdated.length) {
-          changes.updated = decUpdated
-        }
-        this.history.push(this.model, changes)
+        this.history.push(this.#withRemovalCleanup({ erased: [symbol] }, cleanup))
       }
       this.updateLayerUI()
     } else {
@@ -950,6 +990,15 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
       this.client.eraseStrokes([id])
     }
     this.selector.removeSelectedGroup()
+  }
+
+  /** A removed stroke of a math block takes the block's ghost result with it */
+  #clearGhostOf(symbol: TSymbol): void {
+    if (isStroke(symbol) && symbol.jiixBlockType === "Math" && symbol.jiixBlockId) {
+      if (this.math.hasGhostStrokes(symbol.jiixBlockId)) {
+        this.math.clearGhostStrokes(symbol.jiixBlockId)
+      }
+    }
   }
 
   /**
@@ -963,14 +1012,12 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
     const symbolsRemoved: TSymbol[] = []
     const strokesIds: string[] = []
     ids.forEach((id) => {
-      const sym = this.model.getRootSymbol(id)
+      const sym = this.model.getSymbol(id)
       if (sym) {
         symbolsRemoved.push(sym)
         if (isStroke(sym)) {
           strokesIds.push(sym.id)
-          if (sym.jiixBlockType === "Math" && sym.jiixBlockId && this.math.hasGhostStrokes(sym.jiixBlockId)) {
-            this.math.clearGhostStrokes(sym.jiixBlockId)
-          }
+          this.#clearGhostOf(sym)
         }
         this.model.removeSymbol(sym.id)
         this.renderer.removeSymbol(sym.id)
@@ -981,20 +1028,9 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
       this.client.eraseStrokes(strokesIds)
     }
 
-    const removedIds = new Set(symbolsRemoved.map((s) => s.id))
-    const { erased: decErased, updated: decUpdated } = this.#cleanupDecoratorsForRemovedIds(removedIds)
-
+    const cleanup = this.#cleanupAfterRemoval(symbolsRemoved)
     if (addToHistory && symbolsRemoved.length) {
-      const changes: TIIHistoryChanges = {
-        erased: symbolsRemoved,
-      }
-      if (decErased.length) {
-        changes.erased = [...changes.erased!, ...decErased]
-      }
-      if (decUpdated.length) {
-        changes.updated = decUpdated
-      }
-      this.history.push(this.model, changes)
+      this.history.push(this.#withRemovalCleanup({ erased: symbolsRemoved }, cleanup))
       this.updateLayerUI()
     }
     this.manageIdleState(false)
@@ -1008,29 +1044,23 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
    */
   select(ids: string[]): void {
     this.tool = CanvasTool.Select
+    // A Set: `ids.includes` inside a pass over the whole document was O(n·m)
+    const idsToSelect = new Set(ids)
     this.model.symbols.forEach((s) => {
-      const shouldBeSelected = ids.includes(s.id)
+      const shouldBeSelected = idsToSelect.has(s.id)
       const wasSelected = this.model.selectedIds.has(s.id)
       if (wasSelected !== shouldBeSelected) {
         if (shouldBeSelected) {
-          this.model.selectedIds.add(s.id)
+          this.model.selectSymbol(s.id)
         } else {
-          this.model.selectedIds.delete(s.id)
+          this.model.unselectSymbol(s.id)
         }
         this.renderer.updateSelectedState(s, shouldBeSelected)
       }
     })
     this.selector.expandSelectionForMathBlocks()
-    this.selector.drawSelectedGroup(this.model.symbolsSelected)
-
-    const selectedMathJiixBlockId = this.selector.getSelectedMathJiixBlockId()
-    if (selectedMathJiixBlockId) {
-      this.math.selectBlock(selectedMathJiixBlockId)
-    } else {
-      this.math.clearBlockSelection()
-    }
-    this.updateLayerUI()
-    this.event.emitSelected(this.model.symbolsSelected)
+    this.selector.expandSelectionForBlocks()
+    this.#afterSelectionChanged()
   }
 
   /**
@@ -1039,9 +1069,14 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
   selectAll(): void {
     this.tool = CanvasTool.Select
     this.model.symbols.forEach((s) => {
-      this.model.selectedIds.add(s.id)
+      this.model.selectSymbol(s.id)
       this.renderer.updateSelectedState(s, true)
     })
+    this.#afterSelectionChanged()
+  }
+
+  /** Draws the selection, follows it with the math block selection, and tells the listeners */
+  #afterSelectionChanged(): void {
     this.selector.drawSelectedGroup(this.model.symbolsSelected)
 
     const selectedMathJiixBlockId = this.selector.getSelectedMathJiixBlockId()
@@ -1077,11 +1112,9 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
    * @returns Promise resolving to updated model
    */
   async importPointEvents(partialStrokes: TPartialDeep<TStroke>[]): Promise<IIModel> {
-    this.logger.info("importPointEvents", {
-      partialStrokes,
-    })
+    this.logger.info("importPointEvents", { partialStrokes })
     this.manageIdleState(false)
-    const strokes = partialStrokes.map(StrokeOps.createFromPartial)
+    const strokes = partialStrokes.map(StrokeUtil.createFromPartial)
     strokes.forEach((s) => {
       this.model.addSymbol(s)
       this.renderer.drawSymbol(s)
@@ -1090,32 +1123,26 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
       this.startOperation("Recognizing")
       this.client.addStrokes(strokes, false)
     }
-    this.history.push(this.model, {
-      added: strokes,
-    })
+    this.history.push({ added: strokes })
     this.logger.debug("importPointEvents", this.model)
     this.updateLayerUI()
     this.event.emitImported(this.model.exports as TExport)
     return this.model
   }
 
-  protected triggerDownload(fileName: string, urlData: string): void {
-    const downloadAnchorNode = document.createElement("a")
-    downloadAnchorNode.setAttribute("href", urlData)
-    downloadAnchorNode.setAttribute("download", fileName)
-    document.body.appendChild(downloadAnchorNode)
-    downloadAnchorNode.click()
-    downloadAnchorNode.remove()
-  }
-
   /**
    * Get bounding box for a list of symbols
    * @param symbols - Symbols to calculate bounds for
-   * @param margin - TMargin to add around bounds (default: SELECTION_MARGIN)
+   * @param margin - TMargin to add around bounds (default: SELECTION_PADDING)
    * @returns Bounding box containing all symbols
    */
-  getSymbolsBounds(symbols: TSymbol[], margin: number = SELECTION_MARGIN): TBox {
-    const box = BoxOps.createFromBoxes(symbols.map((s) => OBBOps.toBox(s.bounds)))
+  getSymbolsBounds(symbols: TSymbol[], margin: number = SELECTION_PADDING): TBox {
+    // Public API: callers (export, minimap, viewport framing) can pass an arbitrary symbol
+    // list, including a selection built with no registry check, so an unregistered type is
+    // dropped from the bounds computation instead of throwing.
+    const box = BoxOps.createFromBoxes(
+      symbols.filter((s) => symbolRegistry.has(s.type)).map((s) => OBBOps.toBox(SymbolGeometry.boundsOf(s)))
+    )
     box.x -= margin
     box.y -= margin
     box.width += margin * 2
@@ -1179,160 +1206,43 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
     this.renderer.pan(dx, dy)
   }
 
-  protected buildBlobFromSymbols(symbols: TSymbol[], box: TBox): Blob {
-    const svgNode = SVGBuilder.createLayer(box)
-    symbols.forEach((s) => {
-      const el = this.renderer.getElementById(s.id)?.cloneNode(true)
-      if (el) {
-        svgNode.appendChild(el)
-      }
-    })
-
-    const svgString = new XMLSerializer().serializeToString(svgNode)
-
-    return new Blob([svgString], {
-      type: "image/svg+xml;charset=utf-8",
-    })
-  }
-
-  protected getExportName(extension: string): string {
-    const options: Intl.DateTimeFormatOptions = {
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    }
-    try {
-      return `iink-ts-${new Date().toLocaleDateString(navigator.language, options)}.${extension}`
-    } catch {
-      return `iink-ts-${new Date().toLocaleDateString("en-US", options)}.${extension}`
-    }
+  /**
+   * Export the content in the given format.
+   *
+   * `pdf` is not available here — printing produces no in-memory value, use
+   * {@link InteractiveInkCanvas.download} instead.
+   *
+   * @param format - Format to export to; the resolved type follows from it
+   * @param options - Which symbols to export (`scope`, or an explicit `symbols` list)
+   * @returns Promise resolving with the exported content
+   *
+   * @example
+   * ```typescript
+   * const symbols = await canvas.exportAs("json")
+   * const markdown = await canvas.exportAs("markdown")
+   * const svg = await canvas.exportAs("svg", { scope: "selection" })
+   * ```
+   */
+  exportAs<F extends TExportFormat>(format: F, options?: TExportOptions): Promise<TExportResultMap[F]> {
+    return this.exportManager.exportAs(format, options)
   }
 
   /**
-   * Download symbols as SVG file, either all symbols or only selected ones
-   * @param selection - Whether to download only selected symbols (default: false, downloads all symbols)
+   * Export the content and hand the resulting file to the browser.
+   *
+   * @param format - Format to download; `pdf` opens the print flow instead of saving a file
+   * @param options - Which symbols to export, plus the file name. The PDF settings
+   *                  (`format`/`orientation`/`mode`/`scale`) are ignored by every other format.
+   *
+   * @example
+   * ```typescript
+   * await canvas.download("svg")
+   * await canvas.download("text", { scope: "selection", filename: "notes" })
+   * await canvas.download("pdf", { orientation: "landscape" })
+   * ```
    */
-  downloadAsSVG(selection = false) {
-    const symbols = selection ? this.model.symbolsSelected : this.model.symbols
-    const box = this.getSymbolsBounds(symbols)
-    const svgBlob = this.buildBlobFromSymbols(symbols, box)
-    const url = URL.createObjectURL(svgBlob)
-    this.triggerDownload(this.getExportName("svg"), url)
-  }
-
-  /**
-   * Download symbols as PNG file, either all symbols or only selected ones
-   * @param selection - Whether to download only selected symbols (default: false, downloads all symbols)
-   */
-  downloadAsPNG(selection = false) {
-    const symbols = selection ? this.model.symbolsSelected : this.model.symbols
-    const box = this.getSymbolsBounds(symbols)
-    const svgBlob = this.buildBlobFromSymbols(symbols, box)
-
-    const url = URL.createObjectURL(svgBlob)
-    const image = new Image(box.width, box.height)
-    image.src = url
-    image.onload = () => {
-      const canvas = document.createElement("canvas")
-      canvas.width = image.width
-      canvas.height = image.height
-
-      const ctx = canvas.getContext("2d") as CanvasRenderingContext2D
-      ctx.drawImage(image, 0, 0)
-      URL.revokeObjectURL(url)
-
-      const imgURI = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream")
-
-      this.triggerDownload(this.getExportName("png"), imgURI)
-    }
-  }
-
-  /**
-   * Download symbols as JSON file, either all symbols or only selected ones
-   * @param selection - Whether to download only selected symbols (default: false, downloads all symbols)
-   */
-  downloadAsJson(selection = false) {
-    const symbolsToExport = selection ? this.model.symbolsSelected : this.model.symbols
-
-    const clonedSymbols = symbolsToExport.map((s) => cloneSymbol(s))
-    const filteredSymbols = clonedSymbols
-
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(filteredSymbols, null, 2))
-    this.triggerDownload(this.getExportName("json"), dataStr)
-  }
-
-  /**
-   * Download symbols as plain text file, either all symbols or only selected ones
-   * @param selection - Whether to download only selected symbols (default: false, downloads all symbols)
-   */
-  downloadAsText(selection = false) {
-    const symbolsToExport = selection ? this.model.symbolsSelected : this.model.symbols
-    const text = this.extractTextFromSymbols(symbolsToExport)
-    const dataStr = "data:text/plain;charset=utf-8," + encodeURIComponent(text)
-    this.triggerDownload(this.getExportName("txt"), dataStr)
-  }
-
-  protected extractTextFromSymbols(symbols: TSymbol[]): string {
-    const entries: { box: TBox; label: string }[] = []
-    const seenElementIds = new Set<string>()
-
-    symbols.forEach((s) => {
-      if (isText(s)) {
-        const content = TextOps.getLabel(s)
-        if (content) {
-          entries.push({ box: BoxOps.createFromPoints(s.vertices), label: content })
-        }
-      } else if (isMath(s)) {
-        const content = MathOps.getLabel(s)
-        if (content) {
-          entries.push({ box: BoxOps.createFromPoints(s.vertices), label: content })
-        }
-      } else if (isStroke(s)) {
-        // Stroke with JIIX metadata (text or math recognized from backend).
-        // A block (word or math expression) can span several strokes: use
-        // the block label so the block is emitted once, and its own
-        // bounding box (not draw order) so it sorts into reading order.
-        const element = this.jiix.getElementForStroke(s.id)
-        if (element && !seenElementIds.has(element.id)) {
-          seenElementIds.add(element.id)
-          const label = this.jiix.getBlockLabel(element.id)
-          if (label) {
-            const box = element["bounding-box"] ?? BoxOps.createFromPoints(s.vertices)
-            entries.push({ box, label })
-          }
-        }
-      }
-    })
-
-    return this.groupEntriesIntoLines(entries)
-      .map((line) => line.map((e) => e.label).join(" "))
-      .join("\n")
-  }
-
-  /**
-   * Groups entries (words, math expressions) sharing a vertical extent into
-   * the same reading line, ordered top-to-bottom then left-to-right, so
-   * words drawn on the same line stay on the same line in the export.
-   */
-  private groupEntriesIntoLines<T extends { box: TBox }>(entries: T[]): T[][] {
-    const sortedByTop = [...entries].sort((a, b) => a.box.y - b.box.y)
-    const lines: { bottom: number; entries: T[] }[] = []
-
-    sortedByTop.forEach((entry) => {
-      const bottom = entry.box.y + entry.box.height
-      const currentLine = lines[lines.length - 1]
-      if (currentLine && entry.box.y < currentLine.bottom) {
-        currentLine.entries.push(entry)
-        currentLine.bottom = Math.max(currentLine.bottom, bottom)
-      } else {
-        lines.push({ bottom, entries: [entry] })
-      }
-    })
-
-    return lines.map((line) => line.entries.sort((a, b) => a.box.x - b.box.x))
+  download(format: TDownloadFormat, options?: TPDFDownloadOptions): Promise<void> {
+    return this.exportManager.download(format, options)
   }
 
   /**
@@ -1350,24 +1260,39 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
    * @returns Array of extracted math symbols
    */
   extractMathsFromSymbols(symbols: TSymbol[] | undefined): TMath[] {
-    if (!symbols?.length) {
-      return []
-    }
-    return symbols.filter(isMath)
+    return symbols?.filter(isMath) ?? []
   }
 
   protected handleWheel = (event: WheelEvent): void => {
     if (event.ctrlKey || event.metaKey) {
       event.preventDefault()
       event.stopPropagation()
-      const zoomIntensity = 0.001
-      const zoom = this.renderer.getZoom() * Math.exp(-event.deltaY * zoomIntensity)
       const rect = this.layers.root.getBoundingClientRect()
-      const offsetX = event.clientX - rect.left
-      const offsetY = event.clientY - rect.top
-      this.renderer.setZoom(zoom, offsetX, offsetY)
-      this.menu.action.update()
+      this.#pendingWheelDeltaY += event.deltaY
+      this.#pendingWheelOffset = { x: event.clientX - rect.left, y: event.clientY - rect.top }
+      this.#scheduleWheelZoom()
     }
+  }
+
+  /**
+   * Coalesces `setZoom()` (attribute mutation + virtualization reconciliation + guide redraw)
+   * to at most one call per animation frame — a trackpad pinch/ctrl+scroll fires many `wheel`
+   * events per frame. Summing `deltaY` across the coalesced events and applying it in one
+   * `Math.exp()` against the pre-frame zoom is exactly equivalent to applying each event's zoom
+   * factor in sequence (exponents add under multiplication), so no precision is lost.
+   */
+  #scheduleWheelZoom(): void {
+    this.#wheelZoomCoalescer.schedule(() => {
+      if (!this.#pendingWheelOffset) {
+        return
+      }
+      const zoomIntensity = 0.001
+      const zoom = this.renderer.getZoom() * Math.exp(-this.#pendingWheelDeltaY * zoomIntensity)
+      this.renderer.setZoom(zoom, this.#pendingWheelOffset.x, this.#pendingWheelOffset.y)
+      this.menu.action.update()
+      this.#pendingWheelDeltaY = 0
+      this.#pendingWheelOffset = undefined
+    })
   }
 
   /**
@@ -1376,72 +1301,146 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
    */
   async undo(): Promise<IIModel> {
     this.logger.info("undo")
-    if (this.history.context.canUndo) {
-      return this.#undoInternal()
-    }
-    return this.model
+    return this.history.context.canUndo ? this.#replayHistory("undo") : this.model
   }
 
   #hasBackendActions(actions: TIIHistoryBackendChanges): boolean {
-    return !!(
-      actions.added?.length ||
-      actions.erased?.length ||
-      actions.replaced ||
-      actions.matrix ||
-      actions.translate?.length ||
-      actions.scale?.length ||
-      actions.rotate?.length
-    )
+    return !!(actions.added?.length || actions.erased?.length || actions.replaced)
   }
 
-  #extractJIIXBlockIdFromBackendActions(actions: TIIHistoryBackendChanges): string[] {
-    const strokes = [
-      ...(actions.added || []),
-      ...(actions.erased || []),
-      ...(actions.replaced?.newStrokes || []),
-      ...(actions.replaced?.oldStrokes || []),
-      ...(actions.matrix?.strokes || []),
-      ...(actions.translate?.flatMap((s) => s.strokes) || []),
-      ...(actions.scale?.flatMap((s) => s.strokes) || []),
-      ...(actions.rotate?.flatMap((s) => s.strokes) || []),
+  /**
+   * Notes how far a math block's ghost result has to travel to stay with its expression.
+   *
+   * The delta is `restored ∘ current⁻¹` — read off the two records rather than taken from the
+   * history entry, which no longer says *how* a symbol changed, only what it changed to. That is
+   * enough here, and only here: a ghost is an overlay, not part of any record, so nothing else
+   * would move it.
+   *
+   * Collected into a map keyed by block rather than applied on the spot. Every stroke of an
+   * expression carries the same transform and produces the same delta, so applying it per stroke
+   * moved the ghost by as many multiples as the expression had strokes.
+   */
+  #collectGhostDelta(into: Map<string, MatrixTransform>, current: TSymbol, restored: TSymbol): void {
+    if (!isStroke(restored) || restored.jiixBlockType !== "Math" || !restored.jiixBlockId) {
+      return
+    }
+    if (into.has(restored.jiixBlockId) || !this.math.hasGhostStrokes(restored.jiixBlockId)) {
+      return
+    }
+    // `identity().multiply(m)` copies `m`: `invert` and `multiply` work in place, and a record is frozen
+    const inverse = MatrixTransform.identity().multiply(current.transform).invert()
+    const delta = MatrixTransform.identity().multiply(restored.transform).multiply(inverse)
+    if (isIdentityMatrix(delta)) {
+      return
+    }
+    into.set(restored.jiixBlockId, delta)
+  }
+
+  /**
+   * The math blocks whose ghost result a replay invalidates, as opposed to merely repositions.
+   *
+   * Driven by the symbol-level changes rather than the backend ones: `extractIIBackendChanges`
+   * folds `updated` into `replaced`, which loses the distinction this needs. A block whose strokes
+   * were added, erased or genuinely replaced has a stale result and must lose its ghost; a block
+   * that only moved keeps it, repositioned by {@link #moveGhostResultWith}.
+   */
+  #ghostBlocksInvalidatedBy(changes: TIIHistoryChanges): string[] {
+    const touched = [
+      ...(changes.added || []),
+      ...(changes.erased || []),
+      ...(changes.replaced?.oldSymbols || []),
+      ...(changes.replaced?.newSymbols || []),
     ]
-
-    return new Set(strokes.map((s) => s.jiixBlockId))
-      .values()
-      .toArray()
-      .filter((a) => !!a) as string[]
+    const blockIds = extractStrokes(touched).map((stroke) => {
+      // The live record first, the entry's snapshot second. A history entry holds a stroke as it
+      // was when the step happened, and a stroke has no `jiixBlockId` at the moment it is written —
+      // recognition assigns one later. Reading only the snapshot found no block for an undo of a
+      // freshly drawn stroke, so a ghost result outlived the expression it belonged to.
+      const live = this.model.getSymbol(stroke.id)
+      return (live && isStroke(live) ? live.jiixBlockId : undefined) ?? stroke.jiixBlockId
+    })
+    return [...new Set(blockIds)].filter((id): id is string => !!id)
   }
 
-  #applyHistoryStackItem(stackItem: TIIHistoryStackItem): TIIHistoryBackendChanges {
+  /**
+   * Applies a history diff locally (model + renderer), replacing the model-clone-swap this
+   * used to do. Backend replay is a separate, consolidated message sent by the caller via
+   * extractIIBackendChanges - this method must never talk to `this.client` itself, or the
+   * backend would receive the same action twice.
+   */
+  #applyHistoryChanges(changes: TIIHistoryChanges): void {
     this.manageIdleState(false)
     this.unselectAll()
-    const modifications = stackItem.model.extractDifferenceSymbols(this.model)
-    this.#model = stackItem.model.clone()
-    // The restored snapshot's `exports` (deep-cloned by `IIModel#clone`) reflects whatever the
-    // model looked like when it was pushed to history, which predates this undo/redo - if left
-    // in place, the next `export()` call sees a non-empty cache and skips re-fetching the JIIX
-    // entirely, so the backend's actual current block ids/content are never picked up.
-    this.#model.invalidateExports()
-    modifications.removed.forEach((s) => this.renderer.removeSymbol(s.id))
-    modifications.added.forEach((s) => this.renderer.drawSymbol(s))
-    return extractIIBackendChanges(stackItem.changes)
+
+    // A history entry is a value: putting one into the document hands over a copy, so the entry
+    // stays replayable and the document never shares identity with the stack. Undo and redo entries
+    // also share their arrays (see `reverseChanges`), so a stored reference would be reachable from
+    // both directions.
+    const restore = <T extends TSymbol>(sym: T): T => cloneSymbol(sym) as T
+
+    changes.added?.forEach((sym) => {
+      this.model.addSymbol(restore(sym))
+      this.renderer.drawSymbol(sym)
+    })
+    changes.erased?.forEach((sym) => {
+      this.model.removeSymbol(sym.id)
+      this.renderer.removeSymbol(sym.id)
+    })
+    // One delta per math block, not per symbol: an expression is many strokes, they all move
+    // together, and applying the delta once per stroke would shift the ghost by a multiple of it.
+    const ghostDeltas = new Map<string, MatrixTransform>()
+    changes.updated?.forEach(({ after }) => {
+      // Read before the restore: a ghost result's coordinates come from the recognizer, in
+      // millimetres, so it cannot be re-placed from the model — it is either carried by the same
+      // matrix as its expression or thrown away. Restoring a record that only moved leaves the
+      // result itself valid, so the delta between where the symbol is and where it is going back to
+      // is what the ghost has to follow.
+      const current = this.model.getSymbol(after.id)
+      this.model.updateSymbol(restore(after))
+      this.renderer.drawSymbol(after)
+      if (current) {
+        this.#collectGhostDelta(ghostDeltas, current, after)
+      }
+    })
+    ghostDeltas.forEach((delta, jiixBlockId) => this.math.applyTransformToGhostStrokes(jiixBlockId, delta))
+    if (changes.replaced) {
+      const [anchor, ...rest] = changes.replaced.oldSymbols
+      rest.forEach((s) => {
+        this.renderer.removeSymbol(s.id)
+        this.model.removeSymbol(s.id)
+      })
+      this.model.replaceSymbol(anchor.id, changes.replaced.newSymbols.map(restore))
+      this.renderer.replaceSymbol(anchor.id, changes.replaced.newSymbols)
+    }
+    const { order } = changes
+    order?.symbols.forEach((sym) => {
+      this.model.changeOrderSymbol(sym.id, order.position)
+      this.renderer.changeOrderSymbol(sym, order.position)
+    })
   }
 
-  async #undoInternal(): Promise<IIModel> {
-    const previousStackItem = this.history.undo()
-    this.logger.debug("undo", {
-      previousStackItem,
-    })
-
-    const actionsToBackend = this.#applyHistoryStackItem(previousStackItem)
-    if (this.#hasBackendActions(actionsToBackend)) {
-      this.#extractJIIXBlockIdFromBackendActions(actionsToBackend).forEach((jiixBlockId) => {
-        this.math.clearGhostStrokes(jiixBlockId)
-      })
-      this.startOperation("Recognizing")
-      await this.client.undo(actionsToBackend)
+  /** Steps the history back or forth: locally first, then on the backend as one consolidated message. */
+  async #replayHistory(direction: "undo" | "redo"): Promise<IIModel> {
+    const changes = direction === "undo" ? this.history.undo() : this.history.redo()
+    this.logger.debug(direction, { changes })
+    // Resolved before the replay: it reads each stroke's block off the document, and the replay is
+    // about to remove some of them.
+    const invalidatedGhostBlocks = this.#ghostBlocksInvalidatedBy(changes)
+    this.#applyHistoryChanges(changes)
+    const actionsToBackend = extractIIBackendChanges(changes)
+    const hasBackendActions = this.#hasBackendActions(actionsToBackend)
+    try {
+      if (hasBackendActions) {
+        invalidatedGhostBlocks.forEach((jiixBlockId) => this.math.clearGhostStrokes(jiixBlockId))
+        this.startOperation("Recognizing")
+        await this.client[direction](actionsToBackend)
+      }
+      if (changes.variables?.length) {
+        await this.math.replayVariableChanges(changes.variables, hasBackendActions)
+      }
+    } finally {
+      this.updateLayerUI()
     }
-    this.updateLayerUI()
     return this.model
   }
 
@@ -1451,26 +1450,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
    */
   async redo(): Promise<IIModel> {
     this.logger.info("redo")
-
-    if (this.history.context.canRedo) {
-      return this.#redoInternal()
-    }
-    return this.model
-  }
-
-  async #redoInternal(): Promise<IIModel> {
-    const nextStackItem = this.history.redo()
-    this.logger.debug("redo", { nextStackItem })
-    const actionsToBackend = this.#applyHistoryStackItem(nextStackItem)
-    if (this.#hasBackendActions(actionsToBackend)) {
-      this.#extractJIIXBlockIdFromBackendActions(actionsToBackend).forEach((jiixBlockId) => {
-        this.math.clearGhostStrokes(jiixBlockId)
-      })
-      this.startOperation("Recognizing")
-      await this.client.redo(actionsToBackend)
-    }
-    this.updateLayerUI()
-    return this.model
+    return this.history.context.canRedo ? this.#replayHistory("redo") : this.model
   }
 
   /**
@@ -1499,9 +1479,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
       this.jiix.invalidateIndex()
       return this.model.exports!
     } catch (error) {
-      this.logger.error("export", { error })
-      this.manageError(error as Error)
-      throw error
+      this.#reportAndThrow("export", error)
     }
   }
 
@@ -1511,18 +1489,25 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
    */
   #debouncedExportRetry(mimeTypes: string[]): Promise<TExport> {
     mimeTypes.forEach((mt) => this.#pendingExportRetryMimeTypes.add(mt))
-    clearTimeout(this.#exportRetryTimer)
     if (!this.#pendingExportRetry) {
       this.#pendingExportRetry = new Promise<TExport>((resolve, reject) => {
-        this.#exportRetryTimer = setTimeout(() => {
-          const mimeTypesToRetry = [...this.#pendingExportRetryMimeTypes]
-          this.#pendingExportRetryMimeTypes.clear()
-          this.#pendingExportRetry = undefined
-          this.export(mimeTypesToRetry).then(resolve, reject)
-        }, InteractiveInkCanvas.EXPORT_RETRY_DEBOUNCE_MS)
+        this.#settleExportRetry = { resolve, reject }
       })
     }
+    // Re-armed on every call: clearing the timer without arming a new one left the shared retry
+    // unscheduled, and every caller waiting on it hung.
+    clearTimeout(this.#exportRetryTimer)
+    this.#exportRetryTimer = setTimeout(() => this.#runExportRetry(), InteractiveInkCanvas.EXPORT_RETRY_DEBOUNCE_MS)
     return this.#pendingExportRetry
+  }
+
+  #runExportRetry(): void {
+    const mimeTypesToRetry = [...this.#pendingExportRetryMimeTypes]
+    const settle = this.#settleExportRetry
+    this.#pendingExportRetryMimeTypes.clear()
+    this.#pendingExportRetry = undefined
+    this.#settleExportRetry = undefined
+    this.export(mimeTypesToRetry).then(settle?.resolve, settle?.reject)
   }
 
   /**
@@ -1537,9 +1522,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
       this.select(addedSymbols.map((s) => s.id))
       this.event.emitConverted()
     } catch (error) {
-      this.logger.error("convert", error)
-      this.manageError(error as Error)
-      throw error
+      this.#reportAndThrow("convert", error)
     } finally {
       this.updateLayerUI()
     }
@@ -1554,17 +1537,23 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
     try {
       this.manageIdleState(false)
       const symbolsToDuplicate = symbols ?? this.model.symbols
-      const bounds = BoxOps.createFromBoxes(symbolsToDuplicate.map((s) => OBBOps.toBox(s.bounds)))
+      // `symbols` is caller-supplied and may include an unregistered type; skip it for the
+      // placement-offset computation rather than abort the whole duplicate.
+      const bounds = BoxOps.createFromBoxes(
+        symbolsToDuplicate
+          .filter((s) => symbolRegistry.has(s.type))
+          .map((s) => OBBOps.toBox(SymbolGeometry.boundsOf(s)))
+      )
 
       const duplicatedSymbols = symbolsToDuplicate.map((s) => {
         const clone = cloneSymbol(s)
 
         // Generate unique ID for cloned symbols
-        while (this.model.symbols.find((sym) => sym.id === clone.id)) {
+        while (this.model.getSymbol(clone.id)) {
           clone.id = `${clone.type}-${createUUID()}`
         }
 
-        const matrix = MatrixTransform.identity().translate(SELECTION_MARGIN, bounds.height + SELECTION_MARGIN)
+        const matrix = MatrixTransform.identity().translate(DUPLICATE_OFFSET, bounds.height + DUPLICATE_OFFSET)
         this.transform.translate.applyToSymbol(clone, matrix)
         return clone
       })
@@ -1573,9 +1562,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
       this.select(syms.map((s) => s.id))
       return syms
     } catch (error) {
-      this.logger.error("duplicate", error)
-      this.manageError(error as Error)
-      throw error
+      this.#reportAndThrow("duplicate", error)
     } finally {
       this.updateLayerUI()
     }
@@ -1594,36 +1581,29 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
    * @param dimensions - New height and/or width
    * @returns Promise that resolves when resize is complete
    */
-  async resize({
-    height,
-    width,
-  }: {
-    height?: number
-    width?: number
-  } = {}): Promise<void> {
+  async resize({ height, width }: { height?: number; width?: number } = {}): Promise<void> {
     try {
-      this.logger.info("resize", {
-        height,
-        width,
-      })
-      const compStyles = window.getComputedStyle(this.layers.root)
-      height = height || Math.max(parseInt(compStyles.height.replace("px", "")), this.configuration.rendering.minHeight)
-      width = width || Math.max(parseInt(compStyles.width.replace("px", "")), this.configuration.rendering.minWidth)
+      this.logger.info("resize", { height, width })
+      const dims = this.resolveDimensions(height, width)
 
-      if (height === this.#renderedHeight && width === this.#renderedWidth) {
+      if (dims.height === this.#renderedHeight && dims.width === this.#renderedWidth) {
         this.logger.debug("resize", "no change")
         return
       }
-      this.#renderedHeight = height
-      this.#renderedWidth = width
+      this.#renderedHeight = dims.height
+      this.#renderedWidth = dims.width
 
       this.manageIdleState(false)
-      this.renderer.resize(height, width)
+      this.renderer.resize(dims.height, dims.width)
       this.updateLayerUI(50)
       this.manageIdleState(true)
     } catch (error) {
-      this.manageError(error as Error)
+      this.manageError(error)
     }
+  }
+
+  protected get minDimensions(): { minHeight: number; minWidth: number } {
+    return this.configuration.rendering
   }
 
   /**
@@ -1657,26 +1637,24 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
         const erased = this.model.symbols
         this.renderer.clear()
         this.model.clear()
-        this.history.push(this.model, { erased })
+        this.history.push({ erased })
         this.startOperation("Recognizing")
-        this.client.clear()
+        await this.client.clear()
         this.event.emitSelected(this.model.symbolsSelected)
       }
       this.updateLayerUI()
       this.event.emitCleared()
     } catch (error) {
-      this.manageError(error as Error)
+      // "Recognizing" is normally bulk-cleared by onContentChanged, which is driven by the
+      // client's contentChanged event — that never arrives if the clear failed, so the badge
+      // would stay lit forever.
+      this.clearOperation("Recognizing")
+      this.manageError(error)
     }
   }
 
   #isCopyableSymbol(symbol: TSymbol): boolean {
-    if (isDecorator(symbol)) {
-      return false
-    }
-    if (isStrokeSolverOutput(symbol)) {
-      return false
-    }
-    return true
+    return !isDecorator(symbol) && !isStrokeSolverOutput(symbol)
   }
 
   #cloneSymbolForPaste(symbol: TSymbol, tx: number, ty: number): TSymbol {
@@ -1703,9 +1681,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
     if (!this.#clipboard.length) {
       return
     }
-    this.logger.info("paste", {
-      count: this.#clipboard.length,
-    })
+    this.logger.info("paste", { count: this.#clipboard.length })
     const clones = this.#clipboard.map((s) =>
       this.#cloneSymbolForPaste(s, InteractiveInkCanvas.PASTE_OFFSET, InteractiveInkCanvas.PASTE_OFFSET)
     )
@@ -1727,6 +1703,32 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
   }
 
   /**
+   * Tear down every manager the canvas owns that carries the {@link IIAbstractManager} lifecycle,
+   * in reverse construction order so a manager is released before whatever it was built on.
+   * `math` cascades to its own sub-managers.
+   *
+   * Deliberately an explicit list rather than enumerating the instance: a manager added later and
+   * forgotten here is caught by the "should destroy every manager it owns" test, which does
+   * enumerate at runtime.
+   */
+  #destroyManagers(): void {
+    this.playback.destroy()
+    this.connector.destroy()
+    this.math.destroy()
+    this.jiix.destroy()
+    this.synchronizer.destroy()
+    this.snaps.destroy()
+    this.overlays.destroy()
+    this.typeset.destroy()
+    this.converter.destroy()
+    this.transform.destroy()
+    this.gesture.destroy()
+    this.move.destroy()
+    this.selector.destroy()
+    this.keyboard.destroy()
+  }
+
+  /**
    * Destroy the canvas and clean up resources
    * @returns Promise that resolves when destruction is complete
    */
@@ -1735,25 +1737,20 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
 
     this.keyboard.detach()
     this.layers.root.removeEventListener("wheel", this.handleWheel)
-    this.stopResizeObserver()
+    this.#wheelZoomCoalescer.cancel()
 
-    this.layers.root.classList.remove("draw")
-    this.layers.root.classList.remove("erase")
-    this.layers.root.classList.remove("select")
-    this.layers.root.classList.remove("move")
+    this.layers.root.classList.remove(...this.cursorClasses)
+    this.#detachToolManagers()
 
-    this.eraser.detach()
-    this.selector.detach()
-    this.move.detach()
-    this.writer.detach()
-
-    this.playback.destroy()
-    this.renderer.destroy()
-    this.layers.destroy()
+    this.#destroyManagers()
+    this.exportManager.destroy()
+    this.teardownCommon()
     this.menu.destroy()
+    this.layout.destroy()
     this.client.destroy()
     this.model.clear()
     this.history.clear()
+    this.clearRootElementReference()
     return Promise.resolve()
   }
 }

@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="HandheldFriendly" content="true" />
+  <title>Flowchart Runner Example</title>
+
+  <link rel="stylesheet" href="../assets/style/reset.css" />
+  <link rel="stylesheet" href="../assets/style/components.css" />
+  <link rel="stylesheet" href="../assets/style/examples.css" />
+  <link rel="stylesheet" href="../assets/style/panel.css" />
+  <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+
+  <style>
+    #rootEl {
+      flex: 1;
+      min-width: 0;
+    }
+
+    #runner {
+      --ex-side-panel-width: 300px;
+      padding: 12px;
+      background: var(--ex-surface-alt);
+      font-family: monospace;
+      font-size: 12px;
+    }
+
+    .runner-title {
+      color: #1976D2;
+      display: block;
+      margin: 12px 0 6px;
+      font-weight: bold;
+    }
+
+    .runner-title:first-child {
+      margin-top: 0;
+    }
+
+    .runner-actions {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    #runner-state {
+      padding: 6px;
+      background: var(--ex-surface);
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+
+    .runner-choice {
+      display: block;
+      width: 100%;
+      margin: 4px 0;
+      padding: 6px;
+      text-align: left;
+      font-family: inherit;
+      font-size: inherit;
+      cursor: pointer;
+      background: var(--ex-surface);
+      border: 1px solid var(--ex-border);
+      border-left: 3px solid #2196F3;
+      border-radius: 4px;
+      color: inherit;
+    }
+
+    .runner-choice:hover {
+      border-left-color: #E91E63;
+    }
+
+    .runner-step {
+      margin: 2px 0;
+      padding: 3px 6px;
+      background: var(--ex-surface);
+      border-left: 3px solid #4CAF50;
+    }
+
+    .runner-step-edge {
+      opacity: 0.75;
+      font-style: italic;
+    }
+
+    .runner-hint {
+      color: #9E9E9E;
+      font-style: italic;
+    }
+
+    .runner-warning {
+      color: #C62828;
+    }
+
+    /* Applied to the canvas DOM element(s) of the node the run is standing on. */
+    .runner-current-highlight {
+      outline: 3px solid #E91E63 !important;
+      outline-offset: 2px;
+    }
+
+    /* Applied to the edge just traversed, so the jump is readable on the ink itself. */
+    .runner-edge-highlight {
+      outline: 3px dashed #2196F3 !important;
+      outline-offset: 2px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .runner-title { color: #90caf9; }
+      :root:not([data-theme="light"]) .runner-warning { color: #ef9a9a; }
+    }
+    :root[data-theme="dark"] .runner-title { color: #90caf9; }
+    :root[data-theme="dark"] .runner-warning { color: #ef9a9a; }
+  </style>
+  <script src="../assets/js/theme-init.js"></script>
+</head>
+
+<body>
+  <header class="header-main">
+    <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+      💡 Info
+    </button>
+    <button id="showModalBtn" class="btn-keys">API Keys</button>
+    <h1 class="header-title">Flowchart Runner Example</h1>
+    <button id="sidePanelToggleBtn" class="btn-panel-toggle btn-side-panel-toggle" aria-expanded="false" aria-controls="runner">
+      ▶ Runner
+    </button>
+  </header>
+
+  <div class="ex-page-layout">
+    <aside id="info-panel" class="ex-panel">
+      <p class="ex-panel-heading">A hand-drawn flowchart is a graph you can walk</p>
+      <p class="ex-panel-intro">Recognition doesn't stop at pretty shapes: it tells you which shape each line joins. That is enough to <em>run</em> the diagram you just drew — step from box to box, and pick a branch whenever there is more than one way out.</p>
+      <div class="ex-panel-divider"></div>
+      <div class="ex-panel-item">
+        <div class="ex-panel-item-desc">Nodes become steps, labelled with the text written inside them.</div>
+      </div>
+      <div class="ex-panel-item">
+        <div class="ex-panel-item-desc">Edges become transitions. Direction follows the connection reported by the server; draw an <span class="highlight">arrow head</span> on an end to flip it the way you meant it.</div>
+      </div>
+      <div class="ex-panel-item">
+        <div class="ex-panel-item-desc">Text written next to an edge — a <em>yes</em> / <em>no</em> beside a decision — is picked up as that branch's label.</div>
+      </div>
+      <div class="ex-panel-item">
+        <div class="ex-panel-item-desc">The run starts on a node nothing points to, and stops on a node with no way out.</div>
+      </div>
+      <div class="ex-panel-divider"></div>
+      <div class="ex-panel-item">
+        <div class="ex-panel-item-desc"><strong>Try it:</strong><br>
+          1. Draw a box, write <span class="highlight">Start</span> in it<br>
+          2. Draw a rhombus below it, write a question inside, join the two with an arrow<br>
+          3. Draw two boxes under the rhombus, one arrow to each, and write <span class="highlight">yes</span> / <span class="highlight">no</span> next to those arrows<br>
+          4. Hit <span class="highlight">Run</span> — the current step is outlined on your ink<br>
+          5. At the rhombus, pick a branch; the trace records the path you took
+        </div>
+      </div>
+    </aside>
+    <div class="main-layout">
+      <div id="rootEl"></div>
+      <div id="runner" class="ex-side-panel">
+        <div class="runner-actions">
+          <button id="runBtn" class="classic-btn primary">▶ Run</button>
+          <button id="resetBtn" class="classic-btn">Reset</button>
+        </div>
+        <div id="runner-state">Draw a flowchart, then hit Run.</div>
+        <span class="runner-title">Next step</span>
+        <div id="runner-choices"><span class="runner-hint">—</span></div>
+        <span class="runner-title">Trace</span>
+        <div id="runner-trace"><span class="runner-hint">Nothing yet.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import {
+      Canvas,
+      extractJIIXGraphElements,
+      findLabelInside,
+      isPointInsideBox,
+      resolveEdgeNodes,
+    } from '../../dist/iink.esm.js'
+    import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
+
+    const panelToggleBtn = document.getElementById('panelToggleBtn')
+    const infoPanel = document.getElementById('info-panel')
+    panelToggleBtn.addEventListener('click', () => {
+      const open = infoPanel.classList.toggle('open')
+      panelToggleBtn.setAttribute('aria-expanded', open)
+    })
+
+    const sidePanelToggleBtn = document.getElementById('sidePanelToggleBtn')
+    const sidePanel = document.getElementById('runner')
+    sidePanelToggleBtn.addEventListener('click', () => {
+      const open = sidePanel.classList.toggle('open')
+      sidePanelToggleBtn.setAttribute('aria-expanded', open)
+    })
+
+    const rootElement = document.getElementById('rootEl')
+    const showModalBtn = document.getElementById('showModalBtn')
+    const runBtn = document.getElementById('runBtn')
+    const resetBtn = document.getElementById('resetBtn')
+    const stateElement = document.getElementById('runner-state')
+    const choicesElement = document.getElementById('runner-choices')
+    const traceElement = document.getElementById('runner-trace')
+
+    // A text sitting further than this from an edge (JIIX bounding boxes are in millimeters)
+    // is somebody else's label, not that edge's.
+    const EDGE_LABEL_MAX_DISTANCE_MM = 25
+
+    let canvas
+    let currentNodeId = null
+    let trace = []
+    // Signature of the graph the walk in progress was built on: the server keeps synchronizing
+    // after the last stroke, and a plain re-export of the same diagram must not disturb the run.
+    let walkSignature = null
+
+    // Nothing to configure: INTERACTIVE_INK recognizes shapes, edges and text out of the box.
+    const canvasOptions = {
+      configuration: {},
+    }
+
+    function boxCenter(box) {
+      return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+    }
+
+    /**
+     * Reads the diagram out of the live JIIX export, with the same helper the built-in
+     * Mermaid/PlantUML exports use — so the walk here follows exactly the graph those exports
+     * would produce.
+     */
+    function currentGraph() {
+      const jiix = canvas?.model.exports?.['application/vnd.myscript.jiix']
+      return jiix ? extractJIIXGraphElements(jiix) : { nodes: [], edges: [], texts: [] }
+    }
+
+    function nodeLabel(node, texts) {
+      return findLabelInside(node['bounding-box'], texts) ?? node.kind
+    }
+
+    /**
+     * An arrow head on the first end means the edge was drawn backwards relative to the
+     * connection order, so the transition has to be flipped.
+     */
+    function isReversed(edge) {
+      const [start, end] =
+        edge.kind === 'arc'
+          ? [edge.startDecoration, edge.endDecoration]
+          : edge.kind === 'polyedge'
+            ? [edge.edges[0]?.p1Decoration, edge.edges[edge.edges.length - 1]?.p2Decoration]
+            : [edge.p1Decoration, edge.p2Decoration]
+      return Boolean(start) && !end
+    }
+
+    /**
+     * A branch label is the text nearest to the edge that isn't already claimed as a node's
+     * own label — the "yes" / "no" written beside a decision.
+     */
+    function edgeLabel(edge, freeTexts) {
+      const edgeBox = edge['bounding-box']
+      if (!edgeBox) {
+        return undefined
+      }
+      const from = boxCenter(edgeBox)
+      let best
+      freeTexts.forEach((text) => {
+        const box = text['bounding-box']
+        if (!box) {
+          return
+        }
+        const to = boxCenter(box)
+        const distance = Math.hypot(to.x - from.x, to.y - from.y)
+        if (distance <= EDGE_LABEL_MAX_DISTANCE_MM && (!best || distance < best.distance)) {
+          best = { distance, label: text.label }
+        }
+      })
+      return best?.label
+    }
+
+    /**
+     * Turns the recognized diagram into a directed graph: one entry per node, each holding the
+     * transitions leaving it.
+     */
+    /**
+     * Identity of the recognized diagram, restricted to what the walk relies on: re-exporting an
+     * unchanged drawing yields the very same signature, editing it yields another one.
+     */
+    function graphSignature({ nodes, edges, texts }) {
+      return JSON.stringify([
+        nodes.map((node) => [node.id, node.kind]),
+        edges.map((edge) => [edge.id, edge.kind, edge.connected]),
+        texts.map((text) => [text.id, text.label]),
+      ])
+    }
+
+    function buildFlow() {
+      const graph = currentGraph()
+      const { nodes, edges, texts } = graph
+      // Texts that land inside a shape are that shape's label; the rest are free to label edges.
+      const freeTexts = texts.filter(
+        (text) =>
+          !text['bounding-box'] ||
+          !nodes.some((node) => node['bounding-box'] && isPointInsideBox(boxCenter(text['bounding-box']), node['bounding-box']))
+      )
+
+      const steps = new Map(
+        nodes.map((node) => [node.id, { id: node.id, label: nodeLabel(node, texts), transitions: [] }])
+      )
+      const targeted = new Set()
+
+      edges.forEach((edge) => {
+        const resolved = resolveEdgeNodes(edge, nodes)
+        if (!resolved) {
+          return
+        }
+        const [from, to] = isReversed(edge) ? [resolved[1], resolved[0]] : resolved
+        if (from.id === to.id) {
+          return
+        }
+        steps.get(from.id)?.transitions.push({ edgeId: edge.id, toId: to.id, label: edgeLabel(edge, freeTexts) })
+        targeted.add(to.id)
+      })
+
+      const entries = [...steps.values()]
+      // A flowchart starts where nothing points; a fully cyclic drawing has no such node, so
+      // fall back to the first recognized shape rather than refusing to run.
+      const start = entries.find((step) => !targeted.has(step.id)) ?? entries[0]
+      return {
+        steps,
+        start,
+        danglingEdges: edges.filter((edge) => !resolveEdgeNodes(edge, nodes)).length,
+        signature: graphSignature(graph),
+      }
+    }
+
+    /**
+     * Resolves the canvas DOM ids backing one JIIX element. `canvas.jiix` indexes the JIIX
+     * stroke items; after a Convert those items are gone, so we fall back to the block id
+     * stamped on each symbol during synchronization.
+     */
+    function elementIdsFor(blockId) {
+      const fromIndex = canvas.jiix
+        .getStrokeIdsForBlock(blockId)
+        .map((strokeId) => canvas.model.getSymbol(strokeId)?.id)
+        .filter(Boolean)
+      if (fromIndex.length) {
+        return [...new Set(fromIndex)]
+      }
+      return canvas.model.symbols.filter((symbol) => symbol.jiixBlockId === blockId).map((symbol) => symbol.id)
+    }
+
+    function clearHighlights() {
+      document
+        .querySelectorAll('.runner-current-highlight, .runner-edge-highlight')
+        .forEach((element) => element.classList.remove('runner-current-highlight', 'runner-edge-highlight'))
+    }
+
+    function highlight(blockId, cssClass) {
+      elementIdsFor(blockId).forEach((id) => document.getElementById(id)?.classList.add(cssClass))
+    }
+
+    function renderTrace() {
+      traceElement.innerHTML = trace.length
+        ? trace
+            .map(
+              (entry, index) =>
+                `<div class="runner-step">${index + 1}. ${entry.label}` +
+                (entry.via ? `<div class="runner-step-edge">via "${entry.via}"</div>` : '') +
+                `</div>`
+            )
+            .join('')
+        : '<span class="runner-hint">Nothing yet.</span>'
+    }
+
+    function renderChoices(step) {
+      if (!step) {
+        choicesElement.innerHTML = '<span class="runner-hint">—</span>'
+        return
+      }
+      if (!step.transitions.length) {
+        choicesElement.innerHTML = '<span class="runner-hint">End of the flow — no edge leaves this step.</span>'
+        return
+      }
+      const flow = buildFlow()
+      choicesElement.innerHTML = step.transitions
+        .map((transition, index) => {
+          const target = flow.steps.get(transition.toId)
+          const label = transition.label ? `"${transition.label}" → ` : '→ '
+          return `<button class="runner-choice" data-transition="${index}">${label}${target?.label ?? '?'}</button>`
+        })
+        .join('')
+    }
+
+    function showStep(step, via) {
+      clearHighlights()
+      if (!step) {
+        stateElement.innerHTML = '<span class="runner-warning">No shape recognized yet — draw a flowchart first.</span>'
+        renderChoices(null)
+        return
+      }
+      currentNodeId = step.id
+      trace.push({ label: step.label, via })
+      highlight(step.id, 'runner-current-highlight')
+      stateElement.textContent = `Now at: ${step.label}`
+      renderChoices(step)
+      renderTrace()
+    }
+
+    function reset() {
+      clearHighlights()
+      currentNodeId = null
+      trace = []
+      walkSignature = null
+      stateElement.textContent = 'Draw a flowchart, then hit Run.'
+      renderChoices(null)
+      renderTrace()
+    }
+
+    runBtn.addEventListener('click', () => {
+      if (!canvas) {
+        return
+      }
+      clearHighlights()
+      currentNodeId = null
+      trace = []
+      const flow = buildFlow()
+      walkSignature = flow.signature
+      showStep(flow.start)
+      if (flow.start && flow.danglingEdges) {
+        stateElement.innerHTML +=
+          `<br><span class="runner-warning">${flow.danglingEdges} edge(s) reach no shape and were skipped.</span>`
+      }
+    })
+
+    /**
+     * Synchronization fires on every server update, ink edits included but also long after the
+     * last stroke for the same content — so the walk is dropped only when the graph really moved.
+     */
+    function invalidateWalkOnGraphChange() {
+      if (walkSignature !== null && graphSignature(currentGraph()) !== walkSignature) {
+        reset()
+      }
+    }
+
+    resetBtn.addEventListener('click', reset)
+
+    // The rows are rebuilt on every step, so the clicks are handled by delegation.
+    choicesElement.addEventListener('click', (event) => {
+      const button = event.target.closest('.runner-choice')
+      if (!button || currentNodeId === null) {
+        return
+      }
+      const flow = buildFlow()
+      const transition = flow.steps.get(currentNodeId)?.transitions[Number(button.dataset.transition)]
+      if (!transition) {
+        return
+      }
+      const next = flow.steps.get(transition.toId)
+      walkSignature = flow.signature
+      showStep(next, transition.label)
+      // Outline the edge just taken on top of the new current node, so the jump stays readable.
+      highlight(transition.edgeId, 'runner-edge-highlight')
+    })
+
+    async function loadCanvas(options) {
+      await canvas?.destroy()
+
+      canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK', options)
+
+      // Editing the diagram invalidates the walk: the graph under the run has changed.
+      canvas.event.addSynchronizedListener(invalidateWalkOnGraphChange)
+      reset()
+      return canvas
+    }
+
+    showModalBtn.addEventListener('click', () => {
+      ModalCanvasOptions.show(loadCanvas, canvasOptions)
+    })
+
+    ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
+
+    /**
+     * We expose these objects to the window use it in test
+     */
+    window.canvasOptions = canvasOptions
+    window.loadCanvas = loadCanvas
+  </script>
+  <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+  <script src="../assets/js/theme.js"></script>
+</body>
+</html>

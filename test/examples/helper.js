@@ -75,6 +75,21 @@ export const writeStrokes = async (
   }
 }
 
+// A symbol read back from the model keeps the raw coordinates it was captured with: a move,
+// resize or rotate is stored in its `transform` matrix and applied by the renderer, never
+// written back into the pointers. Screen positions therefore have to go through that matrix —
+// reading the pointers alone points at where the symbol was before it was ever transformed.
+// Dataset strokes carry no transform and are left as they are.
+const toScreenPointers = (stroke) => {
+  const m = stroke.transform
+  if (!m) return stroke.pointers
+  return stroke.pointers.map((p) => ({
+    ...p,
+    x: m.xx * p.x + m.xy * p.y + m.tx,
+    y: m.yx * p.x + m.yy * p.y + m.ty,
+  }))
+}
+
 /**
  * 
  * @param {Array} strokes
@@ -83,11 +98,12 @@ export const writeStrokes = async (
  * @param {Object} strokes[0].pointers[0]
  * @param {Number} strokes[0].pointers[0].x
  * @param {Number} strokes[0].pointers[0].y
+ * @param {Object} [strokes[0].transform] - matrix a model symbol is displayed through, if any
  * @param {Number} [padding=6] 
  * @returns 
  */
 export const boundsOf = (strokes, padding = 6) => {
-  const points = strokes.flatMap((s) => s.pointers)
+  const points = strokes.flatMap(toScreenPointers)
   return {
     minX: Math.min(...points.map((p) => p.x)) - padding,
     maxX: Math.max(...points.map((p) => p.x)) + padding,
@@ -455,6 +471,24 @@ export const selectBlockById = async (page, jiixBlockId) => {
   await expect
     .poll(() => page.evaluate(() => rootEl.iink.model.symbolsSelected.length), { timeout: 3000 })
     .toBeGreaterThan(0)
+}
+
+// A style menu section opens on a 500ms max-height transition over a scrollable container
+// (.collapsible-content, see iink.css). Clicking a button inside it while that transition runs
+// is a race: the container scrolls the button into view, the transition keeps growing it, and
+// the pointerup can land past the button — the click is reported as done, the "change" handler
+// never runs, and the setting silently keeps its previous value (seen on CI: a Bold click that
+// left the menu on "Auto"). Open the section through this helper and the buttons are settled.
+export const openMenuCollapsible = async (page, sectionSelector) => {
+  await page.locator(`${sectionSelector} .collapsible-header`).click()
+  await page.waitForFunction((selector) => {
+    const content = document.querySelector(`${selector} .collapsible-content`)
+    if (!content) return false
+    const { maxHeight } = getComputedStyle(content)
+    // The section is open and done growing once max-height stops interpolating towards its
+    // final value — compare against the height the content actually needs, not a magic number.
+    return parseFloat(maxHeight) >= Math.min(200, content.scrollHeight)
+  }, sectionSelector)
 }
 
 export const buildSurroundPointers = (strokes, { padding = 40, steps = 32 } = {}) => {

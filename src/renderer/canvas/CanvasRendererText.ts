@@ -1,12 +1,6 @@
+import type { TPoint } from "@/core"
 import { LoggerCategory, LoggerManager } from "@/logger"
-import type {
-  TBaseSymbol,
-  TCanvasTextSymbol,
-  TCanvasTextUnderlineSymbol,
-  TCanvasUnderLineSymbol,
-  TPoint,
-} from "@/symbol"
-
+import type { TBaseSymbol, TCanvasTextSymbol, TCanvasTextUnderlineSymbol, TCanvasUnderLineSymbol } from "@/symbol"
 /**
  * @group Renderer
  */

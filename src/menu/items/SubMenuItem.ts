@@ -1,20 +1,38 @@
 import ArrowDown from "@/assets/svg/nav-arrow-down.svg"
+import type { TInteractiveInkCanvas } from "@/canvas"
 
-import type { TMenuItemBase } from "./BaseMenuItem"
+import type { TGenericMenuItem, TMenuItemBase } from "./BaseMenuItem"
 import { BaseMenuItem } from "./BaseMenuItem"
 import type { TMenuButtonList } from "./ButtonListMenuItem"
+import { ButtonListMenuItem } from "./ButtonListMenuItem"
 import type { TMenuButton } from "./ButtonMenuItem"
+import { ButtonMenuItem } from "./ButtonMenuItem"
 import type { TMenuCheckbox } from "./CheckboxMenuItem"
+import { CheckboxMenuItem } from "./CheckboxMenuItem"
+import type { TMenuColorList } from "./ColorListMenuItem"
+import { ColorListMenuItem } from "./ColorListMenuItem"
 import type { TMenuFileInput } from "./FileInputMenuItem"
-import { createMenuItemInstance } from "./MenuItemFactory"
+import { FileInputMenuItem } from "./FileInputMenuItem"
 import type { TMenuRange } from "./RangeMenuItem"
+import { RangeMenuItem } from "./RangeMenuItem"
 import type { TMenuSelect } from "./SelectMenuItem"
+import { SelectMenuItem } from "./SelectMenuItem"
 
 /**
  * @group Menu
  * @remarks Submenu position type
  */
-export type TMenuPosition = "top" | "left" | "right" | "right-top" | "bottom" | "bottom-left" | "bottom-right"
+export type TMenuPosition =
+  | "top"
+  | "top-left"
+  | "top-right"
+  | "left"
+  | "left-top"
+  | "right"
+  | "right-top"
+  | "bottom"
+  | "bottom-left"
+  | "bottom-right"
 
 /**
  * @group Menu
@@ -49,15 +67,21 @@ export class SubMenuItem extends BaseMenuItem<HTMLDivElement> {
   protected closedRotation: number = 0
   protected openedRotation: number = 180
 
+  /** The side the sub-menu opens on is the first part of its position: "right-top" opens on the right */
+  protected sideOf(position: TMenuPosition): string {
+    return position.split("-")[0]
+  }
+
   protected getArrowRotationForPosition(position: TMenuPosition): number {
-    if (position.includes("bottom")) {
-      return 180
-    } else if (position.includes("left")) {
-      return 90
-    } else if (position.includes("right")) {
-      return -90
-    } else {
-      return 0
+    switch (this.sideOf(position)) {
+      case "bottom":
+        return 180
+      case "left":
+        return 90
+      case "right":
+        return -90
+      default:
+        return 0
     }
   }
 
@@ -73,7 +97,7 @@ export class SubMenuItem extends BaseMenuItem<HTMLDivElement> {
       id: `${this.config.id}-trigger`,
       className: ["between", "full-width"],
     })
-    const position = this.config.position || "right-top"
+    const position = this.openPosition ?? this.config.position ?? "right-top"
 
     this.closedRotation = this.getArrowRotationForPosition(position)
     this.openedRotation = this.closedRotation + 180
@@ -104,7 +128,7 @@ export class SubMenuItem extends BaseMenuItem<HTMLDivElement> {
       this.trigger.textContent = this.config.label
     }
 
-    if (position.includes("left")) {
+    if (this.sideOf(position) === "left") {
       this.trigger.prepend(this.arrowSpan)
     } else {
       this.trigger.appendChild(this.arrowSpan)
@@ -130,6 +154,10 @@ export class SubMenuItem extends BaseMenuItem<HTMLDivElement> {
 
     this.config.items.forEach((item) => {
       const menuItem = createMenuItemInstance(item, this.canvas)
+      // A nested sub-menu opens sideways, on the side its parent opened towards
+      if (this.openPosition && !menuItem.openPosition) {
+        menuItem.openPosition = this.sideOf(this.openPosition) === "left" ? "left-top" : "right-top"
+      }
       const element = menuItem.getElement()
       if (element) {
         this.subMenuWrapper!.appendChild(element)
@@ -226,5 +254,38 @@ export class SubMenuItem extends BaseMenuItem<HTMLDivElement> {
     this.subMenuItems.clear()
 
     super.destroy()
+  }
+}
+
+/**
+ * @group Menu
+ * @remarks Type union enriched with all menu item types
+ */
+export type TAllMenuItems = TSubMenuItems | TMenuSubMenu | TMenuColorList | TMenuRange | TMenuFileInput
+
+/**
+ * @group Menu
+ * @remarks Factory function to create an instance of the appropriate menu item class
+ */
+export function createMenuItemInstance(config: TAllMenuItems, canvas: TInteractiveInkCanvas): BaseMenuItem {
+  switch (config.type) {
+    case "button":
+      return new ButtonMenuItem(config, canvas)
+    case "checkbox":
+      return new CheckboxMenuItem(config, canvas)
+    case "select":
+      return new SelectMenuItem(config, canvas)
+    case "buttonlist":
+      return new ButtonListMenuItem(config, canvas)
+    case "submenu":
+      return new SubMenuItem(config, canvas)
+    case "colorlist":
+      return new ColorListMenuItem(config, canvas)
+    case "range":
+      return new RangeMenuItem(config, canvas)
+    case "fileinput":
+      return new FileInputMenuItem(config, canvas)
+    default:
+      throw new Error(`Unknown menu item type: ${(config as TGenericMenuItem).type}`)
   }
 }

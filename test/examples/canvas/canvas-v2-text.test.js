@@ -1,8 +1,8 @@
 import { test, expect } from "@playwright/test"
-import { waitForCanvasInit, writeStrokes, waitForExportedEvent, getCanvasExports, passModalKey, getCanvasStrokes } from "../helper"
+import { writeStrokes, waitForExportedEvent, getCanvasExports, passModalKey, getCanvasStrokes } from "../helper"
 import h from "../__dataset__/h"
 
-test.describe("Ink Canvas v2 Text", () => {
+test.describe("Ink Canvas v2 Text", { tag: "@minimal" }, () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/canvas/canvas_v2_text.html`)
     await passModalKey(page)

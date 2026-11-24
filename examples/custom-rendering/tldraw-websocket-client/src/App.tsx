@@ -1,37 +1,47 @@
 import { useCallback, useEffect, useState, useRef, useMemo } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import ReactJson from "react-json-view"
-import { Editor, TLDrawShape, Tldraw, RecordsDiff, TLRecord } from "tldraw"
+import { Editor, TLDrawShape, TLShapeId, Tldraw, RecordsDiff, TLRecord } from "tldraw"
 import { RootState } from "./store"
 import { setExports } from "./store/exportsStore"
 import { addError, removeError } from "./store/errorsStore"
 
 import { TldrawWebSocketClient, useTldrawWebSocketClient } from "./TldrawWebSocketClient"
-import { useConverter } from "./Converter"
+import { strokeIdsOf, useConverter } from "./Converter"
 import { useSynchronizer } from "./Synchronizer"
 
 import { Loading } from "./components/Loading"
 
-import { ExportHTMLTab } from "./components/ExportHTMLTab"
 import { MainMenu } from "./components/MainMenu"
 import { QuickActions } from "./components/QuickActionsMenu"
 import { ContextMenu } from "./components/ContextMenu"
 import { TopZone } from "./components/TopZone"
 import { Modal } from "./components/Modal"
 import { KeyForms } from "./components/KeyForms"
-import { TPartialDeep, TServerWebsocketConfiguration } from "iink-ts"
-import { SharePanel } from "./components/SharePanel"
+import { TJIIXElement, TJIIXExport, TPartialDeep, TServerWebsocketConfiguration } from "iink-ts"
+import { Header } from "./components/Header"
+import { RecognitionPanel } from "./components/RecognitionPanel"
+import { useTheme } from "./theme"
 
-type TabName = "HTML" | "JIIX" | "Shapes" | "Messages"
+const EXPORT_MIMETYPES = ["application/vnd.myscript.jiix"]
+
+declare global
+{
+  interface Window
+  {
+    /** Exposed for the end-to-end tests: they read the hinted shapes through the editor */
+    tldrawEditor?: Editor
+  }
+}
 
 export default function App()
 {
   const [editor, setEditor] = useState<Editor>()
   const [recognizer, setRecognizer] = useState<TldrawWebSocketClient>()
   const [loading, setLoading] = useState<boolean>(true)
-  const [tabName, setTabName] = useState<TabName>("HTML")
-  const [leftColumnWidthPercent, setLeftColumnWidthPercent] = useState<number>(60)
-  const [cachedShapes, setCachedShapes] = useState<object>({})
+  const [showKeys, setShowKeys] = useState(false)
+  const [infoOpen, setInfoOpen] = useState(false)
+  const [resultsOpen, setResultsOpen] = useState(false)
+  const [theme, toggleTheme] = useTheme()
 
   const [serverConfiguration, setServerConfiguration] = useState<TPartialDeep<TServerWebsocketConfiguration>>()
   const exports = useSelector((state: RootState) => state.exports.value)
@@ -39,10 +49,7 @@ export default function App()
   const dispatch = useDispatch()
   const converter = useConverter()
 
-  const memoizedExports = useMemo(() => ({
-    jiix: exports["application/vnd.myscript.jiix"] as object,
-    html: exports["text/html"] as string
-  }), [exports])
+  const jiix = useMemo(() => exports["application/vnd.myscript.jiix"] as TJIIXExport | undefined, [exports])
 
   const batchedChangesRef = useRef<{
     added: Map<string, TLDrawShape>,
@@ -53,7 +60,6 @@ export default function App()
     updated: new Map(),
     removed: new Map()
   })
-  const UPD_SHAPE_TAB_DELAY = 250
   const UPD_EXPORTS_TABS_DELAY = 500
   const SYNC_BATCH_DELAY = 200
   const AUTO_CONVERT_DELAY = 1000
@@ -70,17 +76,6 @@ export default function App()
     setLoading(false)
   }
 
-  const updateShapesDisplayDebounceRef = useRef<ReturnType<typeof setTimeout>>()
-  const updateShapesDisplay = useCallback(() =>
-  {
-    if (!editor) return
-    clearTimeout(updateShapesDisplayDebounceRef.current)
-    updateShapesDisplayDebounceRef.current = setTimeout(() =>
-    {
-      setCachedShapes(editor.getCurrentPageShapes() as object)
-    }, UPD_SHAPE_TAB_DELAY)
-  }, [editor])
-
   const convertDebounceRef = useRef<ReturnType<typeof setTimeout>>()
   const scheduleConversion = useCallback((changedDrawShapes: TLDrawShape[]) =>
   {
@@ -90,6 +85,8 @@ export default function App()
       if (changedDrawShapes.length > 0 && editor) {
         const { toConvert, toRemove } = converter.convert(changedDrawShapes)
         if (toConvert.length > 0) {
+          // Own undo step: otherwise undo also removes the last stroke drawn
+          editor.markHistoryStoppingPoint("convert")
           editor.run(() =>
           {
             editor.deleteShapes(toRemove)
@@ -132,12 +129,11 @@ export default function App()
       .then(async () =>
       {
         if (converter.auto && shapesToConvert.length > 0) {
-          const exports = await recognizer!.export(["application/vnd.myscript.jiix", "text/html"])
+          const exports = await recognizer!.export(EXPORT_MIMETYPES)
           dispatch(setExports(exports))
           converter.invalidateCache()
           scheduleConversion(shapesToConvert)
         }
-        updateShapesDisplay()
       })
       .catch(error =>
       {
@@ -161,7 +157,7 @@ export default function App()
     clearTimeout(updateExportsDebounceRef.current)
     updateExportsDebounceRef.current = setTimeout(async () =>
     {
-      const exports = await recognizer!.export(["application/vnd.myscript.jiix", "text/html"])
+      const exports = await recognizer!.export(EXPORT_MIMETYPES)
       dispatch(setExports(exports))
     }, UPD_EXPORTS_TABS_DELAY)
   }
@@ -179,7 +175,7 @@ export default function App()
     batchedChangesRef.current.updated.delete(drawShape.id)
 
     scheduleSyncBatch()
-  }, [editor, recognizer, updateShapesDisplay, scheduleSyncBatch])
+  }, [editor, recognizer, scheduleSyncBatch])
 
   const onShapeChanged = useCallback(async (prev: TLRecord, current: TLRecord) =>
   {
@@ -196,7 +192,7 @@ export default function App()
     }
 
     scheduleSyncBatch()
-  }, [editor, recognizer, updateShapesDisplay, scheduleSyncBatch])
+  }, [editor, recognizer, scheduleSyncBatch])
 
   const onShapeRemoved = useCallback(async (shape: TLRecord) =>
   {
@@ -211,20 +207,14 @@ export default function App()
     batchedChangesRef.current.updated.delete(drawShape.id)
 
     scheduleSyncBatch()
-  }, [editor, recognizer, updateShapesDisplay, scheduleSyncBatch])
+  }, [editor, recognizer, scheduleSyncBatch])
 
   const onTLdrawMounted = useCallback((editor: Editor) =>
   {
+    window.tldrawEditor = editor
     setEditor(editor)
     editor.setCurrentTool("draw")
   }, [])
-
-  const initResizeColumns = () =>
-  {
-    const resizeColumns = (e: PointerEvent) => setLeftColumnWidthPercent(e.clientX / window.innerWidth * 100)
-    document.body.addEventListener("pointermove", resizeColumns)
-    document.body.addEventListener("pointerup", () => document.body.removeEventListener("pointermove", resizeColumns))
-  }
 
   useEffect(() =>
   {
@@ -253,164 +243,138 @@ export default function App()
 
   useEffect(() =>
   {
+    editor?.user.updateUserPreferences({ colorScheme: theme })
+  }, [editor, theme])
+
+  useEffect(() =>
+  {
     if (!TldrawWebSocketClient.instance?.initialized && serverConfiguration) {
       loadRecognizer(serverConfiguration)
     }
   }, [TldrawWebSocketClient.instance?.initialized, serverConfiguration])
 
+  const saveKeys = (keys: TPartialDeep<TServerWebsocketConfiguration>) =>
+  {
+    window.localStorage.setItem("server", JSON.stringify(keys))
+    setShowKeys(false)
+    setServerConfiguration(keys)
+    loadRecognizer(keys)
+  }
+
+  const header = (
+    <Header
+      title="tldraw + iinkTS"
+      panels={[
+        { label: "💡 Info", controls: "info-panel", open: infoOpen, onToggle: () => setInfoOpen(!infoOpen) },
+        { label: "🔍 Recognition", controls: "results-panel", open: resultsOpen, onToggle: () => setResultsOpen(!resultsOpen) },
+      ]}
+      onShowKeys={() => setShowKeys(true)}
+      theme={theme}
+      onToggleTheme={toggleTheme}
+    />
+  )
+
   if (!serverConfiguration) {
     if (!window.localStorage.getItem("server")) {
-      return <KeyForms onSubmit={(keys) =>
-      {
-        const serverKeys = JSON.stringify(keys)
-        window.localStorage.setItem("server", serverKeys)
-        setServerConfiguration(keys as TPartialDeep<TServerWebsocketConfiguration>)
-      }} />
+      return (
+        <>
+          {header}
+          <KeyForms onSubmit={(keys) =>
+          {
+            window.localStorage.setItem("server", JSON.stringify(keys))
+            setServerConfiguration(keys as TPartialDeep<TServerWebsocketConfiguration>)
+          }} />
+        </>
+      )
     }
     else {
       setServerConfiguration(JSON.parse(window.localStorage.getItem("server")!) as TPartialDeep<TServerWebsocketConfiguration>)
     }
   }
 
-  return (
-    <div
-      style={{
-        display: "flex",
-        height: "100%",
-        width: "100%"
-      }}
-    >
-      {
-        errors.map((e, i) =>
-        {
-          return (
-            <Modal
-              key={i}
-              type='error'
-              title="Something went wrong"
-              message={e}
-              onClose={() => dispatch(removeError(e))}
-            />
-          )
-        })
-      }
-      <div
-        style={{
-          width: `${ leftColumnWidthPercent }%`,
-          height: "100%"
-        }}
-      >
-        <Loading loading={loading} />
-        <Tldraw
-          components={{
-            MainMenu,
-            QuickActions,
-            ContextMenu,
-            TopPanel: TopZone,
-            SharePanel: (props) => <SharePanel {...props} loadRecognizer={loadRecognizer} />,
-            PageMenu: null
-          }}
-          onMount={onTLdrawMounted}
-        />
-      </div>
-      <div
-        style={{
-          width: `${ 100 - leftColumnWidthPercent }%`,
-          height: "100%",
-          display: "flex",
-        }}
-      >
-        <div
-          style={{
-            width: "5px",
-            background: "lightgrey",
-            cursor: "ew-resize"
-          }}
-          onPointerDown={initResizeColumns}
-        >
-        </div>
-        <div
-          style={{
-            width: "calc(100% - 5px)",
-            padding: 12,
-            background: "#eee",
-            border: "none",
-            overflow: "hidden"
-          }}
-        >
-          <div className='tabs'>
-            <button
-              className={`tab-btn ${ tabName === "Shapes" ? "active" : "" }`}
-              onClick={() => setTabName("Shapes")}
-            >
-              Shapes
-            </button>
-            <button
-              className={`tab-btn ${ tabName === "JIIX" ? "active" : "" }`}
-              onClick={() => setTabName("JIIX")}
-            >
-              Export JIIX
-            </button>
-            <button
-              className={`tab-btn ${ tabName === "HTML" ? "active" : "" }`}
-              onClick={() => setTabName("HTML")}
-            >
-              Export HTML
-            </button>
-            <button
-              className={`tab-btn ${ tabName === "Messages" ? "active" : "" }`}
-              onClick={() => setTabName("Messages")}
-            >
-              Messages
-            </button>
-          </div>
-          <div
-            style={{
-              height: "calc(100% - 70px)",
-              backgroundColor: "white",
-              overflow: "scroll",
-              padding: 12
-            }}
-          >
-            {tabName === "Shapes" && (
-              <div id="shapes-tab-content" className="tab-content active">
-                <ReactJson
-                  src={cachedShapes}
-                  collapsed={2}
-                  displayDataTypes={false}
-                  displayObjectSize={false}
-                />
-              </div>
-            )}
-            {tabName === "JIIX" && (
-              <div id="jiix-tab-content" className="tab-content active">
-                <ReactJson
-                  src={memoizedExports.jiix}
-                  collapsed={2}
-                  displayDataTypes={false}
-                  displayObjectSize={false}
-                />
-              </div>
-            )}
-            {tabName === "HTML" && (
-              <div id="html-tab-content" style={{ pointerEvents: "none" }} className="tab-content active">
-                {ExportHTMLTab(memoizedExports.html)}
-              </div>
-            )}
-            {tabName === "Messages" && (
-              <div id="messages-tab-content" className="tab-content active">
-                <ReactJson
-                  src={recognizer?.messages || []}
-                  collapsed={2}
-                  displayDataTypes={false}
-                  displayObjectSize={false}
-                />
-              </div>
-            )}
-          </div>
-        </div>
+  // tldraw outlines hinted shapes: the hovered element's strokes stand out without touching them
+  const highlightElement = (element?: TJIIXElement) =>
+  {
+    editor?.setHintingShapes(element ? strokeIdsOf(element).map(id => id as TLShapeId) : [])
+  }
 
+  return (
+    <>
+      {header}
+      {showKeys && (
+        <div className="keys-overlay" onPointerDown={e => e.target === e.currentTarget && setShowKeys(false)}>
+          <KeyForms onSubmit={(keys) => saveKeys(keys as TPartialDeep<TServerWebsocketConfiguration>)} />
+        </div>
+      )}
+      <div className="ex-page-layout">
+        <aside id="info-panel" className={`ex-panel ${ infoOpen ? "open" : "" }`}>
+          <p className="ex-panel-heading">tldraw as the ink surface</p>
+          <p className="ex-panel-intro">
+            tldraw draws and keeps the shapes; iinkTS only talks to the server through a <code>WebSocketClient</code>.
+            No iinkTS canvas is mounted.
+          </p>
+          <div className="ex-panel-divider"></div>
+          <div className="ex-panel-item">
+            <div className="ex-panel-item-label">Synchronize</div>
+            <div className="ex-panel-item-desc">
+              tldraw side effects report every draw shape created, changed or deleted; they are batched and sent to the server.
+            </div>
+          </div>
+          <div className="ex-panel-item">
+            <div className="ex-panel-item-label">Convert</div>
+            <div className="ex-panel-item-desc">
+              <strong>Auto conversion</strong> (top of the canvas) replaces strokes with tldraw text and geo shapes
+              once recognized. <strong>Convert</strong> in the main menu does it on demand.
+            </div>
+          </div>
+          <div className="ex-panel-item">
+            <div className="ex-panel-item-label">Gestures</div>
+            <div className="ex-panel-item-desc">
+              Scratch-out erases, underline and strike-through act as set in the main menu.
+            </div>
+          </div>
+          <div className="ex-panel-item">
+            <div className="ex-panel-item-label">Recognize</div>
+            <div className="ex-panel-item-desc">
+              On each <code>contentChanged</code> the JIIX is exported and listed in the right panel.
+              Hover an element there to outline its strokes.
+            </div>
+          </div>
+        </aside>
+        <div className="main-layout">
+          <div id="rootEl" className="canvas-area">
+            {
+              errors.map((e, i) =>
+              {
+                return (
+                  <Modal
+                    key={i}
+                    type='error'
+                    title="Something went wrong"
+                    message={e}
+                    onClose={() => dispatch(removeError(e))}
+                  />
+                )
+              })
+            }
+            <Loading loading={loading} />
+            <Tldraw
+              components={{
+                MainMenu,
+                QuickActions,
+                ContextMenu,
+                TopPanel: TopZone,
+                SharePanel: null,
+                PageMenu: null
+              }}
+              onMount={onTLdrawMounted}
+            />
+          </div>
+          <aside id="results-panel" className={`ex-panel ${ resultsOpen ? "open" : "" }`}>
+            <RecognitionPanel jiix={jiix} onHover={highlightElement} />
+          </aside>
+        </div>
       </div>
-    </div>
+    </>
   )
 }

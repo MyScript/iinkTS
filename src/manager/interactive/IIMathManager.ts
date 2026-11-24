@@ -1,14 +1,15 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import type { TInteractiveInkCanvas } from "@/canvas"
 import type {
+  TJIIXMathElement,
   TMathEvaluable,
   TMathVariable,
   TMathVariableDefinition,
   TMathVariableDefinitions,
-} from "@/client/WebSocketClientMessage"
+} from "@/client"
+import type { MatrixTransform, TBox } from "@/core"
+import type { TIIHistoryVariableChange } from "@/history"
 import { LoggerCategory } from "@/logger"
-import type { TJIIXMathElement } from "@/model"
-import type { TBox } from "@/symbol"
-import type { MatrixTransform } from "@/transform"
+import { isStroke } from "@/symbol"
 
 import { IIAbstractManager } from "./IIAbstractManager"
 import type {
@@ -59,6 +60,7 @@ export class IIMathManager extends IIAbstractManager {
   #capabilities: IIMathCapabilitiesSubManager
 
   #isHandlingSynchronized = false
+  #pendingVariableChanges: TIIHistoryVariableChange[] = []
 
   constructor(canvas: TInteractiveInkCanvas, config?: TMathConfig) {
     super(canvas, LoggerCategory.MATH)
@@ -79,7 +81,11 @@ export class IIMathManager extends IIAbstractManager {
     }
     this.#isHandlingSynchronized = true
     try {
-      if (this.#computation.getConfig().autoCompute) {
+      await this.#applyPendingVariableChanges()
+      // Mid-history, drawn results come back from the stack: a result drawn here would push a step
+      // and cut off everything left to redo. A ghost is never in the stack, so it is always recomputed.
+      const { autoCompute, resultMode } = this.#computation.getConfig()
+      if (autoCompute && (resultMode === "ghost" || !this.canvas.history.context.canRedo)) {
         await this.tryAutoCompute()
       }
     } finally {
@@ -119,7 +125,9 @@ export class IIMathManager extends IIAbstractManager {
   }
 
   async clearSolverOutputs(jiixBlockId: string): Promise<void> {
-    return this.canvas.trackOperation("Computing", async () => this.#computation.clearSolverOutputs(jiixBlockId))
+    return this.canvas.trackOperation("Computing", async () => {
+      await this.#computation.clearSolverOutputs(jiixBlockId)
+    })
   }
 
   async clearAllSolverOutputs(): Promise<void> {
@@ -186,10 +194,10 @@ export class IIMathManager extends IIAbstractManager {
         variableName,
         variableValue,
       })
-      if (jiixBlockId) {
-        await this.#computation.clearSolverOutputs(jiixBlockId)
-      }
+      const change = await this.#variableChange(jiixBlockId, variableName, variableValue)
+      const erased = jiixBlockId ? await this.#computation.clearSolverOutputs(jiixBlockId) : []
       await this.#variables.setVariableValue(jiixBlockId, variableName, variableValue)
+      this.canvas.history.push({ variables: [change], erased })
       this.#capabilities.invalidateCache(jiixBlockId)
       if (jiixBlockId) {
         await this.recalculateDependentBlocks(jiixBlockId)
@@ -197,6 +205,76 @@ export class IIMathManager extends IIAbstractManager {
     } catch (error) {
       this.canvas.manageError(error as Error)
       throw error
+    }
+  }
+
+  async #variableChange(jiixBlockId: string, name: string, after?: number): Promise<TIIHistoryVariableChange> {
+    const before = (await this.#variables.getVariableValue(jiixBlockId, name)) ?? undefined
+    return { strokeIds: this.#writtenStrokeIds(jiixBlockId), name, before, after }
+  }
+
+  /** The strokes the user wrote in a block, its solver output left out. None for a global variable. */
+  #writtenStrokeIds(jiixBlockId: string): string[] {
+    if (!jiixBlockId) {
+      return []
+    }
+    return this.canvas.model.symbols
+      .filter((s) => isStroke(s) && s.jiixBlockId === jiixBlockId && !s.isSolverOutput)
+      .map((s) => s.id)
+  }
+
+  /** The block the strokes belong to now: "" for a global variable, undefined if none is recognized yet. */
+  #currentBlockId(strokeIds: string[]): string | undefined {
+    if (!strokeIds.length) {
+      return ""
+    }
+    for (const id of strokeIds) {
+      const symbol = this.canvas.model.getSymbol(id)
+      if (symbol && isStroke(symbol) && symbol.jiixBlockId) {
+        return symbol.jiixBlockId
+      }
+    }
+    return undefined
+  }
+
+  /**
+   * Sends variable values replayed by undo/redo to the backend, which keeps them nowhere else.
+   * @param afterSync - wait for the next synchronization when the same step also changed strokes:
+   * the backend renames a block whose strokes come back, and only the synchronization tells the
+   * strokes their new block
+   */
+  async replayVariableChanges(changes: TIIHistoryVariableChange[], afterSync: boolean): Promise<void> {
+    if (afterSync) {
+      this.#pendingVariableChanges.push(...changes)
+      return
+    }
+    await this.#applyVariableChanges(changes)
+  }
+
+  async #applyPendingVariableChanges(): Promise<void> {
+    const pending = this.#pendingVariableChanges.splice(0)
+    if (pending.length) {
+      await this.#applyVariableChanges(pending)
+    }
+  }
+
+  async #applyVariableChanges(changes: TIIHistoryVariableChange[]): Promise<void> {
+    for (const { strokeIds, name, after } of changes) {
+      const jiixBlockId = this.#currentBlockId(strokeIds)
+      if (jiixBlockId === undefined) {
+        this.logger.warn("replayVariableChanges", `No block recognized for variable "${name}"`)
+        continue
+      }
+      try {
+        if (after === undefined) {
+          await this.#variables.removeVariableValue(jiixBlockId, name)
+        } else {
+          await this.#variables.setVariableValue(jiixBlockId, name, after)
+        }
+        this.#capabilities.invalidateCache(jiixBlockId)
+      } catch (error) {
+        this.logger.error("replayVariableChanges", `Failed to replay variable "${name}":`, error)
+      }
     }
   }
 
@@ -324,7 +402,9 @@ export class IIMathManager extends IIAbstractManager {
 
   async removeVariable(jiixBlockId: string, variableName: string): Promise<void> {
     return this.canvas.trackOperation("Updating variables", async () => {
+      const change = await this.#variableChange(jiixBlockId, variableName, undefined)
       await this.#variables.removeVariableValue(jiixBlockId, variableName)
+      this.canvas.history.push({ variables: [change] })
       await this.recalculateDependentBlocks(jiixBlockId)
     })
   }
@@ -473,17 +553,11 @@ export class IIMathManager extends IIAbstractManager {
     // gets recomputed. export() is a no-op if the jiix export is already current.
     await this.canvas.export(["application/vnd.myscript.jiix"])
 
+    // The server decides which blocks ask for a result: it offers numerical-computation for
+    // "2+3=" or a vertical operation with an empty result row, not for "2+3"
     const mathBlocks = this.canvas.model.mathBlocks
     for (const mb of mathBlocks) {
       if (!mb.id) {
-        continue
-      }
-      const label = mb.label ?? ""
-
-      if (!(label.endsWith("=") || label.endsWith("?"))) {
-        if (this.#computation.hasGhostStrokes(mb.id)) {
-          this.#computation.clearGhostStrokes(mb.id)
-        }
         continue
       }
 
@@ -495,7 +569,7 @@ export class IIMathManager extends IIAbstractManager {
           this.#computation.clearGhostStrokes(mb.id)
         }
       } catch (error) {
-        this.logger.debug("tryAutoCompute", `Cannot auto-compute "${label}":`, (error as Error).message)
+        this.logger.debug("tryAutoCompute", `Cannot auto-compute "${mb.label ?? ""}":`, (error as Error).message)
       }
     }
     this.canvas.selector.redrawSelectedGroup()

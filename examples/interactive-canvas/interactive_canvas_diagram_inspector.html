@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="HandheldFriendly" content="true" />
+  <title>Diagram Inspector Example</title>
+
+  <link rel="stylesheet" href="../assets/style/reset.css" />
+  <link rel="stylesheet" href="../assets/style/components.css" />
+  <link rel="stylesheet" href="../assets/style/examples.css" />
+  <link rel="stylesheet" href="../assets/style/panel.css" />
+  <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+
+  <style>
+    #rootEl {
+      flex: 1;
+      min-width: 0;
+    }
+
+    #inspector {
+      --ex-side-panel-width: 300px;
+      padding: 12px;
+      background: var(--ex-surface-alt);
+      font-family: monospace;
+      font-size: 12px;
+    }
+
+    .inspector-title {
+      color: #1976D2;
+      display: block;
+      margin: 12px 0 6px;
+      font-weight: bold;
+    }
+
+    .inspector-title:first-child {
+      margin-top: 0;
+    }
+
+    #graph-summary {
+      padding: 6px;
+      background: var(--ex-surface);
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+
+    .graph-item {
+      margin: 4px 0;
+      padding: 4px 6px;
+      background: var(--ex-surface);
+      border-left: 3px solid #FF9800;
+      cursor: pointer;
+    }
+
+    .graph-item.node { border-left-color: #FF9800; }
+    .graph-item.edge { border-left-color: #2196F3; }
+    .graph-item.dangling { border-left-color: #E53935; }
+
+    .graph-item-head {
+      font-weight: bold;
+    }
+
+    .graph-item-detail {
+      margin-left: 8px;
+      opacity: 0.85;
+    }
+
+    .graph-label {
+      color: #2E7D32;
+    }
+
+    .graph-label.empty {
+      color: #9E9E9E;
+      font-style: italic;
+    }
+
+    .graph-warning {
+      color: #C62828;
+    }
+
+    /* Applied to the canvas DOM element(s) backing whatever panel entry is hovered. */
+    .inspector-hover-highlight {
+      outline: 3px dashed #E91E63 !important;
+      outline-offset: 2px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .inspector-title { color: #90caf9; }
+      :root:not([data-theme="light"]) .graph-label { color: #81c784; }
+      :root:not([data-theme="light"]) .graph-warning { color: #ef9a9a; }
+    }
+    :root[data-theme="dark"] .inspector-title { color: #90caf9; }
+    :root[data-theme="dark"] .graph-label { color: #81c784; }
+    :root[data-theme="dark"] .graph-warning { color: #ef9a9a; }
+  </style>
+  <script src="../assets/js/theme-init.js"></script>
+</head>
+
+<body>
+  <header class="header-main">
+    <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+      💡 Info
+    </button>
+    <button id="showModalBtn" class="btn-keys">API Keys</button>
+    <h1 class="header-title">Diagram Inspector Example</h1>
+    <button id="sidePanelToggleBtn" class="btn-panel-toggle btn-side-panel-toggle" aria-expanded="false" aria-controls="inspector">
+      🔍 Inspector
+    </button>
+  </header>
+
+  <div class="ex-page-layout">
+    <aside id="info-panel" class="ex-panel">
+      <p class="ex-panel-heading">What does the server actually recognize in my diagram?</p>
+      <p class="ex-panel-intro">Every stroke you draw is grouped into a JIIX element: a <em>Node</em> (a shape), an <em>Edge</em> (a line, polyline or arc) or a <em>Text</em>. This page turns that raw recognition result into a readable graph, live, as you draw.</p>
+      <div class="ex-panel-divider"></div>
+      <div class="ex-panel-item">
+        <div class="ex-panel-item-desc"><strong>Nodes</strong> report their recognized <span class="highlight">kind</span> (rectangle, circle, rhombus…) and the text found inside them — the same rule the Mermaid and PlantUML exports use for labels.</div>
+      </div>
+      <div class="ex-panel-item">
+        <div class="ex-panel-item-desc"><strong>Edges</strong> report which two nodes they join. The server fills <span class="highlight">connected</span> and <span class="highlight">ports</span> as soon as the diagram holds more than one shape; when it can't, the endpoints are matched against node boxes instead.</div>
+      </div>
+      <div class="ex-panel-item">
+        <div class="ex-panel-item-desc">An edge that reaches nothing on one or both ends is flagged <span class="highlight">dangling</span> — that's exactly what makes an export come out with a missing arrow.</div>
+      </div>
+      <div class="ex-panel-item">
+        <div class="ex-panel-item-desc"><strong>Hover any entry</strong> to highlight the ink strokes it was built from, resolved through <code>canvas.jiix</code>, the JIIX query manager.</div>
+      </div>
+      <div class="ex-panel-divider"></div>
+      <div class="ex-panel-item">
+        <div class="ex-panel-item-desc"><strong>Try it:</strong><br>
+          1. With the <span class="highlight">Pen</span>, draw two shapes by hand (box, circle, ...) — only handwritten ink is recognized, the <span class="highlight">Shape</span> and <span class="highlight">Edge</span> tools are not<br>
+          2. Write a word inside each one — the panel picks them up as labels<br>
+          3. Still with the pen, draw a line or an arrow joining them — the edge reports <em>from → to</em><br>
+          4. Hover an entry to see which strokes produced it<br>
+          5. Move one shape away so the edge no longer touches it — it turns <span class="highlight">dangling</span>
+        </div>
+      </div>
+    </aside>
+    <div class="main-layout">
+      <div id="rootEl"></div>
+      <div id="inspector" class="ex-side-panel">
+        <div id="graph-summary">Nothing recognized yet.</div>
+        <span class="inspector-title">Nodes</span>
+        <div id="nodes-list">—</div>
+        <span class="inspector-title">Edges</span>
+        <div id="edges-list">—</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { Canvas, extractJIIXGraphElements, findLabelInside, resolveEdgeNodes } from '../../dist/iink.esm.js'
+    import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
+
+    const panelToggleBtn = document.getElementById('panelToggleBtn')
+    const infoPanel = document.getElementById('info-panel')
+    panelToggleBtn.addEventListener('click', () => {
+      const open = infoPanel.classList.toggle('open')
+      panelToggleBtn.setAttribute('aria-expanded', open)
+    })
+
+    const sidePanelToggleBtn = document.getElementById('sidePanelToggleBtn')
+    const sidePanel = document.getElementById('inspector')
+    sidePanelToggleBtn.addEventListener('click', () => {
+      const open = sidePanel.classList.toggle('open')
+      sidePanelToggleBtn.setAttribute('aria-expanded', open)
+    })
+
+    const rootElement = document.getElementById('rootEl')
+    const showModalBtn = document.getElementById('showModalBtn')
+    const summaryElement = document.getElementById('graph-summary')
+    const nodesList = document.getElementById('nodes-list')
+    const edgesList = document.getElementById('edges-list')
+
+    let canvas
+
+    // Nothing to configure: INTERACTIVE_INK recognizes shapes, edges and text out of the box,
+    // and the JIIX export is always kept on the model.
+    const canvasOptions = {
+      configuration: {},
+    }
+
+    /**
+     * Reads the diagram out of the live JIIX export. `extractJIIXGraphElements` is the same
+     * helper the built-in Mermaid/PlantUML exports use, so the panel and those exports always
+     * agree on what counts as a node, an edge or a label.
+     */
+    function currentGraph() {
+      const jiix = canvas?.model.exports?.['application/vnd.myscript.jiix']
+      return jiix ? extractJIIXGraphElements(jiix) : { nodes: [], edges: [], texts: [] }
+    }
+
+    /**
+     * Resolves the canvas DOM ids to highlight for one JIIX element. `canvas.jiix` indexes the
+     * JIIX stroke items, whose ids are the ink strokes; after a Convert those items are gone,
+     * so we fall back to the block id stamped on each symbol during synchronization.
+     */
+    function elementIdsFor(blockId) {
+      const fromIndex = canvas.jiix
+        .getStrokeIdsForBlock(blockId)
+        .map((strokeId) => canvas.model.getSymbol(strokeId)?.id)
+        .filter(Boolean)
+      if (fromIndex.length) {
+        return [...new Set(fromIndex)]
+      }
+      return canvas.model.symbols.filter((symbol) => symbol.jiixBlockId === blockId).map((symbol) => symbol.id)
+    }
+
+    function labelHtml(label) {
+      return label
+        ? `<span class="graph-label">"${label}"</span>`
+        : '<span class="graph-label empty">no label</span>'
+    }
+
+    /**
+     * An arrow head on one end of an edge is what turns an undirected link into a direction the
+     * reader can see. JIIX names those decorations differently per edge kind.
+     */
+    function decorationGlyph(edge) {
+      const [start, end] =
+        edge.kind === 'arc'
+          ? [edge.startDecoration, edge.endDecoration]
+          : edge.kind === 'polyedge'
+            ? [edge.edges[0]?.p1Decoration, edge.edges[edge.edges.length - 1]?.p2Decoration]
+            : [edge.p1Decoration, edge.p2Decoration]
+      if (start && end) return '↔'
+      if (end) return '→'
+      if (start) return '←'
+      return '—'
+    }
+
+    function renderNodes(nodes, texts) {
+      if (!nodes.length) {
+        nodesList.innerHTML = '<span class="graph-label empty">No shape recognized yet.</span>'
+        return
+      }
+      nodesList.innerHTML = nodes
+        .map((node, index) => {
+          const label = findLabelInside(node['bounding-box'], texts)
+          const ids = elementIdsFor(node.id)
+          return (
+            `<div class="graph-item node" data-hover-ids="${ids.join(',')}">` +
+            `<div class="graph-item-head">Node ${index + 1} — ${node.kind}</div>` +
+            `<div class="graph-item-detail">label: ${labelHtml(label)}</div>` +
+            `<div class="graph-item-detail">${ids.length} stroke(s)</div>` +
+            `</div>`
+          )
+        })
+        .join('')
+    }
+
+    function renderEdges(edges, nodes, texts) {
+      if (!edges.length) {
+        edgesList.innerHTML = '<span class="graph-label empty">No line or arc recognized yet.</span>'
+        return
+      }
+      edgesList.innerHTML = edges
+        .map((edge, index) => {
+          // `resolveEdgeNodes` trusts the server's `connected` list first and only falls back to
+          // geometry, so an edge reported here as dangling really is unconnected for the exports too.
+          const resolved = resolveEdgeNodes(edge, nodes)
+          const ids = elementIdsFor(edge.id)
+          const ports = edge.ports?.length ? ` (ports ${edge.ports.join(', ')})` : ''
+          const link = resolved
+            ? `${labelHtml(findLabelInside(resolved[0]['bounding-box'], texts) ?? resolved[0].kind)} ` +
+              `${decorationGlyph(edge)} ` +
+              `${labelHtml(findLabelInside(resolved[1]['bounding-box'], texts) ?? resolved[1].kind)}${ports}`
+            : '<span class="graph-warning">dangling — reaches no shape</span>'
+          const hoverIds = resolved ? [...ids, ...elementIdsFor(resolved[0].id), ...elementIdsFor(resolved[1].id)] : ids
+          return (
+            `<div class="graph-item edge ${resolved ? '' : 'dangling'}" data-hover-ids="${hoverIds.join(',')}">` +
+            `<div class="graph-item-head">Edge ${index + 1} — ${edge.kind}</div>` +
+            `<div class="graph-item-detail">${link}</div>` +
+            `<div class="graph-item-detail">${ids.length} stroke(s)</div>` +
+            `</div>`
+          )
+        })
+        .join('')
+    }
+
+    function refreshInspector() {
+      if (!canvas) {
+        return
+      }
+      const { nodes, edges, texts } = currentGraph()
+      const dangling = edges.filter((edge) => !resolveEdgeNodes(edge, nodes)).length
+      summaryElement.innerHTML =
+        nodes.length || edges.length
+          ? `${nodes.length} node(s) · ${edges.length} edge(s) · ${texts.length} text(s)` +
+            (dangling ? ` · <span class="graph-warning">${dangling} dangling</span>` : '')
+          : 'Nothing recognized yet — draw a shape to start.'
+      renderNodes(nodes, texts)
+      renderEdges(edges, nodes, texts)
+    }
+
+    // Hovering a panel entry outlines the ink it was built from, via event delegation since
+    // innerHTML rebuilds the rows on every refresh.
+    function toggleHoverHighlight(event, add) {
+      const item = event.target.closest('.graph-item')
+      if (!item) {
+        return
+      }
+      const ids = (item.dataset.hoverIds || '').split(',').filter(Boolean)
+      ids.forEach((id) => document.getElementById(id)?.classList.toggle('inspector-hover-highlight', add))
+    }
+    const inspector = document.getElementById('inspector')
+    inspector.addEventListener('mouseover', (event) => toggleHoverHighlight(event, true))
+    inspector.addEventListener('mouseout', (event) => toggleHoverHighlight(event, false))
+
+    async function loadCanvas(options) {
+      await canvas?.destroy()
+
+      canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK', options)
+
+      // `synchronized` fires once the JIIX has been merged back onto the symbols, `changed`
+      // covers the local edits (move, erase, undo) that don't need a new recognition round.
+      canvas.event.addSynchronizedListener(refreshInspector)
+      canvas.event.addChangedListener(refreshInspector)
+      refreshInspector()
+      return canvas
+    }
+
+    showModalBtn.addEventListener('click', () => {
+      ModalCanvasOptions.show(loadCanvas, canvasOptions)
+    })
+
+    ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
+
+    /**
+     * We expose these objects to the window use it in test
+     */
+    window.canvasOptions = canvasOptions
+    window.loadCanvas = loadCanvas
+  </script>
+  <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+  <script src="../assets/js/theme.js"></script>
+</body>
+</html>

@@ -273,6 +273,19 @@
   font-size: .95rem;
 }
 
+.home-build-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 32px;
+  color: var(--text-muted);
+  font-family: ui-monospace, monospace;
+  font-size: .8rem;
+}
+
+.home-build-info[hidden] { display: none; }
+
 /* ---- Layout ---- */
 .home-layout {
   display: flex;
@@ -706,4 +719,13 @@
 
 @media (max-width: 420px) {
   .card-grid { grid-template-columns: 1fr; }
+}
+
+.card-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  object-position: top center;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
 }

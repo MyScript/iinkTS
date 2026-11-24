@@ -2,8 +2,12 @@
  * @group Renderer
  */
 export const SVGRendererConst = {
-  selectionFilterId: "selection-filter",
-  removalFilterId: "removal-filter",
+  /** Class a selected symbol's element carries; its outline is drawn by the stylesheet */
+  selectedClassName: "ms-selected",
+  /** Class of the wider copy drawn under a selected shape or edge; the stylesheet colours it */
+  selectionHaloClassName: "ms-selection-halo",
+  /** Class a symbol's element carries while the eraser passes over it; the stylesheet fades it */
+  deletingClassName: "ms-deleting",
   crossMarker: "cross-marker",
   noSelection:
     "pointer-events: none; -webkit-touch-callout: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;",

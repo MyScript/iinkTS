@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Interactive Ink Canvas - Mermaid Export</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <style>
+      #rootEl {
+        flex: 1;
+        min-width: 0;
+      }
+
+      #results-panel {
+        width: 360px;
+      }
+
+      .export-result-item {
+        margin-bottom: var(--ex-space-md);
+      }
+
+      .export-result-item pre {
+        margin: 4px 0 0;
+        min-height: 60px;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      #mermaidRendered {
+        margin: 4px 0 0;
+        padding: var(--ex-space-sm);
+        border: 1px solid var(--ex-border, #ddd);
+        border-radius: 4px;
+        min-height: 80px;
+        overflow-x: auto;
+      }
+
+      #mermaidRendered svg {
+        max-width: 100%;
+        height: auto;
+      }
+    </style>
+    <script src="../assets/js/theme-init.js"></script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="resultsPanelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="results-panel">
+        📤 Results
+      </button>
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">
+        Interactive Ink Canvas - Mermaid Export
+      </h1>
+    </header>
+
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">Hand-drawn diagram → Mermaid</p>
+        <p class="ex-panel-intro"><code>canvas.exportAs("mermaid")</code> resolves with a <code>flowchart TD</code> block, derived locally from the JIIX recognition result.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Draw shapes (rectangle, circle, rhombus…) connected by lines. Write a word inside a shape to label it.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Edge-to-shape connections are resolved geometrically — an edge's endpoint must land inside a shape. An edge that doesn't touch any shape is left out of the flowchart.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">The panel refreshes on every <code>exported</code> event, so the flowchart follows the diagram as you draw it.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc"><code>canvas.download("mermaid")</code> saves the same content as a <code>.mmd</code> file.</div>
+        </div>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-hint">The rendered diagram below uses <code>mermaid</code> from a CDN. It is only there to show the syntax as a picture — iinkTS itself produces the text and has no rendering dependency.</div>
+      </aside>
+      <div class="page-content">
+        <nav class="flex-container wrap gap between">
+          <div class="flex-container wrap gap">
+            <button class="classic-btn primary" id="exportMermaid">
+              Export as Mermaid
+            </button>
+            <button class="classic-btn" id="downloadMermaid">
+              Download .mmd
+            </button>
+            <button class="classic-btn" id="clear">
+              Clear
+            </button>
+          </div>
+        </nav>
+        <div class="main-layout">
+          <div id="rootEl"></div>
+          <aside id="results-panel" class="ex-panel">
+            <p class="ex-panel-heading">Mermaid source</p>
+            <div class="export-result-item">
+              <pre id="mermaidResult" class="ex-panel-code"></pre>
+            </div>
+            <p class="ex-panel-heading">Rendered</p>
+            <div class="export-result-item">
+              <div id="mermaidRendered"></div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { Canvas } from '../../dist/iink.esm.js'
+      import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"
+      import { ModalCanvasOptions } from "../components/modal/modalCanvasOptions.js";
+
+      mermaid.initialize({ startOnLoad: false })
+
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      const resultsPanelToggleBtn = document.getElementById('resultsPanelToggleBtn')
+      const resultsPanel = document.getElementById('results-panel')
+      resultsPanelToggleBtn.addEventListener('click', () => {
+        const open = resultsPanel.classList.toggle('open')
+        resultsPanelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      const rootElement = document.getElementById("rootEl");
+      const exportMermaidBtn = document.getElementById("exportMermaid");
+      const downloadMermaidBtn = document.getElementById("downloadMermaid");
+      const clearBtn = document.getElementById("clear");
+      const mermaidResultElement = document.getElementById("mermaidResult");
+      const mermaidRenderedElement = document.getElementById("mermaidRendered");
+      const showModalBtn = document.getElementById("showModalBtn");
+
+      let canvas;
+      let renderCount = 0;
+      const canvasOptions = {
+        configuration: {
+          recognition: { types: ['text', 'shape'] },
+          menu: {
+            action: {
+              language: false,
+              gesture: false,
+              snap: false,
+              export: false,
+              import: false,
+              convert: false,
+              math: false,
+              guide: false,
+              selection: false,
+            },
+            tool: {
+              write: true,
+              move: true,
+              select: true,
+              erase: true,
+              shape: false,
+              edge: false,
+            },
+            style: {
+              strokeColor: true,
+              fillColor: false,
+              thickness: false,
+              fontSize: false,
+              fontWeight: false,
+              opacity: false,
+            },
+            context: {
+              edit: false,
+              decorator: false,
+              reorder: false,
+              export: false,
+              convert: false,
+            },
+          },
+        },
+      };
+
+      function clearResults() {
+        mermaidResultElement.textContent = "";
+        mermaidRenderedElement.innerHTML = "";
+      }
+
+      /**
+       * Renders the exported flowchart. The source text is the export itself; the SVG is only a
+       * preview, so a syntax mermaid cannot draw yet (an empty diagram, a half-drawn edge) leaves
+       * the source visible instead of breaking the page.
+       */
+      async function refreshMermaid() {
+        if (!canvas) return;
+        const flowchart = await canvas.exportAs("mermaid");
+        mermaidResultElement.textContent = flowchart;
+        try {
+          const { svg } = await mermaid.render(`mermaid-preview-${++renderCount}`, flowchart);
+          mermaidRenderedElement.innerHTML = svg;
+        } catch {
+          mermaidRenderedElement.textContent = "Nothing to render yet.";
+        }
+      }
+
+      async function loadCanvas(options) {
+        await canvas?.destroy();
+        canvas = await Canvas.load(rootElement, "INTERACTIVE_INK", options);
+        window.canvas = canvas;
+        clearResults();
+        canvas.event.addEventListener("exported", () => refreshMermaid());
+      }
+
+      exportMermaidBtn.addEventListener("click", () => refreshMermaid());
+
+      downloadMermaidBtn.addEventListener("click", () => canvas?.download("mermaid"));
+
+      clearBtn.addEventListener("click", async () => {
+        if (!canvas) return;
+        await canvas.clear();
+        clearResults();
+      });
+
+      showModalBtn.addEventListener("click", () => {
+        ModalCanvasOptions.show(loadCanvas, canvasOptions);
+      });
+
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions);
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.canvasOptions = canvasOptions
+      window.loadCanvas = loadCanvas
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>

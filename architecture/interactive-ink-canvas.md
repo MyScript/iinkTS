@@ -1,6 +1,6 @@
 # InteractiveInkCanvas — Architecture
 
-`InteractiveInkCanvas` is the WebSocket real-time editor variant (`Canvas.load(element, "INTERACTIVE_INK", options)`). It orchestrates ~18 managers, a `WebSocketClient`, an `SVGRenderer` and an `IIModel`.
+`InteractiveInkCanvas` is the WebSocket real-time editor variant (`Canvas.load(element, "INTERACTIVE_INK", options)`). It orchestrates ~21 managers, a `WebSocketClient`, an `SVGRenderer` and an `IIModel`.
 
 ## Overview
 
@@ -29,6 +29,10 @@ classDiagram
   InteractiveInkCanvas *-- IIConnectorManager : connector
   InteractiveInkCanvas *-- IIMenuManager : menu
   InteractiveInkCanvas *-- IIPlaybackManager : playback
+  InteractiveInkCanvas *-- PDFExportManager : pdfExport
+  InteractiveInkCanvas *-- IIExportManager : exportManager
+  InteractiveInkCanvas *-- LayoutManager : layout
+  IIExportManager ..> PDFExportManager : download("pdf")
 
   InteractiveInkCanvas o-- IIModel : model
   InteractiveInkCanvas o-- SVGRenderer : renderer
@@ -50,6 +54,7 @@ classDiagram
 
 Notes:
 - `IIMenuManager` lives in `src/menu/`, not `src/manager/`.
+- `PDFExportManager` and `LayoutManager` live in `src/manager/base/` (shared with `InkCanvas`); `IIExportManager` extends `ExportManager` from the same folder.
 - `ColorPaletteManager` (`src/manager/base/ColorPaletteManager.ts`) is a singleton, only reached two levels down (`IIOverlayManager`, `IIMathVariableSubManager`) — `InteractiveInkCanvas` never touches it directly.
 - `IIModel` / `SVGRenderer` are treated as opaque boxes here — see the symbol-system docs for their internals.
 
@@ -93,35 +98,38 @@ classDiagram
     +connector: IIConnectorManager
     +menu: IIMenuManager
     +playback: IIPlaybackManager
+    +pdfExport: PDFExportManager
+    +exportManager: IIExportManager
+    +layout: LayoutManager
+    +initializationPromise: Promise~void~
     +constructor(rootElement, options?)
     +initialize() Promise~void~
     +addSymbol(sym, addToHistory?) Promise~TSymbol~
     +addSymbols(symList, addToHistory?) Promise~TSymbol[]~
-    +updateSymbol(sym, addToHistory?) Promise~TSymbol~
+    +updateSymbol(id, patch, addToHistory?) Promise~TSymbol~
+    +updateSymbols(ids, patch, addToHistory?) Promise~TSymbol[]~
     +removeSymbol(id, addToHistory?) Promise~void~
     +select(ids) void
     +selectAll() void
     +unselectAll() void
     +convert(symbols?) Promise~void~
     +export(mimeTypes?) Promise~TExport~
-    +synchronize() void
+    +exportAs(format, options?) Promise
+    +download(format, options?) Promise~void~
+    +synchronize() Promise~void~
     +undo() Promise~IIModel~
     +redo() Promise~IIModel~
     +duplicate(symbols?) Promise~TSymbol[]~
     +copy() void
     +paste() Promise~void~
-    +cut() void
+    +cut() Promise~void~
     +zoom(zoom, cx?, cy?) void
     +zoomToFit(symbols?) void
-    +pan(...) void
+    +pan(dx, dy) void
     +resize(dims?) Promise~void~
     +clear() Promise~void~
     +destroy() Promise~void~
-    +downloadAsSVG(selection?) void
-    +downloadAsPNG(selection?) void
-    +downloadAsJson(selection?) void
-    +downloadAsText(selection?) void
-    +changeLanguage(code) Promise~void~
+    +updateRecognitionConfiguration(partial) Promise~void~
     +waitForIdle() Promise~void~
   }
   AbstractCanvas <|-- InteractiveInkCanvas
@@ -219,8 +227,9 @@ classDiagram
 
   class IIAbstractTransformManager {
     <<abstract>>
-    +setTransformOrigin(id, ox, oy) void
+    +applyMatrix(symbols, matrix) void
     +applyToSymbol(symbol, matrix) TSymbol
+    #applyThroughUtil(symbol, matrix)* void
   }
   IIAbstractManager <|-- IIAbstractTransformManager
 
@@ -233,14 +242,13 @@ classDiagram
   }
   class IIResizeManager {
     +constructor(canvas)
-    +scaleElement(id, sx, sy) void
+    +direction: ResizeDirection
     +start(target, origin) void
     +continue(point) object
     +end(point) Promise~void~
   }
   class IIRotationManager {
     +constructor(canvas)
-    +rotateElement(id, degree) void
     +start(target, origin) void
     +continue(point) number
     +end(point) Promise~void~
@@ -337,11 +345,42 @@ classDiagram
   IIAbstractManager <|-- IIConnectorManager
 
   class IIMenuManager {
-    +constructor(canvas, custom?)
+    +constructor(canvas, override?, items?)
+    +getMenu(name) IIAbstractMenu
     +render(layer) void
+    +setConfig(config) void
+    +addItem(menu, key, factory, options?) void
+    +removeItem(menu, key) boolean
     +show() void
     +hide() void
     +update() void
+    +destroy() void
+  }
+
+  class ExportManager {
+    <<abstract>>
+    +constructor(canvas, pdfExport)
+    +exportAs(format, options?) Promise
+    +download(format, options?) Promise~void~
+    +destroy() void
+  }
+  class IIExportManager
+  ExportManager <|-- IIExportManager
+
+  class PDFExportManager {
+    +constructor(canvas)
+    +openExportDialog(onConfirm, onCancel?) void
+    +print(svgContent, box, options) void
+  }
+
+  class LayoutManager~TCanvas~ {
+    +occupantsOf(slot) string[]
+    +slotOf(occupant) TLayoutSlot
+    +set(configuration) void
+    +add(key, factory, options?) void
+    +remove(key) boolean
+    +host(occupant) HTMLElement
+    +render() void
     +destroy() void
   }
 
@@ -363,14 +402,18 @@ classDiagram
     +pop() void
     +clear() void
   }
-  class IIHistoryManager {
-    +isChangesEmpty(changes) boolean
-    +init(model) void
-    +push(model, changes) void
-    +undo() TIIHistoryStackItem
-    +redo() TIIHistoryStackItem
+  class AbstractDiffHistoryManager~TChanges~ {
+    <<abstract>>
+    +push(changes) void
+    +undo() TChanges
+    +redo() TChanges
   }
-  AbstractHistoryStack <|-- IIHistoryManager
+  class IIHistoryManager {
+    +init(model) void
+    #isChangesEmpty(changes) boolean
+  }
+  AbstractHistoryStack <|-- AbstractDiffHistoryManager
+  AbstractDiffHistoryManager <|-- IIHistoryManager
 
   class ColorPaletteManager {
     <<singleton>>
@@ -397,6 +440,9 @@ classDiagram
   InteractiveInkCanvas *-- IIConnectorManager : connector
   InteractiveInkCanvas *-- IIMenuManager : menu
   InteractiveInkCanvas *-- IIPlaybackManager : playback
+  InteractiveInkCanvas *-- PDFExportManager : pdfExport
+  InteractiveInkCanvas *-- IIExportManager : exportManager
+  InteractiveInkCanvas *-- LayoutManager : layout
 ```
 
 ## Source files
@@ -409,7 +455,8 @@ classDiagram
 | `IIAbstractManager` | `src/manager/interactive/IIAbstractManager.ts` |
 | Transform managers | `src/manager/interactive/transform/` |
 | Math sub-managers | `src/manager/interactive/math/` |
-| `IIHistoryManager` / `AbstractHistoryStack` | `src/history/` |
+| `IIHistoryManager` / `AbstractDiffHistoryManager` / `AbstractHistoryStack` | `src/history/` |
 | `IIMenuManager` | `src/menu/IIMenuManager.ts` |
-| `ColorPaletteManager` | `src/manager/base/ColorPaletteManager.ts` |
-| `WebSocketClient` | `src/client/WebSocketClient.ts` — see [websocket-protocol.md](websocket-protocol.md) |
+| `ColorPaletteManager` / `ExportManager` / `PDFExportManager` / `LayoutManager` | `src/manager/base/` |
+| `IIExportManager` | `src/manager/interactive/IIExportManager.ts` |
+| `WebSocketClient` | `src/client/websocket/WebSocketClient.ts` — see [websocket-protocol.md](websocket-protocol.md) |

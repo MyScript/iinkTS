@@ -1,18 +1,7 @@
-import {
-  arcJIIX,
-  circleJIIX,
-  ellipseJIIX,
-  hTextJIIX,
-  lineJIIX,
-  parallelogramJIIX,
-  polygonJIIX,
-  rectangleJIIX,
-  rhombusJIIX,
-  triangleJIIX,
-} from "../../__dataset__/jiix.dataset"
+import { arcJIIX, circleJIIX, ellipseJIIX, hTextJIIX, lineJIIX, parallelogramJIIX, polygonJIIX, rectangleJIIX, rhombusJIIX, triangleJIIX } from "../../__dataset__/jiix.dataset"
 import { buildIIStroke } from "../../helpers"
 import { createCanvasMock, asCanvas } from "../../__mocks__/createCanvasMock"
-import { IIConversionManager, JIIXElementType, TJIIXEdgeElement, TJIIXMathElement, TJIIXNodeElement, TJIIXTextElement, TextOps } from "@/iink"
+import { EdgeUtil, IIConversionManager, JIIXEdgeKind, JIIXElementType, JIIXNodeKind, ShapeUtil, TEdgeLine, TJIIXEdgeElement, TJIIXMathElement, TJIIXNodeElement, TJIIXTextElement, TSymbol, TextUtil } from "@/iink"
 
 describe("IIConversionManager.ts", () => {
   test("should create", () => {
@@ -36,21 +25,21 @@ describe("IIConversionManager.ts", () => {
     })
     test("should call convertText", async () => {
       expect(manager.convertText).toHaveBeenCalledTimes(0)
-      manager.model.exports = { "application/vnd.myscript.jiix": hTextJIIX }
+      manager.model.mergeExport({ "application/vnd.myscript.jiix": hTextJIIX })
       await manager.apply()
       expect(canvas.selector.removeSelectedGroup).toHaveBeenCalledTimes(1)
       expect(manager.convertText).toHaveBeenCalledTimes(1)
     })
     test("should call convertNode", async () => {
       expect(manager.convertNode).toHaveBeenCalledTimes(0)
-      manager.model.exports = { "application/vnd.myscript.jiix": rectangleJIIX }
+      manager.model.mergeExport({ "application/vnd.myscript.jiix": rectangleJIIX })
       await manager.apply()
       expect(canvas.selector.removeSelectedGroup).toHaveBeenCalledTimes(1)
       expect(manager.convertNode).toHaveBeenCalledTimes(1)
     })
     test("should call convertEdge", async () => {
       expect(manager.convertEdge).toHaveBeenCalledTimes(0)
-      manager.model.exports = { "application/vnd.myscript.jiix": lineJIIX }
+      manager.model.mergeExport({ "application/vnd.myscript.jiix": lineJIIX })
       await manager.apply()
       expect(canvas.selector.removeSelectedGroup).toHaveBeenCalledTimes(1)
       expect(manager.convertEdge).toHaveBeenCalledTimes(1)
@@ -99,18 +88,19 @@ describe("IIConversionManager.ts", () => {
     test("should return converted symbol & strokes associate", async () => {
       const helloStroke = buildIIStroke()
       helloStroke.id = hTextJIIXElement.words![0].items![0]["full-id"]!
-      manager.model.symbols.push(helloStroke)
+      manager.model.addSymbol(helloStroke)
       const result = manager.convertText(hTextJIIXElement, [helloStroke], false)!
       expect(result).toHaveLength(1)
       expect(result[0].strokes).toEqual([helloStroke])
-      expect(TextOps.getLabel(result[0].symbol)).toEqual("h")
+      expect(TextUtil.getLabel(result[0].symbol)).toEqual("h")
     })
     test("should skip a word that only references an embedded element (e.g. inline math) instead of building a degenerate zero-bounds text symbol", async () => {
       const helloStroke = buildIIStroke()
       helloStroke.id = "stroke-hello"
       const mathStroke = buildIIStroke()
       mathStroke.id = "stroke-math"
-      manager.model.symbols.push(helloStroke, mathStroke)
+      manager.model.addSymbol(helloStroke)
+      manager.model.addSymbol(mathStroke)
 
       const textWithMathRef: TJIIXTextElement = {
         id: "raw-content/142",
@@ -157,7 +147,7 @@ describe("IIConversionManager.ts", () => {
 
       const result = manager.convertText(textWithMathRef, [helloStroke, mathStroke], false)!
       expect(result).toHaveLength(1)
-      expect(TextOps.getLabel(result[0].symbol)).toEqual("hello")
+      expect(TextUtil.getLabel(result[0].symbol)).toEqual("hello")
     })
   })
 
@@ -176,14 +166,14 @@ describe("IIConversionManager.ts", () => {
     test("should should return nothing when shape.kind unknow", async () => {
       const stroke = buildIIStroke()
       stroke.id = "stroke-95ec1ea8-3dc9-4d63-945c-eaaa1d92636711"
-      manager.model.symbols.push(stroke)
+      manager.model.addSymbol(stroke)
       //@ts-ignore
       expect(manager.convertNode({ ...jiixNodeRect, kind: "pouet" }, [stroke])).toBeUndefined()
     })
     test("should return converted symbol & strokes associate when rectangle", async () => {
       const stroke = buildIIStroke()
       stroke.id = "stroke-95ec1ea8-3dc9-4d63-945c-eaaa1d926367"
-      manager.model.symbols.push(stroke)
+      manager.model.addSymbol(stroke)
       const result = manager.convertNode(jiixNodeRect, [stroke])!
       expect(result.strokes).toEqual([stroke])
       expect(result.symbol.kind).toEqual("polygon")
@@ -191,7 +181,7 @@ describe("IIConversionManager.ts", () => {
     test("should return converted symbol & strokes associate when rectangle", async () => {
       const stroke = buildIIStroke()
       stroke.id = "stroke-e3ab0f2b-7846-4440-9e49-97ae560813ee"
-      manager.model.symbols.push(stroke)
+      manager.model.addSymbol(stroke)
       const result = manager.convertNode(jiixNodeCircle, [stroke])!
       expect(result.strokes).toEqual([stroke])
       expect(result.symbol.kind).toEqual("circle")
@@ -199,7 +189,7 @@ describe("IIConversionManager.ts", () => {
     test("should return converted symbol & strokes associate when ellipse", async () => {
       const stroke = buildIIStroke()
       stroke.id = "stroke-c5f186da-33c9-41ce-8750-1909e52fbf4c"
-      manager.model.symbols.push(stroke)
+      manager.model.addSymbol(stroke)
       const result = manager.convertNode(jiixNodeEllipse, [stroke])!
       expect(result.strokes).toEqual([stroke])
       expect(result.symbol.kind).toEqual("ellipse")
@@ -207,7 +197,7 @@ describe("IIConversionManager.ts", () => {
     test("should return converted symbol & strokes associate when triangle", async () => {
       const stroke = buildIIStroke()
       stroke.id = "stroke-024da324-4196-41d0-8f51-16c2a21b9226"
-      manager.model.symbols.push(stroke)
+      manager.model.addSymbol(stroke)
       const result = manager.convertNode(jiixNodeTriangle, [stroke])!
       expect(result.strokes).toEqual([stroke])
       expect(result.symbol.kind).toEqual("polygon")
@@ -215,7 +205,7 @@ describe("IIConversionManager.ts", () => {
     test("should return converted symbol & strokes associate when parallelogram", async () => {
       const stroke = buildIIStroke()
       stroke.id = "stroke-768451fe-6737-43e7-b3a5-d7f2b3da8caa"
-      manager.model.symbols.push(stroke)
+      manager.model.addSymbol(stroke)
       const result = manager.convertNode(jiixNodeParrallelogram, [stroke])!
       expect(result.strokes).toEqual([stroke])
       expect(result.symbol.kind).toEqual("polygon")
@@ -223,7 +213,7 @@ describe("IIConversionManager.ts", () => {
     test("should return converted symbol & strokes associate when rhombus", async () => {
       const stroke = buildIIStroke()
       stroke.id = "stroke-1d68a985-9ca6-48dd-88b5-d385df793105"
-      manager.model.symbols.push(stroke)
+      manager.model.addSymbol(stroke)
       const result = manager.convertNode(jiixNodeRhombus, [stroke])!
       expect(result.strokes).toEqual([stroke])
       expect(result.symbol.kind).toEqual("polygon")
@@ -231,7 +221,7 @@ describe("IIConversionManager.ts", () => {
     test("should return converted symbol & strokes associate when polygon", async () => {
       const stroke = buildIIStroke()
       stroke.id = "stroke-fa6ee3fd-6189-4bdf-8c06-1907588f298f"
-      manager.model.symbols.push(stroke)
+      manager.model.addSymbol(stroke)
       const result = manager.convertNode(jiixNodePolygon, [stroke])!
       expect(result.strokes).toEqual([stroke])
       expect(result.symbol.kind).toEqual("polygon")
@@ -250,14 +240,14 @@ describe("IIConversionManager.ts", () => {
     test("should return nothing when when edge.kind unknow", async () => {
       const stroke = buildIIStroke()
       stroke.id = "stroke-2632b9c1-697d-44e6-bba4-44c49820318211"
-      manager.model.symbols.push(stroke)
+      manager.model.addSymbol(stroke)
       //@ts-ignore
       expect(manager.convertEdge({ ...jiixEdgeLine, kind: "pouet" }, [stroke])).toBeUndefined()
     })
     test("should return converted symbol & strokes associate when line", async () => {
       const stroke = buildIIStroke()
       stroke.id = "stroke-2632b9c1-697d-44e6-bba4-44c498203182"
-      manager.model.symbols.push(stroke)
+      manager.model.addSymbol(stroke)
       const result = manager.convertEdge(jiixEdgeLine, [stroke])!
       expect(result.strokes).toEqual([stroke])
       expect(result.symbol.kind).toEqual("line")
@@ -265,10 +255,97 @@ describe("IIConversionManager.ts", () => {
     test("should return converted symbol & strokes associate when arc", async () => {
       const stroke = buildIIStroke()
       stroke.id = "stroke-a3aea978-6ea3-449e-8b02-74772a8233bb"
-      manager.model.symbols.push(stroke)
+      manager.model.addSymbol(stroke)
       const result = manager.convertEdge(jiixEdgeArc, [stroke])!
       expect(result.strokes).toEqual([stroke])
       expect(result.symbol.kind).toEqual("arc")
+    })
+  })
+
+  describe("apply - two-pass anchor resolution", () => {
+    // The real InteractiveInkCanvas.addSymbols() adds the symbol to the model before resolving;
+    // createCanvasMock's default addSymbols stub doesn't, so mirror that side effect here to
+    // exercise the same ordering guarantee #applyInternal relies on.
+    function mockAddSymbolsIntoModel(canvas: ReturnType<typeof createCanvasMock>): void {
+      canvas.addSymbols = jest.fn().mockImplementation((syms: TSymbol[]) => {
+        syms.forEach((s) => canvas.model.addSymbol(s))
+        return Promise.resolve(syms)
+      })
+    }
+
+    test("convert: node converted before its connected edge in the same batch → edge gets a real anchor", async () => {
+      const canvas = createCanvasMock()
+      mockAddSymbolsIntoModel(canvas)
+      const nodeStroke = buildIIStroke()
+      const edgeStroke = buildIIStroke()
+      canvas.model.addSymbol(nodeStroke)
+      canvas.model.addSymbol(edgeStroke)
+
+      const nodeEl = {
+        type: JIIXElementType.Node,
+        id: "node-1",
+        kind: JIIXNodeKind.Rectangle,
+        x: 100,
+        y: 0,
+        width: 20,
+        height: 20,
+        items: [{ type: "stroke", id: "i1", "full-id": nodeStroke.id }],
+      } as unknown as TJIIXNodeElement
+      const edgeEl = {
+        type: JIIXElementType.Edge,
+        id: "edge-1",
+        kind: JIIXEdgeKind.Line,
+        x1: 0,
+        y1: 5,
+        x2: 10,
+        y2: 5,
+        connected: ["node-1"],
+        ports: [0],
+        items: [{ type: "stroke", id: "i2", "full-id": edgeStroke.id }],
+      } as unknown as TJIIXEdgeElement
+      canvas.model.mergeExport({
+        "application/vnd.myscript.jiix": { type: "Text", id: "root", version: "3", elements: [edgeEl, nodeEl] },
+      })
+      jest
+        .spyOn(canvas.jiix, "getStrokesForElement")
+        .mockImplementation((id: string) => (id === "node-1" ? [nodeStroke.id] : []))
+
+      const manager = new IIConversionManager(asCanvas(canvas))
+      const added = await manager.apply()
+
+      const edgeSymbol = added.find((s) => EdgeUtil.isEdge(s)) as TEdgeLine
+      const shapeSymbol = added.find((s) => ShapeUtil.isShape(s))
+      expect(edgeSymbol.endAnchor?.symbolId).toBe(shapeSymbol!.id)
+    })
+
+    test("convert: edge converted alone (connected node not in this batch) → no anchor set", async () => {
+      const canvas = createCanvasMock()
+      mockAddSymbolsIntoModel(canvas)
+      const edgeStroke = buildIIStroke()
+      canvas.model.addSymbol(edgeStroke)
+
+      const edgeEl = {
+        type: JIIXElementType.Edge,
+        id: "edge-1",
+        kind: JIIXEdgeKind.Line,
+        x1: 0,
+        y1: 5,
+        x2: 10,
+        y2: 5,
+        connected: ["node-1"],
+        ports: [0],
+        items: [{ type: "stroke", id: "i2", "full-id": edgeStroke.id }],
+      } as unknown as TJIIXEdgeElement
+      canvas.model.mergeExport({
+        "application/vnd.myscript.jiix": { type: "Text", id: "root", version: "3", elements: [edgeEl] },
+      })
+
+      const manager = new IIConversionManager(asCanvas(canvas))
+      const added = await manager.apply()
+
+      const edgeSymbol = added.find((s) => EdgeUtil.isEdge(s)) as TEdgeLine
+      expect(edgeSymbol.startAnchor).toBeUndefined()
+      expect(edgeSymbol.endAnchor).toBeUndefined()
     })
   })
 

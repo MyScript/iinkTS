@@ -1,0 +1,27 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": "..",
+    "types": [
+      "jest",
+      "node"
+    ],
+    "allowImportingTsExtensions": true,
+    "paths": {
+      "#iink": [
+        "../dist/iink.d.ts"
+      ]
+    },
+    "allowJs": true,
+    "checkJs": false
+  },
+  "include": [
+    ".",
+    "../test/examples/helper.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

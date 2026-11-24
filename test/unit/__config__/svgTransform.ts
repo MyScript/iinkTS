@@ -1,8 +1,11 @@
 import path from "path"
 
+type TJestTransformResult = {
+  code: string
+}
+
 export default {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  process(sourceText, sourcePath, options) {
+  process(_sourceText: string, sourcePath: string, _options: unknown): TJestTransformResult {
     return {
       code: `module.exports = ${JSON.stringify(path.basename(sourcePath))};`,
     }

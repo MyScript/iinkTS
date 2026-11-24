@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and support
+    url: https://developer-support.myscript.com/support/discussions/forums/16000096760
+    about: Ask how to use iinkTS on the MyScript developer forum.
+  - name: Documentation
+    url: https://developer.myscript.com/docs/cloud/latest/iinkts/get-started/
+    about: Guides and API reference.

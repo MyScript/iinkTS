@@ -1,7 +1,7 @@
-import snapIcon from "@/assets/svg/arrow-to-dot.svg"
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import type { TMenuSubMenu } from "@/menu/items/SubMenuItem"
-import { SubMenuItem } from "@/menu/items/SubMenuItem"
+import type { TInteractiveInkCanvas } from "@/canvas"
+
+import type { TMenuSubMenu } from "../items/SubMenuItem"
+import { SubMenuItem } from "../items/SubMenuItem"
 
 /** @group Menu */
 export type TSnapActionItemsConfig = {
@@ -25,7 +25,6 @@ export class SnapMenuAction extends SubMenuItem {
       id: `${idPrefix}-snap`,
       label: "Snap",
       menuTitle: "Snap",
-      icon: snapIcon,
       position: "right-top",
       items: [],
     }

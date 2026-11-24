@@ -3,7 +3,7 @@ name: add-symbol-type
 description: >
   Step-by-step guide to add a new symbol type to iinkTS. Use when implementing
   a new geometric primitive, annotation type, or any new TSymbol variant.
-  Covers the full chain: type+Ops → Util adapter → registry → renderer → tests.
+  Covers the full chain: type file → util → registry → renderer → tests.
 ---
 
 # Add Symbol Type
@@ -12,10 +12,15 @@ description: >
 
 Adding any new symbol kind that must be stored in `IIModel`, rendered in SVG, and manipulated by managers.
 
-## Two layers — know which one you're extending
+## Where things go
 
-1. **`*Ops`** — pure logic (create/update/overlap), co-located with the type in `src/symbol/{type}/{Type}.ts`. No dependency on rendering or the registry.
-2. **`*Util`** — adapter in `src/symbol-utils/{type}/{Type}Util.ts`, extends abstract `SymbolUtil`, mostly delegates to the matching `*Ops`, adds `getSVGElement()`. Registered into `symbolRegistry` so `SVGRenderer` can dispatch without a `switch`.
+- `src/symbol/{type}/{Type}.ts` — **the type and its guards, nothing else**.
+- `src/symbol-utils/{type}/{Type}Util.ts` — **everything the type knows**. Extends `SymbolUtil`
+  (or `PathSymbolUtil` if you draw a single `<path>`). Instance methods are what the registry
+  dispatches; statics are construction and editing, which have no symbol to dispatch on.
+
+There is no `*Ops` object for a symbol. Registered into `symbolRegistry` so `SVGRenderer` dispatches
+without a `switch`.
 
 ## Steps
 
@@ -29,31 +34,26 @@ export enum SymbolType {
 }
 ```
 
-### 2. Create the type + Ops file
+### 2. Create the type file
 
-`src/symbol/yourtype/YourType.ts`:
+`src/symbol/yourtype/YourType.ts` — the type and its guard, and that is all. **No stored geometry**:
+bounds, vertices, snap points and edges are computed on read from the util's `getGeometry`.
+
 ```typescript
 import type { TBaseSymbol } from "../Symbol"
 import { SymbolType } from "../Symbol"
 
 export type TYourType = TBaseSymbol & {
   type: SymbolType.YourType
-  // primary geometry fields + stored derived fields (bounds, snapPoints, etc.)
+  // the coordinates you own — nothing derived from them
 }
 
 export function isYourType(symbol: TBaseSymbol): symbol is TYourType {
   return symbol.type === SymbolType.YourType
 }
-
-export const YourTypeOps = {
-  create(/* params */): TYourType { /* ... */ },
-  createFromPartial(partial: TPartialDeep<TYourType>): TYourType { /* ... */ },
-  updateDerivedFields(sym: TYourType): void { /* recompute bounds/snapPoints */ },
-  overlaps(sym: TYourType, box: TBox): boolean { /* ... */ },
-}
 ```
 
-Model this on an existing type in the same family — `src/symbol/stroke/Stroke.ts` (`StrokeOps`) is the reference implementation.
+Model this on an existing type in the same family — `src/symbol-utils/stroke/StrokeUtil.ts` is the reference implementation, and `src/symbol/stroke/Stroke.ts` shows how little the type file holds.
 
 ### 3. Export from `src/symbol/index.ts`
 
@@ -68,23 +68,37 @@ export * from "./yourtype"
 export type TSymbol = TEdge | TShape | TStroke | TText | TMath | TDecorator | TYourType
 ```
 
-### 5. Create the `*Util` adapter
+### 5. Create the util
 
-`src/symbol-utils/yourtype/YourTypeUtil.ts`:
+`src/symbol-utils/yourtype/YourTypeUtil.ts`. Four abstract members are required (`type`, `create`, `getGeometry`, `getSVGElement`); everything else is inherited. Cross-folder imports go through the barrel (`iink/barrel-imports` lint rule):
+
 ```typescript
+import { BoxOps, type Geometry2d, Polygon2d, type TPartialDeep } from "@/core"
+import { SymbolType, type TYourType } from "@/symbol"
+
 import { SymbolUtil } from "../SymbolUtil"
-import { SymbolType } from "@/symbol/Symbol"
-import { YourTypeOps, type TYourType } from "@/symbol/yourtype/YourType"
 
 export class YourTypeUtil extends SymbolUtil<TYourType> {
   readonly type = SymbolType.YourType
 
-  create(partial) { return YourTypeOps.createFromPartial(partial) }
-  updateDerivedFields(sym) { YourTypeOps.updateDerivedFields(sym) }
-  overlaps(sym, box) { return YourTypeOps.overlaps(sym, box) }
-  getSVGElement(sym) { /* build and return the SVGGraphicsElement */ }
+  create(partial) { return YourTypeUtil.createFromPartial(partial) }
+
+  // Say what shape you are; overlap, containment, distance and bounds follow from it.
+  getGeometry(symbol: TYourType): Geometry2d {
+    return new Polygon2d(BoxOps.getCorners(/* … */))
+  }
+
+  getSVGElement(symbol: TYourType) { /* build and return the SVGGraphicsElement */ }
+
+  // Construction and editing are statics: there is no symbol yet to dispatch on.
+  static createFromPartial(partial: TPartialDeep<TYourType>): TYourType { /* … */ }
 }
 ```
+
+Pick the geometry that describes what you draw — `Polygon2d` (closed), `Polyline2d` (open),
+`PointSet2d` (caught only where a sample lands), `Circle2d`, `Ellipse2d`. If you draw a single
+`<path>`, extend `PathSymbolUtil` instead and implement `getPathData` + `getPathAttributes` rather
+than `getSVGElement`.
 
 Reference: `src/symbol-utils/stroke/StrokeUtil.ts`.
 
@@ -111,19 +125,21 @@ Check which managers need to handle the new type:
 
 ### 9. Write tests
 
-- `test/unit/symbol/yourtype/YourType.test.ts` — `create()`, `createFromPartial()` with missing fields, `updateDerivedFields()`, `overlaps()` inside/outside box
-- `test/unit/symbol-utils/yourtype/YourTypeUtil.test.ts` — adapter delegates correctly, `getSVGElement()` produces expected structure
+Import everything through `@/iink` (unit tests never import `@/symbol` or deeper paths).
+
+- `test/unit/symbol/yourtype/YourType.test.ts` — the guard
+- `test/unit/symbol-utils/yourtype/YourTypeUtil.test.ts` — `create()`, `createFromPartial()` with missing fields, `getGeometry()` / `overlaps()` inside/outside box, `getSVGElement()` produces expected structure
 
 ## Checklist
 
 - [ ] `SymbolType` enum updated
-- [ ] Type + `*Ops` created in `src/symbol/{type}/`, with type guard
+- [ ] Type + guard created in `src/symbol/{type}/` — no stored geometry
 - [ ] Exported from `src/symbol/index.ts`
 - [ ] Added to `TSymbol` union
-- [ ] `*Util` adapter created in `src/symbol-utils/{type}/`, extends `SymbolUtil`
+- [ ] Util created in `src/symbol-utils/{type}/`, extends `SymbolUtil` (or `PathSymbolUtil`), with `getGeometry`
 - [ ] Registered in `registerBuiltinSymbolUtils`
 - [ ] Exported from `src/symbol-utils/index.ts`
 - [ ] Manager handling verified
-- [ ] Tests written (Ops + Util), ≥75% coverage
-- [ ] `yarn typecheck` clean
+- [ ] Tests written (global threshold: 88% branches/lines/statements, 86% functions)
+- [ ] `yarn typecheck` and `yarn lint` clean
 - [ ] `yarn test:unit` passes

@@ -1,8 +1,7 @@
 import menuIcon from "@/assets/svg/menu.svg"
-import type { TCanvasTheme } from "@/canvas/CanvasThemes"
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import { DOMFactory } from "@/components/dom"
-import { LoggerCategory, LoggerManager } from "@/logger"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import type { TRecognitionType } from "@/client"
+import { DOMFactory } from "@/dom"
 import type { IIModel } from "@/model"
 
 import type {
@@ -11,12 +10,14 @@ import type {
   TGuideActionConfig,
   TMathActionConfig,
   TOverlayActionConfig,
+  TPenActionConfig,
   TSelectionActionConfig,
   TSnapActionConfig,
 } from "./actions"
 import {
   ClearMenuAction,
   ConvertMenuAction,
+  DiagramMenuAction,
   ExportMenuAction,
   GestureMenuAction,
   GuideMenuAction,
@@ -25,13 +26,15 @@ import {
   MathMenuAction,
   MinimapMenuAction,
   OverlayMenuAction,
+  PenMenuAction,
   SelectionMenuAction,
   SnapMenuAction,
   ThemeMenuAction,
   UndoRedoMenuAction,
   ZoomMenuAction,
 } from "./actions"
-import type { BaseMenuItem } from "./items"
+import type { TCanvasTheme } from "./CanvasThemes"
+import { IIAbstractMenu, type TMenuItemOptions, type TMenuLayoutConfig, type TMenuZone } from "./IIAbstractMenu"
 
 /**
  * @group Menu
@@ -53,8 +56,12 @@ export type TMenuActionConfig = {
   gesture?: TGestureActionConfig
   /** Enable/disable Guide submenu. Pass an object to configure individual guide items. */
   guide?: TGuideActionConfig
+  /** Enable/disable Pen submenu. Pass an object to configure individual pen items. */
+  pen?: TPenActionConfig
   /** Enable/disable Snap submenu. Pass an object to configure individual snap items. */
   snap?: TSnapActionConfig
+  /** Enable/disable Diagram submenu (toggles whether moving a connected shape follows its anchored edges) */
+  diagram?: boolean
   /** Enable/disable Math submenu. Pass an object to configure individual math items. */
   math?: TMathActionConfig
   /** Enable/disable Overlay submenu. Pass an object to configure individual overlay items. */
@@ -82,7 +89,9 @@ export const DefaultMenuActionConfig: Required<Omit<TMenuActionConfig, "themes">
   convert: true,
   gesture: true,
   guide: true,
+  pen: true,
   snap: true,
+  diagram: true,
   math: true,
   overlay: true,
   selection: true,
@@ -92,31 +101,17 @@ export const DefaultMenuActionConfig: Required<Omit<TMenuActionConfig, "themes">
   theme: true,
 }
 
-function extractSubConfig<T>(config: boolean | T): T | undefined {
-  return typeof config === "object" && config !== null ? config : undefined
-}
-
 /**
  * @group Menu
  */
-export class IIMenuAction {
-  #logger = LoggerManager.getLogger(LoggerCategory.MENU)
+export class IIMenuAction extends IIAbstractMenu<
+  Required<Omit<TMenuActionConfig, "themes">> & Pick<TMenuActionConfig, "themes"> & TMenuLayoutConfig
+> {
+  readonly defaultZone: TMenuZone = "dropdown"
+  readonly layoutName = "action"
 
-  canvas: TInteractiveInkCanvas
-  id: string
-  wrapper?: HTMLElement
-  config: Required<Omit<TMenuActionConfig, "themes">> & Pick<TMenuActionConfig, "themes">
-
-  private menuActions: Map<string, BaseMenuItem> = new Map()
-  #documentPointerdownHandler?: (e: PointerEvent) => void
-
-  constructor(canvas: TInteractiveInkCanvas, id = "ms-menu-action", config?: TMenuActionConfig) {
-    this.id = id
-    this.canvas = canvas
-    this.config = {
-      ...DefaultMenuActionConfig,
-      ...config,
-    }
+  constructor(canvas: TInteractiveInkCanvas, id = "ms-menu-action", config?: TMenuActionConfig & TMenuLayoutConfig) {
+    super(canvas, id, { ...DefaultMenuActionConfig, ...config })
   }
 
   get model(): IIModel {
@@ -127,182 +122,95 @@ export class IIMenuAction {
     return this.canvas.renderer.parent.clientWidth < 700
   }
 
+  /** Whether the recognition configuration lets the backend recognize `type` */
+  protected recognizes(type: TRecognitionType): boolean {
+    return !!this.canvas.configuration.recognition["raw-content"].recognition?.types.includes(type)
+  }
+
   render(layer: HTMLElement): void {
-    if (this.canvas.configuration.menu.action.enable) {
-      this.#logger.info("Rendering menu actions with config", this.config)
+    if (!this.canvas.configuration.menu.action.enable) {
+      return
+    }
+    this.logger.info("Rendering menu actions with config", this.config)
+    this.wrapper = DOMFactory.div({ className: ["ms-menu", "ms-menu-action", this.barClassName()] })
+    this.renderDropdownItems()
+    this.renderBarItems(layer)
+    layer.appendChild(this.wrapper)
+    this.update()
+    this.show()
+  }
 
-      const menuTrigger = DOMFactory.button({
-        id: this.id,
-        className: "square",
-        html: menuIcon,
-      })
+  protected createZone(zone: TMenuZone, wrapper: HTMLElement): HTMLElement {
+    if (zone === "bar") {
+      return wrapper
+    }
+    const column = DOMFactory.div({ className: "ms-menu-column" })
+    const trigger = DOMFactory.button({ id: this.id, className: "square", html: menuIcon })
+    // First in the row, before the bar items
+    wrapper.prepend(this.createDropdown(trigger, column, this.barOpenPosition() ?? "bottom-right").element)
+    return column
+  }
 
-      const subMenuWrapper = DOMFactory.div({
-        className: "ms-menu-column",
-      })
-
-      if (this.config.theme) {
-        const themeAction = new ThemeMenuAction(this.canvas, this.id, this.config.themes)
-        this.menuActions.set("theme", themeAction)
-        subMenuWrapper.appendChild(themeAction.getElement())
-      }
-
-      if (this.config.gesture) {
-        const gestureAction = new GestureMenuAction(this.canvas, this.id, extractSubConfig(this.config.gesture))
-        this.menuActions.set("gesture", gestureAction)
-        subMenuWrapper.appendChild(gestureAction.getElement())
-      }
-
-      if (this.config.guide) {
-        const guideAction = new GuideMenuAction(this.canvas, this.id, extractSubConfig(this.config.guide))
-        this.menuActions.set("guide", guideAction)
-        subMenuWrapper.appendChild(guideAction.getElement())
-      }
-
-      if (this.config.snap) {
-        const snapAction = new SnapMenuAction(this.canvas, this.id, extractSubConfig(this.config.snap))
-        this.menuActions.set("snap", snapAction)
-        subMenuWrapper.appendChild(snapAction.getElement())
-      }
-
-      if (
-        this.config.math &&
-        this.canvas.configuration.recognition["raw-content"].recognition?.types.includes("math")
-      ) {
-        const mathAction = new MathMenuAction(this.canvas, this.id, extractSubConfig(this.config.math))
-        this.menuActions.set("math", mathAction)
-        subMenuWrapper.appendChild(mathAction.getElement())
-      }
-
-      if (this.config.overlay) {
-        const overlayAction = new OverlayMenuAction(this.canvas, this.id, extractSubConfig(this.config.overlay))
-        this.menuActions.set("overlay", overlayAction)
-        subMenuWrapper.appendChild(overlayAction.getElement())
-      }
-
-      if (this.config.selection) {
-        const selectionAction = new SelectionMenuAction(this.canvas, this.id, extractSubConfig(this.config.selection))
-        this.menuActions.set("selection", selectionAction)
-        subMenuWrapper.appendChild(selectionAction.getElement())
-      }
-
-      if (this.config.import) {
-        const importAction = new ImportMenuAction(this.canvas, this.id)
-        this.menuActions.set("import", importAction)
-        subMenuWrapper.appendChild(importAction.getElement())
-      }
-
-      if (this.config.export) {
-        const exportAction = new ExportMenuAction(this.canvas, this.id, extractSubConfig(this.config.export))
-        this.menuActions.set("export", exportAction)
-        subMenuWrapper.appendChild(exportAction.getElement())
-      }
-
-      this.wrapper = DOMFactory.div({
-        className: ["ms-menu", "ms-menu-top-left", "ms-menu-row"],
-      })
-
-      // Only add submenu if there are items
-      if (subMenuWrapper.children.length > 0) {
-        const subMenuElement = DOMFactory.div({
-          className: "sub-menu",
-        })
-        subMenuElement.appendChild(menuTrigger)
-
-        const subMenuContent = DOMFactory.div({
-          className: ["sub-menu-content", "bottom-right"],
-        })
-        subMenuContent.appendChild(subMenuWrapper)
-        subMenuElement.appendChild(subMenuContent)
-
-        // Event listeners
-        menuTrigger.addEventListener("pointerdown", () => subMenuContent.classList.toggle("open"))
-        this.#documentPointerdownHandler = (e: PointerEvent) => {
-          if (!subMenuElement.contains(e.target as HTMLElement)) {
-            subMenuContent.classList.remove("open")
-          }
-        }
-        document.addEventListener("pointerdown", this.#documentPointerdownHandler)
-
-        this.wrapper.appendChild(subMenuElement)
-      }
-
-      if (this.config.language) {
-        const languageAction = new LanguageMenuAction(this.canvas, this.id)
-        this.menuActions.set("language", languageAction)
-        this.wrapper.appendChild(languageAction.getElement())
-      }
-
-      if (this.config.clear) {
-        const clearAction = new ClearMenuAction(this.canvas, this.id)
-        this.menuActions.set("clear", clearAction)
-        this.wrapper.appendChild(clearAction.getElement())
-      }
-
-      if (this.config.undoRedo) {
-        const undoRedoAction = new UndoRedoMenuAction(this.canvas, this.id)
-        this.menuActions.set("undoRedo", undoRedoAction)
-        this.wrapper.appendChild(undoRedoAction.getElement())
-      }
-
-      if (this.config.convert) {
-        const convertAction = new ConvertMenuAction(this.canvas, this.id)
-        this.menuActions.set("convert", convertAction)
-        this.wrapper.appendChild(convertAction.getElement())
-      }
-
-      if (this.config.zoom) {
-        const zoomAction = new ZoomMenuAction(this.canvas, this.id)
-        this.menuActions.set("zoom", zoomAction)
-        this.wrapper.appendChild(zoomAction.getElement())
-      }
-
-      if (this.config.minimap) {
-        const minimapAction = new MinimapMenuAction(this.canvas, layer, this.id)
-        this.menuActions.set("minimap", minimapAction)
-        this.wrapper.appendChild(minimapAction.getElement())
-      }
-
-      layer.appendChild(this.wrapper)
-      this.update()
-      this.show()
+  protected renderDropdownItems(): void {
+    const { config } = this
+    if (config.theme) {
+      this.addItem("theme", new ThemeMenuAction(this.canvas, this.id, config.themes))
+    }
+    if (config.gesture) {
+      this.addItem("gesture", new GestureMenuAction(this.canvas, this.id, this.subConfig(config.gesture)))
+    }
+    if (config.guide) {
+      this.addItem("guide", new GuideMenuAction(this.canvas, this.id, this.subConfig(config.guide)))
+    }
+    if (config.pen) {
+      this.addItem("pen", new PenMenuAction(this.canvas, this.id, this.subConfig(config.pen)))
+    }
+    if (config.snap) {
+      this.addItem("snap", new SnapMenuAction(this.canvas, this.id, this.subConfig(config.snap)))
+    }
+    if (config.diagram && this.recognizes("shape")) {
+      this.addItem("diagram", new DiagramMenuAction(this.canvas, this.id))
+    }
+    if (config.math && this.recognizes("math")) {
+      this.addItem("math", new MathMenuAction(this.canvas, this.id, this.subConfig(config.math)))
+    }
+    if (config.overlay) {
+      this.addItem("overlay", new OverlayMenuAction(this.canvas, this.id, this.subConfig(config.overlay)))
+    }
+    if (config.selection) {
+      const selection = new SelectionMenuAction(this.canvas, this.id, this.subConfig(config.selection))
+      this.addItem("selection", selection)
+    }
+    if (config.import) {
+      this.addItem("import", new ImportMenuAction(this.canvas, this.id))
+    }
+    if (config.export) {
+      this.addItem("export", new ExportMenuAction(this.canvas, this.id, this.subConfig(config.export)))
     }
   }
 
-  update(): void {
-    this.menuActions.forEach((menuAction) => {
-      menuAction.update()
-    })
-  }
-
-  show(): void {
-    if (this.wrapper) {
-      this.wrapper.style.visibility = "visible"
+  protected renderBarItems(layer: HTMLElement): void {
+    const bar: TMenuItemOptions = { zone: "bar" }
+    const { config } = this
+    if (config.language) {
+      this.addItem("language", new LanguageMenuAction(this.canvas, this.id), bar)
     }
-  }
-
-  hide(): void {
-    if (this.wrapper) {
-      this.wrapper.style.visibility = "hidden"
+    if (config.clear) {
+      this.addItem("clear", new ClearMenuAction(this.canvas, this.id), bar)
     }
-  }
-
-  destroy(): void {
-    if (this.wrapper) {
-      if (this.#documentPointerdownHandler) {
-        document.removeEventListener("pointerdown", this.#documentPointerdownHandler)
-        this.#documentPointerdownHandler = undefined
-      }
-      this.menuActions.forEach((menuAction) => {
-        menuAction.destroy()
-      })
-      this.menuActions.clear()
-
-      while (this.wrapper.lastChild) {
-        this.wrapper.removeChild(this.wrapper.lastChild)
-      }
-      this.wrapper.remove()
-      this.wrapper = undefined
+    if (config.undoRedo) {
+      this.addItem("undoRedo", new UndoRedoMenuAction(this.canvas, this.id), bar)
+    }
+    if (config.convert) {
+      this.addItem("convert", new ConvertMenuAction(this.canvas, this.id), bar)
+    }
+    if (config.zoom) {
+      this.addItem("zoom", new ZoomMenuAction(this.canvas, this.id), bar)
+    }
+    if (config.minimap) {
+      // The minimap opens in its own slot of the layout
+      const minimapHost = this.canvas.layout.host("minimap") ?? layer
+      this.addItem("minimap", new MinimapMenuAction(this.canvas, minimapHost, this.id), bar)
     }
   }
 }

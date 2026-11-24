@@ -1,6 +1,7 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import type { TMenuButton } from "@/menu/items/ButtonMenuItem"
-import { ButtonMenuItem } from "@/menu/items/ButtonMenuItem"
+import type { TInteractiveInkCanvas } from "@/canvas"
+
+import type { TMenuButton } from "../items/ButtonMenuItem"
+import { ButtonMenuItem } from "../items/ButtonMenuItem"
 
 /**
  * @group Menu

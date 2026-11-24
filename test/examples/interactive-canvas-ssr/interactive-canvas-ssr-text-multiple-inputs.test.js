@@ -16,7 +16,7 @@ const switchToOtherQuestion = async (page, inputId) => {
   await callCanvasIdle(page)
 }
 
-test.describe("Interactive Canvas SSR Text Multiple Inputs", () => {
+test.describe("Interactive Canvas SSR Text Multiple Inputs", { tag: "@slow" }, () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/interactive-canvas-ssr/interactive_canvas_ssr_text_multiple_inputs.html`)
     await passModalKey(page)

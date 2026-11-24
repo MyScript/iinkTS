@@ -1,9 +1,10 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import type { TMenuButtonList } from "@/menu/items"
-import { ButtonListMenuItem, CollapsibleWrapper } from "@/menu/items"
-import { BaseMenuItem } from "@/menu/items/BaseMenuItem"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import { CanvasTool } from "@/manager"
 import { isText } from "@/symbol"
 
+import type { TMenuButtonList } from "../items"
+import { ButtonListMenuItem, CollapsibleWrapper } from "../items"
+import { BaseMenuItem } from "../items/BaseMenuItem"
 /**
  * @group Menu
  * @remarks Font size style menu
@@ -29,6 +30,7 @@ export class FontSizeStyle extends BaseMenuItem<HTMLDivElement> {
       type: "fontsize" as const,
       id: `${idPrefix}-font-size`,
       label: "Font Size",
+      visible: (canvas: TInteractiveInkCanvas) => [CanvasTool.Write, CanvasTool.Select].includes(canvas.tool),
     }
     super(config, canvas)
     this.fontSizeList = fontSizeList
@@ -51,11 +53,9 @@ export class FontSizeStyle extends BaseMenuItem<HTMLDivElement> {
           const fontSize = parseFloat(value)
           canvas.configuration.fontStyle.size = fontSize
           const textSymbols = canvas.model.symbolsSelected.filter((s) => isText(s))
-          canvas.updateTextFontStyle(
+          canvas.updateSymbols(
             textSymbols.map((s) => s.id),
-            {
-              fontSize: fontSize * this.rowHeight,
-            }
+            { font: { size: fontSize * this.rowHeight } }
           )
           canvas.selector.redrawSelectedGroup()
         }

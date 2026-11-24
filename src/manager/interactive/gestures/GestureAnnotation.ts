@@ -1,9 +1,10 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import type { TBox, TDraft } from "@/core"
+import { OBBOps, type TOBB } from "@/core"
 import type { TIIHistoryChanges } from "@/history"
-import type { DecoratorKind, TBox, TDecorator, TStroke, TText } from "@/symbol"
-import { isDecorator, isRecognizedText, isStroke, isText, SymbolType, type TSymbol } from "@/symbol"
-import { DecoratorOps } from "@/symbol/decorator/Decorator"
-import { OBBOps, type TOBB } from "@/symbol/primitives/OBB"
+import type { DecoratorKind, TDecorator, TStroke, TText } from "@/symbol"
+import { isDecorator, isMath, isRecognizedText, isStroke, isText, type TSymbol } from "@/symbol"
+import { DecoratorUtil, MathUtil, SymbolGeometry, TextUtil } from "@/symbol-utils"
 
 /**
  * Unified representation of a gesture's intent on a set of target strokes.
@@ -16,7 +17,13 @@ export type TGestureAnnotation =
       decoratorKind: DecoratorKind
     }
   | { kind: "erase" }
-  | { kind: "thicken"; factor: number }
+  | {
+      kind: "thicken"
+      /** Stroke widths to step through, the thickness menu's */
+      widths: number[]
+      /** Font weights to step through, the font weight menu's */
+      fontWeights: ("normal" | "bold")[]
+    }
   | { kind: "select" }
 
 /**
@@ -34,10 +41,9 @@ export class IIGestureAnnotationProcessor {
       case "erase":
         await this.canvas.removeSymbols(ids)
         return undefined
-      case "thicken": {
-        const changed = this.#applyThicken(ids, annotation.factor)
-        return changed.length ? { style: { symbols: changed } } : undefined
-      }
+      case "thicken":
+        await this.#stepThickness(ids, annotation.widths, annotation.fontWeights)
+        return undefined
       case "select":
         this.#applySelect(ids)
         return undefined
@@ -52,7 +58,9 @@ export class IIGestureAnnotationProcessor {
     const erased: TDecorator[] = []
 
     for (const id of ids) {
-      const sym = this.canvas.model.getRootSymbol(id)
+      // A draft rather than a read: the text branch below adds or removes a decorator on the
+      // symbol and commits it.
+      const sym = this.canvas.model.draftSymbol(id)
       if (!sym) {
         continue
       }
@@ -117,7 +125,7 @@ export class IIGestureAnnotationProcessor {
   async #waitForPendingClassification(ids: string[]): Promise<void> {
     const isPending = () =>
       ids.some((id) => {
-        const sym = this.canvas.model.getRootSymbol(id)
+        const sym = this.canvas.model.getSymbol(id)
         return sym && isStroke(sym) && !sym.jiixBlockType
       })
     for (const delay of [100, 200, 300, 400, 500, 500]) {
@@ -146,13 +154,16 @@ export class IIGestureAnnotationProcessor {
       this.canvas.renderer.removeElement(existing.id)
       erased.push(existing)
     } else {
-      const decorator = DecoratorOps.create(kind, this.canvas.penStyle, targetIds)
+      const decorator = DecoratorUtil.createDecorator(kind, this.canvas.penStyle, targetIds)
+      // The recognizer's own word box when JIIX has answered, the union of the targets' boxes
+      // otherwise. Not interchangeable: a word box is tighter than the union of its strokes, and
+      // neither can be recomputed from the decorator, which stores no coordinates of its own.
       if (wordBounds) {
-        DecoratorOps.setBounds(decorator, OBBOps.fromBox(wordBounds))
+        DecoratorUtil.setTargetBounds(decorator, OBBOps.fromBox(wordBounds))
       } else {
         const bounds = this.#computeBoundsFromTargets(targetIds)
         if (bounds) {
-          DecoratorOps.setBounds(decorator, bounds)
+          DecoratorUtil.setTargetBounds(decorator, bounds)
         }
       }
       if (baseline !== null) {
@@ -167,17 +178,17 @@ export class IIGestureAnnotationProcessor {
     }
   }
 
-  #toggleTextDecorator(sym: TText, kind: DecoratorKind, added: TDecorator[], erased: TDecorator[]): void {
+  #toggleTextDecorator(sym: TDraft<TText>, kind: DecoratorKind, added: TDecorator[], erased: TDecorator[]): void {
     const index = sym.decorators.findIndex((d) => d.kind === kind)
     if (index !== -1) {
       const removed = sym.decorators.splice(index, 1)[0]
-      this.canvas.model.updateSymbol(sym)
+      this.canvas.model.commitSymbol(sym)
       this.canvas.renderer.drawSymbol(sym)
       erased.push(removed)
     } else {
-      const decorator = DecoratorOps.create(kind, this.canvas.penStyle)
+      const decorator = DecoratorUtil.createDecorator(kind, this.canvas.penStyle)
       sym.decorators.push(decorator)
-      this.canvas.model.updateSymbol(sym)
+      this.canvas.model.commitSymbol(sym)
       this.canvas.renderer.drawSymbol(sym)
       added.push(decorator)
     }
@@ -192,28 +203,46 @@ export class IIGestureAnnotationProcessor {
   }
 
   #computeBoundsFromTargets(targetIds: string[]): TOBB | null {
-    const syms = targetIds.map((id) => this.canvas.model.getRootSymbol(id)).filter((s): s is TSymbol => !!s)
+    const syms = targetIds.map((id) => this.canvas.model.getSymbol(id)).filter((s): s is TSymbol => !!s)
     if (!syms.length) {
       return null
     }
-    return OBBOps.createFromOBBs(syms.map((s) => s.bounds))
+    return OBBOps.createFromOBBs(syms.map((s) => SymbolGeometry.boundsOf(s)))
   }
 
-  #applyThicken(ids: string[], factor: number): TStroke[] {
-    const changed: TStroke[] = []
-    const seen = new Set<string>()
-    for (const id of ids) {
-      const sym = this.canvas.model.getRootSymbol(id)
-      if (!sym || sym.type !== SymbolType.Stroke || seen.has(sym.id)) {
-        continue
-      }
-      seen.add(sym.id)
-      const stroke = sym as TStroke
-      const newWidth = (stroke.style.width || 1) * factor
-      this.canvas.updateSymbolsStyle([stroke.id], { width: newWidth }, false)
-      changed.push(stroke)
+  /**
+   * Moves each target one level up: a stroke to the first width above its own, a text or math block
+   * to the next font weight; past the last level, back to the first. A kind with no level is left as
+   * is. `updateSymbols` records the history, the texts it slides along included.
+   */
+  async #stepThickness(ids: string[], widths: number[], fontWeights: ("normal" | "bold")[]): Promise<void> {
+    const sortedWidths = [...widths].sort((a, b) => a - b)
+    const targets = [...new Set(ids)].filter((id) => {
+      const sym = this.canvas.model.getSymbol(id)
+      return (
+        !!sym &&
+        ((isStroke(sym) && sortedWidths.length > 0) || ((isText(sym) || isMath(sym)) && fontWeights.length > 0))
+      )
+    })
+    if (!targets.length) {
+      return
     }
-    return changed
+    await this.canvas.updateSymbols(targets, (draft) => {
+      if (isText(draft)) {
+        const fontWeight = this.#nextFontWeight(fontWeights, TextUtil.isBold(draft) ? "bold" : "normal")
+        TextUtil.updateChildrenFont(draft, { fontWeight })
+      } else if (isMath(draft)) {
+        const fontWeight = this.#nextFontWeight(fontWeights, MathUtil.isBold(draft) ? "bold" : "normal")
+        MathUtil.updateChildrenFont(draft, { fontWeight })
+      } else if (isStroke(draft)) {
+        const width = draft.style.width || 1
+        draft.style = { ...draft.style, width: sortedWidths.find((w) => w > width) ?? sortedWidths[0] }
+      }
+    })
+  }
+
+  #nextFontWeight(fontWeights: ("normal" | "bold")[], current: "normal" | "bold"): "normal" | "bold" {
+    return fontWeights[(fontWeights.indexOf(current) + 1) % fontWeights.length]
   }
 
   #applySelect(ids: string[]): void {

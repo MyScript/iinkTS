@@ -1,6 +1,6 @@
 import { buildIIStroke } from "../../../helpers"
 import { createCanvasMock, asCanvas } from "../../../__mocks__/createCanvasMock"
-import { GestureHandler, GestureHelpers, TGestureType, TSymbol, DecoratorKind, DecoratorOps } from "@/iink"
+import { DecoratorKind, DecoratorUtil, GestureHandler, GestureHelpers, TGestureType, TSymbol } from "@/iink"
 
 class TestGestureHandler extends GestureHandler {
   readonly gestureType: TGestureType = "JOIN"
@@ -145,7 +145,7 @@ describe("GestureHandler.ts", () => {
       const { canvas, handler } = setup()
       const s1 = buildIIStroke({ box: { height: 5, width: 5, x: 5, y: 10 } })
       const s2 = buildIIStroke({ box: { height: 10, width: 5, x: 50, y: 95 } })
-      const decorator = DecoratorOps.create(DecoratorKind.Underline, {}, [s1.id])
+      const decorator = DecoratorUtil.createDecorator(DecoratorKind.Underline, {}, [s1.id])
       ;(canvas.jiix as unknown as Record<string, unknown>).getLineCenterYForStroke = jest.fn((id: string) =>
         id === s1.id ? 96 : null
       )

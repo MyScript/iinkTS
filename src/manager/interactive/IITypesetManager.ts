@@ -1,10 +1,10 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import type { TBox } from "@/core"
+import { OBBOps } from "@/core"
 import { LoggerCategory } from "@/logger"
-import type { TBox, TMath, TSymbol, TSymbolChar, TText } from "@/symbol"
+import type { TMath, TSymbol, TSymbolChar, TText } from "@/symbol"
 import { isText } from "@/symbol"
-import { MathOps } from "@/symbol/math/Math"
-import { OBBOps } from "@/symbol/primitives/OBB"
-import { TextOps } from "@/symbol/text/Text"
+import { SymbolGeometry, symbolRegistry, TextUtil } from "@/symbol-utils"
 
 import { IIAbstractManager } from "./IIAbstractManager"
 
@@ -25,7 +25,7 @@ export class IITypesetManager extends IIAbstractManager {
 
   getSymbolRowIndex(symbol: TSymbol): number {
     // Use symbol bounds yMid for row calculation
-    return Math.round(symbol.bounds.center.y / this.rowHeight)
+    return Math.round(SymbolGeometry.boundsOf(symbol).center.y / this.rowHeight)
   }
 
   getSymbolsByRowOrdered(): {
@@ -35,6 +35,11 @@ export class IITypesetManager extends IIAbstractManager {
     const rowsMap = new Map<number, TSymbol[]>()
 
     for (const s of this.model.symbols) {
+      // Whole-document scan — one unregistered symbol type must not abort row bucketing for
+      // the rest of the document.
+      if (!symbolRegistry.has(s.type)) {
+        continue
+      }
       const rowIndex = this.getSymbolRowIndex(s)
       const row = rowsMap.get(rowIndex)
       if (row) {
@@ -49,7 +54,7 @@ export class IITypesetManager extends IIAbstractManager {
       symbols: TSymbol[]
     }[] = []
     rowsMap.forEach((symbols, rowIndex) => {
-      symbols.sort((s1, s2) => s1.bounds.center.x - s2.bounds.center.x)
+      symbols.sort((s1, s2) => SymbolGeometry.boundsOf(s1).center.x - SymbolGeometry.boundsOf(s2).center.x)
       rows.push({ rowIndex, symbols })
     })
 
@@ -93,9 +98,7 @@ export class IITypesetManager extends IIAbstractManager {
     const el = this.drawSymbolHidden(symbol)
     if (isText(symbol)) {
       symbol.bounds = OBBOps.fromBox(this.getElementBoundingBox(el))
-      symbol.bounds.angle = symbol.rotation?.degree ?? 0
       this.setCharsBounds(symbol, el)
-      TextOps.updateDerivedFields(symbol)
     } else {
       const bbox = el.getBBox()
       symbol.bounds = OBBOps.fromBox({
@@ -104,8 +107,6 @@ export class IITypesetManager extends IIAbstractManager {
         width: bbox.width,
         height: bbox.height,
       })
-      symbol.bounds.angle = symbol.rotation?.degree ?? 0
-      MathOps.updateDerivedFields(symbol)
     }
   }
 
@@ -144,7 +145,7 @@ export class IITypesetManager extends IIAbstractManager {
       fontWeight: "normal",
       bounds: boundingBox,
     }
-    return this.getBoundingBox(TextOps.create([charSymbol], { x: 0, y: 0 }, boundingBox))?.width as number
+    return this.getBoundingBox(TextUtil.createText([charSymbol], { x: 0, y: 0 }, boundingBox))?.width as number
   }
 
   updateBounds<T extends TText | TMath>(typesetSymbol: T): T {
@@ -153,17 +154,39 @@ export class IITypesetManager extends IIAbstractManager {
     return typesetSymbol
   }
 
-  moveTextAfter(text: TText, tx: number): TSymbol[] | undefined {
-    const row = this.getSymbolsByRowOrdered().find((r) => r.rowIndex === this.getSymbolRowIndex(text))
+  /**
+   * Shifts the texts that follow `text` on its row, and returns each one's before/after pair.
+   *
+   * Pairs rather than just the moved symbols: only this method knows which ones it picked, so it is
+   * the only place a caller's history entry can get its pre-move snapshots from.
+   */
+  moveTextAfter(text: TText, tx: number): { before: TSymbol; after: TSymbol }[] | undefined {
+    // `text` can be a draft mid-edit (see callers in InteractiveInkCanvas), so its geometry is
+    // never cached — one boundsOf call here, reused for both the row lookup and the position
+    // comparison below, instead of getSymbolRowIndex(text) computing it again independently.
+    const textBounds = SymbolGeometry.boundsOf(text)
+    const textRowIndex = Math.round(textBounds.center.y / this.rowHeight)
+    const row = this.getSymbolsByRowOrdered().find((r) => r.rowIndex === textRowIndex)
     if (row) {
-      const textsAfter = row.symbols.filter((s) => isText(s) && s.bounds.center.x > text.bounds.center.x) as TText[]
-      textsAfter.forEach((symbol) => {
-        symbol.point.x += tx
-        this.updateBounds(symbol)
-        this.model.updateSymbol(symbol)
-        this.renderer.drawSymbol(symbol)
+      const textsAfter = row.symbols.filter(
+        (s) => isText(s) && SymbolGeometry.boundsOf(s).center.x > textBounds.center.x
+      ) as TText[]
+      return textsAfter.flatMap((committed) => {
+        // Drafted by id rather than shifted where it lies. `getSymbolsByRowOrdered` reads
+        // `model.symbols`, which hands out the store's deep-frozen committed records, so
+        // `symbol.point.x += tx` threw `TypeError: Cannot assign to read only property 'x'` —
+        // and `setBounds` would have thrown on `bounds` and on every char's `bounds` right after.
+        const draft = this.model.draftSymbol(committed.id)
+        if (!draft || !isText(draft)) {
+          return []
+        }
+        draft.point.x += tx
+        // Measures the moved text and commits the draft in one call.
+        this.updateBounds(draft)
+        this.renderer.drawSymbol(draft)
+        // `committed` is already a frozen value, so it is the snapshot — nothing to clone.
+        return [{ before: committed, after: this.model.getSymbol(committed.id) ?? draft }]
       })
-      return textsAfter
     }
     return
   }

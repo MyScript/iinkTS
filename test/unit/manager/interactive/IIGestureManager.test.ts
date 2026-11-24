@@ -1,15 +1,6 @@
-import { buildIICircle, buildIIStroke, buildIIText } from "../../helpers"
+import { SymbolGeometry, DefaultIIRendererConfiguration, TGesture, IIGestureManager, TStroke, TWebSocketClientMessageType, BoxOps, OBBOps, UnderlineAction } from "@/iink"
+import { buildIICircle, buildIIMath, buildIIStroke, buildIIText } from "../../helpers"
 import { createCanvasMock, asCanvas } from "../../__mocks__/createCanvasMock"
-import {
-  DefaultIIRendererConfiguration,
-  TGesture,
-  TSymbolChar,
-  IIGestureManager,
-  TStroke,
-  TWebSocketClientMessageType,
-  BoxOps,
-  OBBOps,
-} from "@/iink"
 
 describe("IIGestureManager.ts", () => {
   const rowHeight = DefaultIIRendererConfiguration.guides.gap
@@ -96,317 +87,6 @@ describe("IIGestureManager.ts", () => {
     })
   })
 
-  describe.skip("applyScratchGesture", () => {
-    const canvas = createCanvasMock()
-    const manager = new IIGestureManager(asCanvas(canvas))
-    manager.typeset.updateBounds = jest.fn()
-    manager.renderer.drawSymbol = jest.fn()
-    manager.renderer.removeSymbol = jest.fn()
-    manager.renderer.replaceSymbol = jest.fn()
-    manager.model.removeSymbol = jest.fn((id) => [id])
-    manager.model.updateSymbol = jest.fn((id) => [id])
-    manager.model.replaceSymbol = jest.fn((id) => [id])
-    manager.client.eraseStrokes = jest.fn(() => Promise.resolve())
-    manager.client.replaceStrokes = jest.fn(() => Promise.resolve())
-    manager.history.push = jest.fn()
-
-    beforeEach(() => {
-      manager.model.clear()
-    })
-
-    test("should do nothing if gesture as no strokeIds", async () => {
-      const gestureStroke = buildIIStroke()
-      const gesture: TGesture = {
-        gestureType: "SCRATCH",
-        gestureStrokeId: gestureStroke.id,
-        strokeIds: [],
-        strokeBeforeIds: [],
-        strokeAfterIds: [],
-      }
-      // @ts-expect-error - Method moved to ScratchGestureHandler
-      await manager.applyScratch(gestureStroke, gesture)
-      expect(canvas.updateSymbols).toHaveBeenCalledTimes(0)
-      expect(canvas.removeSymbols).toHaveBeenCalledTimes(0)
-      expect(canvas.replaceSymbols).toHaveBeenCalledTimes(0)
-      expect(manager.history.push).toHaveBeenCalledTimes(0)
-    })
-
-    test("should erase shape symbol", async () => {
-      const circle = buildIICircle()
-      canvas.model.addSymbol(circle)
-      const gestureStroke = buildIIStroke({ box: OBBOps.toBox(circle.bounds), nbPoint: 100 })
-      const gesture: TGesture = {
-        gestureType: "SCRATCH",
-        gestureStrokeId: gestureStroke.id,
-        strokeIds: [circle.id],
-        strokeBeforeIds: [],
-        strokeAfterIds: [],
-      }
-      // @ts-expect-error - Method moved to ScratchGestureHandler
-      await manager.applyScratch(gestureStroke, gesture)
-      expect(canvas.updateSymbols).toHaveBeenCalledTimes(0)
-      expect(canvas.removeSymbols).toHaveBeenNthCalledWith(1, [circle.id], false)
-      expect(canvas.replaceSymbols).toHaveBeenCalledTimes(0)
-      expect(manager.history.push).toHaveBeenCalledTimes(1)
-    })
-
-    test("should erase text symbol", async () => {
-      const chars: TSymbolChar[] = [
-        {
-          bounds: { height: 10, width: 5, x: 0, y: 10 },
-          color: "black",
-          fontSize: 16,
-          fontWeight: "normal",
-          id: "char-1",
-          label: "A",
-        },
-        {
-          bounds: { height: 10, width: 5, x: 5, y: 10 },
-          color: "black",
-          fontSize: 16,
-          fontWeight: "normal",
-          id: "char-2",
-          label: "b",
-        },
-      ]
-      const text = buildIIText({ chars, boundingBox: { height: 10, width: 10, x: 0, y: 10 } })
-      canvas.model.addSymbol(text)
-      const gestureStroke = buildIIStroke({ box: { height: 20, width: 20, x: -5, y: 5 }, nbPoint: 100 })
-      const gesture: TGesture = {
-        gestureType: "SCRATCH",
-        gestureStrokeId: gestureStroke.id,
-        strokeIds: [text.id],
-        strokeBeforeIds: [],
-        strokeAfterIds: [],
-      }
-      // @ts-expect-error - Method moved to ScratchGestureHandler
-      await manager.applyScratch(gestureStroke, gesture)
-      expect(canvas.removeSymbols).toHaveBeenNthCalledWith(1, [text.id], false)
-      expect(canvas.replaceSymbols).toHaveBeenCalledTimes(0)
-      expect(manager.history.push).toHaveBeenCalledTimes(1)
-    })
-
-    test("should partially erase text symbol", async () => {
-      const chars: TSymbolChar[] = [
-        {
-          bounds: { height: 10, width: 5, x: 0, y: 10 },
-          color: "black",
-          fontSize: 16,
-          fontWeight: "normal",
-          id: "char-1",
-          label: "A",
-        },
-        {
-          bounds: { height: 10, width: 5, x: 5, y: 10 },
-          color: "black",
-          fontSize: 16,
-          fontWeight: "normal",
-          id: "char-2",
-          label: "b",
-        },
-      ]
-      const text = buildIIText({ chars, boundingBox: { height: 10, width: 10, x: 0, y: 10 } })
-      canvas.model.addSymbol(text)
-      const gestureStroke = buildIIStroke({ box: chars[0].bounds })
-      const gesture: TGesture = {
-        gestureType: "SCRATCH",
-        gestureStrokeId: gestureStroke.id,
-        strokeIds: [text.id],
-        strokeBeforeIds: [],
-        strokeAfterIds: [],
-      }
-      // @ts-expect-error - Method moved to ScratchGestureHandler
-      await manager.applyScratch(gestureStroke, gesture)
-
-      expect(canvas.removeSymbols).toHaveBeenCalledTimes(0)
-      expect(canvas.replaceSymbols).toHaveBeenCalledTimes(1)
-      expect(manager.history.push).toHaveBeenCalledTimes(1)
-    })
-
-    test("should erase stroke symbol", async () => {
-      const stroke = buildIIStroke()
-      canvas.model.addSymbol(stroke)
-      const gestureStroke = buildIIStroke()
-      const gesture: TGesture = {
-        gestureType: "SCRATCH",
-        gestureStrokeId: gestureStroke.id,
-        strokeIds: [stroke.id],
-        strokeBeforeIds: [],
-        strokeAfterIds: [],
-      }
-      // @ts-expect-error - Method moved to ScratchGestureHandler
-      await manager.applyScratch(gestureStroke, gesture)
-      expect(canvas.removeSymbols).toHaveBeenNthCalledWith(1, [stroke.id], false)
-      expect(canvas.replaceSymbols).toHaveBeenCalledTimes(0)
-      expect(manager.history.push).toHaveBeenCalledTimes(1)
-    })
-
-    test("should partially erase stroke symbol", async () => {
-      const stroke = buildIIStroke({ nbPoint: 50 })
-      canvas.model.addSymbol(stroke)
-      const gestureStroke = buildIIStroke()
-      const gesture: TGesture = {
-        gestureType: "SCRATCH",
-        gestureStrokeId: gestureStroke.id,
-        strokeIds: [stroke.id],
-        strokeBeforeIds: [],
-        strokeAfterIds: [],
-        subStrokes: [
-          {
-            fullStrokeId: stroke.id,
-            x: stroke.pointers.slice(10, 25).map((p) => p.x),
-            y: stroke.pointers.slice(10, 25).map((p) => p.y),
-          },
-        ],
-      }
-      // @ts-expect-error - Method moved to ScratchGestureHandler
-      await manager.applyScratch(gestureStroke, gesture)
-      expect(canvas.updateSymbols).toHaveBeenCalledTimes(0)
-      expect(canvas.removeSymbols).toHaveBeenCalledTimes(0)
-      expect(canvas.replaceSymbols).toHaveBeenNthCalledWith(
-        1,
-        [stroke],
-        expect.arrayContaining([
-          expect.objectContaining({ type: "stroke" }),
-          expect.objectContaining({ type: "stroke" }),
-        ]),
-        false
-      )
-      expect(manager.history.push).toHaveBeenCalledTimes(1)
-    })
-  })
-
-  // TODO: Refactor these tests to work with Strategy Pattern - JoinGestureHandler
-  describe.skip("applyJoinGesture", () => {
-    const canvas = createCanvasMock()
-    const stroke11 = buildIIStroke({ box: { height: 9, width: 10, x: 0, y: 0.6 * rowHeight } })
-    canvas.model.addSymbol(stroke11)
-    const stroke12 = buildIIStroke({ box: { height: 9, width: 10, x: 100, y: 0.6 * rowHeight } })
-    canvas.model.addSymbol(stroke12)
-    const stroke21 = buildIIStroke({ box: { height: 9, width: 10, x: 100, y: 1.6 * rowHeight } })
-    canvas.model.addSymbol(stroke21)
-    const gestMan = new IIGestureManager(asCanvas(canvas))
-    gestMan.translator.translate = jest.fn(() => Promise.resolve())
-    gestMan.history.push = jest.fn()
-
-    test.skip("should join and group strokes if between 2 strokes", async () => {
-      const strokeGesture = buildIIStroke({ box: { height: 9, width: 10, x: 20, y: 0.6 * rowHeight } })
-      const gesture: TGesture = {
-        gestureType: "JOIN",
-        gestureStrokeId: "stroke-5b5c63a1-d546-4eb8-a63a-6db512ce2aaf",
-        strokeIds: [],
-        strokeBeforeIds: [],
-        strokeAfterIds: [],
-      }
-      // @ts-expect-error - Method moved to JoinGestureHandler
-      await gestMan.applyJoinGesture(strokeGesture, gesture)
-      expect((gestMan as any).canvas.replaceSymbols).toHaveBeenCalledTimes(1)
-      expect(gestMan.history.push).toHaveBeenCalledTimes(1)
-    })
-
-    test("should go up strokes if strokesAfter and go after stroke in previous row", async () => {
-      const strokeGesture = buildIIStroke({ box: { height: 9, width: 10, x: 10, y: 1.6 * rowHeight } })
-      const gesture: TGesture = {
-        gestureType: "JOIN",
-        gestureStrokeId: "stroke-5b5c63a1-d546-4eb8-a63a-6db512ce2aaf",
-        strokeIds: [],
-        strokeBeforeIds: [],
-        strokeAfterIds: [],
-      }
-      // @ts-expect-error - Method moved to JoinGestureHandler
-      await gestMan.applyJoinGesture(strokeGesture, gesture)
-      expect(gestMan.translator.translate).toHaveBeenNthCalledWith(
-        1,
-        [stroke21],
-        OBBOps.toBox(stroke12.bounds).x + stroke12.bounds.width - OBBOps.toBox(stroke21.bounds).x + rowHeight * 2,
-        -rowHeight,
-        false
-      )
-      expect(gestMan.history.push).toHaveBeenCalledTimes(1)
-    })
-
-    test("should go up strokes if strokesAfter and no stroke in previous row", async () => {
-      const stroke51 = buildIIStroke({ box: { height: 9, width: 10, x: 100, y: 4.6 * rowHeight } })
-      const gesture: TGesture = {
-        gestureType: "JOIN",
-        gestureStrokeId: "stroke-5b5c63a1-d546-4eb8-a63a-6db512ce2aaf",
-        strokeIds: [],
-        strokeBeforeIds: [],
-        strokeAfterIds: [],
-      }
-      canvas.model.addSymbol(stroke51)
-      const strokeGesture = buildIIStroke({ box: { height: 9, width: 10, x: 10, y: 4.6 * rowHeight } })
-      // @ts-expect-error - Method moved to JoinGestureHandler
-      await gestMan.applyJoinGesture(strokeGesture, gesture)
-      expect(gestMan.translator.translate).toHaveBeenNthCalledWith(1, [stroke51], 0, -rowHeight, false)
-      expect(gestMan.history.push).toHaveBeenCalledTimes(1)
-    })
-  })
-
-  // TODO: Refactor these tests to work with Strategy Pattern - InsertGestureHandler
-  describe.skip("applyInsertGesture", () => {
-    const canvas = createCanvasMock()
-    const stroke = buildIIStroke()
-    canvas.model.addSymbol(stroke)
-    const gestMan = new IIGestureManager(asCanvas(canvas))
-    gestMan.translator.translate = jest.fn(() => Promise.resolve())
-    gestMan.history.push = jest.fn()
-
-    test("should split", async () => {
-      const strokeGesture = buildIIStroke({ box: { height: 9, width: 10, x: 20, y: 0.6 * rowHeight } })
-      const gesture: TGesture = {
-        gestureType: "JOIN",
-        gestureStrokeId: strokeGesture.id,
-        strokeIds: [stroke.id],
-        strokeBeforeIds: [],
-        strokeAfterIds: [],
-        subStrokes: [
-          {
-            fullStrokeId: stroke.id,
-            x: stroke.pointers.slice(2).map((p) => p.x),
-            y: stroke.pointers.slice(2).map((p) => p.y),
-          },
-        ],
-      }
-      // @ts-expect-error - Method moved to InsertGestureHandler
-      await gestMan.applyInsertGesture(strokeGesture, gesture)
-      expect(gestMan.translator.translate).toHaveBeenCalledTimes(0)
-      expect(canvas.replaceSymbols).toHaveBeenNthCalledWith(
-        1,
-        [stroke],
-        expect.arrayContaining([
-          expect.objectContaining({ type: "stroke" }),
-          expect.objectContaining({ type: "stroke" }),
-        ]),
-        false
-      )
-      expect(gestMan.history.push).toHaveBeenCalledTimes(1)
-    })
-
-    test("should go down stroke", async () => {
-      const strokeGesture = buildIIStroke({
-        box: {
-          height: stroke.bounds.height,
-          width: 5,
-          x: OBBOps.toBox(stroke.bounds).x - 10,
-          y: OBBOps.toBox(stroke.bounds).y,
-        },
-      })
-      const gesture: TGesture = {
-        gestureType: "JOIN",
-        gestureStrokeId: strokeGesture.id,
-        strokeIds: [],
-        strokeBeforeIds: [],
-        strokeAfterIds: [],
-      }
-      // @ts-expect-error - Method moved to InsertGestureHandler
-      await gestMan.applyInsertGesture(strokeGesture, gesture)
-      expect(gestMan.translator.translate).toHaveBeenNthCalledWith(1, [stroke], 0, rowHeight, false)
-      expect(canvas.replaceSymbols).toHaveBeenCalledTimes(0)
-      expect(gestMan.history.push).toHaveBeenCalledTimes(1)
-    })
-  })
-
   describe("getGestureFromContextLess", () => {
     const canvas = createCanvasMock()
     // canvas.model.addSymbol(stroke)
@@ -414,6 +94,14 @@ describe("IIGestureManager.ts", () => {
 
     beforeEach(() => {
       canvas.model.clear()
+      canvas.configuration.recognition["raw-content"].gestures = [
+        "underline",
+        "scratch-out",
+        "join",
+        "insert",
+        "strike-through",
+        "surround",
+      ]
     })
 
     test("should return undefined when recognizeGesture return nothing", async () => {
@@ -453,8 +141,8 @@ describe("IIGestureManager.ts", () => {
         const gestureStroke = buildIIStroke({ box: { height: 10, width: 10, x: 0, y: 0 } })
         canvas.model.addSymbol(
           buildIICircle({
-            center: BoxOps.getCenter(OBBOps.toBox(gestureStroke.bounds)),
-            radius: Math.max(gestureStroke.bounds.width * 2, gestureStroke.bounds.height * 2),
+            center: BoxOps.getCenter(OBBOps.toBox(SymbolGeometry.boundsOf(gestureStroke))),
+            radius: Math.max(SymbolGeometry.boundsOf(gestureStroke).width * 2, SymbolGeometry.boundsOf(gestureStroke).height * 2),
           })
         )
         expect(await gestMan.getGestureFromContextLess(gestureStroke)).toBeUndefined()
@@ -463,8 +151,8 @@ describe("IIGestureManager.ts", () => {
         const gestureStroke = buildIIStroke({ box: { height: 10, width: 10, x: 0, y: 0 } })
         canvas.model.addSymbol(
           buildIICircle({
-            center: BoxOps.getCenter(OBBOps.toBox(gestureStroke.bounds)),
-            radius: Math.min(gestureStroke.bounds.width / 2, gestureStroke.bounds.height / 2),
+            center: BoxOps.getCenter(OBBOps.toBox(SymbolGeometry.boundsOf(gestureStroke))),
+            radius: Math.min(SymbolGeometry.boundsOf(gestureStroke).width / 2, SymbolGeometry.boundsOf(gestureStroke).height / 2),
           })
         )
         expect(await gestMan.getGestureFromContextLess(gestureStroke)).toEqual(
@@ -520,6 +208,26 @@ describe("IIGestureManager.ts", () => {
           })
         )
       })
+      test("should return gesture underline on a math block when underlineAction is Thicken", async () => {
+        gestMan.underlineAction = UnderlineAction.Thicken
+        const gestureStroke = buildIIStroke({ box: { height: 2, width: 10, x: 0, y: 10 } })
+        const math = buildIIMath("x", { boundingBox: { height: 12, width: 10, x: 0, y: 0 } })
+        canvas.model.addSymbol(gestureStroke)
+        canvas.model.addSymbol(math)
+        expect(await gestMan.getGestureFromContextLess(gestureStroke)).toEqual(
+          expect.objectContaining({
+            gestureType: "UNDERLINE",
+            strokeIds: [math.id],
+          })
+        )
+        gestMan.underlineAction = UnderlineAction.Draw
+      })
+      test("should ignore a math block when underlineAction is Draw", async () => {
+        const gestureStroke = buildIIStroke({ box: { height: 2, width: 10, x: 0, y: 10 } })
+        canvas.model.addSymbol(gestureStroke)
+        canvas.model.addSymbol(buildIIMath("x", { boundingBox: { height: 12, width: 10, x: 0, y: 0 } }))
+        expect(await gestMan.getGestureFromContextLess(gestureStroke)).toBeUndefined()
+      })
     })
 
     describe("scratch", () => {
@@ -549,6 +257,14 @@ describe("IIGestureManager.ts", () => {
             strokeIds: [text.id],
           })
         )
+      })
+      test("must return undefined when scratch-out is disabled in the recognition configuration", async () => {
+        canvas.configuration.recognition["raw-content"].gestures = ["join"]
+        const gestureStroke = buildIIStroke({ box: { height: 2, width: 10, x: 0, y: 10 } })
+        const text = buildIIText({ boundingBox: { height: 12, width: 10, x: 0, y: 0 } })
+        canvas.model.addSymbol(gestureStroke)
+        canvas.model.addSymbol(text)
+        expect(await gestMan.getGestureFromContextLess(gestureStroke)).toBeUndefined()
       })
     })
 
@@ -580,6 +296,14 @@ describe("IIGestureManager.ts", () => {
             gestureStrokeId: gestureStroke.id,
           })
         )
+      })
+      test("must return undefined when join is disabled in the recognition configuration", async () => {
+        canvas.configuration.recognition["raw-content"].gestures = ["insert"]
+        const gestureStroke = buildIIStroke({ box: { height: 20, width: 10, x: 0, y: rowHeight } })
+        const text = buildIIText({ boundingBox: { height: 12, width: 10, x: 0, y: rowHeight } })
+        canvas.model.addSymbol(gestureStroke)
+        canvas.model.addSymbol(text)
+        expect(await gestMan.getGestureFromContextLess(gestureStroke)).toBeUndefined()
       })
     })
 

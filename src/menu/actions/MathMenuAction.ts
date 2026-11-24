@@ -1,11 +1,14 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import type { TRecognitionWebSocketConfiguration } from "@/client"
 import { IIMathCapabilitiesTable, IIMathVariableCanvas } from "@/components"
-import type { TMathResultMode } from "@/manager/interactive/math"
-import type { TMenuButton } from "@/menu/items/ButtonMenuItem"
-import type { TMenuCheckbox } from "@/menu/items/CheckboxMenuItem"
-import type { TMenuSelect } from "@/menu/items/SelectMenuItem"
-import type { TMenuSubMenu } from "@/menu/items/SubMenuItem"
-import { SubMenuItem } from "@/menu/items/SubMenuItem"
+import type { TPartialDeep } from "@/core"
+import type { TMathResultMode } from "@/manager"
+
+import type { TMenuItemBase } from "../items/BaseMenuItem"
+import type { TMenuRange } from "../items/RangeMenuItem"
+import type { TMenuSelect } from "../items/SelectMenuItem"
+import type { TMenuSubMenu, TSubMenuItems } from "../items/SubMenuItem"
+import { SubMenuItem } from "../items/SubMenuItem"
 
 /** @group Menu */
 export type TMathActionItemsConfig = {
@@ -17,22 +20,179 @@ export type TMathActionItemsConfig = {
   editVariables?: boolean
   capabilities?: boolean
   forceComputeAll?: boolean
+  solver?: boolean | TMathSolverItemsConfig
 }
 /** @group Menu */
 export type TMathActionConfig = boolean | TMathActionItemsConfig
 
 /**
  * @group Menu
+ * @remarks Solver settings shown in Math > Solver; each one is shown unless set to `false`
+ */
+export type TMathSolverItemsConfig = {
+  angleUnit?: boolean
+  fractionalDigits?: boolean
+  decimalSeparator?: boolean
+  roundingMode?: boolean
+}
+
+/**
+ * @group Menu
+ * @remarks Wait after the last move of the fractional digits slider before resynchronizing
+ */
+export const MATH_SOLVER_DEBOUNCE_MS = 300
+
+const SOLVER_ITEM_KEYS: (keyof TMathSolverItemsConfig)[] = [
+  "angleUnit",
+  "fractionalDigits",
+  "decimalSeparator",
+  "roundingMode",
+]
+
+type TWebSocketSolverConfiguration = NonNullable<NonNullable<TRecognitionWebSocketConfiguration["math"]>["solver"]>
+type TSolverChange = TPartialDeep<TWebSocketSolverConfiguration>
+
+class Debouncer {
+  #timer?: ReturnType<typeof setTimeout>
+
+  constructor(private readonly delay: number) {}
+
+  schedule(callback: () => void): void {
+    this.cancel()
+    this.#timer = setTimeout(callback, this.delay)
+  }
+
+  cancel(): void {
+    clearTimeout(this.#timer)
+    this.#timer = undefined
+  }
+}
+
+const isAutoVariableEnabled = (canvas: TInteractiveInkCanvas): boolean =>
+  canvas.configuration.recognition.math?.solver?.["auto-variable-management"]?.enable === true
+
+/** Every change resynchronizes the session: a failure is reported by the canvas error event, and
+ * the menu update that follows realigns the widgets on the restored configuration. */
+const changeSolver = (canvas: TInteractiveInkCanvas, solver: TSolverChange): void => {
+  canvas.updateRecognitionConfiguration({ math: { solver } }).catch(() => undefined)
+}
+
+type TSolverSelect<T extends string> = TMenuItemBase & {
+  choices: { value: T; label: string }[]
+  serverDefault?: boolean
+  read: (solver: TWebSocketSolverConfiguration) => T | undefined
+  write: (value: T | undefined) => TSolverChange
+}
+
+function solverSelect<T extends string>(select: TSolverSelect<T>): TMenuSelect {
+  const { choices, serverDefault, read, write, ...base } = select
+  const options = serverDefault ? [{ value: "", label: "Server default" }, ...choices] : choices
+  return {
+    ...base,
+    type: "select",
+    options,
+    getValue: (canvas) => {
+      const solver = canvas.configuration.recognition.math?.solver
+      return (solver && read(solver)) ?? ""
+    },
+    setValue: (canvas, value) => changeSolver(canvas, write(choices.find((c) => c.value === value)?.value)),
+  }
+}
+
+function fractionalDigitsRange(canvas: TInteractiveInkCanvas, id: string, debouncer: Debouncer): TMenuRange {
+  return {
+    type: "range",
+    id,
+    label: "Decimals",
+    min: 0,
+    max: 10,
+    step: 1,
+    unit: "",
+    initValue: canvas.configuration.recognition.math?.solver?.["fractional-part-digits"],
+    onChange: (value, canvas) => debouncer.schedule(() => changeSolver(canvas, { "fractional-part-digits": value })),
+  }
+}
+
+function buildSolverItems(
+  canvas: TInteractiveInkCanvas,
+  id: string,
+  debouncer: Debouncer
+): Record<keyof TMathSolverItemsConfig, TSubMenuItems> {
+  return {
+    angleUnit: solverSelect({
+      id: `${id}-angle-unit`,
+      label: "Angle unit",
+      choices: [
+        { value: "deg", label: "Degrees" },
+        { value: "rad", label: "Radians" },
+      ],
+      read: (solver) => solver["angle-unit"],
+      write: (value) => ({ "angle-unit": value }),
+    }),
+    fractionalDigits: fractionalDigitsRange(canvas, `${id}-fractional-digits`, debouncer),
+    decimalSeparator: solverSelect({
+      id: `${id}-decimal-separator`,
+      label: "Decimal separator",
+      choices: [
+        { value: ".", label: "Dot (.)" },
+        { value: ",", label: "Comma (,)" },
+      ],
+      read: (solver) => solver["decimal-separator"],
+      write: (value) => ({ "decimal-separator": value }),
+    }),
+    roundingMode: solverSelect({
+      id: `${id}-rounding-mode`,
+      label: "Rounding",
+      choices: [
+        { value: "half up", label: "Half up" },
+        { value: "truncate", label: "Truncate" },
+      ],
+      read: (solver) => solver["rounding-mode"],
+      write: (value) => ({ "rounding-mode": value }),
+    }),
+  }
+}
+
+function buildSolverSubMenu(
+  canvas: TInteractiveInkCanvas,
+  idPrefix: string,
+  itemsConfig: TMathSolverItemsConfig | true | undefined,
+  debouncer: Debouncer
+): TMenuSubMenu {
+  const id = `${idPrefix}-math-solver`
+  const allItems = buildSolverItems(canvas, id, debouncer)
+  const items = SOLVER_ITEM_KEYS.filter((key) => itemsConfig === true || itemsConfig?.[key] !== false).map(
+    (key) => allItems[key]
+  )
+  return { type: "submenu", id, label: "Solver", menuTitle: "Solver", position: "right-top", items }
+}
+
+/**
+ * @group Menu
  * @remarks Menu action for Math visualization and interaction controls
  */
 export class MathMenuAction extends SubMenuItem {
+  #cancelPendingSolverChange: () => void
+
   constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-action", itemsConfig?: TMathActionItemsConfig) {
     const enabled = (key: keyof TMathActionItemsConfig) => itemsConfig?.[key] !== false
+    const solverDebouncer = new Debouncer(MATH_SOLVER_DEBOUNCE_MS)
 
-    const items: (TMenuCheckbox | TMenuSelect | TMenuButton)[] = []
+    const config: TMenuSubMenu = {
+      type: "submenu",
+      id: `${idPrefix}-math`,
+      label: "Math",
+      menuTitle: "Math",
+      position: "right-top",
+      items: [],
+    }
+
+    if (itemsConfig?.solver !== false) {
+      config.items.push(buildSolverSubMenu(canvas, idPrefix, itemsConfig?.solver, solverDebouncer))
+    }
 
     if (enabled("autoCompute")) {
-      items.push({
+      config.items.push({
         type: "checkbox",
         id: `${idPrefix}-math-auto-compute`,
         label: "Auto-compute",
@@ -49,7 +209,7 @@ export class MathMenuAction extends SubMenuItem {
     }
 
     if (enabled("forceComputeAll")) {
-      items.push({
+      config.items.push({
         type: "button",
         id: `${idPrefix}-math-force-compute-all`,
         label: "Force Compute all",
@@ -60,7 +220,7 @@ export class MathMenuAction extends SubMenuItem {
     }
 
     if (enabled("resultMode")) {
-      items.push({
+      config.items.push({
         type: "select",
         id: `${idPrefix}-math-result-mode`,
         label: "Result mode",
@@ -87,7 +247,7 @@ export class MathMenuAction extends SubMenuItem {
     }
 
     if (enabled("resultColor")) {
-      items.push({
+      config.items.push({
         type: "select",
         id: `${idPrefix}-math-result-color`,
         label: "Result color",
@@ -110,41 +270,41 @@ export class MathMenuAction extends SubMenuItem {
       })
     }
 
-    if (canvas.configuration.recognition.math?.solver?.["auto-variable-management"]?.enable) {
-      if (enabled("showDependencies")) {
-        items.push({
-          type: "checkbox",
-          id: `${idPrefix}-math-show-dependency-on-hover`,
-          label: "Show Dependencies on Hover",
-          getValue: (canvas: TInteractiveInkCanvas) => canvas.math.getVariablesConfig().showDependencyOnHover,
-          setValue: (canvas: TInteractiveInkCanvas, value: boolean) => {
-            canvas.math.updateVariablesConfig({
-              showDependencyOnHover: value,
-            })
-            if (!value) {
-              canvas.math.clearVariableInteractions()
-            }
-          },
-        })
-      }
+    if (enabled("showDependencies")) {
+      config.items.push({
+        type: "checkbox",
+        id: `${idPrefix}-math-show-dependency-on-hover`,
+        visible: isAutoVariableEnabled,
+        label: "Show Dependencies on Hover",
+        getValue: (canvas: TInteractiveInkCanvas) => canvas.math.getVariablesConfig().showDependencyOnHover,
+        setValue: (canvas: TInteractiveInkCanvas, value: boolean) => {
+          canvas.math.updateVariablesConfig({
+            showDependencyOnHover: value,
+          })
+          if (!value) {
+            canvas.math.clearVariableInteractions()
+          }
+        },
+      })
+    }
 
-      if (enabled("highlightOnSelect")) {
-        items.push({
-          type: "checkbox",
-          id: `${idPrefix}-math-highlight-on-select`,
-          label: "Highlight on Select",
-          getValue: (canvas: TInteractiveInkCanvas) => canvas.math.getVariablesConfig().highlightOnSelect,
-          setValue: (canvas: TInteractiveInkCanvas, value: boolean) => {
-            canvas.math.updateVariablesConfig({
-              highlightOnSelect: value,
-            })
-          },
-        })
-      }
+    if (enabled("highlightOnSelect")) {
+      config.items.push({
+        type: "checkbox",
+        id: `${idPrefix}-math-highlight-on-select`,
+        visible: isAutoVariableEnabled,
+        label: "Highlight on Select",
+        getValue: (canvas: TInteractiveInkCanvas) => canvas.math.getVariablesConfig().highlightOnSelect,
+        setValue: (canvas: TInteractiveInkCanvas, value: boolean) => {
+          canvas.math.updateVariablesConfig({
+            highlightOnSelect: value,
+          })
+        },
+      })
     }
 
     if (enabled("editVariables")) {
-      items.push({
+      config.items.push({
         type: "button",
         id: `${idPrefix}-math-variables`,
         label: "Edit Variables",
@@ -156,7 +316,7 @@ export class MathMenuAction extends SubMenuItem {
     }
 
     if (enabled("capabilities")) {
-      items.push({
+      config.items.push({
         type: "button",
         id: `${idPrefix}-math-capabilities-overview`,
         label: "Show Math Capabilities Overview",
@@ -167,15 +327,12 @@ export class MathMenuAction extends SubMenuItem {
       })
     }
 
-    const config: TMenuSubMenu = {
-      type: "submenu",
-      id: `${idPrefix}-math`,
-      label: "Math (∑)",
-      menuTitle: "Math (∑)",
-      position: "right-top",
-      items: items,
-    }
-
     super(config, canvas)
+    this.#cancelPendingSolverChange = () => solverDebouncer.cancel()
+  }
+
+  destroy(): void {
+    this.#cancelPendingSolverChange()
+    super.destroy()
   }
 }

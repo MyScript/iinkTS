@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Interactive Ink Canvas - Markdown Export</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <style>
+      #rootEl {
+        flex: 1;
+        min-width: 0;
+      }
+
+      #results-panel {
+        width: 360px;
+      }
+
+      .export-result-item {
+        margin-bottom: var(--ex-space-md);
+      }
+
+      .export-result-item pre {
+        margin: 4px 0 0;
+        min-height: 60px;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      #markdownRendered {
+        margin: 4px 0 0;
+        padding: var(--ex-space-sm);
+        border: 1px solid var(--ex-border, #ddd);
+        border-radius: 4px;
+        min-height: 60px;
+        overflow-wrap: break-word;
+      }
+
+      #markdownRendered :is(h1, h2, h3) {
+        margin: 0.4em 0 0.2em;
+        font-weight: 600;
+      }
+
+      #markdownRendered ul,
+      #markdownRendered ol {
+        padding-left: 1.2em;
+        list-style: revert;
+      }
+    </style>
+    <script src="../assets/js/theme-init.js"></script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="resultsPanelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="results-panel">
+        📤 Results
+      </button>
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">
+        Interactive Ink Canvas - Markdown Export
+      </h1>
+    </header>
+
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">Handwriting → Markdown</p>
+        <p class="ex-panel-intro"><code>canvas.exportAs("markdown")</code> resolves with the Markdown source, derived locally from the JIIX recognition result — no extra server round-trip.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Recognized text becomes paragraphs, math becomes <code>$$...$$</code>. Handy to hand the content to an LLM prompt or to a note-taking app.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">The panel refreshes on every <code>exported</code> event, so the Markdown follows what you write without pressing anything.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc"><code>canvas.download("markdown")</code> saves the same content as a <code>.md</code> file.</div>
+        </div>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-hint">The rendered preview below uses <code>marked</code> and <code>DOMPurify</code> from a CDN. They are only there to show the Markdown as a document — iinkTS itself produces the source text and has no rendering dependency.</div>
+      </aside>
+      <div class="page-content">
+        <nav class="flex-container wrap gap between">
+          <div class="flex-container wrap gap">
+            <button class="classic-btn primary" id="exportMarkdown">
+              Export as Markdown
+            </button>
+            <button class="classic-btn" id="downloadMarkdown">
+              Download .md
+            </button>
+            <button class="classic-btn" id="clear">
+              Clear
+            </button>
+          </div>
+        </nav>
+        <div class="main-layout">
+          <div id="rootEl"></div>
+          <aside id="results-panel" class="ex-panel">
+            <p class="ex-panel-heading">Markdown source</p>
+            <div class="export-result-item">
+              <pre id="markdownResult" class="ex-panel-code"></pre>
+            </div>
+            <p class="ex-panel-heading">Rendered</p>
+            <div class="export-result-item">
+              <div id="markdownRendered"></div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/marked@15.0.7/marked.min.js"
+      integrity="sha384-H+hy9ULve6xfxRkWIh/YOtvDdpXgV2fmAGQkIDTxIgZwNoaoBal14Di2YTMR6MzR"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/dompurify@3.2.4/dist/purify.min.js"
+      integrity="sha384-eEu5CTj3qGvu9PdJuS+YlkNi7d2XxQROAFYOr59zgObtlcux1ae1Il3u7jvdCSWu"
+      crossorigin="anonymous"
+    ></script>
+
+    <script type="module">
+      import { Canvas } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from "../components/modal/modalCanvasOptions.js";
+
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      const resultsPanelToggleBtn = document.getElementById('resultsPanelToggleBtn')
+      const resultsPanel = document.getElementById('results-panel')
+      resultsPanelToggleBtn.addEventListener('click', () => {
+        const open = resultsPanel.classList.toggle('open')
+        resultsPanelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      const rootElement = document.getElementById("rootEl");
+      const exportMarkdownBtn = document.getElementById("exportMarkdown");
+      const downloadMarkdownBtn = document.getElementById("downloadMarkdown");
+      const clearBtn = document.getElementById("clear");
+      const markdownResultElement = document.getElementById("markdownResult");
+      const markdownRenderedElement = document.getElementById("markdownRendered");
+      const showModalBtn = document.getElementById("showModalBtn");
+
+      let canvas;
+      const canvasOptions = {
+        configuration: {
+          recognition: { types: ['text'] },
+          menu: {
+            action: {
+              language: false,
+              gesture: false,
+              snap: false,
+              export: false,
+              import: false,
+              convert: false,
+              math: false,
+              guide: false,
+              selection: false,
+            },
+            tool: {
+              write: true,
+              move: true,
+              select: true,
+              erase: true,
+              shape: false,
+              edge: false,
+            },
+            style: {
+              strokeColor: true,
+              fillColor: false,
+              thickness: false,
+              fontSize: false,
+              fontWeight: false,
+              opacity: false,
+            },
+            context: {
+              edit: false,
+              decorator: false,
+              reorder: false,
+              export: false,
+              convert: false,
+            },
+          },
+        },
+      };
+
+      function clearResults() {
+        markdownResultElement.textContent = "";
+        markdownRenderedElement.innerHTML = "";
+      }
+
+      /**
+       * Renders the exported Markdown as HTML. The source text is the export itself; the HTML is
+       * only a preview, sanitized before it reaches the DOM.
+       */
+      async function refreshMarkdown() {
+        if (!canvas) return;
+        const markdown = await canvas.exportAs("markdown");
+        markdownResultElement.textContent = markdown;
+        markdownRenderedElement.innerHTML = window.DOMPurify.sanitize(window.marked.parse(markdown));
+      }
+
+      async function loadCanvas(options) {
+        await canvas?.destroy();
+        canvas = await Canvas.load(rootElement, "INTERACTIVE_INK", options);
+        window.canvas = canvas;
+        clearResults();
+        canvas.event.addEventListener("exported", () => refreshMarkdown());
+      }
+
+      exportMarkdownBtn.addEventListener("click", () => refreshMarkdown());
+
+      downloadMarkdownBtn.addEventListener("click", () => canvas?.download("markdown"));
+
+      clearBtn.addEventListener("click", async () => {
+        if (!canvas) return;
+        await canvas.clear();
+        clearResults();
+      });
+
+      showModalBtn.addEventListener("click", () => {
+        ModalCanvasOptions.show(loadCanvas, canvasOptions);
+      });
+
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions);
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.canvasOptions = canvasOptions
+      window.loadCanvas = loadCanvas
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>

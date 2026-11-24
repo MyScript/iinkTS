@@ -1,16 +1,10 @@
 import { CanvasEventMock } from "../__mocks__/CanvasEventMock"
 import { buildIIStroke } from "../helpers"
-import {
-  THistoryConfiguration,
-  getInitialHistoryContext,
-  IIHistoryManager,
-  IIModel,
-  DefaultHistoryConfiguration,
-  MatrixTransform,
-} from "@/iink"
+import { THistoryConfiguration, getInitialHistoryContext, IIHistoryManager, IIModel, DefaultHistoryConfiguration } from "@/iink"
 
 describe("IIHistoryManager.ts", () => {
   const event = new CanvasEventMock(document.createElement("div"))
+
   test("should instanciate IIHistoryManager", () => {
     const manager = new IIHistoryManager(DefaultHistoryConfiguration, event)
     expect(manager).toBeDefined()
@@ -22,72 +16,67 @@ describe("IIHistoryManager.ts", () => {
       const context = getInitialHistoryContext()
       expect(manager.context).toStrictEqual(context)
     })
-    test("should init stack without actions", () => {
-      const model1 = new IIModel()
-      manager.init(model1)
+    test("should init stack without actions and no model", () => {
+      manager.init(new IIModel())
 
       expect(manager.context.stackIndex).toStrictEqual(0)
       expect(manager.context.canUndo).toStrictEqual(false)
       expect(manager.context.canRedo).toStrictEqual(false)
       expect(manager.context.empty).toStrictEqual(true)
       expect(manager.stack).toHaveLength(1)
-      expect(manager.stack[manager.context.stackIndex].model).toEqual(model1)
-      expect(manager.stack[manager.context.stackIndex].model).not.toBe(model1)
-      expect(manager.stack[manager.context.stackIndex].changes).toEqual({})
+      expect(manager.stack[manager.context.stackIndex]).toEqual({})
       expect(manager.event.emitChanged).toHaveBeenNthCalledWith(1, manager.context)
+    })
+  })
+
+  describe("empty context", () => {
+    test("should reflect the live model passed to init, not the stack content", () => {
+      const manager = new IIHistoryManager(DefaultHistoryConfiguration, event)
+      const model = new IIModel()
+      manager.init(model)
+      expect(manager.context.empty).toStrictEqual(true)
+
+      const stroke = buildIIStroke()
+      model.addSymbol(stroke)
+      manager.push({ added: [stroke] })
+      expect(manager.context.empty).toStrictEqual(false)
+
+      model.removeSymbol(stroke.id)
+      manager.push({ erased: [stroke] })
+      expect(manager.context.empty).toStrictEqual(true)
     })
   })
 
   describe("push", () => {
     const configuration: THistoryConfiguration = { maxStackSize: 5 }
     const manager = new IIHistoryManager(configuration, event)
-
-    const model1 = new IIModel()
-    manager.init(model1)
-
-    const stroke2 = buildIIStroke()
-    const model2 = new IIModel()
-    model2.addSymbol(stroke2)
-
-    const model3 = new IIModel()
+    manager.init(new IIModel())
 
     test("should not push item to stack without actions and not emitChanged", () => {
-      expect(manager.context.stackIndex).toStrictEqual(0)
-      expect(manager.context.canUndo).toStrictEqual(false)
-      expect(manager.context.canRedo).toStrictEqual(false)
-      expect(manager.context.empty).toStrictEqual(true)
       expect(manager.stack).toHaveLength(1)
 
-      manager.push(model1, {})
+      manager.push({})
 
-      expect(manager.context.stackIndex).toStrictEqual(0)
-      expect(manager.context.canUndo).toStrictEqual(false)
-      expect(manager.context.canRedo).toStrictEqual(false)
-      expect(manager.context.empty).toStrictEqual(true)
       expect(manager.stack).toHaveLength(1)
       expect(manager.event.emitChanged).toHaveBeenCalledTimes(0)
     })
 
-    test("should add model to stack with action added and emitChanged", () => {
-      manager.push(model2, { added: [stroke2] })
+    test("should push changes to stack with action added and emitChanged", () => {
+      const stroke = buildIIStroke()
+      manager.push({ added: [stroke] })
 
       expect(manager.context.stackIndex).toStrictEqual(1)
       expect(manager.context.canUndo).toStrictEqual(true)
       expect(manager.context.canRedo).toStrictEqual(false)
-      expect(manager.context.empty).toStrictEqual(false)
       expect(manager.stack).toHaveLength(2)
-      expect(manager.stack[manager.context.stackIndex].model).toEqual(model2)
-      expect(manager.stack[manager.context.stackIndex].model).not.toBe(model2)
-      expect(manager.stack[manager.context.stackIndex].changes).toEqual({ added: [stroke2] })
+      expect(manager.stack[manager.context.stackIndex]).toEqual({ added: [stroke] })
       expect(manager.event.emitChanged).toHaveBeenNthCalledWith(1, manager.context)
     })
 
-    test("should splice end of stack if stackIndex no last and emitChanged", () => {
+    test("should splice end of stack if stackIndex not last and emitChanged", () => {
       const NB_STROKE = 5
       for (let i = 0; i < NB_STROKE; i++) {
-        const stroke = buildIIStroke()
-        model3.addSymbol(stroke)
-        manager.push(model3, { added: [stroke] })
+        manager.push({ added: [buildIIStroke()] })
       }
       expect(manager.context.stackIndex).toStrictEqual(configuration.maxStackSize - 1)
       expect(manager.stack).toHaveLength(configuration.maxStackSize)
@@ -95,34 +84,24 @@ describe("IIHistoryManager.ts", () => {
       manager.context.stackIndex = 0
 
       const stroke = buildIIStroke()
-      model3.addSymbol(stroke)
-
-      manager.push(model3, { added: [stroke] })
+      manager.push({ added: [stroke] })
 
       expect(manager.context.stackIndex).toEqual(1)
       expect(manager.stack).toHaveLength(2)
-
-      expect(manager.stack[manager.context.stackIndex].model).toEqual(model3)
-      expect(manager.stack[manager.context.stackIndex].model).not.toBe(model3)
-      expect(manager.stack[manager.context.stackIndex].changes).toEqual({ added: [stroke] })
+      expect(manager.stack[manager.context.stackIndex]).toEqual({ added: [stroke] })
       expect(manager.event.emitChanged).toHaveBeenNthCalledWith(1, manager.context)
     })
 
     test("should shift the first element of the stack when maxStackSize is exceeded and emitChanged", () => {
       const NB_STROKE = 10
       for (let i = 0; i < NB_STROKE; i++) {
-        const stroke = buildIIStroke()
-        model3.addSymbol(stroke)
-        manager.push(model3, { added: [stroke] })
+        manager.push({ added: [buildIIStroke()] })
       }
 
-      manager.push(model3, {})
+      manager.push({})
       expect(manager.context.stackIndex + 1).toStrictEqual(configuration.maxStackSize)
 
       expect(manager.stack).toHaveLength(configuration.maxStackSize)
-      expect(manager.stack[manager.context.stackIndex].model).toEqual(model3)
-      expect(manager.stack[manager.context.stackIndex].model).not.toBe(model3)
-
       expect(manager.context.canUndo).toStrictEqual(true)
       expect(manager.context.canRedo).toStrictEqual(false)
       expect(manager.event.emitChanged).toHaveBeenNthCalledWith(1, manager.context)
@@ -130,9 +109,8 @@ describe("IIHistoryManager.ts", () => {
   })
 
   describe("undo", () => {
-    const model = new IIModel()
     const manager = new IIHistoryManager(DefaultHistoryConfiguration, event)
-    manager.init(model)
+    manager.init(new IIModel())
 
     test("should define canUndo to false and canRedo to false", () => {
       expect(manager.context.stackIndex).toStrictEqual(0)
@@ -140,14 +118,11 @@ describe("IIHistoryManager.ts", () => {
       expect(manager.context.canRedo).toStrictEqual(false)
     })
 
-    test("should get the previous model", () => {
-      const model2 = new IIModel()
+    test("should invert added action", () => {
       const stroke = buildIIStroke()
-      model2.addSymbol(stroke)
-      manager.push(model2, { added: [stroke] })
-      const previousStackItem = manager.undo()
-      expect(previousStackItem.model).toEqual(model)
-      expect(previousStackItem.model).not.toBe(model)
+      manager.push({ added: [stroke] })
+      const reversed = manager.undo()
+      expect(reversed).toEqual({ erased: [stroke] })
     })
 
     test("should define canUndo to false and canRedo to true", () => {
@@ -156,72 +131,96 @@ describe("IIHistoryManager.ts", () => {
       expect(manager.context.canRedo).toStrictEqual(true)
     })
 
-    test("should invert added action", () => {
-      const model2 = new IIModel()
-      const stroke = buildIIStroke()
-      manager.push(model2, { added: [stroke] })
-      const previousStackItem = manager.undo()
-      expect(previousStackItem.changes).toEqual({ erased: [stroke] })
-    })
-
     test("should invert erased action", () => {
-      const model2 = new IIModel()
       const stroke = buildIIStroke()
-      manager.push(model2, { erased: [stroke] })
-      const previousStackItem = manager.undo()
-      expect(previousStackItem.changes).toEqual({ added: [stroke] })
+      manager.push({ erased: [stroke] })
+      const reversed = manager.undo()
+      expect(reversed).toEqual({ added: [stroke] })
     })
 
     test("should invert replaced action", () => {
-      const model2 = new IIModel()
       const oldStroke = buildIIStroke()
       const newStroke = buildIIStroke()
-      manager.push(model2, { replaced: { newSymbols: [newStroke], oldSymbols: [oldStroke] } })
-      const previousStackItem = manager.undo()
-      expect(previousStackItem.changes).toEqual({ replaced: { newSymbols: [oldStroke], oldSymbols: [newStroke] } })
+      manager.push({ replaced: { newSymbols: [newStroke], oldSymbols: [oldStroke] } })
+      const reversed = manager.undo()
+      expect(reversed).toEqual({ replaced: { newSymbols: [oldStroke], oldSymbols: [newStroke] } })
     })
 
-    test("should invert translate action", () => {
-      const model2 = new IIModel()
-      const stroke = buildIIStroke()
-      manager.push(model2, { translate: [{ symbols: [stroke], tx: 42, ty: 24 }] })
-      const previousStackItem = manager.undo()
-      expect(previousStackItem.changes).toEqual({ translate: [{ symbols: [stroke], tx: -42, ty: -24 }] })
+    test("should invert a variable change alone by swapping its values", () => {
+      manager.push({ variables: [{ strokeIds: ["s1"], name: "x", before: 2, after: 4 }] })
+      const reversed = manager.undo()
+      expect(reversed).toEqual({ variables: [{ strokeIds: ["s1"], name: "x", before: 4, after: 2 }] })
     })
 
-    test("should invert matrix action", () => {
-      const model2 = new IIModel()
-      const stroke = buildIIStroke()
-      const matrix = MatrixTransform.identity()
-        .rotate(Math.PI / 2)
-        .translate(2, 5)
-      manager.push(model2, { matrix: { symbols: [stroke], matrix } })
-      const previousStackItem = manager.undo()
-      expect(previousStackItem.changes).toEqual({ matrix: { symbols: [stroke], matrix: matrix.invert() } })
+    test("should invert updated by swapping each pair", () => {
+      const before = buildIIStroke()
+      const after = buildIIStroke()
+      manager.push({ updated: [{ before, after }] })
+      const reversed = manager.undo()
+      expect(reversed).toEqual({ updated: [{ before: after, after: before }] })
+    })
+
+    /**
+     * The reason `updated` is a list of pairs and not two parallel lists: one undoable step gathers
+     * symbols from more than one source — a transform records the symbols dragged *and* the
+     * connected edges recomputed from them — and two lists that fell out of step paired the wrong
+     * symbols together on undo, silently.
+     */
+    test("should keep every pair together through a reversal", () => {
+      const a = buildIIStroke()
+      const aMoved = buildIIStroke()
+      const b = buildIIStroke()
+      const bMoved = buildIIStroke()
+      manager.push({
+        updated: [
+          { before: a, after: aMoved },
+          { before: b, after: bMoved },
+        ],
+      })
+
+      const reversed = manager.undo()
+
+      expect(reversed.updated).toEqual([
+        { before: aMoved, after: a },
+        { before: bMoved, after: b },
+      ])
+    })
+
+    /**
+     * A restyle used to have its own form, carrying the styles before and after. It is a change to
+     * the symbol's record like any other now, so the pair carries it with no extra machinery — and
+     * a font change, which also moves the text's geometry, comes back whole rather than needing the
+     * `oldFontSizes` list the old form had to keep alongside.
+     */
+    test("should invert a restyle, which is now just a pair", () => {
+      const before = buildIIStroke()
+      before.style = { ...before.style, color: "red" }
+      const after = buildIIStroke()
+      after.id = before.id
+      after.style = { ...after.style, color: "blue" }
+      manager.push({ updated: [{ before, after }] })
+
+      const reversed = manager.undo()
+
+      expect(reversed.updated).toEqual([{ before: after, after: before }])
+      expect(reversed.updated![0].after.style.color).toBe("red")
     })
   })
 
   describe("redo", () => {
-    const model = new IIModel()
     const manager = new IIHistoryManager(DefaultHistoryConfiguration, event)
+    manager.init(new IIModel())
 
-    const stroke = buildIIStroke()
-    model.addSymbol(stroke)
-    manager.init(model)
-
-    test("should get the next model", () => {
+    test("should return the next changes as pushed", () => {
       const stroke = buildIIStroke()
-      model.addSymbol(stroke)
-
-      manager.push(model, { added: [stroke] })
+      manager.push({ added: [stroke] })
       manager.undo()
-      const lastStackItem = manager.redo()
-      expect(manager.context.stackIndex).toStrictEqual(1)
+      const next = manager.redo()
 
+      expect(manager.context.stackIndex).toStrictEqual(1)
       expect(manager.stack).toHaveLength(2)
-      expect(manager.stack[manager.context.stackIndex].model).toEqual(lastStackItem.model)
-      expect(manager.stack[manager.context.stackIndex].model).toBe(lastStackItem.model)
-      expect(manager.stack[manager.context.stackIndex].changes).toEqual(lastStackItem.changes)
+      expect(manager.stack[manager.context.stackIndex]).toEqual(next)
+      expect(next).toEqual({ added: [stroke] })
 
       expect(manager.context.canUndo).toStrictEqual(true)
       expect(manager.context.canRedo).toStrictEqual(false)

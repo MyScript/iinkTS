@@ -1,7 +1,6 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import type { TInteractiveInkCanvas } from "@/canvas"
 import type { TSymbol } from "@/symbol"
 import { isRecognizedText, SymbolType } from "@/symbol"
-
 /**
  * Helper class containing all shared utility methods for gesture handlers
  * Centralizes common functionality to avoid code duplication across handlers

@@ -1,16 +1,16 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import type { TInteractiveInkCanvas } from "@/canvas"
 
 import type { TMenuItemBase } from "./BaseMenuItem"
 import { BaseMenuItem } from "./BaseMenuItem"
 
 /**
  * @group Menu
- * @remarks Configuration for a button list (S, M, L, XL)
+ * @remarks Configuration for a button list
  */
 export type TMenuButtonList = TMenuItemBase & {
   type: "buttonlist"
   buttonType?: "square" | "round"
-  options: Array<{ label: string; value: string }>
+  options: Array<{ label?: string; icon?: string; value: string }>
   getValue: (canvas: TInteractiveInkCanvas) => string
   setValue: (canvas: TInteractiveInkCanvas, value: string) => void
 }
@@ -37,7 +37,8 @@ export class ButtonListMenuItem extends BaseMenuItem<HTMLDivElement> {
     this.config.options.forEach((option) => {
       const button = this.dom.button({
         id: `${this.config.id}-${option.value}`,
-        label: option.label,
+        label: option.label || option.value,
+        icon: option.icon,
         className: [this.config.buttonType || "", option.value === currentValue ? "active" : ""],
         onPointerUp: () => {
           this.logger.info(`${this.config.id}.change`, { value: option.value })
@@ -53,11 +54,11 @@ export class ButtonListMenuItem extends BaseMenuItem<HTMLDivElement> {
     if (typeof this.config.disabled === "function") {
       const isDisabled = this.config.disabled(this.canvas)
       wrapper.querySelectorAll("button").forEach((btn) => {
-        ;(btn as HTMLButtonElement).disabled = isDisabled
+        btn.disabled = isDisabled
       })
     } else if (this.config.disabled) {
       wrapper.querySelectorAll("button").forEach((btn) => {
-        ;(btn as HTMLButtonElement).disabled = true
+        btn.disabled = true
       })
     }
 

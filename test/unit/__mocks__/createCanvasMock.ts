@@ -1,17 +1,5 @@
-import { IIModel } from "@/model"
-import {
-  DefaultInteractiveInkCanvasConfiguration,
-  InteractiveInkCanvasConfiguration,
-} from "@/canvas/variants/InteractiveInkCanvasConfiguration"
-import { DefaultStyle } from "@/style/Style"
-import { CanvasTool, CanvasWriteTool } from "@/Constants"
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import type { TStyle } from "@/style"
-import type { TSymbol } from "@/symbol/Symbol"
-import { SymbolType } from "@/symbol/Symbol"
-import type { TStroke } from "@/symbol/stroke/Stroke"
-import { DOMFactory } from "@/components/dom"
-import { CanvasLayer } from "@/canvas/CanvasLayer"
+import { IIModel, DefaultInteractiveInkCanvasConfiguration, InteractiveInkCanvasConfiguration, DefaultStyle, CanvasTool, CanvasWriteTool, SymbolType, DOMFactory, CanvasLayer, LayoutManager, registerBuiltinSymbolUtils } from "@/iink"
+import type { TInteractiveInkCanvas, TStyle, TSymbol, TStroke, TSymbolUpdate } from "@/iink"
 import { CanvasEventMock } from "./CanvasEventMock"
 
 /**
@@ -43,6 +31,7 @@ export type TRendererStub = {
   verticalGuides: number[]
   horizontalGuides: number[]
   drawSymbol: jest.Mock
+  setSymbolTransform: jest.Mock
   drawCurrentSymbol: jest.Mock
   clearCurrentSymbolLayer: jest.Mock
   updateSelectedState: jest.Mock
@@ -82,6 +71,7 @@ function createRendererStub(): TRendererStub {
     verticalGuides: [],
     horizontalGuides: [],
     drawSymbol: jest.fn(),
+    setSymbolTransform: jest.fn(),
     drawCurrentSymbol: jest.fn(),
     clearCurrentSymbolLayer: jest.fn(),
     updateSelectedState: jest.fn(),
@@ -155,10 +145,27 @@ export type TCanvasMock = Omit<TInteractiveInkCanvas, "renderer"> & {
  * const canvas = createCanvasMock({ model })
  */
 export function createCanvasMock(overrides: Partial<TCanvasMock> = {}): TCanvasMock {
+  // A real canvas registers the built-in utils in its constructor, and the managers now ask the
+  // registry for a symbol's behaviour rather than calling a family dispatcher. A mock canvas that
+  // skipped this would hand its managers a registry no real canvas ever gives them.
+  registerBuiltinSymbolUtils()
   const configuration =
     overrides.configuration ??
     new InteractiveInkCanvasConfiguration(JSON.parse(JSON.stringify(DefaultInteractiveInkCanvasConfiguration)))
   const model = overrides.model ?? new IIModel()
+  const applyUpdate = (id: string, patch: TSymbolUpdate): TSymbol | undefined => {
+    const draft = model.draftSymbol(id)
+    if (!draft) {
+      return undefined
+    }
+    if (typeof patch === "function") {
+      patch(draft)
+    } else if (patch.style) {
+      draft.style = { ...draft.style, ...patch.style }
+    }
+    model.commitSymbol(draft)
+    return model.getSymbol(id) ?? draft
+  }
   const renderer = overrides.renderer ?? createRendererStub()
   const event = overrides.event ?? new CanvasEventMock(document.createElement("div"))
   const client = overrides.client ?? stubManager()
@@ -175,13 +182,16 @@ export function createCanvasMock(overrides: Partial<TCanvasMock> = {}): TCanvasM
   let _readOnly = false
   const _activeOperations = new Map<string, number>()
 
+  const layers = overrides.layers ?? new CanvasLayer(document.createElement("div"))
   const base = {
     model,
     renderer,
     client,
     configuration,
     event,
-    layers: overrides.layers ?? new CanvasLayer(document.createElement("div")),
+    layers,
+    // Not rendered: menus fall back to the UI layer, as before the layout existed
+    layout: overrides.layout ?? new LayoutManager(layers, ["action", "style", "tool", "state", "minimap"]),
     dom: overrides.dom ?? DOMFactory,
     history: overrides.history ?? stubManager(),
     writer:
@@ -229,6 +239,7 @@ export function createCanvasMock(overrides: Partial<TCanvasMock> = {}): TCanvasM
         return s
       })(),
     synchronizer: overrides.synchronizer ?? stubManager(),
+    exportManager: overrides.exportManager ?? stubManager(),
     jiix:
       overrides.jiix ??
       (() => {
@@ -250,7 +261,21 @@ export function createCanvasMock(overrides: Partial<TCanvasMock> = {}): TCanvasM
           .mockReturnValue({ showDependencyOnHover: false, highlightOnSelect: false })
         return m
       })(),
-    connector: overrides.connector ?? stubManager(),
+    connector:
+      overrides.connector ??
+      (() => {
+        const c = stubManager()
+        // getFollowedStrokeIds returns ids (callers spread the result); updateAnchoredEdges
+        // returns { rigidStrokeIds, oldSymbols, newSymbols } — callers destructure it, so the
+        // stub must hand back that shape, not the auto-stub's undefined.
+        ;(c as unknown as Record<string, unknown>).updateAnchoredEdges = jest
+          .fn()
+          .mockReturnValue({ rigidStrokeIds: [], oldSymbols: [], newSymbols: [] })
+        ;(c as unknown as Record<string, unknown>).getFollowedStrokeIds = jest.fn().mockReturnValue([])
+        ;(c as unknown as Record<string, unknown>).getRigidFollowedStrokeIds = jest.fn().mockReturnValue([])
+        ;(c as unknown as Record<string, unknown>).connectorConfiguration = { followConnectedEdges: true }
+        return c
+      })(),
     menu:
       overrides.menu ??
       (() => {
@@ -307,10 +332,16 @@ export function createCanvasMock(overrides: Partial<TCanvasMock> = {}): TCanvasM
     createSymbols: jest.fn().mockResolvedValue([]),
     addSymbol: jest.fn().mockImplementation((sym: unknown) => Promise.resolve(sym)),
     addSymbols: jest.fn().mockImplementation((syms: unknown) => Promise.resolve(syms)),
-    updateSymbol: jest.fn().mockImplementation((sym: unknown) => Promise.resolve(sym)),
-    updateSymbols: jest.fn().mockImplementation((syms: unknown) => Promise.resolve(syms)),
-    updateSymbolsStyle: jest.fn(),
-    updateTextFontStyle: jest.fn(),
+    // These write through to the model, like the real canvas: since IIC-1974 the document holds
+    // frozen records and callers commit drafts, so a stub that swallowed the write would leave the
+    // model showing the pre-drag value and the test asserting on nothing.
+    // Apply the patch to a draft and commit it: no typesetting, no history, no backend
+    updateSymbol: jest.fn().mockImplementation((id: string, patch: TSymbolUpdate) => {
+      return Promise.resolve(applyUpdate(id, patch))
+    }),
+    updateSymbols: jest.fn().mockImplementation((ids: string[], patch: TSymbolUpdate) => {
+      return Promise.resolve(ids.flatMap((id) => applyUpdate(id, patch) ?? []))
+    }),
     replaceSymbols: jest.fn().mockResolvedValue(undefined),
     changeOrderSymbols: jest.fn(),
     removeSymbol: jest.fn().mockResolvedValue(undefined),
@@ -334,11 +365,9 @@ export function createCanvasMock(overrides: Partial<TCanvasMock> = {}): TCanvasM
     paste: jest.fn().mockResolvedValue(undefined),
     export: jest.fn().mockResolvedValue({}),
     convert: jest.fn().mockResolvedValue(undefined),
-    changeLanguage: jest.fn().mockResolvedValue(undefined),
-    downloadAsSVG: jest.fn(),
-    downloadAsPNG: jest.fn(),
-    downloadAsJson: jest.fn(),
-    downloadAsText: jest.fn(),
+    updateRecognitionConfiguration: jest.fn().mockResolvedValue(undefined),
+    exportAs: jest.fn().mockResolvedValue(undefined),
+    download: jest.fn().mockResolvedValue(undefined),
     clear: jest.fn().mockResolvedValue(undefined),
     destroy: jest.fn().mockResolvedValue(undefined),
     resize: jest.fn().mockResolvedValue(undefined),

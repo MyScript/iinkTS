@@ -1,11 +1,9 @@
+import type { TBox, TPointer } from "@/core"
+import { BoxOps, createUUID } from "@/core"
 import type { TStyle } from "@/style"
-import { DefaultStyle } from "@/style"
-import type { TBox } from "@/symbol/primitives/Box"
-import { BoxOps } from "@/symbol/primitives/Box"
-import type { TPointer } from "@/symbol/primitives/Point"
-import { SymbolType } from "@/symbol/Symbol"
-import { createUUID } from "@/utils"
+import { mergeSymbolStyle } from "@/style"
 
+import { SymbolType } from "../Symbol"
 /**
  * @group Symbol
  */
@@ -21,14 +19,12 @@ export type TEraser = {
  */
 export const EraserOps = {
   create(width = 5): TEraser {
-    const style = Object.assign({}, DefaultStyle, {
+    const style = mergeSymbolStyle({
       color: "grey",
       fill: "none",
       opacity: 0.2,
       width,
     })
-    style.opacity = +style.opacity
-    style.width = +style.width
     return {
       type: SymbolType.Eraser,
       id: `${SymbolType.Eraser}-${createUUID()}`,

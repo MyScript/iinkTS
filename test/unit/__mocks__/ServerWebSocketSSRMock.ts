@@ -1,6 +1,6 @@
 import Server from "jest-websocket-mock"
 import { DeserializedMessage } from "jest-websocket-mock/lib/websocket"
-import { TWebSocketSSRClientMessage } from "@/client"
+import { TWebSocketSSRClientMessage } from "@/iink"
 
 export const ackWithHMACMessage = {
   type: "ack",
@@ -105,7 +105,7 @@ export const errorNotGrantedMessage = {
 }
 
 export class ServerWebSocketSSRMock extends Server {
-  init(withHMAC = false) {
+  init(withHMAC = false, withPong = false) {
     this.on("connection", (socket) => {
       socket.on("message", (message: string | Blob | ArrayBuffer | ArrayBufferView) => {
         const parsedMessage: TWebSocketSSRClientMessage = JSON.parse(message as string)
@@ -125,6 +125,11 @@ export class ServerWebSocketSSRMock extends Server {
             break
           case "newContentPart":
             socket.send(JSON.stringify(newPartMessage))
+            break
+          case "ping":
+            if (withPong) {
+              socket.send(JSON.stringify({ type: "pong" }))
+            }
             break
           default:
             break

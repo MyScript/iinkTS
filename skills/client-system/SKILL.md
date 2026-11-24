@@ -21,16 +21,17 @@ The client system handles communication with the MyScript Cloud backend for hand
 | `HTTPClientV2` | HTTP/REST, stateless batch | `InkCanvas` |
 | `HTTPClientV1` | HTTP/REST, **deprecated** | `InkCanvasDeprecated` |
 
-`WebSocketSSRClient` is **not** a subclass of `WebSocketClient` — it's an independent implementation with its own config type (`WebSocketSSRClientConfiguration`). This skill covers `WebSocketClient` and `HTTPClientV2/V1` in detail; consult `src/client/WebSocketSSRClient.ts` directly for SSR-specific protocol details.
+`WebSocketSSRClient` is **not** a subclass of `WebSocketClient` — it's an independent implementation with its own config type (`WebSocketSSRClientConfiguration`). This skill covers `WebSocketClient` and `HTTPClientV2/V1` in detail; consult `src/client/websocket/WebSocketSSRClient.ts` directly for SSR-specific protocol details.
 
 ## WebSocket Protocol Flow
 
-**Implementation**: [src/client/WebSocketClient.ts](src/client/WebSocketClient.ts) — a sequence diagram already lives in the doc comment at the top of the file (lines 36-55), consult it first.
+**Implementation**: [src/client/websocket/WebSocketClient.ts](src/client/websocket/WebSocketClient.ts) — a sequence diagram already lives in the doc comment above the `WebSocketClient` class ("A websocket dialog have this sequence"), consult it first. The full message lifecycle is in `architecture/websocket-protocol.md`.
 
 ### 1. Connection + handshake
 
 ```typescript
-// URL built in the constructor:
+// URL built in the constructor by serverUrl(server, "offscreen", { websocket: true, query })
+// (src/client/shared/ServerConfiguration.ts):
 // `${scheme}://${host}/api/v4.0/iink/offscreen?applicationKey=${applicationKey}`
 // scheme is "wss" if server.scheme === "https", else "ws"
 
@@ -46,8 +47,8 @@ Auth is a **message-field challenge/response**, not an HTTP header (that's HTTP-
 // 2. Server → Client
 ← { type: 'hmacChallenge', hmacChallenge, iinkSessionId }
 
-// 3. Client computes HMAC over the challenge string and replies
-→ { type: 'hmac', hmac: computeHmac(hmacChallenge, applicationKey, hmacKey) }
+// 3. Client signs the challenge string (server.sign, or hmacKey in development) and replies
+→ { type: 'hmac', hmac: await resolveHmac(server, hmacChallenge) }
 
 ← { type: 'authenticated' }
 
@@ -56,7 +57,7 @@ Auth is a **message-field challenge/response**, not an HTTP header (that's HTTP-
 ← { type: 'sessionDescription', ... }
 ```
 
-**HMAC computation**: [src/utils/crypto.ts](src/utils/crypto.ts) — `computeHmac(message, applicationKey, hmacKey)`. Concatenates `applicationKey + hmacKey` as the HMAC-SHA-512 key (via WebCrypto `crypto.subtle`), signs `message`, hex-encodes.
+**HMAC computation**: [src/client/shared/crypto.ts](src/client/shared/crypto.ts) — `computeHmac(message, applicationKey, hmacKey)`. Concatenates `applicationKey + hmacKey` as the HMAC-SHA-512 key (via WebCrypto `crypto.subtle`), signs `message`, hex-encodes. Clients go through `resolveHmac` ([src/client/shared/HmacAuth.ts](src/client/shared/HmacAuth.ts)), which prefers `server.sign` (signature from the integrator's server, key never in the browser) over a string `hmacKey`.
 
 ### 2. Recognition flow
 
@@ -107,11 +108,11 @@ There is **no `convert` message** on the WebSocket protocol — conversion is an
 
 There is **no `close`/`closed` JSON message**. Closing the session is a native `WebSocket.close(code, reason)` call, handled via the native `CloseEvent`, not a protocol message.
 
-**Type definitions**: [src/client/WebSocketClientMessage.ts](src/client/WebSocketClientMessage.ts) — full server→client enum `TWebSocketClientMessageType`: `hmacChallenge, authenticated, sessionDescription, newPart, partChanged, contentChanged, idle, pong, exported, gestureDetected, contextlessGesture, mathSolverResult, error, ack`.
+**Type definitions**: [src/client/websocket/WebSocketClientMessage.ts](src/client/websocket/WebSocketClientMessage.ts) — full server→client enum `TWebSocketClientMessageType`: `hmacChallenge, authenticated, sessionDescription, newPart, partChanged, configurationChanged, contentChanged, idle, pong, exported, gestureDetected, contextlessGesture, mathSolverResult, error, ack`.
 
 ### Event emission
 
-Events go through `ClientEvent` (`src/client/ClientEvent.ts`), enum `ClientEventName`:
+Events go through `ClientEvent` (`src/client/shared/ClientEvent.ts`), enum `ClientEventName`:
 
 ```typescript
 client.event.addContentChangedListener((evt) => { ... })
@@ -129,7 +130,7 @@ There is **no dedicated `CLEARED` event** — `clear()` just triggers the normal
 
 ## HTTP Protocol Flow (HTTPClientV2)
 
-**Implementation**: [src/client/HTTPClientV2.ts](src/client/HTTPClientV2.ts)
+**Implementation**: [src/client/http/HTTPClientV2.ts](src/client/http/HTTPClientV2.ts)
 
 Single entry point, no separate init/connect/export calls — HTTP is a stateless one-shot recognize:
 
@@ -170,34 +171,37 @@ Errors: non-OK response throws { code, message } (TApiError)
 
 ### HTTPClientV1 (deprecated)
 
-`src/client/HTTPClientV1.ts` — `@deprecated Use HTTPClientV2 instead`. Endpoint `/api/v4.0/iink/batch`. Body uses legacy `strokeGroups` (grouped by pen style) plus `xDPI`/`yDPI`/`height`/`width`/optional `conversionState` — materially different shape from V2. Uniquely exposes `convert(model, conversionState?, requestedMimeTypes?)` and `resize(model)`, neither of which exist on V2 or the WebSocket client.
+`src/client/http/HTTPClientV1.ts` — `@deprecated Use HTTPClientV2 instead`. Endpoint `/api/v4.0/iink/batch`. Body uses legacy `strokeGroups` (grouped by pen style) plus `xDPI`/`yDPI`/`height`/`width`/optional `conversionState` — materially different shape from V2. Uniquely exposes `convert(model, conversionState?, requestedMimeTypes?)` and `resize(model)`, neither of which exist on V2 or the WebSocket client.
 
 ## Message Handling Pattern: DeferredPromise
 
-[src/utils/DeferredPromise.ts](src/utils/DeferredPromise.ts) — `.promise`/`.resolve`/`.reject`/`.isFullFilled`/`.isPending`. Used throughout `WebSocketClient` to track pending round trips keyed by `blockId`/`strokeId`/mimeType, since the protocol has no universal correlation id:
+[src/core/std/DeferredPromise.ts](src/core/std/DeferredPromise.ts) — `.promise`/`.resolve`/`.reject`/`.isFullFilled`/`.isPending`. `WebSocketClient` tracks pending round trips with `waitForAnswer(key, neutral)`, keyed by a string (`export:<mimeType>`, a `blockId`…) since the protocol has no universal correlation id; the message handlers settle them by key (`answer()` / `settlePending()`):
 
 ```typescript
-async export(requestedMimeTypes?: string[]): Promise<TExport> {
-  const deferred = new DeferredPromise<TExport>()
-  this.#exportDeferredMap.set(id, deferred)
-  this.send({ type: 'export', ... })
-  return deferred.promise
+protected async sendExport(requestedMimeTypes?: string[]): Promise<TExport> {
+  const mimeTypes = requestedMimeTypes || this.mimeTypes.slice()
+  await this.send({ type: "export", partId: this.currentPartId, mimeTypes })
+  const deferreds = mimeTypes.map((mt) => this.waitForAnswer(`export:${mt}`, {}))
+  return Object.assign({}, ...(await Promise.all(deferreds.map((d) => d.promise))))
 }
 ```
+
+`export()` chains calls through `exportQueue`, so concurrent exports never interleave.
 
 ## Authentication summary
 
 - **WebSocket**: message-field challenge/response (`hmacChallenge` → client replies `{ type: 'hmac', hmac }`). See flow above.
-- **HTTP**: `computeHmac(JSON.stringify(body), applicationKey, hmacKey)` sent as a plain `hmac` request header alongside `applicationKey` header — no challenge round trip.
+- **HTTP**: `resolveHmac(server, JSON.stringify(body))` (`src/client/http/HTTPRecognition.ts`) sent as a plain `hmac` request header alongside `applicationKey` header — no challenge round trip.
+- Both: `server.sign` (signature from the integrator's server) in production, a string `hmacKey` only in development.
 
 ## Reconnection Strategy (WebSocketClient only)
 
-Two layers, both in `WebSocketClient.ts`:
+One path, in `WebSocketClient.ts`, switched by `server.websocket.autoReconnect` (default true):
 
-1. **Offline queue + background reconnect loop** — when `addStrokes()` etc. is called while disconnected and `server.websocket.offlineQueueEnabled` is true, messages queue (`#enqueueOfflineMessage`) and `#startReconnectLoop()` retries `init()` every `server.websocket.reconnectDelay` ms (default 3000) up to `maxReconnectAttempts` (default 10), then `#giveUpReconnecting()` rejects the queue and emits `CONNECTION_STATUS_CHANGED: "error"`. On reconnect, `#drainOfflineQueue()` replays queued messages in order.
-2. **Legacy synchronous auto-reconnect in `send()`** — if the socket is closing/closed and `server.websocket.autoReconnect` is true (default), `send()` itself calls `init()` and retries, bounded by `server.websocket.maxRetryCount` (default 2).
+1. **Changes are queued** — `sendChange()` queues every change made while disconnected (`enqueueOfflineMessage`, max `offlineQueueMaxSize`) and `startReconnectLoop()` retries `init()` every `reconnectDelay` ms (default 3000) up to `maxReconnectAttempts` (default 10). On reconnect, `onConnected()` replays the queue in order (`drainOfflineQueue()`), then settles `reconnection`.
+2. **Requests wait** — `send()` on a closed socket awaits `waitForReconnection()`, so a request goes after the replay; when the loop gives up (`giveUpReconnecting()`), the queue and the waiting requests reject and `CONNECTION_STATUS_CHANGED: "error"` is emitted.
 
-Guards `#connectingPromise` / `#closingPromise` prevent both paths from racing a deliberate `close()`/`newSession()` teardown.
+Each `connect()` gets a fresh `initialized` and closes a socket a failed attempt left open; `connectingPromise` / `closingPromise` keep a reconnection from racing a deliberate `close()`/`newSession()`. `maxRetryCount` is read by `WebSocketSSRClient` only.
 
 ## Ping Worker (WebSocket Keep-Alive)
 
@@ -216,7 +220,7 @@ Config in `ServerConfiguration.ts` (`DefaultServerWebsocketConfiguration`): `pin
 
 ## Testing Clients
 
-See `test/unit/client/` for real specs: `WebSocketClient.test.ts`, `WebSocketSSRClient.test.ts`, `HTTPClientV1.test.ts`, `HTTPClientV2.test.ts`.
+`test/unit/client/` mirrors `src/client/`: `websocket/WebSocketClient.test.ts`, `websocket/WebSocketSSRClient.test.ts`, `http/HTTPClientV1.test.ts`, `http/HTTPClientV2.test.ts`, `shared/HmacAuth.test.ts`…
 
 ## Best Practices
 

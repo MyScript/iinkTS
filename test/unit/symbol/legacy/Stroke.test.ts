@@ -42,14 +42,14 @@ describe("Stroke.ts", () => {
       const pStrokes: TPartialDeep<TLegacyStroke>[] = [
         {
           pointers: [
-            { x: 254, y: 37, t: 1, p: 1 },
-            { x: 253, y: 42, t: 2, p: 0.7 },
+            { x: 254, y: 37, dt: 1, p: 1 },
+            { x: 253, y: 42, dt: 2, p: 0.7 },
           ],
         },
         {
           pointers: [
-            { x: 222, y: 386, t: 3, p: 0.5 },
-            { x: 226, y: 385, t: 4, p: 0.8 },
+            { x: 222, y: 386, dt: 3, p: 0.5 },
+            { x: 226, y: 385, dt: 4, p: 0.8 },
           ],
           style: { width: 3, color: "#1A8CFF" },
         },
@@ -77,8 +77,8 @@ describe("Stroke.ts", () => {
       const pStrokes: TPartialDeep<TLegacyStroke>[] = [
         {
           pointers: [
-            { x: 254, y: 37, t: 1, p: 0.5 },
-            { y: 42, t: 2, p: 0.7 },
+            { x: 254, y: 37, dt: 1, p: 0.5 },
+            { y: 42, dt: 2, p: 0.7 },
           ],
         },
       ]
@@ -88,8 +88,8 @@ describe("Stroke.ts", () => {
       const pStrokes: TPartialDeep<TLegacyStroke>[] = [
         {
           pointers: [
-            { x: 254, y: 37, t: 1, p: 0.5 },
-            { x: 254, t: 2, p: 0.7 },
+            { x: 254, y: 37, dt: 1, p: 0.5 },
+            { x: 254, dt: 2, p: 0.7 },
           ],
         },
       ]

@@ -1,16 +1,13 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import type { InkCanvas } from "@/canvas/variants/InkCanvas"
+import type { TInkCanvas, TInteractiveInkCanvas } from "@/canvas"
+import type { TPoint, TSegment } from "@/core"
+import { BoxOps, computeDistanceBetweenPointAndSegment, computeDistanceSquared, OBBOps, type TOBB } from "@/core"
 import type { TPointerInfo } from "@/grabber"
 import { PointerEventGrabber } from "@/grabber"
 import { LoggerCategory, LoggerManager } from "@/logger"
 import type { SVGRenderer } from "@/renderer"
-import type { TEraser, TPoint, TSegment } from "@/symbol"
-import { isText } from "@/symbol"
-import { EraserOps } from "@/symbol/eraser/Eraser"
-import { BoxOps } from "@/symbol/primitives/Box"
-import { OBBOps, type TOBB } from "@/symbol/primitives/OBB"
-import { computeDistanceBetweenPointAndSegment, computeDistanceSquared } from "@/utils"
-
+import type { TEraser, TSymbol } from "@/symbol"
+import { EraserOps, isText } from "@/symbol"
+import { SymbolGeometry, symbolRegistry } from "@/symbol-utils"
 /**
  * @group Manager
  */
@@ -26,14 +23,14 @@ export type THittable = {
 export class EraseManager {
   #logger = LoggerManager.getLogger(LoggerCategory.WRITE)
   grabber: PointerEventGrabber
-  canvas: TInteractiveInkCanvas | InkCanvas
+  canvas: TInteractiveInkCanvas | TInkCanvas
 
   eraserWidth = 5
   currentEraser?: TEraser
   deletingIds: Set<string>
   charsToDelete: Map<string, Set<string>> = new Map()
 
-  constructor(canvas: TInteractiveInkCanvas | InkCanvas) {
+  constructor(canvas: TInteractiveInkCanvas | TInkCanvas) {
     this.#logger.info("constructor")
     this.canvas = canvas
     this.grabber = new PointerEventGrabber(canvas.configuration.grabber)
@@ -44,12 +41,17 @@ export class EraseManager {
     return this.canvas.renderer
   }
 
-  #isTInteractiveInkCanvas(canvas: TInteractiveInkCanvas | InkCanvas): canvas is TInteractiveInkCanvas {
+  #isTInteractiveInkCanvas(canvas: TInteractiveInkCanvas | TInkCanvas): canvas is TInteractiveInkCanvas {
     return "removeSymbols" in canvas && typeof canvas.removeSymbols === "function"
   }
 
-  #isHitByPoint(symbol: THittable, point: TPoint, radius: number): boolean {
-    const { x, y, width, height } = OBBOps.toBox(symbol.bounds)
+  #isHitByPoint(symbol: TSymbol, point: TPoint, radius: number): boolean {
+    // One `of()` call serves all three reads below: an unfrozen symbol (the plain-Ink branch loops
+    // `IModel.strokes`, a never-frozen array — see SymbolStore.ts's the only freeze in `src/`) is
+    // never cached, so three separate accessor calls would recompute the whole geometry three
+    // times over on every pointermove instead of once.
+    const { bounds, vertices, edges } = SymbolGeometry.of(symbol)
+    const { x, y, width, height } = OBBOps.toBox(bounds)
     const expanded = {
       x: x - radius,
       y: y - radius,
@@ -59,10 +61,9 @@ export class EraseManager {
     if (!BoxOps.containsPoint(expanded, point)) {
       return false
     }
-    const edges = symbol.edges
     if (edges.length === 0) {
       const squaredRadius = radius * radius
-      return symbol.vertices.some((v) => computeDistanceSquared(point, v) <= squaredRadius)
+      return vertices.some((v) => computeDistanceSquared(point, v) <= squaredRadius)
     }
     return edges.some((edge) => computeDistanceBetweenPointAndSegment(point, edge) < radius)
   }
@@ -95,6 +96,9 @@ export class EraseManager {
     this.renderer.drawSymbol(this.currentEraser)
     const currentPoint = info.pointer
     const radius = (this.currentEraser.style.width as number) / 2
+    // Scans every symbol in the document regardless of type, so an integrator's custom symbol type
+    // missing its util must not abort erasing for the whole document — skip it like a non-hit
+    // instead of throwing.
     if (this.#isTInteractiveInkCanvas(this.canvas)) {
       this.canvas.model.symbols.forEach((s) => {
         if (isText(s)) {
@@ -119,7 +123,7 @@ export class EraseManager {
             this.deletingIds.add(s.id)
             this.renderer.updateDeletingState(s, true)
           }
-        } else if (this.#isHitByPoint(s, currentPoint, radius)) {
+        } else if (symbolRegistry.has(s.type) && this.#isHitByPoint(s, currentPoint, radius)) {
           this.deletingIds.add(s.id)
           this.renderer.updateDeletingState(s, true)
         }
@@ -152,10 +156,16 @@ export class EraseManager {
             // All chars deleted, remove the symbol
             symbolsToRemove.push(s.id)
           } else {
-            // Some chars deleted, update the symbol directly
-            s.chars = remainingChars
-            canvas.typeset.setBounds(s)
-            this.renderer.drawSymbol(s)
+            // Some chars deleted, update the symbol directly. The draft is committed here: the old
+            // code mutated the clone `model.symbols` had just handed it, drew the result, and never
+            // stored it — so the deleted characters came back on any redraw from the document.
+            const draft = canvas.model.draftSymbol(s.id)
+            if (draft && isText(draft)) {
+              draft.chars = remainingChars
+              canvas.typeset.setBounds(draft)
+              canvas.model.commitSymbol(draft)
+              this.renderer.drawSymbol(draft)
+            }
           }
         } else if (this.deletingIds.has(s.id)) {
           symbolsToRemove.push(s.id)
@@ -169,7 +179,7 @@ export class EraseManager {
       this.deletingIds.clear()
       this.charsToDelete.clear()
     } else {
-      this.canvas.removeStrokes(this.deletingIds.values().toArray())
+      this.canvas.removeStrokes([...this.deletingIds])
       this.deletingIds.clear()
     }
     this.currentEraser = undefined

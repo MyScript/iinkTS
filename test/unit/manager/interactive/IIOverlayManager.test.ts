@@ -19,9 +19,9 @@ describe("IIOverlayManager.ts", () => {
   describe("refresh()", () => {
     test("creates a hover zone for an unselected math block", () => {
       const canvas = createCanvasMock()
-      canvas.model.exports = {
+      canvas.model.mergeExport({
         "application/vnd.myscript.jiix": { type: "Text", id: "root", version: "3", elements: [buildMathElement("block-1")] },
-      }
+      })
       canvas.selector.isMathBlockSelected = jest.fn().mockReturnValue(false)
       const manager = new IIOverlayManager(asCanvas(canvas))
 
@@ -32,9 +32,9 @@ describe("IIOverlayManager.ts", () => {
 
     test("skips the hover zone for an already-selected math block, so it doesn't cover the selection's translate handle", () => {
       const canvas = createCanvasMock()
-      canvas.model.exports = {
+      canvas.model.mergeExport({
         "application/vnd.myscript.jiix": { type: "Text", id: "root", version: "3", elements: [buildMathElement("block-1")] },
-      }
+      })
       canvas.selector.isMathBlockSelected = jest.fn().mockReturnValue(true)
       const manager = new IIOverlayManager(asCanvas(canvas))
 

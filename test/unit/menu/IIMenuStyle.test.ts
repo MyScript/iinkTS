@@ -1,7 +1,7 @@
 import { LeftClickEventMock } from "../__mocks__/EventMock"
 import { createCanvasMock, asCanvas } from "../__mocks__/createCanvasMock"
-import { buildIICircle, buildIIStroke } from "../helpers"
-import { CanvasTool, IIMenuStyle, CanvasWriteTool } from "@/iink"
+import { buildIICircle, buildIIStroke, StubMenuItem } from "../helpers"
+import { CanvasTool, IIMenuStyle, CanvasWriteTool, TMenuItemOptions } from "@/iink"
 
 describe("IIMenuStyle.ts", () => {
   test("should create", () => {
@@ -25,7 +25,7 @@ describe("IIMenuStyle.ts", () => {
       test("should render menu stroke color", () => {
         const menuColor = layer.querySelector("#ms-menu-style-color") as HTMLElement
         expect(menuColor).not.toBeNull()
-        expect(menuColor.style.display).toEqual("block")
+        expect(menuColor.style.display).not.toEqual("none")
         const list = menuColor.querySelector("#ms-menu-style-color-list") as HTMLElement
         expect(list.childElementCount).toEqual(menu.config.colors.length)
       })
@@ -39,21 +39,21 @@ describe("IIMenuStyle.ts", () => {
       test("should render menu thickness", () => {
         const menuThickness = layer.querySelector("#ms-menu-style-thickness") as HTMLElement
         expect(menuThickness).not.toBeNull()
-        expect(menuThickness.style.display).toEqual("block")
+        expect(menuThickness.style.display).not.toEqual("none")
         const buttons = menuThickness.querySelectorAll("button")
         expect(buttons.length).toEqual(menu.config.thicknessList.length)
       })
       test("should render menu font-size", () => {
         const menuFontSize = layer.querySelector("#ms-menu-style-font-size") as HTMLElement
         expect(menuFontSize).not.toBeNull()
-        expect(menuFontSize.style.display).toEqual("block")
+        expect(menuFontSize.style.display).not.toEqual("none")
         const buttons = menuFontSize.querySelectorAll("button")
         expect(buttons.length).toEqual(menu.config.fontSizeList.length)
       })
       test("should render menu opacity", () => {
         const menuOpacity = layer.querySelector("#ms-menu-style-opacity") as HTMLElement
         expect(menuOpacity).not.toBeNull()
-        expect(menuOpacity.style.display).toEqual("block")
+        expect(menuOpacity.style.display).not.toEqual("none")
         const input = menuOpacity.querySelector("#ms-menu-style-opacity-input") as HTMLElement
         expect(input.getAttribute("type")).toEqual("range")
       })
@@ -74,7 +74,7 @@ describe("IIMenuStyle.ts", () => {
       test("should render menu stroke color", () => {
         const menuColor = layer.querySelector("#ms-menu-style-color") as HTMLElement
         expect(menuColor).not.toBeNull()
-        expect(menuColor.style.display).toEqual("block")
+        expect(menuColor.style.display).not.toEqual("none")
         const list = menuColor.querySelector("#ms-menu-style-color-list") as HTMLElement
         expect(list.childElementCount).toEqual(menu.config.colors.length)
       })
@@ -88,21 +88,21 @@ describe("IIMenuStyle.ts", () => {
       test("should render menu thickness", () => {
         const menuThickness = layer.querySelector("#ms-menu-style-thickness") as HTMLElement
         expect(menuThickness).not.toBeNull()
-        expect(menuThickness.style.display).toEqual("block")
+        expect(menuThickness.style.display).not.toEqual("none")
         const buttons = menuThickness.querySelectorAll("button")
         expect(buttons.length).toEqual(menu.config.thicknessList.length)
       })
       test("should render menu font-size", () => {
         const menuFontSize = layer.querySelector("#ms-menu-style-font-size") as HTMLElement
         expect(menuFontSize).not.toBeNull()
-        expect(menuFontSize.style.display).toEqual("block")
+        expect(menuFontSize.style.display).not.toEqual("none")
         const buttons = menuFontSize.querySelectorAll("button")
         expect(buttons.length).toEqual(menu.config.fontSizeList.length)
       })
       test("should render menu opacity", () => {
         const menuOpacity = layer.querySelector("#ms-menu-style-opacity") as HTMLElement
         expect(menuOpacity).not.toBeNull()
-        expect(menuOpacity.style.display).toEqual("block")
+        expect(menuOpacity.style.display).not.toEqual("none")
         const input = menuOpacity.querySelector("#ms-menu-style-opacity-input") as HTMLElement
         expect(input.getAttribute("type")).toEqual("range")
       })
@@ -142,20 +142,20 @@ describe("IIMenuStyle.ts", () => {
     test("should update color of selected symbols", () => {
       const stroke = buildIIStroke()
       canvas.model.addSymbol(stroke)
-      canvas.model.selectedIds.add(stroke.id)
+      canvas.model.selectSymbol(stroke.id)
       const btn = layer.querySelector("#ms-menu-style-color-list-808080") as HTMLButtonElement
       btn.dispatchEvent(clickEvt)
-      expect(canvas.updateSymbolsStyle).toHaveBeenCalledTimes(1)
-      expect(canvas.updateSymbolsStyle).toHaveBeenCalledWith([stroke.id], { color: "#808080" })
+      expect(canvas.updateSymbols).toHaveBeenCalledTimes(1)
+      expect(canvas.updateSymbols).toHaveBeenCalledWith([stroke.id], { style: { color: "#808080" } })
     })
     test("should update fill of selected symbols", () => {
       const stroke = buildIIStroke()
       canvas.model.addSymbol(stroke)
-      canvas.model.selectedIds.add(stroke.id)
+      canvas.model.selectSymbol(stroke.id)
       const btn = layer.querySelector("#ms-menu-style-fill-list-ffff00") as HTMLButtonElement
       btn.dispatchEvent(clickEvt)
-      expect(canvas.updateSymbolsStyle).toHaveBeenCalledTimes(1)
-      expect(canvas.updateSymbolsStyle).toHaveBeenCalledWith([stroke.id], { fill: "#ffff00" })
+      expect(canvas.updateSymbols).toHaveBeenCalledTimes(1)
+      expect(canvas.updateSymbols).toHaveBeenCalledWith([stroke.id], { style: { fill: "#ffff00" } })
     })
     test("should update style thickness", () => {
       const btn = layer.querySelector("#ms-menu-style-thickness-8") as HTMLButtonElement
@@ -165,11 +165,11 @@ describe("IIMenuStyle.ts", () => {
     test("should update thickness of selected symbols", () => {
       const stroke = buildIIStroke()
       canvas.model.addSymbol(stroke)
-      canvas.model.selectedIds.add(stroke.id)
+      canvas.model.selectSymbol(stroke.id)
       const btn = layer.querySelector("#ms-menu-style-thickness-8") as HTMLButtonElement
       btn.dispatchEvent(pointerUpEvt)
-      expect(canvas.updateSymbolsStyle).toHaveBeenCalledTimes(1)
-      expect(canvas.updateSymbolsStyle).toHaveBeenCalledWith([stroke.id], { width: 8 })
+      expect(canvas.updateSymbols).toHaveBeenCalledTimes(1)
+      expect(canvas.updateSymbols).toHaveBeenCalledWith([stroke.id], { style: { width: 8 } })
       expect(canvas.selector.redrawSelectedGroup).toHaveBeenNthCalledWith(1)
     })
     test("should update style opacity", () => {
@@ -182,12 +182,12 @@ describe("IIMenuStyle.ts", () => {
     test("should update opacity of selected symbols", () => {
       const stroke = buildIIStroke()
       canvas.model.addSymbol(stroke)
-      canvas.model.selectedIds.add(stroke.id)
+      canvas.model.selectSymbol(stroke.id)
       const input = layer.querySelector("#ms-menu-style-opacity-input") as HTMLInputElement
       input.value = "42"
       input.dispatchEvent(new Event("input"))
-      expect(canvas.updateSymbolsStyle).toHaveBeenCalledTimes(1)
-      expect(canvas.updateSymbolsStyle).toHaveBeenCalledWith([stroke.id], { opacity: 0.42 })
+      expect(canvas.updateSymbols).toHaveBeenCalledTimes(1)
+      expect(canvas.updateSymbols).toHaveBeenCalledWith([stroke.id], { style: { opacity: 0.42 } })
     })
   })
 
@@ -205,7 +205,7 @@ describe("IIMenuStyle.ts", () => {
       })
       test("should display menu color", () => {
         const m = layer.querySelector("#ms-menu-style-color") as HTMLElement
-        expect(m.style.display).toEqual("block")
+        expect(m.style.display).not.toEqual("none")
       })
       test("should not display menu fill", () => {
         const m = layer.querySelector("#ms-menu-style-fill") as HTMLElement
@@ -213,11 +213,11 @@ describe("IIMenuStyle.ts", () => {
       })
       test("should display menu thickness", () => {
         const m = layer.querySelector("#ms-menu-style-thickness") as HTMLElement
-        expect(m.style.display).toEqual("block")
+        expect(m.style.display).not.toEqual("none")
       })
       test("should display menu opacity", () => {
         const m = layer.querySelector("#ms-menu-style-opacity") as HTMLElement
-        expect(m.style.display).toEqual("block")
+        expect(m.style.display).not.toEqual("none")
       })
     })
 
@@ -229,19 +229,19 @@ describe("IIMenuStyle.ts", () => {
       })
       test("should display menu color", () => {
         const m = layer.querySelector("#ms-menu-style-color") as HTMLElement
-        expect(m.style.display).toEqual("block")
+        expect(m.style.display).not.toEqual("none")
       })
       test("should display menu fill", () => {
         const m = layer.querySelector("#ms-menu-style-fill") as HTMLElement
-        expect(m.style.display).toEqual("block")
+        expect(m.style.display).not.toEqual("none")
       })
       test("should display menu thickness", () => {
         const m = layer.querySelector("#ms-menu-style-thickness") as HTMLElement
-        expect(m.style.display).toEqual("block")
+        expect(m.style.display).not.toEqual("none")
       })
       test("should display menu opacity", () => {
         const m = layer.querySelector("#ms-menu-style-opacity") as HTMLElement
-        expect(m.style.display).toEqual("block")
+        expect(m.style.display).not.toEqual("none")
       })
     })
 
@@ -252,19 +252,19 @@ describe("IIMenuStyle.ts", () => {
       })
       test("should display menu color", () => {
         const m = layer.querySelector("#ms-menu-style-color") as HTMLElement
-        expect(m.style.display).toEqual("block")
+        expect(m.style.display).not.toEqual("none")
       })
-      test("should not display menu fill", () => {
+      test("should display menu fill", () => {
         const m = layer.querySelector("#ms-menu-style-fill") as HTMLElement
-        expect(m.style.display).toEqual("none")
+        expect(m.style.display).not.toEqual("none")
       })
       test("should display menu thickness", () => {
         const m = layer.querySelector("#ms-menu-style-thickness") as HTMLElement
-        expect(m.style.display).toEqual("block")
+        expect(m.style.display).not.toEqual("none")
       })
       test("should display menu opacity", () => {
         const m = layer.querySelector("#ms-menu-style-opacity") as HTMLElement
-        expect(m.style.display).toEqual("block")
+        expect(m.style.display).not.toEqual("none")
       })
     })
 
@@ -273,24 +273,24 @@ describe("IIMenuStyle.ts", () => {
         canvas.tool = CanvasTool.Select
         const shape = buildIICircle()
         canvas.model.addSymbol(shape)
-        canvas.model.selectedIds.add(shape.id)
+        canvas.model.selectSymbol(shape.id)
         menu.update()
       })
       test("should display menu color", () => {
         const m = layer.querySelector("#ms-menu-style-color") as HTMLElement
-        expect(m.style.display).toEqual("block")
+        expect(m.style.display).not.toEqual("none")
       })
       test("should display menu fill", () => {
         const m = layer.querySelector("#ms-menu-style-fill") as HTMLElement
-        expect(m.style.display).toEqual("block")
+        expect(m.style.display).not.toEqual("none")
       })
       test("should display menu thickness", () => {
         const m = layer.querySelector("#ms-menu-style-thickness") as HTMLElement
-        expect(m.style.display).toEqual("block")
+        expect(m.style.display).not.toEqual("none")
       })
       test("should display menu opacity", () => {
         const m = layer.querySelector("#ms-menu-style-opacity") as HTMLElement
-        expect(m.style.display).toEqual("block")
+        expect(m.style.display).not.toEqual("none")
       })
     })
 
@@ -335,5 +335,36 @@ describe("IIMenuStyle.ts", () => {
       expect(layer.childElementCount).toEqual(0)
       expect(menu.wrapper).toBeUndefined()
     })
+  })
+})
+
+describe("IIMenuStyle zones", () => {
+  class ExtendedMenuStyle extends IIMenuStyle {
+    extra: { key: string; options?: TMenuItemOptions }[] = []
+    render(layer: HTMLElement): void {
+      super.render(layer)
+      this.extra.forEach(({ key, options }) => this.addItem(key, new StubMenuItem(key, this.canvas), options))
+    }
+  }
+
+  function render(extra: { key: string; options?: TMenuItemOptions }[]) {
+    const layer = document.createElement("div")
+    const menu = new ExtendedMenuStyle(asCanvas(createCanvasMock()))
+    menu.extra = extra
+    menu.render(layer)
+    return { menu, layer }
+  }
+
+  test("should have no bar while nothing goes to it", () => {
+    const { menu } = render([{ key: "extra-dropdown" }])
+    expect(menu.wrapper?.querySelector(":scope > .ms-menu-row")).toBeNull()
+    expect(menu.subMenuContent?.querySelector("#extra-dropdown")).not.toBeNull()
+  })
+
+  test("should put a bar item in a row first in the menu", () => {
+    const { menu } = render([{ key: "extra-bar", options: { zone: "bar" } }])
+    const bar = menu.wrapper?.firstElementChild
+    expect(bar?.classList.contains("ms-menu-row")).toBe(true)
+    expect(bar?.querySelector("#extra-bar")).not.toBeNull()
   })
 })

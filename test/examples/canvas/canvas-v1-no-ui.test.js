@@ -28,8 +28,6 @@ test.describe("Ink Canvas no UI", () => {
       imagePngExport,
       page.locator("#recognize").click()
     ])
-    // // for wait rendering after convertBlobToBase64
-    // await page.waitForTimeout(1000)
 
     await expect(page.locator("#interpretatedTextContent")).not.toBeEmpty()
     await expect(page.locator("#interpretatedImageContent > *")).toHaveCount(1)

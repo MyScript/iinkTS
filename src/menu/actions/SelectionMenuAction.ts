@@ -1,8 +1,7 @@
-import frameSelectIcon from "@/assets/svg/frame-select.svg"
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import type { TMenuSelect } from "@/menu/items/SelectMenuItem"
-import type { TMenuSubMenu } from "@/menu/items/SubMenuItem"
-import { SubMenuItem } from "@/menu/items/SubMenuItem"
+import type { TInteractiveInkCanvas } from "@/canvas"
+
+import type { TMenuSubMenu } from "../items/SubMenuItem"
+import { SubMenuItem } from "../items/SubMenuItem"
 
 /** @group Menu */
 export type TSelectionActionItemsConfig = {
@@ -21,10 +20,17 @@ export class SelectionMenuAction extends SubMenuItem {
   constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-action", itemsConfig?: TSelectionActionItemsConfig) {
     const enabled = (key: keyof TSelectionActionItemsConfig) => itemsConfig?.[key] !== false
 
-    const items: TMenuSelect[] = []
+    const config: TMenuSubMenu = {
+      type: "submenu",
+      id: `${idPrefix}-selection`,
+      label: "Selection",
+      menuTitle: "Selection",
+      position: "right-top",
+      items: [],
+    }
 
     if (enabled("text") && canvas.configuration.recognition["raw-content"].recognition?.types.includes("text")) {
-      items.push({
+      config.items.push({
         type: "select",
         id: `${idPrefix}-selection-text-level`,
         label: "Text selection",
@@ -41,7 +47,7 @@ export class SelectionMenuAction extends SubMenuItem {
     }
 
     if (enabled("math") && canvas.configuration.recognition["raw-content"].recognition?.types.includes("math")) {
-      items.push({
+      config.items.push({
         type: "select",
         id: `${idPrefix}-selection-math-level`,
         label: "Math selection",
@@ -57,7 +63,7 @@ export class SelectionMenuAction extends SubMenuItem {
     }
 
     if (enabled("shape") && canvas.configuration.recognition["raw-content"].recognition?.types.includes("shape")) {
-      items.push({
+      config.items.push({
         type: "select",
         id: `${idPrefix}-selection-shape-level`,
         label: "Shape selection",
@@ -70,16 +76,6 @@ export class SelectionMenuAction extends SubMenuItem {
           canvas.configuration.selection.shapeLevel = value as "element" | "stroke"
         },
       })
-    }
-
-    const config: TMenuSubMenu = {
-      type: "submenu",
-      id: `${idPrefix}-selection`,
-      label: "Selection",
-      menuTitle: "Selection",
-      icon: frameSelectIcon,
-      position: "right-top",
-      items,
     }
 
     super(config, canvas)

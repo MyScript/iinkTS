@@ -1,14 +1,6 @@
 import { CanvasEventMock } from "../__mocks__/CanvasEventMock"
 import { delay } from "../helpers"
-import {
-  TPointer,
-  THistoryConfiguration,
-  getInitialHistoryContext,
-  HistoryManager,
-  Model,
-  DefaultHistoryConfiguration,
-  DefaultPenStyle,
-} from "@/iink"
+import { TPointer, THistoryConfiguration, getInitialHistoryContext, HistoryManager, Model, DefaultHistoryConfiguration, DefaultPenStyle } from "@/iink"
 
 describe("HistoryManager.ts", () => {
   const event = new CanvasEventMock(document.createElement("div"))
@@ -34,6 +26,7 @@ describe("HistoryManager.ts", () => {
       manager.push(model1)
 
       expect(manager.context.stackIndex).toStrictEqual(0)
+      expect(manager.context.possibleUndoCount).toStrictEqual(0)
       expect(manager.context.canUndo).toStrictEqual(false)
       expect(manager.context.canRedo).toStrictEqual(false)
       expect(manager.context.empty).toStrictEqual(true)
@@ -44,11 +37,12 @@ describe("HistoryManager.ts", () => {
     })
 
     test("should add 2nd model to stack and emitChanged", () => {
-      model2.initCurrentStroke({ t: 1, p: 0.5, x: 1, y: 1 }, "pen", DefaultPenStyle)
-      model2.endCurrentStroke({ t: 15, p: 0.5, x: 10, y: 1 })
+      model2.initCurrentStroke({ dt: 1, p: 0.5, x: 1, y: 1 }, "pen", DefaultPenStyle)
+      model2.endCurrentStroke({ dt: 15, p: 0.5, x: 10, y: 1 })
       manager.push(model2)
 
       expect(manager.context.stackIndex).toStrictEqual(1)
+      expect(manager.context.possibleUndoCount).toStrictEqual(1)
       expect(manager.context.canUndo).toStrictEqual(true)
       expect(manager.context.canRedo).toStrictEqual(false)
       expect(manager.context.empty).toStrictEqual(false)
@@ -61,8 +55,8 @@ describe("HistoryManager.ts", () => {
     test("should splice end of stack if stackIndex no last and emitChanged", () => {
       const NB_STROKE = 4
       for (let i = 0; i < NB_STROKE; i++) {
-        model3.initCurrentStroke({ t: i * 5, p: 1, x: i * 10, y: 10 }, "pen", DefaultPenStyle)
-        model3.endCurrentStroke({ t: i * 10, p: 1, x: i * 10, y: 10 })
+        model3.initCurrentStroke({ dt: i * 5, p: 1, x: i * 10, y: 10 }, "pen", DefaultPenStyle)
+        model3.endCurrentStroke({ dt: i * 10, p: 1, x: i * 10, y: 10 })
         manager.push(model3)
       }
       expect(manager.context.stackIndex).toStrictEqual(NB_STROKE)
@@ -70,10 +64,10 @@ describe("HistoryManager.ts", () => {
 
       manager.context.stackIndex = 0
 
-      const p1: TPointer = { t: 27, p: 0.5, x: 1989, y: 2022 }
+      const p1: TPointer = { dt: 27, p: 0.5, x: 1989, y: 2022 }
       model3.initCurrentStroke(p1, "pen", DefaultPenStyle)
 
-      const p2: TPointer = { t: 75, p: 1, x: 200, y: 10 }
+      const p2: TPointer = { dt: 75, p: 1, x: 200, y: 10 }
       model3.endCurrentStroke(p2)
 
       manager.push(model3)
@@ -89,10 +83,10 @@ describe("HistoryManager.ts", () => {
     test("should shift the first element of the stack when maxStackSize is exceeded and emitChanged", () => {
       const NB_STROKE = 10
       for (let i = 0; i < NB_STROKE; i++) {
-        const p1: TPointer = { t: i * 42, p: 0.5, x: i / 2, y: i * 20 }
+        const p1: TPointer = { dt: i * 42, p: 0.5, x: i / 2, y: i * 20 }
         model3.initCurrentStroke(p1, "pen", DefaultPenStyle)
 
-        const p2: TPointer = { t: i * 10, p: 1, x: i * 10, y: 10 }
+        const p2: TPointer = { dt: i * 10, p: 1, x: i * 10, y: 10 }
         model3.endCurrentStroke(p2)
 
         manager.push(model3)
@@ -116,12 +110,13 @@ describe("HistoryManager.ts", () => {
     const manager = new HistoryManager(DefaultHistoryConfiguration, event)
     manager.push(model)
     test("should get the previous model and emitChanged", () => {
-      model.initCurrentStroke({ t: 1, p: 0.5, x: 1, y: 1 }, "pen", DefaultPenStyle)
-      model.endCurrentStroke({ t: 15, p: 0.5, x: 10, y: 1 })
+      model.initCurrentStroke({ dt: 1, p: 0.5, x: 1, y: 1 }, "pen", DefaultPenStyle)
+      model.endCurrentStroke({ dt: 15, p: 0.5, x: 10, y: 1 })
       manager.push(model)
 
       const previousModel = manager.undo()
       expect(manager.context.stackIndex).toStrictEqual(0)
+      expect(manager.context.possibleUndoCount).toStrictEqual(0)
 
       expect(manager.stack).toHaveLength(2)
       expect(manager.stack[manager.context.stackIndex]).toEqual(previousModel)
@@ -138,10 +133,10 @@ describe("HistoryManager.ts", () => {
     const manager = new HistoryManager(DefaultHistoryConfiguration, event)
     manager.push(model)
     test("should get the next model", () => {
-      const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
+      const p1: TPointer = { dt: 1, p: 0.5, x: 1, y: 1 }
       model.initCurrentStroke(p1, "pen", DefaultPenStyle)
 
-      const p2: TPointer = { t: 15, p: 0.5, x: 10, y: 1 }
+      const p2: TPointer = { dt: 15, p: 0.5, x: 10, y: 1 }
       model.endCurrentStroke(p2)
 
       manager.push(model)
@@ -164,12 +159,12 @@ describe("HistoryManager.ts", () => {
       const model = new Model(27, 5)
       const manager = new HistoryManager(DefaultHistoryConfiguration, event)
       manager.push(model)
-      const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
+      const p1: TPointer = { dt: 1, p: 0.5, x: 1, y: 1 }
       // wait a few seconds and have a different model.modificationDate
       await delay(100)
       model.initCurrentStroke(p1, "pen", DefaultPenStyle)
 
-      const p2: TPointer = { t: 15, p: 0.5, x: 10, y: 1 }
+      const p2: TPointer = { dt: 15, p: 0.5, x: 10, y: 1 }
       model.endCurrentStroke(p2)
 
       manager.push(model)
@@ -189,23 +184,23 @@ describe("HistoryManager.ts", () => {
       const manager = new HistoryManager(DefaultHistoryConfiguration, event)
       manager.push(model)
 
-      const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
+      const p1: TPointer = { dt: 1, p: 0.5, x: 1, y: 1 }
       // wait a few seconds and have a different model.modificationDate
       await delay(100)
       model.initCurrentStroke(p1, "pen", DefaultPenStyle)
 
-      const p2: TPointer = { t: 15, p: 0.5, x: 10, y: 1 }
+      const p2: TPointer = { dt: 15, p: 0.5, x: 10, y: 1 }
       model.endCurrentStroke(p2)
 
       const firstModel = model.clone()
       manager.push(model)
 
-      const p3: TPointer = { t: 100, p: 0.5, x: 1, y: 10 }
+      const p3: TPointer = { dt: 100, p: 0.5, x: 1, y: 10 }
       // wait a few seconds and have a different model.modificationDate
       await delay(100)
       model.initCurrentStroke(p3, "pen", DefaultPenStyle)
 
-      const p4: TPointer = { t: 150, p: 0.5, x: 1, y: 10 }
+      const p4: TPointer = { dt: 150, p: 0.5, x: 1, y: 10 }
       model.endCurrentStroke(p4)
       manager.push(model)
 

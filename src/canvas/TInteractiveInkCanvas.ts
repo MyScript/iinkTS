@@ -1,11 +1,13 @@
-import type { WebSocketClient } from "@/client"
-import type { DOMFactory } from "@/components/dom"
-import type { CanvasTool } from "@/Constants"
+import type { TExport, TRecognitionWebSocketConfiguration, WebSocketClient } from "@/client"
+import type { TBox, TDraft, TPartialDeep } from "@/core"
+import type { DOMFactory } from "@/dom"
 import type { IIHistoryManager } from "@/history"
 import type {
+  CanvasTool,
   EraseManager,
   IIConnectorManager,
   IIConversionManager,
+  IIExportManager,
   IIGestureManager,
   IIJiixQueryManager,
   IIKeyboardManager,
@@ -19,20 +21,42 @@ import type {
   IITransformManager,
   IITypesetManager,
   IIWriterManager,
+  LayoutManager,
+  TDownloadFormat,
+  TExportFormat,
+  TExportOptions,
+  TExportResultMap,
+  TPDFDownloadOptions,
 } from "@/manager"
 import type { IIMenuManager } from "@/menu"
-import type { IIModel, TExport } from "@/model"
-import type { SVGRenderer } from "@/renderer"
-import type { TIIRendererConfiguration } from "@/renderer"
+import type { IIModel } from "@/model"
+import type { SVGRenderer, TIIRendererConfiguration } from "@/renderer"
 import type { TStyle } from "@/style"
-import type { TBaseSymbol, TBox, TStroke, TSymbol } from "@/symbol"
-import type { SymbolUtil } from "@/symbol-utils/SymbolUtil"
-import type { TPartialDeep } from "@/utils"
+import type { TBaseSymbol, TStroke, TSymbol } from "@/symbol"
+import type { SymbolUtil } from "@/symbol-utils"
 
-import type { TCanvasOperationLabel } from "./AbstractCanvas"
 import type { CanvasEvent, TCanvasConnectionState } from "./CanvasEvent"
 import type { CanvasLayer } from "./CanvasLayer"
+import type { TCanvasOperationLabel } from "./TCanvasOperationLabel"
 import type { InteractiveInkCanvasConfiguration } from "./variants/InteractiveInkCanvasConfiguration"
+
+/**
+ * What `updateSymbols(ids, patch)` changes on each symbol it names.
+ * @group Canvas
+ */
+export type TSymbolPatch = {
+  /** Merged into the symbol's style; a text hands it down to its chars */
+  style?: TPartialDeep<TStyle>
+  /** Applied to the chars of a text; any other symbol ignores it. `weight: "auto"` keeps each char's own weight */
+  font?: { size?: number; weight?: "normal" | "bold" | "auto" }
+}
+
+/**
+ * What `updateSymbols(ids, patch)` does to each symbol: an object patch, or a function that changes a
+ * draft of the symbol at will.
+ * @group Canvas
+ */
+export type TSymbolUpdate = TSymbolPatch | ((draft: TDraft<TSymbol>) => void)
 
 /**
  * Structural type for InteractiveInkCanvas used by all managers.
@@ -77,8 +101,10 @@ export type TInteractiveInkCanvas = {
   readonly snaps: IISnapManager
   readonly synchronizer: IISynchronizerManager
   readonly jiix: IIJiixQueryManager
+  readonly exportManager: IIExportManager
   readonly math: IIMathManager
   readonly connector: IIConnectorManager
+  readonly layout: LayoutManager<TInteractiveInkCanvas>
   readonly menu: IIMenuManager
   readonly playback: IIPlaybackManager
 
@@ -86,16 +112,8 @@ export type TInteractiveInkCanvas = {
   createSymbols(partialSymbols: TPartialDeep<TSymbol>[]): Promise<TSymbol[]>
   addSymbol(sym: TSymbol, addToHistory?: boolean): Promise<TSymbol>
   addSymbols(symList: TSymbol[], addToHistory?: boolean): Promise<TSymbol[]>
-  updateSymbol(sym: TSymbol, addToHistory?: boolean): Promise<TSymbol>
-  updateSymbols(symList: TSymbol[], addToHistory?: boolean): Promise<TSymbol[]>
-  updateSymbolsStyle(symbolIds: string[], style: TPartialDeep<TStyle>, addToHistory?: boolean): void
-  updateTextFontStyle(
-    textIds: string[],
-    opts: {
-      fontSize?: number
-      fontWeight?: "normal" | "bold" | "auto"
-    }
-  ): void
+  updateSymbol(id: string, patch: TSymbolUpdate, addToHistory?: boolean): Promise<TSymbol | undefined>
+  updateSymbols(ids: string[], patch: TSymbolUpdate, addToHistory?: boolean): Promise<TSymbol[]>
   replaceSymbols(oldSymbols: TSymbol[], newSymbols: TSymbol[], addToHistory?: boolean): Promise<void>
   changeOrderSymbols(symbols: TSymbol[], position: "first" | "last" | "forward" | "backward"): void
   removeSymbol(id: string, addToHistory?: boolean): Promise<void>
@@ -125,13 +143,11 @@ export type TInteractiveInkCanvas = {
   // ── Recognition / conversion ──────────────────────────────────────
   export(mimeTypes?: string[]): Promise<TExport>
   convert(symbols?: TSymbol[]): Promise<void>
-  changeLanguage(code: string): Promise<void>
+  updateRecognitionConfiguration(partial: TPartialDeep<TRecognitionWebSocketConfiguration>): Promise<void>
 
-  // ── Download ──────────────────────────────────────────────────────
-  downloadAsSVG(selection?: boolean): void
-  downloadAsPNG(selection?: boolean): void
-  downloadAsJson(selection?: boolean): void
-  downloadAsText(selection?: boolean): void
+  // ── Export / download ─────────────────────────────────────────────
+  exportAs<F extends TExportFormat>(format: F, options?: TExportOptions): Promise<TExportResultMap[F]>
+  download(format: TDownloadFormat, options?: TPDFDownloadOptions): Promise<void>
 
   // ── Symbol plugin registry ────────────────────────────────────────
   registerSymbolUtil<T extends TBaseSymbol>(util: SymbolUtil<T>): void

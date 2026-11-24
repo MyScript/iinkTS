@@ -1,11 +1,26 @@
-import type { InteractiveInkSSRCanvas } from "@/canvas"
-import type { TMarginConfiguration } from "@/client"
+import type { CanvasEvent } from "@/canvas"
+import type { TConverstionState, TJIIXExport, TJIIXWord, TMarginConfiguration } from "@/client"
+import { ExportType } from "@/client"
+import { convertMillimeterToPixel, createUUID } from "@/core"
 import { LoggerCategory, LoggerManager } from "@/logger"
-import type { TJIIXExport, TJIIXWord } from "@/model"
-import { ExportType } from "@/model"
-import { convertMillimeterToPixel, createUUID } from "@/utils"
 
 import style from "./InteractiveInkSSRSmartGuide.css"
+
+/**
+ * The four things the smart guide asks of the canvas that hosts it.
+ *
+ * Declared here rather than importing `InteractiveInkSSRCanvas`, for the same reason every manager
+ * takes a contract instead of a class: the concrete canvas constructs the smart guide and hands
+ * itself in, so naming the class closes a cycle, and it would tie a UI component to one variant.
+ * Structural typing means the SSR canvas satisfies this with nothing to declare.
+ * @group SmartGuide
+ */
+export type TSmartGuideHost = {
+  readonly event: CanvasEvent
+  clear(): Promise<void>
+  convert(params?: { conversionState?: TConverstionState }): Promise<unknown>
+  import(data: Blob | string | TJIIXExport, mimeType?: string): Promise<unknown>
+}
 
 /**
  * @group SmartGuide
@@ -24,14 +39,14 @@ export class InteractiveInkSSRSmartGuide {
   #copyElement!: HTMLButtonElement
   #deleteElement!: HTMLButtonElement
   #isMenuOpen!: boolean
-  canvas: InteractiveInkSSRCanvas
+  canvas: TSmartGuideHost
   margin: TMarginConfiguration
   jiix?: TJIIXExport
   lastWord?: TJIIXWord
   wordToChange?: TJIIXWord
   #logger = LoggerManager.getLogger(LoggerCategory.SMARTGUIDE)
 
-  constructor(canvas: InteractiveInkSSRCanvas) {
+  constructor(canvas: TSmartGuideHost) {
     this.#logger.info("constructor")
     this.uuid = createUUID()
     this.canvas = canvas
@@ -174,15 +189,18 @@ export class InteractiveInkSSRSmartGuide {
     this.wordToChange = words[wordId]
     if (this.wordToChange) {
       this.wordToChange.id = wordId.toString()
-      this.#candidatesElement.innerHTML = ""
+      this.#candidatesElement.replaceChildren()
       if (this.wordToChange?.candidates) {
         this.#candidatesElement.style.display = "flex"
         this.wordToChange.candidates.forEach((word, index) => {
+          const span = document.createElement("span")
+          span.id = `cdt-${index}${this.uuid}`
           if (this.wordToChange?.label === word) {
-            this.#candidatesElement.innerHTML += `<span id="cdt-${index}${this.uuid}" class="selected-word">${word}</span>`
-          } else {
-            this.#candidatesElement.innerHTML += `<span id="cdt-${index}${this.uuid}">${word}</span>`
+            span.classList.add("selected-word")
           }
+          // `word` is a server-supplied JIIX candidate label: textContent, never innerHTML.
+          span.textContent = word
+          this.#candidatesElement.appendChild(span)
         })
 
         target.appendChild(this.#candidatesElement)

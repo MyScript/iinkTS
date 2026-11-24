@@ -1,7 +1,7 @@
+import type { TExportV2 } from "@/client"
+import { mergeExports } from "@/core"
 import { LoggerCategory, LoggerManager } from "@/logger"
 import type { TStroke } from "@/symbol"
-
-import type { TExportV2 } from "./ExportV2"
 
 /**
  * @group Model
@@ -84,11 +84,7 @@ export class IModel {
 
   mergeExport(exports: TExportV2) {
     this.#logger.info("mergeExport", { exports })
-    if (this.exports) {
-      Object.assign(this.exports, exports)
-    } else {
-      this.exports = exports
-    }
+    this.exports = mergeExports(this.exports, exports)
     this.#logger.debug("mergeExport", this.exports)
   }
 

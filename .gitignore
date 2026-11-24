@@ -4,7 +4,6 @@ coverage
 !.vscode/launch.json
 .yarn
 
-docker/examples/delivery
 test/examples/screenshots
 test-results/
 docs
@@ -22,3 +21,12 @@ __diff_output__
 .serena/
 .playwright-mcp/
 .local
+
+# tsc incremental state
+*.tsbuildinfo
+bench-history
+dist-ref
+docker-logs/
+
+# Written at deploy time for the examples footer (scripts/build-info.sh)
+examples/build-info.json

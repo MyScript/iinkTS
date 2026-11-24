@@ -11,6 +11,7 @@ import
 } from "tldraw"
 import
 {
+  JIIXElementType,
   TJIIXEdgeArc,
   TJIIXEdgeElement,
   TJIIXEdgeLine,
@@ -29,6 +30,19 @@ import { store } from "./store"
 
 type geoType = "arrow-down" | "arrow-left" | "arrow-right" | "arrow-up" | "check-box" | "diamond" | "ellipse" | "hexagon" | "octagon" | "oval" | "pentagon" | "rectangle" | "rhombus-2" | "rhombus" | "star" | "trapezoid" | "triangle" | "x-box"
 type arrowheadType = "none" | "diamond" | "triangle" | "arrow" | "bar" | "dot" | "inverted" | "pipe" | "square" | undefined
+
+/**
+ * Every shape id a JIIX element was recognized from, text words and chars included
+ */
+export const strokeIdsOf = (element: TJIIXElement): string[] =>
+{
+  const items = [...(element.items ?? [])]
+  if (element.type === JIIXElementType.Text) {
+    element.words?.forEach(w => items.push(...(w.items ?? [])))
+    element.chars?.forEach(c => items.push(...(c.items ?? [])))
+  }
+  return items.flatMap(i => i["full-id"] ? [i["full-id"]] : [])
+}
 
 export class Converter
 {
@@ -59,28 +73,7 @@ export class Converter
     if (!this.jiixExport?.elements) return
 
     for (const element of this.jiixExport.elements) {
-      const shapeIds = new Set<string>()
-      element.items?.forEach(i =>
-      {
-        if (i["full-id"]) shapeIds.add(i["full-id"])
-      })
-
-      const textElement = element as TJIIXTextElement
-      textElement.words?.forEach(w =>
-      {
-        w.items?.forEach(i =>
-        {
-          if (i["full-id"]) shapeIds.add(i["full-id"])
-        })
-      })
-
-      textElement.chars?.forEach(c =>
-      {
-        c.items?.forEach(i =>
-        {
-          if (i["full-id"]) shapeIds.add(i["full-id"])
-        })
-      })
+      const shapeIds = new Set(strokeIdsOf(element))
 
       shapeIds.forEach(shapeId =>
       {
@@ -348,25 +341,7 @@ export class Converter
 
         if (shapeConverted) {
           toConvert.push(shapeConverted)
-          e.items?.forEach(i =>
-          {
-            if (i["full-id"]) toRemove.add(i["full-id"] as TLShapeId)
-          })
-          const textElement = e as TJIIXTextElement
-          textElement.words?.forEach(w =>
-          {
-            w.items?.forEach(i =>
-            {
-              if (i["full-id"]) toRemove.add(i["full-id"] as TLShapeId)
-            })
-          })
-          textElement.chars?.forEach(c =>
-          {
-            c.items?.forEach(i =>
-            {
-              if (i["full-id"]) toRemove.add(i["full-id"] as TLShapeId)
-            })
-          })
+          strokeIdsOf(e).forEach(id => toRemove.add(id as TLShapeId))
         }
       }
     }

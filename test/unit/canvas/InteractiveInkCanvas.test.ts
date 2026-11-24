@@ -1,24 +1,8 @@
-import { jiixMathDuplicateStrokes, jiixText } from "../__dataset__/exports.dataset"
-import { buildIICircle, buildIIStroke, buildIIText, buildIIMath, buildIIDecorator, delay } from "../helpers"
-import {
-  InteractiveInkCanvas,
-  DefaultInteractiveInkCanvasConfiguration,
-  CanvasTool,
-  TInteractiveInkCanvasOptions,
-  TStyle,
-  TPartialDeep,
-  TStroke,
-  SymbolType,
-  TShapeCircle,
-  ShapeKind,
-  TSymbol,
-  DecoratorKind,
-  TSymbolChar,
-  TText,
-  getInitialHistoryContext,
-} from "@/iink"
+import { jiixText } from "../__dataset__/exports.dataset"
+import { buildIICircle, buildIIStroke, buildIIText, buildIIDecorator, delay } from "../helpers"
+import { CanvasTool, DecoratorKind, DecoratorUtil, DefaultInteractiveInkCanvasConfiguration, EdgeUtil, IIAbstractManager, InteractiveInkCanvas, MatrixTransform, DUPLICATE_OFFSET, OBBOps, ShapeKind, ShapeUtil, SymbolGeometry, SymbolType, TBaseSymbol, TDecorator, TEdgeLine, TInteractiveInkCanvasOptions, TPartialDeep, TShapeCircle, TStroke, TStyle, TSymbol, TSymbolChar, TText, cloneSymbol, getInitialHistoryContext, isStroke } from "@/iink"
 
-describe("CanvasOffscreen.ts", () => {
+describe("InteractiveInkCanvas.ts", () => {
   global.fetch = jest.fn(() =>
     Promise.resolve({
       json: () => Promise.resolve({ result: { fr: "fr_FR" } }),
@@ -284,6 +268,66 @@ describe("CanvasOffscreen.ts", () => {
     })
   })
 
+  describe("a failing debounced synchronize must not be swallowed", () => {
+    let canvas: InteractiveInkCanvas
+
+    beforeEach(() => {
+      jest.useFakeTimers()
+      canvas = new InteractiveInkCanvas(document.createElement("div"), CanvasOptions)
+    })
+
+    afterEach(() => {
+      jest.useRealTimers()
+    })
+
+    test("should route the failure through manageError instead of leaving it unhandled", async () => {
+      const boom = new Error("synchronize failed")
+      jest.spyOn(canvas.synchronizer, "synchronize").mockRejectedValue(boom)
+      const manageError = jest.spyOn(canvas, "manageError").mockImplementation(() => undefined)
+
+      canvas.client.event.emitContentChanged(getInitialHistoryContext())
+      await jest.advanceTimersByTimeAsync(500)
+
+      expect(manageError).toHaveBeenCalledWith(boom)
+    })
+
+    test("should still emit changed when the synchronize failed", async () => {
+      jest.spyOn(canvas.synchronizer, "synchronize").mockRejectedValue(new Error("synchronize failed"))
+      jest.spyOn(canvas, "manageError").mockImplementation(() => undefined)
+      const emitChanged = jest.spyOn(canvas.event, "emitChanged")
+
+      canvas.client.event.emitContentChanged(getInitialHistoryContext())
+      await jest.advanceTimersByTimeAsync(500)
+
+      // The local content did change — that is why onContentChanged ran at all. Only the backend
+      // sync failed, so consumers must still be told the document moved.
+      expect(emitChanged).toHaveBeenCalledTimes(1)
+    })
+
+    test("should emit changed with the local history state, not the backend's", async () => {
+      jest.spyOn(canvas.synchronizer, "synchronize").mockResolvedValue(undefined)
+      const emitChanged = jest.spyOn(canvas.event, "emitChanged")
+      const backendContext = { canUndo: true, canRedo: true, empty: false, stackIndex: 7, possibleUndoCount: 7 }
+
+      canvas.client.event.emitContentChanged(backendContext)
+      await jest.advanceTimersByTimeAsync(500)
+
+      // The local history drives undo/redo in this variant; the backend's stack only mirrors what it was sent
+      expect(emitChanged).toHaveBeenCalledWith(canvas.history.context)
+    })
+
+    test("should clear the Recognizing operation even when the synchronize failed", async () => {
+      jest.spyOn(canvas.synchronizer, "synchronize").mockRejectedValue(new Error("synchronize failed"))
+      jest.spyOn(canvas, "manageError").mockImplementation(() => undefined)
+      canvas.startOperation("Recognizing")
+
+      canvas.client.event.emitContentChanged(getInitialHistoryContext())
+      await jest.advanceTimersByTimeAsync(500)
+
+      expect(canvas.hasOperation("Recognizing")).toBe(false)
+    })
+  })
+
   describe("onGestured forces a synchronize when the backend won't emit a contentChange for it", () => {
     let canvas: InteractiveInkCanvas
 
@@ -377,7 +421,7 @@ describe("CanvasOffscreen.ts", () => {
     test("create stroke", async () => {
       const stroke: TPartialDeep<TStroke> = {
         type: SymbolType.Stroke,
-        pointers: [{ x: 0, y: 1, t: 1, p: 1 }],
+        pointers: [{ x: 0, y: 1, dt: 1, p: 1 }],
       }
       await canvas.createSymbol(stroke)
       expect(canvas.model.addSymbol).toHaveBeenNthCalledWith(1, expect.objectContaining(stroke))
@@ -420,6 +464,13 @@ describe("CanvasOffscreen.ts", () => {
       expect(canvas.renderer.replaceSymbol).toHaveBeenNthCalledWith(1, shape.id, [stroke])
       expect(canvas.client.addStrokes).toHaveBeenNthCalledWith(1, [stroke], false)
     })
+    test("replace leaves the caller's old symbols untouched", async () => {
+      // A gesture hands its history entry's own array: emptying it rewrote what undo restores
+      const oldSymbols = [buildIIStroke(), buildIIStroke()]
+      const handed = [...oldSymbols]
+      await canvas.replaceSymbols(handed, [buildIIStroke()])
+      expect(handed).toEqual(oldSymbols)
+    })
     test("change order symbol", async () => {
       const stroke = buildIIStroke()
       await canvas.changeOrderSymbol(stroke, "last")
@@ -428,7 +479,8 @@ describe("CanvasOffscreen.ts", () => {
     })
     test("remove stroke", async () => {
       const stroke = buildIIStroke()
-      canvas.model.symbols.push(stroke)
+      canvas.model.getSymbol = jest.fn(() => stroke)
+      canvas.model.addSymbol(stroke)
       await canvas.removeSymbol(stroke.id)
       expect(canvas.model.removeSymbol).toHaveBeenNthCalledWith(1, stroke.id)
       expect(canvas.renderer.removeSymbol).toHaveBeenNthCalledWith(1, stroke.id)
@@ -436,14 +488,224 @@ describe("CanvasOffscreen.ts", () => {
     })
     test("remove shape", async () => {
       const shape = buildIICircle()
-      canvas.model.symbols.push(shape)
+      canvas.model.getSymbol = jest.fn(() => shape)
+      canvas.model.addSymbol(shape)
       await canvas.removeSymbol(shape.id)
       expect(canvas.model.removeSymbol).toHaveBeenNthCalledWith(1, shape.id)
       expect(canvas.renderer.removeSymbol).toHaveBeenNthCalledWith(1, shape.id)
     })
   })
 
-  describe("updateSymbolsStyle", () => {
+  describe("connection anchor cleanup on removal", () => {
+    async function buildCanvasWithMocks(): Promise<InteractiveInkCanvas> {
+      const canvas = new InteractiveInkCanvas(document.createElement("div"), CanvasOptions)
+      canvas.menu.update = jest.fn()
+      canvas.menu.render = jest.fn()
+      canvas.overlays.apply = jest.fn()
+      canvas.client.init = jest.fn(() => Promise.resolve())
+      canvas.client.waitForIdle = jest.fn(() => Promise.resolve())
+      canvas.client.addStrokes = jest.fn(() => Promise.resolve(undefined))
+      canvas.client.replaceStrokes = jest.fn(() => Promise.resolve())
+      canvas.client.eraseStrokes = jest.fn(() => Promise.resolve())
+      canvas.client.undo = jest.fn(() => Promise.resolve())
+      canvas.renderer.init = jest.fn()
+      canvas.renderer.drawSymbol = jest.fn()
+      canvas.renderer.removeSymbol = jest.fn()
+      canvas.renderer.removeElement = jest.fn()
+      canvas.renderer.replaceSymbol = jest.fn()
+      // history.init(model) only runs during initialize(); undo needs the stack's initial
+      // empty entry to make context.canUndo flip true after the first real push.
+      await canvas.initialize()
+      return canvas
+    }
+
+    /**
+     * A decorator's `targetBounds` is an input, so losing a target is the one thing that must
+     * narrow it — nothing else would, and the underline would keep spanning the erased stroke.
+     * This writer had no coverage, which is what made removing it look free.
+     */
+    test("removeSymbols: erasing one of two targets shrinks the decorator to the survivor's box", async () => {
+      const canvas = await buildCanvasWithMocks()
+      const kept = buildIIStroke({ box: { x: 0, y: 0, width: 10, height: 10 } })
+      const erased = buildIIStroke({ box: { x: 100, y: 0, width: 10, height: 10 } })
+      canvas.model.addSymbol(kept)
+      canvas.model.addSymbol(erased)
+      const decorator = DecoratorUtil.createDecorator(
+        DecoratorKind.Underline,
+        {},
+        [kept.id, erased.id],
+        OBBOps.toBox(OBBOps.createFromOBBs([SymbolGeometry.boundsOf(kept), SymbolGeometry.boundsOf(erased)]))
+      )
+      canvas.model.addSymbol(decorator)
+      // Spans both to start with: wider than either stroke alone, so a shrink is observable.
+      expect(decorator.targetBounds!.width).toBeGreaterThan(SymbolGeometry.boundsOf(kept).width)
+
+      await canvas.removeSymbols([erased.id])
+
+      const after = canvas.model.getSymbol(decorator.id) as TDecorator
+      expect(after.targetIds).toEqual([kept.id])
+      expect(after.targetBounds).toEqual(SymbolGeometry.boundsOf(kept))
+    })
+
+    test("removeSymbols: erasing a connected shape clears the edge's anchor and is undo-safe", async () => {
+      const canvas = await buildCanvasWithMocks()
+      const shape = ShapeUtil.createPolygon([
+        { x: 0, y: 0 },
+        { x: 10, y: 0 },
+        { x: 10, y: 10 },
+      ])
+      const edge = EdgeUtil.createLine({ x: -10, y: 5 }, { x: 0, y: 5 })
+      edge.endAnchor = { symbolId: shape.id, normalizedX: 0, normalizedY: 0.5 }
+      canvas.model.addSymbol(shape)
+      canvas.model.addSymbol(edge)
+
+      await canvas.removeSymbols([shape.id])
+      const edgeAfterRemove = canvas.model.getSymbol(edge.id) as TEdgeLine
+      expect(edgeAfterRemove.endAnchor).toBeUndefined()
+
+      await canvas.undo()
+      const restoredEdge = canvas.model.getSymbol(edge.id) as TEdgeLine
+      expect(restoredEdge.endAnchor?.symbolId).toBe(shape.id)
+    })
+
+    test("removeSymbol: erasing a connected shape clears the edge's anchor and is undo-safe", async () => {
+      const canvas = await buildCanvasWithMocks()
+      const shape = ShapeUtil.createPolygon([
+        { x: 0, y: 0 },
+        { x: 10, y: 0 },
+        { x: 10, y: 10 },
+      ])
+      const edge = EdgeUtil.createLine({ x: -10, y: 5 }, { x: 0, y: 5 })
+      edge.startAnchor = { symbolId: shape.id, normalizedX: 0, normalizedY: 0.5 }
+      canvas.model.addSymbol(shape)
+      canvas.model.addSymbol(edge)
+
+      await canvas.removeSymbol(shape.id)
+      const edgeAfterRemove = canvas.model.getSymbol(edge.id) as TEdgeLine
+      expect(edgeAfterRemove.startAnchor).toBeUndefined()
+
+      await canvas.undo()
+      const restoredEdge = canvas.model.getSymbol(edge.id) as TEdgeLine
+      expect(restoredEdge.startAnchor?.symbolId).toBe(shape.id)
+    })
+
+    test("removeSymbols: erasing a pre-convert shape stroke clears the connected edge stroke's block anchor", async () => {
+      const canvas = await buildCanvasWithMocks()
+      // Pre-convert: the anchor targets a JIIX block id, not a real symbol id.
+      const shapeStroke = buildIIStroke()
+      shapeStroke.jiixBlockType = "Node"
+      shapeStroke.jiixBlockId = "block-shape-1"
+      const edgeStroke = buildIIStroke()
+      edgeStroke.jiixBlockType = "Edge"
+      edgeStroke.jiixBlockId = "block-edge-1"
+      edgeStroke.endAnchor = { symbolId: "block-shape-1", normalizedX: 1, normalizedY: 0.5 }
+      canvas.model.addSymbol(shapeStroke)
+      canvas.model.addSymbol(edgeStroke)
+
+      await canvas.removeSymbols([shapeStroke.id])
+
+      const edgeAfterRemove = canvas.model.getSymbol(edgeStroke.id) as TStroke
+      expect(edgeAfterRemove.endAnchor).toBeUndefined()
+
+      await canvas.undo()
+      const restoredEdge = canvas.model.getSymbol(edgeStroke.id) as TStroke
+      expect(restoredEdge.endAnchor?.symbolId).toBe("block-shape-1")
+    })
+
+    test("removeSymbol: erasing a pre-convert shape stroke clears the connected edge stroke's block anchor", async () => {
+      const canvas = await buildCanvasWithMocks()
+      const shapeStroke = buildIIStroke()
+      shapeStroke.jiixBlockType = "Node"
+      shapeStroke.jiixBlockId = "block-shape-2"
+      const edgeStroke = buildIIStroke()
+      edgeStroke.jiixBlockType = "Edge"
+      edgeStroke.startAnchor = { symbolId: "block-shape-2", normalizedX: 0, normalizedY: 0.5 }
+      canvas.model.addSymbol(shapeStroke)
+      canvas.model.addSymbol(edgeStroke)
+
+      await canvas.removeSymbol(shapeStroke.id)
+
+      const edgeAfterRemove = canvas.model.getSymbol(edgeStroke.id) as TStroke
+      expect(edgeAfterRemove.startAnchor).toBeUndefined()
+    })
+
+    test("replaceSymbols: converting a pre-convert shape stroke clears the connected edge stroke's block anchor", async () => {
+      const canvas = await buildCanvasWithMocks()
+      const shapeStroke = buildIIStroke()
+      shapeStroke.jiixBlockType = "Node"
+      shapeStroke.jiixBlockId = "block-shape-3"
+      const edgeStroke = buildIIStroke()
+      edgeStroke.jiixBlockType = "Edge"
+      edgeStroke.endAnchor = { symbolId: "block-shape-3", normalizedX: 1, normalizedY: 0.5 }
+      canvas.model.addSymbol(shapeStroke)
+      canvas.model.addSymbol(edgeStroke)
+      const newShape = ShapeUtil.createPolygon([
+        { x: 0, y: 0 },
+        { x: 20, y: 0 },
+        { x: 20, y: 20 },
+      ])
+
+      await canvas.replaceSymbols([shapeStroke], [newShape])
+
+      const edgeAfterReplace = canvas.model.getSymbol(edgeStroke.id) as TStroke
+      expect(edgeAfterReplace.endAnchor).toBeUndefined()
+    })
+
+    test("replaceSymbols: replacing a connected shape (new id) clears the edge's anchor", async () => {
+      const canvas = await buildCanvasWithMocks()
+      const shape = ShapeUtil.createPolygon([
+        { x: 0, y: 0 },
+        { x: 10, y: 0 },
+        { x: 10, y: 10 },
+      ])
+      const newShape = ShapeUtil.createPolygon([
+        { x: 0, y: 0 },
+        { x: 20, y: 0 },
+        { x: 20, y: 20 },
+      ])
+      const edge = EdgeUtil.createLine({ x: -10, y: 5 }, { x: 0, y: 5 })
+      edge.startAnchor = { symbolId: shape.id, normalizedX: 0, normalizedY: 0.5 }
+      canvas.model.addSymbol(shape)
+      canvas.model.addSymbol(edge)
+
+      await canvas.replaceSymbols([shape], [newShape])
+      const edgeAfterReplace = canvas.model.getSymbol(edge.id) as TEdgeLine
+      expect(edgeAfterReplace.startAnchor).toBeUndefined()
+    })
+
+    test("replaceSymbols: replacing a connected shape with a symbol keeping the same id preserves the edge's anchor", async () => {
+      const canvas = await buildCanvasWithMocks()
+      const shape = ShapeUtil.createPolygon([
+        { x: 0, y: 0 },
+        { x: 10, y: 0 },
+        { x: 10, y: 10 },
+      ])
+      const newShape = ShapeUtil.createPolygon([
+        { x: 0, y: 0 },
+        { x: 20, y: 0 },
+        { x: 20, y: 20 },
+      ])
+      newShape.id = shape.id
+      const edge = EdgeUtil.createLine({ x: -10, y: 5 }, { x: 0, y: 5 })
+      edge.startAnchor = { symbolId: shape.id, normalizedX: 0, normalizedY: 0.5 }
+      canvas.model.addSymbol(shape)
+      canvas.model.addSymbol(edge)
+
+      await canvas.replaceSymbols([shape], [newShape])
+      const edgeAfterReplace = canvas.model.getSymbol(edge.id) as TEdgeLine
+      expect(edgeAfterReplace.startAnchor?.symbolId).toBe(shape.id)
+    })
+  })
+
+  describe("updateSymbols with a patch", () => {
+    const char = (label: string): TSymbolChar => ({
+      id: `char-${label}`,
+      label,
+      color: "#000000",
+      fontSize: 10,
+      fontWeight: "normal",
+      bounds: { x: 0, y: 0, width: 5, height: 10 },
+    })
     const canvas = new InteractiveInkCanvas(document.createElement("div"), CanvasOptions)
     canvas.client.init = jest.fn()
     canvas.client.waitForIdle = jest.fn(() => Promise.resolve())
@@ -455,18 +717,232 @@ describe("CanvasOffscreen.ts", () => {
     test("should update symbol color and draw", async () => {
       await canvas.initialize()
       expect(canvas.model.symbols[0].style.color).toEqual("#000000")
-      canvas.updateSymbolsStyle([stroke1.id], { color: "red" })
+      canvas.updateSymbols([stroke1.id], { style: { color: "red" } })
+      const newStroke1 = canvas.model.getSymbol(stroke1.id)
       expect(canvas.model.symbols[0].style.color).toEqual("red")
       expect(canvas.renderer.drawSymbol).toHaveBeenCalledTimes(1)
-      expect(canvas.renderer.drawSymbol).toHaveBeenCalledWith(stroke1)
+      expect(canvas.renderer.drawSymbol).toHaveBeenCalledWith(newStroke1)
     })
     test("should update symbol width and draw", async () => {
       await canvas.initialize()
-      expect(canvas.model.symbols[1].style.width).toEqual(2)
-      canvas.updateSymbolsStyle([stroke2.id], { width: 42 })
-      expect(canvas.model.symbols[1].style.width).toEqual(42)
+      expect(stroke2.style.width).toEqual(2)
+      canvas.updateSymbols([stroke2.id], { style: { width: 42 } })
+      const newStroke2 = canvas.model.getSymbol(stroke2.id) as TStroke
+      expect(newStroke2.style.width).toEqual(42)
       expect(canvas.renderer.drawSymbol).toHaveBeenCalledTimes(1)
-      expect(canvas.renderer.drawSymbol).toHaveBeenCalledWith(stroke2)
+      expect(canvas.renderer.drawSymbol).toHaveBeenCalledWith(newStroke2)
+    })
+    test("should push both old and new style so the change can be reversed", async () => {
+      await canvas.initialize()
+      const oldStroke1 = canvas.model.getSymbol(stroke1.id) as TStroke
+      const oldStyle = { ...oldStroke1.style }
+      canvas.history.push = jest.fn()
+      canvas.updateSymbols([stroke1.id], { style: { color: "green" } })
+      const newStroke1 = canvas.model.getSymbol(stroke1.id) as TStroke
+      // A restyle is a before/after pair like any other change now: the record carries the style,
+      // so there is nothing to record beside it.
+      expect(canvas.history.push).toHaveBeenNthCalledWith(1, {
+        updated: [{ before: expect.objectContaining({ id: stroke1.id, style: oldStyle }), after: newStroke1 }],
+      })
+    })
+    test("should not push history when told not to", async () => {
+      await canvas.initialize()
+      canvas.history.push = jest.fn()
+      canvas.updateSymbols([stroke1.id], { style: { color: "blue" } }, false)
+      expect(canvas.model.getSymbol(stroke1.id)?.style.color).toEqual("blue")
+      expect(canvas.history.push).not.toHaveBeenCalled()
+    })
+    test("should change the font of a text and leave other symbols alone", async () => {
+      await canvas.initialize()
+      const text = buildIIText({ chars: [char("a"), char("b")] })
+      canvas.model.addSymbol(text)
+      // jsdom measures no text: commit the draft as typeset would, without measuring it
+      canvas.typeset.updateBounds = jest.fn((t) => {
+        canvas.model.updateSymbol(t)
+        return t
+      })
+      canvas.history.push = jest.fn()
+      canvas.updateSymbols([text.id, stroke1.id], { font: { size: 30, weight: "bold" } })
+      const newText = canvas.model.getSymbol(text.id) as TText
+      newText.chars.forEach((c) => {
+        expect(c.fontSize).toEqual(30)
+        expect(c.fontWeight).toEqual("bold")
+      })
+      expect(canvas.renderer.drawSymbol).not.toHaveBeenCalledWith(expect.objectContaining({ id: stroke1.id }))
+      expect(canvas.history.push).toHaveBeenNthCalledWith(1, {
+        updated: [{ before: expect.objectContaining({ id: text.id }), after: newText }],
+      })
+    })
+    test("should record the texts a restyle slides along, so undo puts them back", async () => {
+      await canvas.initialize()
+      const text = buildIIText({ chars: [char("a")] })
+      canvas.model.addSymbol(text)
+      const moved = { before: buildIIText(), after: buildIIText() }
+      // A restyle that makes the text wider pushes the texts after it on its row
+      canvas.typeset.moveTextAfter = jest.fn(() => [moved])
+      canvas.typeset.updateBounds = jest.fn((t) => {
+        t.bounds = OBBOps.fromBox({ x: 0, y: 0, width: 999, height: 30 })
+        canvas.model.updateSymbol(t)
+        return t
+      })
+      canvas.history.push = jest.fn()
+      canvas.updateSymbols([text.id], { style: { fontWeight: "bold" } })
+      expect(canvas.history.push).toHaveBeenNthCalledWith(1, {
+        updated: expect.arrayContaining([moved, expect.objectContaining({ after: canvas.model.getSymbol(text.id) })]),
+      })
+    })
+  })
+
+  describe("updateSymbol", () => {
+    const canvas = new InteractiveInkCanvas(document.createElement("div"), CanvasOptions)
+    canvas.client.init = jest.fn()
+    canvas.client.waitForIdle = jest.fn(() => Promise.resolve())
+    canvas.client.addStrokes = jest.fn()
+    canvas.renderer.drawSymbol = jest.fn()
+
+    test("should push both the old and new symbol so the change can be reversed", async () => {
+      await canvas.initialize()
+      const stroke = buildIIStroke()
+      canvas.model.addSymbol(stroke)
+      const oldStroke = cloneSymbol(stroke)
+
+      canvas.history.push = jest.fn()
+
+      const updatedStroke = await canvas.updateSymbol(stroke.id, (draft) => {
+        draft.style.color = "green"
+      })
+
+      expect(updatedStroke?.style.color).toEqual("green")
+      expect(canvas.history.push).toHaveBeenNthCalledWith(1, {
+        updated: [{ before: oldStroke, after: updatedStroke }],
+      })
+    })
+    test("should skip an id with no symbol", async () => {
+      await canvas.initialize()
+      canvas.history.push = jest.fn()
+      expect(await canvas.updateSymbol("no-such-id", { style: { color: "red" } })).toBeUndefined()
+      expect(canvas.history.push).not.toHaveBeenCalled()
+    })
+    test("should re-measure a text a function patch changed", async () => {
+      await canvas.initialize()
+      const text = buildIIText()
+      canvas.model.addSymbol(text)
+      canvas.typeset.updateBounds = jest.fn((t) => {
+        canvas.model.updateSymbol(t)
+        return t
+      })
+      await canvas.updateSymbol(text.id, (draft) => {
+        draft.style.color = "blue"
+      })
+      expect(canvas.typeset.updateBounds).toHaveBeenCalledWith(expect.objectContaining({ id: text.id }))
+      expect(canvas.model.getSymbol(text.id)?.style.color).toEqual("blue")
+    })
+  })
+
+  describe("getSymbolsBounds — an unregistered symbol type in the list", () => {
+    /**
+     * Public API: callers can pass an arbitrary symbol list, including one built from a
+     * selection with no registry check ahead of it (`selectAll()` populates
+     * `symbolsSelected` unconditionally). An unregistered type must not abort the whole
+     * bounding-box computation.
+     */
+    test("is skipped instead of throwing", () => {
+      const canvas = new InteractiveInkCanvas(document.createElement("div"), CanvasOptions)
+      const stroke = buildIIStroke()
+      canvas.model.addSymbol(stroke)
+
+      const orphan = {
+        ...(buildIIStroke() as unknown as TBaseSymbol),
+        type: "no-such-type",
+        id: "orphan-1",
+      } as unknown as TSymbol
+
+      // Computed independently of `getSymbolsBounds` — comparing against a second call to the
+      // method under test would be a tautology if the gate dropped every symbol: both calls
+      // would degenerate to the same empty-array zero box and still match.
+      const expectedBox = OBBOps.toBox(SymbolGeometry.boundsOf(stroke))
+
+      expect(() => canvas.getSymbolsBounds([stroke, orphan], 0)).not.toThrow()
+      expect(canvas.getSymbolsBounds([stroke, orphan], 0)).toEqual(expectedBox)
+    })
+  })
+
+  describe("duplicate — an unregistered symbol type in the list", () => {
+    /**
+     * Same caller-supplied-list concern as `getSymbolsBounds`. `translate.applyToSymbol` is
+     * stubbed here because it throws unconditionally for an unregistered type by design (see
+     * `AbstractTransformManager.applyToSymbol`) — a separate, pre-existing, out-of-scope path
+     * that would otherwise mask what this test is isolating: only the placement-offset bounds
+     * computation is expected to skip the unregistered symbol.
+     */
+    test("is skipped in the placement-offset bounds instead of throwing", async () => {
+      const canvas = new InteractiveInkCanvas(document.createElement("div"), CanvasOptions)
+      canvas.client.init = jest.fn()
+      canvas.client.waitForIdle = jest.fn(() => Promise.resolve())
+      canvas.client.addStrokes = jest.fn()
+      canvas.renderer.drawSymbol = jest.fn()
+      canvas.selector.drawSelectedGroup = jest.fn()
+      canvas.selector.removeSelectedGroup = jest.fn()
+      // Applies the matrix for real (rather than a pure no-op passthrough) so the placement
+      // offset this test cares about is observable on the returned symbol itself, not only on
+      // the arguments a stub happened to receive.
+      canvas.transform.translate.applyToSymbol = jest.fn((s: TSymbol, matrix: MatrixTransform) => {
+        if (isStroke(s)) {
+          s.pointers.forEach((p) => {
+            const moved = MatrixTransform.applyToPoint(matrix, p)
+            p.x = moved.x
+            p.y = moved.y
+          })
+        }
+        return s
+      })
+
+      const stroke = buildIIStroke()
+      canvas.model.addSymbol(stroke)
+
+      const orphan = {
+        ...(buildIIStroke() as unknown as TBaseSymbol),
+        type: "no-such-type",
+        id: "orphan-1",
+      } as unknown as TSymbol
+      canvas.model.addSymbol(orphan)
+
+      // Computed independently of `duplicate`, from the registered stroke's own real geometry —
+      // if the gate dropped every symbol instead of just the orphan, `bounds.height` inside
+      // `duplicate` would degenerate to 0 and the applied ty would be `DUPLICATE_OFFSET` alone,
+      // not this value.
+      const expectedTy = OBBOps.toBox(SymbolGeometry.boundsOf(stroke)).height + DUPLICATE_OFFSET
+
+      const result = await canvas.duplicate([stroke, orphan])
+      expect(result).toHaveLength(2)
+
+      const duplicatedStroke = result.find((s): s is TStroke => isStroke(s))
+      expect(duplicatedStroke).toBeDefined()
+      expect(duplicatedStroke?.pointers[0].y).toBeCloseTo(stroke.pointers[0].y + expectedTy)
+    })
+  })
+
+  describe("duplicate — fresh ids", () => {
+    test("should give each copy a new id without scanning the document per copy", async () => {
+      const canvas = new InteractiveInkCanvas(document.createElement("div"), CanvasOptions)
+      canvas.client.init = jest.fn()
+      canvas.client.waitForIdle = jest.fn(() => Promise.resolve())
+      canvas.client.addStrokes = jest.fn()
+      canvas.renderer.drawSymbol = jest.fn()
+      canvas.selector.drawSelectedGroup = jest.fn()
+      canvas.selector.removeSelectedGroup = jest.fn()
+      const strokes = [buildIIStroke(), buildIIStroke(), buildIIStroke()]
+      strokes.forEach((s) => canvas.model.addSymbol(s))
+      const originalIds = strokes.map((s) => s.id)
+      const symbolsSpy = jest.spyOn(canvas.model, "symbols", "get")
+
+      const result = await canvas.duplicate(strokes)
+
+      // Reads of the whole document must not grow with the number of copies.
+      expect(symbolsSpy.mock.calls.length).toBeLessThan(strokes.length)
+      const ids = result.map((s) => s.id)
+      expect(new Set(ids).size).toBe(strokes.length)
+      ids.forEach((id) => expect(originalIds).not.toContain(id))
     })
   })
 
@@ -474,14 +950,14 @@ describe("CanvasOffscreen.ts", () => {
     const pStrokes: TPartialDeep<TStroke>[] = [
       {
         pointers: [
-          { x: 254, y: 37, t: 1, p: 1 },
-          { x: 253, y: 42, t: 2, p: 0.7 },
+          { x: 254, y: 37, dt: 1, p: 1 },
+          { x: 253, y: 42, dt: 2, p: 0.7 },
         ],
       },
       {
         pointers: [
-          { x: 222, y: 386, t: 3, p: 0.5 },
-          { x: 226, y: 385, t: 4, p: 0.8 },
+          { x: 222, y: 386, dt: 3, p: 0.5 },
+          { x: 226, y: 385, dt: 4, p: 0.8 },
         ],
         style: { width: 3, color: "#1A8CFF" },
       },
@@ -505,7 +981,7 @@ describe("CanvasOffscreen.ts", () => {
       expect(canvas.client.addStrokes).toHaveBeenCalledTimes(1)
     })
     test("should add symbols to model and draw", async () => {
-      canvas.model.symbols = []
+      canvas.model.clear()
       await canvas.importPointEvents(pStrokes)
       expect(canvas.model.symbols).toHaveLength(pStrokes.length)
       expect(canvas.renderer.drawSymbol).toHaveBeenCalledTimes(2)
@@ -520,179 +996,298 @@ describe("CanvasOffscreen.ts", () => {
     })
   })
 
-  describe("Download", () => {
-    const canvas = new InteractiveInkCanvas(document.createElement("div"), CanvasOptions)
-    const stroke1 = buildIIStroke()
-    canvas.model.addSymbol(stroke1)
-    canvas.model.selectedIds.add(stroke1.id)
-    const stroke2 = buildIIStroke()
-    canvas.model.addSymbol(stroke2)
+  describe("updateRecognitionConfiguration", () => {
+    const buildCanvas = async () => {
+      const canvas = new InteractiveInkCanvas(document.createElement("div"), structuredClone(CanvasOptions))
+      canvas.client.init = jest.fn(() => Promise.resolve())
+      canvas.renderer.init = jest.fn()
+      canvas.menu.render = jest.fn()
+      await canvas.initialize()
+      canvas.client.newSession = jest.fn(() => Promise.resolve())
+      canvas.client.changeConfiguration = jest.fn(() => Promise.resolve())
+      canvas.client.addStrokes = jest.fn(() => Promise.resolve())
+      canvas.math.clearAllSolverOutputs = jest.fn(() => Promise.resolve())
+      canvas.math.tryAutoCompute = jest.fn(() => Promise.resolve())
+      return canvas
+    }
+    const solverOutput = (): TStroke => {
+      const stroke = buildIIStroke()
+      stroke.isSolverOutput = true
+      return stroke
+    }
 
-    canvas.renderer.getElementById = jest.fn((id) => {
-      const p = document.createElementNS("http://www.w3.org/2000/svg", "path")
-      p.id = id
-      return p
+    test("should deep-merge the partial into the recognition configuration", async () => {
+      const canvas = await buildCanvas()
+
+      await canvas.updateRecognitionConfiguration({ math: { solver: { "angle-unit": "deg" } } })
+
+      expect(canvas.configuration.recognition.math?.solver?.["angle-unit"]).toEqual("deg")
+      expect(canvas.configuration.recognition.math?.solver?.["rounding-mode"]).toEqual("half up")
     })
 
-    test("should call trigger download svg file", async () => {
-      global.URL.createObjectURL = jest.fn(() => "download-svg-url")
-      const link = document.createElement("a")
-      link.click = jest.fn()
-      jest.spyOn(document, "createElement").mockImplementationOnce(() => link)
-      canvas.downloadAsSVG()
-      expect(link.href).toContain("download-svg-url")
-      expect(link.download).toContain("iink-ts-")
-      expect(link.download).toContain(".svg")
-      expect(link.click).toHaveBeenCalledTimes(1)
-    })
-    // //fix canvas.getContext
-    test.skip("should call trigger download png file", async () => {
-      global.URL.createObjectURL = jest.fn(() => "download-png-url")
-      //@ts-ignore
-      global.Image = class {
-        onload: () => void
-        //@ts-ignore
-        constructor() {
-          this.onload = jest.fn()
-          setTimeout(() => {
-            this.onload()
-          }, 50)
-        }
-      } as unknown as HTMLImageElement
-      const link = document.createElement("a")
-      link.click = jest.fn()
-      jest.spyOn(document, "createElement").mockImplementationOnce(() => link)
-      canvas.downloadAsPNG()
-      await delay(101)
-      expect(link.href).toContain("download-png-url")
-      expect(link.click).toHaveBeenCalledTimes(1)
-    })
-    test("should call trigger download json file", async () => {
-      const link = document.createElement("a")
-      link.click = jest.fn()
-      jest.spyOn(document, "createElement").mockImplementationOnce(() => link)
-      canvas.downloadAsJson()
-      expect(link.href).toContain("data:text/json;charset=utf-8,")
-      expect(link.href).toContain(stroke1.id)
-      expect(link.href).toContain(stroke2.id)
-      expect(link.download).toContain("iink-ts-")
-      expect(link.download).toContain(".json")
-      expect(link.click).toHaveBeenCalledTimes(1)
-    })
-    test("should call trigger download json file with only selected files", async () => {
-      const link = document.createElement("a")
-      link.click = jest.fn()
-      jest.spyOn(document, "createElement").mockImplementationOnce(() => link)
-      canvas.downloadAsJson(true)
-      expect(link.href).toContain("data:text/json;charset=utf-8,")
-      expect(link.href).toContain(stroke1.id)
-      expect(link.href).not.toContain(stroke2.id)
-      expect(link.download).toContain("iink-ts-")
-      expect(link.download).toContain(".json")
-      expect(link.click).toHaveBeenCalledTimes(1)
-    })
-    test("should call trigger download text file", async () => {
-      const oiMath = buildIIMath("a=b+c")
-      canvas.model.addSymbol(oiMath)
+    test("should replace an array rather than append to it", async () => {
+      const canvas = await buildCanvas()
 
-      const link = document.createElement("a")
-      link.click = jest.fn()
-      jest.spyOn(document, "createElement").mockImplementationOnce(() => link)
-      canvas.downloadAsText()
+      await canvas.updateRecognitionConfiguration({ "raw-content": { recognition: { types: ["math"] } } })
 
-      expect(link.href).toContain("data:text/plain;charset=utf-8,")
-      expect(link.href).toContain("a%3Db%2Bc")
-      expect(link.download).toContain("iink-ts-")
-      expect(link.download).toContain(".txt")
-      expect(link.click).toHaveBeenCalledTimes(1)
+      expect(canvas.configuration.recognition["raw-content"].recognition?.types).toEqual(["math"])
     })
-    test("should not duplicate label of a math item written with several strokes", async () => {
-      // "x" and "=" are each drawn with 2 strokes; JIIX maps every stroke of
-      // an item to that item's single label, so a naive per-stroke join
-      // used to produce "xx==2" instead of "x=2"
-      const addStrokeWithId = (id: string): void => {
-        const s = buildIIStroke()
-        s.id = id
-        canvas.model.addSymbol(s)
-      }
-      addStrokeWithId("eq-1")
-      addStrokeWithId("eq-2")
-      addStrokeWithId("x-1")
-      addStrokeWithId("x-2")
-      addStrokeWithId("n-1")
-      canvas.model.exports = { "application/vnd.myscript.jiix": jiixMathDuplicateStrokes }
 
-      const link = document.createElement("a")
-      link.click = jest.fn()
-      jest.spyOn(document, "createElement").mockImplementationOnce(() => link)
-      canvas.downloadAsText()
+    test("should open a new session with the updated configuration", async () => {
+      const canvas = await buildCanvas()
 
-      expect(link.href).toContain(encodeURIComponent("x=2"))
-      expect(link.href).not.toContain(encodeURIComponent("xx==2"))
+      await canvas.updateRecognitionConfiguration({ lang: "fr_FR" })
+
+      expect(canvas.client.newSession).toHaveBeenCalledWith(canvas.configuration)
+      expect(canvas.client.changeConfiguration).not.toHaveBeenCalled()
+      expect(canvas.configuration.recognition.lang).toEqual("fr_FR")
     })
-    test("should order extracted text by reading position, not draw order", async () => {
-      const charFor = (label: string): TSymbolChar => ({
-        bounds: { height: 0, width: 0, x: 0, y: 0 },
-        color: "black",
-        fontSize: 12,
-        fontWeight: "normal",
-        id: `char-${label}`,
-        label,
+
+    test("should change the configuration of the current session when the language is untouched", async () => {
+      const canvas = await buildCanvas()
+
+      await canvas.updateRecognitionConfiguration({ math: { solver: { "angle-unit": "deg" } } })
+
+      expect(canvas.client.changeConfiguration).toHaveBeenCalledWith(canvas.configuration)
+      expect(canvas.client.newSession).not.toHaveBeenCalled()
+    })
+
+    test("should change the configuration of the current session when the language is the current one", async () => {
+      const canvas = await buildCanvas()
+      const lang = canvas.configuration.recognition.lang
+
+      await canvas.updateRecognitionConfiguration({ lang })
+
+      expect(canvas.client.changeConfiguration).toHaveBeenCalledTimes(1)
+      expect(canvas.client.newSession).not.toHaveBeenCalled()
+    })
+
+    test("should not resend the strokes when the session is kept", async () => {
+      const canvas = await buildCanvas()
+      canvas.model.addSymbol(buildIIStroke())
+
+      await canvas.updateRecognitionConfiguration({ math: { solver: { "angle-unit": "deg" } } })
+
+      expect(canvas.client.addStrokes).not.toHaveBeenCalled()
+    })
+
+    test("should clear the solver outputs before changing the configuration of the session", async () => {
+      const canvas = await buildCanvas()
+      const calls: string[] = []
+      canvas.math.clearAllSolverOutputs = jest.fn(async () => {
+        calls.push("clear")
       })
-      // "middle" is drawn first but sits below "above" on the page
-      const middleWord = buildIIText({
-        chars: [charFor("middle")],
-        boundingBox: { x: 0, y: 50, width: 40, height: 20 },
+      canvas.client.changeConfiguration = jest.fn(async () => {
+        calls.push("changeConfiguration")
       })
-      const aboveWord = buildIIText({
-        chars: [charFor("above")],
-        boundingBox: { x: 0, y: 0, width: 40, height: 20 },
-      })
-      canvas.model.addSymbol(middleWord)
-      canvas.model.addSymbol(aboveWord)
 
-      const link = document.createElement("a")
-      link.click = jest.fn()
-      jest.spyOn(document, "createElement").mockImplementationOnce(() => link)
-      canvas.downloadAsText()
+      await canvas.updateRecognitionConfiguration({ math: { solver: { "angle-unit": "deg" } } })
 
-      const decoded = decodeURIComponent(link.href)
-      expect(decoded.indexOf("above")).toBeLessThan(decoded.indexOf("middle"))
+      expect(calls).toEqual(["clear", "changeConfiguration"])
     })
-    test("should keep words recognized on the same line together", async () => {
-      const charFor = (label: string): TSymbolChar => ({
-        bounds: { height: 0, width: 0, x: 0, y: 0 },
-        color: "black",
-        fontSize: 52,
-        fontWeight: "normal",
-        id: `char-${label}`,
-        label,
+
+    test("should auto-compute again after changing the configuration of the session", async () => {
+      const canvas = await buildCanvas()
+      canvas.math.updateComputationConfig({ autoCompute: true })
+
+      await canvas.updateRecognitionConfiguration({ math: { solver: { "angle-unit": "deg" } } })
+
+      expect(canvas.math.tryAutoCompute).toHaveBeenCalledTimes(1)
+    })
+
+    test("should be read-only while the configuration of the session changes", async () => {
+      const canvas = await buildCanvas()
+      let readOnlyDuringChange: boolean | undefined
+      canvas.client.changeConfiguration = jest.fn(async () => {
+        readOnlyDuringChange = canvas.readOnly
       })
-      const line1Y = { x: 0, y: 501, width: 62 }
-      const line2Y = { x: 0, y: 611, width: 49 }
-      const wordAt = (label: string, x: number, line: typeof line1Y): TText =>
-        buildIIText({
-          chars: [charFor(label)],
-          boundingBox: { x, y: line.y, width: line.width, height: 62 },
+
+      await canvas.updateRecognitionConfiguration({ math: { solver: { "angle-unit": "deg" } } })
+
+      expect(readOnlyDuringChange).toBe(true)
+      expect(canvas.readOnly).toBe(false)
+    })
+
+    test("should clear the solver outputs before opening the new session", async () => {
+      const canvas = await buildCanvas()
+      const calls: string[] = []
+      canvas.math.clearAllSolverOutputs = jest.fn(async () => {
+        calls.push("clear")
+      })
+      canvas.client.newSession = jest.fn(async () => {
+        calls.push("newSession")
+      })
+
+      await canvas.updateRecognitionConfiguration({ lang: "fr_FR" })
+
+      expect(calls).toEqual(["clear", "newSession"])
+    })
+
+    // The bug these guard: `clear()` opens "Recognizing", closed when the server answers with
+    // contentChanged. Switching session before that answer left it open for good, and the canvas
+    // showed itself busy for the rest of the session.
+    test("should not keep waiting on what the previous session was recognizing, after a new session", async () => {
+      const canvas = await buildCanvas()
+      canvas.client.newSession = jest.fn(async () => undefined)
+      canvas.startOperation("Recognizing")
+
+      await canvas.updateRecognitionConfiguration({ lang: "fr_FR" })
+
+      expect(canvas.hasOperation("Recognizing")).toBe(false)
+    })
+
+    test("should resend the user strokes but never a solver output", async () => {
+      const canvas = await buildCanvas()
+      const userStroke = buildIIStroke()
+      canvas.model.addSymbol(userStroke)
+      canvas.model.addSymbol(solverOutput())
+
+      await canvas.updateRecognitionConfiguration({ lang: "fr_FR" })
+
+      expect(canvas.client.addStrokes).toHaveBeenCalledWith([userStroke], false)
+    })
+
+    test("should not send strokes when the model has none", async () => {
+      const canvas = await buildCanvas()
+
+      await canvas.updateRecognitionConfiguration({ lang: "fr_FR" })
+
+      expect(canvas.client.addStrokes).not.toHaveBeenCalled()
+    })
+
+    test("should auto-compute again only when auto-compute is on", async () => {
+      const canvas = await buildCanvas()
+      canvas.math.updateComputationConfig({ autoCompute: true })
+      await canvas.updateRecognitionConfiguration({ lang: "fr_FR" })
+      expect(canvas.math.tryAutoCompute).toHaveBeenCalledTimes(1)
+
+      canvas.math.updateComputationConfig({ autoCompute: false })
+      await canvas.updateRecognitionConfiguration({ lang: "en_US" })
+      expect(canvas.math.tryAutoCompute).toHaveBeenCalledTimes(1)
+    })
+
+    test("should be read-only during the resynchronization", async () => {
+      const canvas = await buildCanvas()
+      let readOnlyDuringSession: boolean | undefined
+      canvas.client.newSession = jest.fn(async () => {
+        readOnlyDuringSession = canvas.readOnly
+      })
+
+      await canvas.updateRecognitionConfiguration({ lang: "fr_FR" })
+
+      expect(readOnlyDuringSession).toBe(true)
+      expect(canvas.readOnly).toBe(false)
+    })
+
+    test("should leave an integrator's read-only canvas read-only", async () => {
+      const canvas = await buildCanvas()
+      canvas.readOnly = true
+
+      await canvas.updateRecognitionConfiguration({ lang: "fr_FR" })
+
+      expect(canvas.readOnly).toBe(true)
+    })
+
+    test("should not start a resynchronization before the previous one ends", async () => {
+      const canvas = await buildCanvas()
+      const calls: string[] = []
+      canvas.client.newSession = jest.fn(async () => {
+        calls.push("start")
+        await delay(10)
+        calls.push("end")
+      })
+
+      const first = canvas.updateRecognitionConfiguration({ lang: "fr_FR" })
+      await delay(1)
+      await Promise.all([first, canvas.updateRecognitionConfiguration({ lang: "de_DE" })])
+
+      expect(calls).toEqual(["start", "end", "start", "end"])
+    })
+
+    test("should merge the calls made before the resynchronization starts into one", async () => {
+      const canvas = await buildCanvas()
+
+      await Promise.all([
+        canvas.updateRecognitionConfiguration({ lang: "fr_FR" }),
+        canvas.updateRecognitionConfiguration({ math: { solver: { "angle-unit": "deg" } } }),
+      ])
+
+      expect(canvas.client.newSession).toHaveBeenCalledTimes(1)
+      expect(canvas.client.changeConfiguration).not.toHaveBeenCalled()
+      expect(canvas.configuration.recognition.lang).toEqual("fr_FR")
+      expect(canvas.configuration.recognition.math?.solver?.["angle-unit"]).toEqual("deg")
+    })
+
+    test("should merge the calls waiting for a running resynchronization into one", async () => {
+      const canvas = await buildCanvas()
+      canvas.client.newSession = jest.fn(async () => {
+        await delay(10)
+      })
+
+      const first = canvas.updateRecognitionConfiguration({ lang: "fr_FR" })
+      await delay(1)
+      await Promise.all([
+        first,
+        canvas.updateRecognitionConfiguration({ math: { solver: { "angle-unit": "deg" } } }),
+        canvas.updateRecognitionConfiguration({ math: { solver: { "rounding-mode": "truncate" } } }),
+      ])
+
+      expect(canvas.client.newSession).toHaveBeenCalledTimes(1)
+      expect(canvas.client.changeConfiguration).toHaveBeenCalledTimes(1)
+      expect(canvas.configuration.recognition.math?.solver).toEqual(
+        expect.objectContaining({ "angle-unit": "deg", "rounding-mode": "truncate" })
+      )
+    })
+
+    test("should run the next call even when the previous one failed", async () => {
+      const canvas = await buildCanvas()
+      canvas.client.newSession = jest
+        .fn()
+        .mockImplementationOnce(async () => {
+          await delay(10)
+          throw new Error("boom")
         })
+        .mockResolvedValue(undefined)
 
-      canvas.model.addSymbol(wordAt("How", 0, line1Y))
-      canvas.model.addSymbol(wordAt("are", 100, line1Y))
-      canvas.model.addSymbol(wordAt("you", 200, line1Y))
-      canvas.model.addSymbol(wordAt("?", 300, line1Y))
-      canvas.model.addSymbol(wordAt("Fine", 0, line2Y))
-      canvas.model.addSymbol(wordAt("and", 100, line2Y))
-      canvas.model.addSymbol(wordAt("you", 200, line2Y))
-      canvas.model.addSymbol(wordAt("?", 300, line2Y))
+      const first = canvas.updateRecognitionConfiguration({ lang: "fr_FR" })
+      await delay(1)
+      const second = canvas.updateRecognitionConfiguration({ lang: "de_DE" })
 
-      const link = document.createElement("a")
-      link.click = jest.fn()
-      jest.spyOn(document, "createElement").mockImplementationOnce(() => link)
-      canvas.downloadAsText()
+      await expect(first).rejects.toThrow("boom")
+      await expect(second).resolves.toBeUndefined()
+      expect(canvas.configuration.recognition.lang).toEqual("de_DE")
+    })
 
-      const decoded = decodeURIComponent(link.href)
-      expect(decoded).toContain("How are you ?")
-      expect(decoded).toContain("Fine and you ?")
+    test("should restore the previous configuration and rethrow when the resynchronization fails", async () => {
+      const canvas = await buildCanvas()
+      const boom = new Error("server refused the session")
+      canvas.client.newSession = jest.fn(() => Promise.reject(boom))
+      const onError = jest.fn()
+      canvas.event.addErrorListener(onError)
+      const before = structuredClone(canvas.configuration.recognition)
+
+      await expect(canvas.updateRecognitionConfiguration({ lang: "fr_FR" })).rejects.toBe(boom)
+
+      expect(canvas.configuration.recognition).toEqual(before)
+      expect(onError).toHaveBeenCalledWith(boom)
+      expect(canvas.readOnly).toBe(false)
+    })
+
+    test("should restore the previous configuration and rethrow when the configuration change fails", async () => {
+      const canvas = await buildCanvas()
+      const boom = new Error("server refused the configuration")
+      canvas.client.changeConfiguration = jest.fn(() => Promise.reject(boom))
+      const onError = jest.fn()
+      canvas.event.addErrorListener(onError)
+      const before = structuredClone(canvas.configuration.recognition)
+
+      await expect(canvas.updateRecognitionConfiguration({ math: { solver: { "angle-unit": "deg" } } })).rejects.toBe(
+        boom
+      )
+
+      expect(canvas.configuration.recognition).toEqual(before)
+      expect(onError).toHaveBeenCalledWith(boom)
+      expect(canvas.readOnly).toBe(false)
     })
   })
 
@@ -720,6 +1315,7 @@ describe("CanvasOffscreen.ts", () => {
       canvas.client.undo = jest.fn(() => Promise.resolve())
       canvas.renderer.removeSymbol = jest.fn()
       canvas.renderer.drawSymbol = jest.fn()
+      canvas.renderer.replaceSymbol = jest.fn()
       canvas.menu.update = jest.fn()
       canvas.overlays.apply = jest.fn()
       canvas.client.waitForIdle = jest.fn(() => Promise.resolve())
@@ -734,19 +1330,32 @@ describe("CanvasOffscreen.ts", () => {
     })
     test("should invalidate the restored model's exports so the next synchronize re-fetches JIIX instead of reusing the pre-undo snapshot", async () => {
       const stroke1 = buildIIStroke()
-      const firstModel = canvas.model.clone()
-      firstModel.addSymbol(stroke1)
-      firstModel.mergeExport({ "application/vnd.myscript.jiix": jiixText } as never)
-      canvas.history.undo = jest.fn(() => ({ model: firstModel, changes: { added: [stroke1] } }))
+      canvas.model.mergeExport({ "application/vnd.myscript.jiix": jiixText } as never)
+      canvas.history.undo = jest.fn(() => ({ added: [stroke1] }))
       canvas.history.context.canUndo = true
       await canvas.undo()
       expect(canvas.model.exports).toBeUndefined()
     })
+    test("should replay variable values after the sync when the step also changes strokes", async () => {
+      const stroke1 = buildIIStroke()
+      const variables = [{ strokeIds: [stroke1.id], name: "x", before: 4, after: 2 }]
+      canvas.math.replayVariableChanges = jest.fn(() => Promise.resolve())
+      canvas.history.undo = jest.fn(() => ({ added: [stroke1], variables }))
+      canvas.history.context.canUndo = true
+      await canvas.undo()
+      expect(canvas.math.replayVariableChanges).toHaveBeenCalledWith(variables, true)
+    })
+    test("should replay variable values at once when the step changes no stroke", async () => {
+      const variables = [{ strokeIds: ["s1"], name: "x", before: 4, after: 2 }]
+      canvas.math.replayVariableChanges = jest.fn(() => Promise.resolve())
+      canvas.history.undo = jest.fn(() => ({ variables }))
+      canvas.history.context.canUndo = true
+      await canvas.undo()
+      expect(canvas.math.replayVariableChanges).toHaveBeenCalledWith(variables, false)
+    })
     test("should call client.undo & renderer.drawSymbol when history.undo return added stroke", async () => {
       const stroke1 = buildIIStroke()
-      const firstModel = canvas.model.clone()
-      firstModel.addSymbol(stroke1)
-      canvas.history.undo = jest.fn(() => ({ model: firstModel, changes: { added: [stroke1] } }))
+      canvas.history.undo = jest.fn(() => ({ added: [stroke1] }))
       canvas.history.context.canUndo = true
       await canvas.undo()
       expect(canvas.client.undo).toHaveBeenCalledTimes(1)
@@ -757,9 +1366,7 @@ describe("CanvasOffscreen.ts", () => {
     })
     test("should not call client.undo & call renderer.drawSymbol when history.undo return added shape", async () => {
       const circle = buildIICircle()
-      const firstModel = canvas.model.clone()
-      firstModel.addSymbol(circle)
-      canvas.history.undo = jest.fn(() => ({ model: firstModel, changes: { added: [circle] } }))
+      canvas.history.undo = jest.fn(() => ({ added: [circle] }))
       canvas.history.context.canUndo = true
       await canvas.undo()
       expect(canvas.client.undo).toHaveBeenCalledTimes(0)
@@ -769,9 +1376,8 @@ describe("CanvasOffscreen.ts", () => {
     })
     test("should call client.undo & renderer.removeSymbol when history.undo return erased stroke", async () => {
       const stroke1 = buildIIStroke()
-      const firstModel = canvas.model.clone()
       canvas.model.addSymbol(stroke1)
-      canvas.history.undo = jest.fn(() => ({ model: firstModel, changes: { erased: [stroke1] } }))
+      canvas.history.undo = jest.fn(() => ({ erased: [stroke1] }))
       canvas.history.context.canUndo = true
       await canvas.undo()
       expect(canvas.client.undo).toHaveBeenCalledTimes(1)
@@ -780,96 +1386,189 @@ describe("CanvasOffscreen.ts", () => {
       expect(canvas.renderer.removeSymbol).toHaveBeenCalledTimes(1)
       expect(canvas.renderer.removeSymbol).toHaveBeenCalledWith(stroke1.id)
     })
-    test("should call client.undo & renderer.drawSymbol & renderer.removeSymbol when history.undo return replaced stroke", async () => {
+    test("should call client.undo & renderer.replaceSymbol when history.undo return replaced stroke", async () => {
       const stroke1 = buildIIStroke()
       const stroke2 = buildIIStroke()
-      const firstModel = canvas.model.clone()
-      firstModel.addSymbol(stroke1)
       canvas.model.addSymbol(stroke2)
-      canvas.history.undo = jest.fn(() => ({
-        model: firstModel,
-        changes: { replaced: { newSymbols: [stroke2], oldSymbols: [stroke1] } },
-      }))
+      canvas.history.undo = jest.fn(() => ({ replaced: { oldSymbols: [stroke2], newSymbols: [stroke1] } }))
       canvas.history.context.canUndo = true
       await canvas.undo()
       expect(canvas.client.undo).toHaveBeenCalledTimes(1)
       expect(canvas.client.undo).toHaveBeenCalledWith(
-        expect.objectContaining({ replaced: { newStrokes: [stroke2], oldStrokes: [stroke1] } })
+        expect.objectContaining({ replaced: { oldStrokes: [stroke2], newStrokes: [stroke1] } })
       )
-      expect(canvas.renderer.drawSymbol).toHaveBeenCalledTimes(1)
-      expect(canvas.renderer.drawSymbol).toHaveBeenCalledWith(stroke1)
-      expect(canvas.renderer.removeSymbol).toHaveBeenCalledTimes(1)
-      expect(canvas.renderer.removeSymbol).toHaveBeenCalledWith(stroke2.id)
+      expect(canvas.renderer.replaceSymbol).toHaveBeenCalledTimes(1)
+      expect(canvas.renderer.replaceSymbol).toHaveBeenCalledWith(stroke2.id, [stroke1])
+      expect(canvas.model.symbols).toEqual([stroke1])
     })
-    test("should call client.undo & renderer.drawSymbol & renderer.removeSymbol when history.undo return matrix", async () => {
-      const stroke1 = buildIIStroke()
-      const firstModel = canvas.model.clone()
-      firstModel.addSymbol(stroke1)
+    /**
+     * A ghost result is an overlay drawn from coordinates the recognizer sent in millimetres. It is
+     * not part of any symbol's record, so restoring records does not move it — it has to be carried
+     * by the same delta as its expression, or a move that is undone leaves the result behind.
+     */
+    test("undoing a move should carry the block's ghost result by the same delta, once", async () => {
+      const strokes = [buildIIStroke(), buildIIStroke(), buildIIStroke()]
+      const snapshots = strokes.map((stroke) => {
+        stroke.jiixBlockId = "block-1"
+        stroke.jiixBlockType = "Math"
+        const before = cloneSymbol(stroke) as TStroke
+        stroke.transform = MatrixTransform.identity().translate(50, 25)
+        canvas.model.addSymbol(stroke)
+        return { before, after: canvas.model.getSymbol(stroke.id) as TStroke }
+      })
+      canvas.math.hasGhostStrokes = jest.fn().mockReturnValue(true)
+      canvas.math.applyTransformToGhostStrokes = jest.fn()
+      canvas.math.clearGhostStrokes = jest.fn()
+      // Reversed the way `reverseChanges` does, so the replay restores the pre-move records.
       canvas.history.undo = jest.fn(() => ({
-        model: firstModel,
-        changes: { matrix: { matrix: { tx: 2, ty: 3, xx: 4, xy: 5, yx: 6, yy: 7 }, symbols: [stroke1] } },
+        updated: snapshots.map(({ before, after }) => ({ before: after, after: before })),
       }))
       canvas.history.context.canUndo = true
+
       await canvas.undo()
-      expect(canvas.client.undo).toHaveBeenCalledTimes(1)
-      expect(canvas.client.undo).toHaveBeenCalledWith(
-        expect.objectContaining({
-          matrix: { matrix: { tx: 2, ty: 3, xx: 4, xy: 5, yx: 6, yy: 7 }, strokes: [stroke1] },
-        })
+
+      // Once for the block, not once per stroke: all three carry the same transform and yield the
+      // same delta, and applying it three times moved the ghost by three times the distance.
+      expect(canvas.math.applyTransformToGhostStrokes).toHaveBeenCalledTimes(1)
+      expect(canvas.math.applyTransformToGhostStrokes).toHaveBeenCalledWith(
+        "block-1",
+        expect.objectContaining({ tx: -50, ty: -25 })
       )
-      expect(canvas.renderer.drawSymbol).toHaveBeenCalledTimes(1)
-      expect(canvas.renderer.drawSymbol).toHaveBeenCalledWith(stroke1)
+      // And it is moved, not thrown away: the result itself is still valid after a move.
+      expect(canvas.math.clearGhostStrokes).not.toHaveBeenCalled()
     })
-    test("should call client.undo & renderer.drawSymbol & renderer.removeSymbol when history.undo return translate", async () => {
-      const stroke1 = buildIIStroke()
-      const firstModel = canvas.model.clone()
-      firstModel.addSymbol(stroke1)
-      canvas.history.undo = jest.fn(() => ({
-        model: firstModel,
-        changes: { translate: [{ tx: 1, ty: 2, symbols: [stroke1] }] },
-      }))
+
+    /**
+     * The mirror case: undoing the stroke that completed the expression invalidates the result, so
+     * the ghost must go. The block id has to come from the document — a history entry holds a
+     * stroke as it was when written, and recognition assigns `jiixBlockId` only afterwards.
+     */
+    test("undoing a written stroke should clear the ghost of the block it belongs to now", async () => {
+      const stroke = buildIIStroke()
+      // The entry's snapshot, taken at write time: no block yet.
+      const asWritten = cloneSymbol(stroke) as TStroke
+      expect(asWritten.jiixBlockId).toBeUndefined()
+      // The document's record, after recognition assigned one.
+      stroke.jiixBlockId = "block-1"
+      stroke.jiixBlockType = "Math"
+      canvas.model.addSymbol(stroke)
+      canvas.math.hasGhostStrokes = jest.fn().mockReturnValue(true)
+      canvas.math.clearGhostStrokes = jest.fn()
+      canvas.history.undo = jest.fn(() => ({ erased: [asWritten] }))
       canvas.history.context.canUndo = true
+
       await canvas.undo()
-      expect(canvas.client.undo).toHaveBeenCalledTimes(1)
-      expect(canvas.client.undo).toHaveBeenCalledWith(
-        expect.objectContaining({ translate: [{ tx: 1, ty: 2, strokes: [stroke1] }] })
-      )
-      expect(canvas.renderer.drawSymbol).toHaveBeenCalledTimes(1)
-      expect(canvas.renderer.drawSymbol).toHaveBeenCalledWith(stroke1)
+
+      expect(canvas.math.clearGhostStrokes).toHaveBeenCalledWith("block-1")
     })
-    test("should call client.undo & renderer.drawSymbol & renderer.removeSymbol when history.undo return scale", async () => {
+
+    test("should restore the before-state of every updated pair and redraw it", async () => {
       const stroke1 = buildIIStroke()
-      const firstModel = canvas.model.clone()
-      firstModel.addSymbol(stroke1)
-      canvas.history.undo = jest.fn(() => ({
-        model: firstModel,
-        changes: { scale: [{ origin: { x: 1, y: 2 }, scaleX: 2, scaleY: 4, symbols: [stroke1] }] },
-      }))
+      const oldStroke1 = cloneSymbol(stroke1) as TStroke
+      canvas.model.addSymbol(stroke1)
+      canvas.history.undo = jest.fn(() => ({ updated: [{ before: stroke1, after: oldStroke1 }] }))
       canvas.history.context.canUndo = true
       await canvas.undo()
-      expect(canvas.client.undo).toHaveBeenCalledTimes(1)
-      expect(canvas.client.undo).toHaveBeenCalledWith(
-        expect.objectContaining({ scale: [{ origin: { x: 1, y: 2 }, scaleX: 2, scaleY: 4, strokes: [stroke1] }] })
-      )
-      expect(canvas.renderer.drawSymbol).toHaveBeenCalledTimes(1)
-      expect(canvas.renderer.drawSymbol).toHaveBeenCalledWith(stroke1)
+      // The document stores a copy of the entry rather than the entry itself, and `updateSymbol`
+      // stamps that copy — so compare everything but the timestamp it just set.
+      expect(canvas.model.symbols).toEqual([{ ...oldStroke1, modificationDate: expect.any(Number) }])
+      expect(canvas.renderer.drawSymbol).toHaveBeenCalledWith(oldStroke1)
     })
-    test("should call client.undo & renderer.drawSymbol & renderer.removeSymbol when history.undo return rotate", async () => {
-      const stroke1 = buildIIStroke()
-      const firstModel = canvas.model.clone()
-      firstModel.addSymbol(stroke1)
+
+    /**
+     * `updated` is a list of pairs, so one undoable step can restore symbols that were changed by
+     * different means — a transform records the symbols dragged *and* the connected edges recomputed
+     * from them. Each pair is independent; nothing about the list's order matters.
+     */
+    test("should restore every pair independently", async () => {
+      const strokeA = buildIIStroke()
+      const strokeB = buildIIStroke()
+      const restoredA = cloneSymbol(strokeA) as TStroke
+      const restoredB = cloneSymbol(strokeB) as TStroke
+      restoredA.style = { ...restoredA.style, color: "#ff0000" }
+      restoredB.style = { ...restoredB.style, width: 9 }
+      canvas.model.addSymbol(strokeA)
+      canvas.model.addSymbol(strokeB)
       canvas.history.undo = jest.fn(() => ({
-        model: firstModel,
-        changes: { rotate: [{ angle: 42, center: { x: 1, y: 2 }, symbols: [stroke1] }] },
+        updated: [
+          { before: strokeA, after: restoredA },
+          { before: strokeB, after: restoredB },
+        ],
       }))
       canvas.history.context.canUndo = true
+
       await canvas.undo()
-      expect(canvas.client.undo).toHaveBeenCalledTimes(1)
+
+      expect(canvas.model.getSymbol(strokeA.id)?.style.color).toBe("#ff0000")
+      expect(canvas.model.getSymbol(strokeB.id)?.style.width).toBe(9)
+    })
+
+    /**
+     * A restyle used to have a history form of its own, carrying the old and new styles. It reaches
+     * the replay as an ordinary pair now — the style is part of the record, so restoring the record
+     * restores it.
+     */
+    test("should restore a style through the same pair replay, and still tell the client", async () => {
+      const stroke1 = buildIIStroke()
+      canvas.model.addSymbol(stroke1)
+      const restored = cloneSymbol(stroke1) as TStroke
+      restored.style = { ...stroke1.style, color: "red" }
+      canvas.history.undo = jest.fn(() => ({ updated: [{ before: stroke1, after: restored }] }))
+      canvas.history.context.canUndo = true
+
+      await canvas.undo()
+
+      expect(canvas.model.symbols[0].style).toEqual(restored.style)
+      // The entry's own symbol is no longer mutated by the replay, so the redraw gets what the
+      // document now holds, not the pre-undo reference the test still has.
+      expect(canvas.renderer.drawSymbol).toHaveBeenCalledWith(restored)
+      // A restyle never reached the server before, because `style` had no backend form. As a pair
+      // it does, as a stroke replacement — the wire form carries the style.
       expect(canvas.client.undo).toHaveBeenCalledWith(
-        expect.objectContaining({ rotate: [{ angle: 42, center: { x: 1, y: 2 }, strokes: [stroke1] }] })
+        expect.objectContaining({ replaced: { oldStrokes: [stroke1], newStrokes: [restored] } })
       )
-      expect(canvas.renderer.drawSymbol).toHaveBeenCalledTimes(1)
-      expect(canvas.renderer.drawSymbol).toHaveBeenCalledWith(stroke1)
+    })
+
+    test("should leave the history entry itself untouched while replaying a pair", async () => {
+      // IIC-1972: the replay used to mutate the entry's symbols in place and store that same
+      // object, so the stack aliased the document and a second undo replayed a rewritten entry.
+      const stroke1 = buildIIStroke()
+      canvas.model.addSymbol(stroke1)
+      const entrySymbol = canvas.model.symbols[0] as TStroke
+      const restored = cloneSymbol(entrySymbol) as TStroke
+      restored.style = { ...entrySymbol.style, color: "red" }
+      const entryStyleBefore = { ...restored.style }
+      canvas.history.undo = jest.fn(() => ({ updated: [{ before: entrySymbol, after: restored }] }))
+      canvas.history.context.canUndo = true
+
+      await canvas.undo()
+
+      expect(canvas.model.symbols[0].style).toEqual(entryStyleBefore)
+      expect(restored.style).toEqual(entryStyleBefore)
+      expect(canvas.model.symbols[0]).not.toBe(restored)
+    })
+
+    test("should reorder the symbol and redraw when history.undo returns an order change, without calling client.undo", async () => {
+      const stroke1 = buildIIStroke()
+      canvas.model.addSymbol(stroke1)
+      canvas.model.changeOrderSymbol = jest.fn()
+      canvas.renderer.changeOrderSymbol = jest.fn()
+      canvas.history.undo = jest.fn(() => ({ order: { symbols: [stroke1], position: "first" } }))
+      canvas.history.context.canUndo = true
+      await canvas.undo()
+      expect(canvas.model.changeOrderSymbol).toHaveBeenNthCalledWith(1, stroke1.id, "first")
+      expect(canvas.renderer.changeOrderSymbol).toHaveBeenNthCalledWith(1, stroke1, "first")
+      expect(canvas.client.undo).toHaveBeenCalledTimes(0)
+    })
+    test("should still refresh the menu (updateLayerUI) even when client.undo rejects", async () => {
+      const stroke1 = buildIIStroke()
+      canvas.model.addSymbol(stroke1)
+      canvas.history.undo = jest.fn(() => ({ erased: [stroke1] }))
+      canvas.history.context.canUndo = true
+      canvas.client.undo = jest.fn(() => Promise.reject(new Error("socket closed")))
+      canvas.updateLayerUI = jest.fn()
+      await expect(canvas.undo()).rejects.toThrow("socket closed")
+      expect(canvas.updateLayerUI).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -884,6 +1583,7 @@ describe("CanvasOffscreen.ts", () => {
       canvas.client.redo = jest.fn(() => Promise.resolve())
       canvas.renderer.removeSymbol = jest.fn()
       canvas.renderer.drawSymbol = jest.fn()
+      canvas.renderer.replaceSymbol = jest.fn()
       canvas.menu.update = jest.fn()
       canvas.overlays.apply = jest.fn()
       canvas.client.waitForIdle = jest.fn(() => Promise.resolve())
@@ -898,10 +1598,8 @@ describe("CanvasOffscreen.ts", () => {
     })
     test("should call client.redo & renderer.drawSymbol when history.redo return added stroke", async () => {
       const stroke1 = buildIIStroke()
-      const secondModel = canvas.model.clone()
-      secondModel.addSymbol(stroke1)
       canvas.history.context.canRedo = true
-      canvas.history.redo = jest.fn(() => ({ model: secondModel, changes: { added: [stroke1] } }))
+      canvas.history.redo = jest.fn(() => ({ added: [stroke1] }))
       await canvas.redo()
       expect(canvas.client.redo).toHaveBeenCalledTimes(1)
       expect(canvas.renderer.drawSymbol).toHaveBeenCalledTimes(1)
@@ -910,9 +1608,7 @@ describe("CanvasOffscreen.ts", () => {
     })
     test("should not call client.redo & call renderer.drawSymbol when history.redo return added shape", async () => {
       const circle = buildIICircle()
-      const firstModel = canvas.model.clone()
-      firstModel.addSymbol(circle)
-      canvas.history.redo = jest.fn(() => ({ model: firstModel, changes: { added: [circle] } }))
+      canvas.history.redo = jest.fn(() => ({ added: [circle] }))
       canvas.history.context.canRedo = true
       await canvas.redo()
       expect(canvas.client.redo).toHaveBeenCalledTimes(0)
@@ -922,9 +1618,8 @@ describe("CanvasOffscreen.ts", () => {
     })
     test("should call client.redo & renderer.removeSymbol when history.redo return erased stroke", async () => {
       const stroke1 = buildIIStroke()
-      const firstModel = canvas.model.clone()
       canvas.model.addSymbol(stroke1)
-      canvas.history.redo = jest.fn(() => ({ model: firstModel, changes: { erased: [stroke1] } }))
+      canvas.history.redo = jest.fn(() => ({ erased: [stroke1] }))
       canvas.history.context.canRedo = true
       await canvas.redo()
       expect(canvas.client.redo).toHaveBeenCalledTimes(1)
@@ -933,26 +1628,29 @@ describe("CanvasOffscreen.ts", () => {
       expect(canvas.renderer.removeSymbol).toHaveBeenCalledTimes(1)
       expect(canvas.renderer.removeSymbol).toHaveBeenCalledWith(stroke1.id)
     })
-    test("should call client.redo & renderer.drawSymbol & renderer.removeSymbol when history.redo return replaced stroke", async () => {
+    test("should call client.redo & renderer.replaceSymbol when history.redo return replaced stroke", async () => {
       const stroke1 = buildIIStroke()
       const stroke2 = buildIIStroke()
-      const firstModel = canvas.model.clone()
-      firstModel.addSymbol(stroke1)
-      canvas.model.addSymbol(stroke2)
-      canvas.history.redo = jest.fn(() => ({
-        model: firstModel,
-        changes: { replaced: { newSymbols: [stroke2], oldSymbols: [stroke1] } },
-      }))
+      canvas.model.addSymbol(stroke1)
+      canvas.history.redo = jest.fn(() => ({ replaced: { oldSymbols: [stroke1], newSymbols: [stroke2] } }))
       canvas.history.context.canRedo = true
       await canvas.redo()
       expect(canvas.client.redo).toHaveBeenCalledTimes(1)
       expect(canvas.client.redo).toHaveBeenCalledWith(
-        expect.objectContaining({ replaced: { newStrokes: [stroke2], oldStrokes: [stroke1] } })
+        expect.objectContaining({ replaced: { oldStrokes: [stroke1], newStrokes: [stroke2] } })
       )
-      expect(canvas.renderer.drawSymbol).toHaveBeenCalledTimes(1)
-      expect(canvas.renderer.drawSymbol).toHaveBeenCalledWith(stroke1)
-      expect(canvas.renderer.removeSymbol).toHaveBeenCalledTimes(1)
-      expect(canvas.renderer.removeSymbol).toHaveBeenCalledWith(stroke2.id)
+      expect(canvas.renderer.replaceSymbol).toHaveBeenCalledTimes(1)
+      expect(canvas.renderer.replaceSymbol).toHaveBeenCalledWith(stroke1.id, [stroke2])
+      expect(canvas.model.symbols).toEqual([stroke2])
+    })
+    test("should still refresh the menu (updateLayerUI) even when client.redo rejects", async () => {
+      const stroke1 = buildIIStroke()
+      canvas.history.redo = jest.fn(() => ({ added: [stroke1] }))
+      canvas.history.context.canRedo = true
+      canvas.client.redo = jest.fn(() => Promise.reject(new Error("socket closed")))
+      canvas.updateLayerUI = jest.fn()
+      await expect(canvas.redo()).rejects.toThrow("socket closed")
+      expect(canvas.updateLayerUI).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -971,9 +1669,33 @@ describe("CanvasOffscreen.ts", () => {
       expect(canvas.event.emitError).toHaveBeenCalledTimes(1)
     })
 
+    test("should resolve every caller when concurrent exports both see the model change", async () => {
+      // The bug this guards: the second superseded export cleared the debounce timer of the
+      // first without arming a new one, so the retry they shared never ran and both waited
+      // forever — a synchronizer among them blocked every later sync.
+      const racingCanvas = new InteractiveInkCanvas(document.createElement("div"), CanvasOptions)
+      let calls = 0
+      racingCanvas.client.export = jest.fn(async () => {
+        calls++
+        // Each of the two first answers lands after the model changed under it
+        if (calls <= 2) racingCanvas.model.addSymbol(buildIIStroke())
+        return { "application/vnd.myscript.jiix": jiixText }
+      })
+      const settled = (promise: Promise<unknown>) =>
+        Promise.race([
+          promise.then(() => "resolved"),
+          new Promise((resolve) => setTimeout(() => resolve("pending"), 2000)),
+        ])
+
+      const results = await Promise.all([settled(racingCanvas.export()), settled(racingCanvas.export())])
+
+      expect(results).toEqual(["resolved", "resolved"])
+      expect(calls).toBe(3)
+    })
+
     test("should only request mimeTypes not already cached in model.exports", async () => {
       const cachedCanvas = new InteractiveInkCanvas(document.createElement("div"), CanvasOptions)
-      cachedCanvas.model.exports = { "text/plain": "already cached" }
+      cachedCanvas.model.mergeExport({ "text/plain": "already cached" })
       cachedCanvas.client.export = jest.fn(() =>
         Promise.resolve({ "application/vnd.myscript.jiix": jiixText })
       )
@@ -990,7 +1712,7 @@ describe("CanvasOffscreen.ts", () => {
 
     test("should not call client.export at all when every requested mimeType is already cached", async () => {
       const cachedCanvas = new InteractiveInkCanvas(document.createElement("div"), CanvasOptions)
-      cachedCanvas.model.exports = { "text/plain": "already cached" }
+      cachedCanvas.model.mergeExport({ "text/plain": "already cached" })
       cachedCanvas.client.export = jest.fn()
 
       const result = await cachedCanvas.export(["text/plain"])
@@ -1010,7 +1732,7 @@ describe("CanvasOffscreen.ts", () => {
 
     test("should not call client.export when no mimeTypes requested but the client's defaults are already cached", async () => {
       const freshCanvas = new InteractiveInkCanvas(document.createElement("div"), CanvasOptions)
-      freshCanvas.model.exports = { "application/vnd.myscript.jiix": jiixText }
+      freshCanvas.model.mergeExport({ "application/vnd.myscript.jiix": jiixText })
       freshCanvas.client.export = jest.fn()
 
       const result = await freshCanvas.export()
@@ -1041,7 +1763,8 @@ describe("CanvasOffscreen.ts", () => {
       canvas.event.emitError = jest.fn()
       await expect(async () => await canvas.convert()).rejects.toEqual("convert-error")
       expect(canvas.event.emitError).toHaveBeenCalledTimes(1)
-      expect(canvas.event.emitError).toHaveBeenCalledWith("convert-error")
+      // A rejection that is not an Error reaches the error listeners as one, as their type says
+      expect(canvas.event.emitError).toHaveBeenCalledWith(new Error("convert-error"))
     })
   })
 
@@ -1127,6 +1850,119 @@ describe("CanvasOffscreen.ts", () => {
     })
   })
 
+  describe("clear failure handling", () => {
+    const buildCanvas = async (clearImpl: () => Promise<void>) => {
+      const canvas = new InteractiveInkCanvas(document.createElement("div"), CanvasOptions)
+      canvas.overlays.apply = jest.fn()
+      canvas.selector.removeSelectedGroup = jest.fn()
+      canvas.renderer.clear = jest.fn()
+      canvas.client.init = jest.fn(() => Promise.resolve())
+      canvas.client.clear = jest.fn(clearImpl)
+      await canvas.initialize()
+      canvas.model.addSymbol(buildIIStroke())
+      return canvas
+    }
+
+    test("should route a client.clear rejection through manageError", async () => {
+      const boom = new Error("server refused the clear")
+      const canvas = await buildCanvas(() => Promise.reject(boom))
+      const onError = jest.fn()
+      canvas.event.addErrorListener(onError)
+
+      await canvas.clear()
+
+      expect(canvas.client.clear).toHaveBeenCalledTimes(1)
+      expect(onError).toHaveBeenCalledWith(boom)
+    })
+
+    test("should not leave the Recognizing operation active when client.clear rejects", async () => {
+      const canvas = await buildCanvas(() => Promise.reject(new Error("server refused the clear")))
+
+      await canvas.clear()
+
+      // onContentChanged - which bulk-clears "Recognizing" - is driven by the client's
+      // contentChanged event, so a failed clear would otherwise never clear the badge.
+      expect(canvas.hasOperation("Recognizing")).toBe(false)
+    })
+
+    test("should keep the Recognizing operation active when client.clear succeeds", async () => {
+      const canvas = await buildCanvas(() => Promise.resolve())
+
+      await canvas.clear()
+
+      // Unchanged behaviour: "Recognizing" accumulates across calls and is cleared in one shot
+      // by the debounced synchronize, exactly as undo/redo and the other backend calls do.
+      expect(canvas.hasOperation("Recognizing")).toBe(true)
+    })
+
+    test("should not resolve before client.clear has settled", async () => {
+      let settled = false
+      const canvas = await buildCanvas(
+        () =>
+          new Promise<void>((resolve) =>
+            setTimeout(() => {
+              settled = true
+              resolve()
+            }, 0)
+          )
+      )
+
+      await canvas.clear()
+
+      expect(settled).toBe(true)
+    })
+  })
+
+  describe("destroy — manager teardown", () => {
+    const buildCanvas = () => {
+      const canvas = new InteractiveInkCanvas(document.createElement("div"), CanvasOptions)
+      canvas.client.destroy = jest.fn()
+      canvas.renderer.destroy = jest.fn()
+      canvas.eraser.detach = jest.fn()
+      canvas.selector.detach = jest.fn()
+      canvas.move.detach = jest.fn()
+      canvas.writer.detach = jest.fn()
+      return canvas
+    }
+
+    // Enumerates the canvas at runtime rather than hard-coding a list, so a manager added later
+    // without being wired into the teardown fails here instead of leaking silently.
+    const spyOnEveryManager = (canvas: InteractiveInkCanvas) => {
+      const spies = new Map<string, jest.Mock>()
+      for (const [name, value] of Object.entries(canvas)) {
+        if (value instanceof IIAbstractManager) {
+          const spy = jest.fn()
+          value.destroy = spy
+          spies.set(name, spy)
+        }
+      }
+      return spies
+    }
+
+    test("should destroy every manager it owns", async () => {
+      const canvas = buildCanvas()
+      const spies = spyOnEveryManager(canvas)
+      expect(spies.size).toBeGreaterThan(10)
+
+      await canvas.destroy()
+
+      const missed = [...spies.entries()].filter(([, spy]) => spy.mock.calls.length === 0).map(([name]) => name)
+      expect(missed).toEqual([])
+    })
+
+    test("should destroy each manager exactly once", async () => {
+      const canvas = buildCanvas()
+      const spies = spyOnEveryManager(canvas)
+
+      await canvas.destroy()
+
+      const wrongCount = [...spies.entries()]
+        .filter(([, spy]) => spy.mock.calls.length !== 1)
+        .map(([name, spy]) => `${name}:${spy.mock.calls.length}`)
+      expect(wrongCount).toEqual([])
+    })
+  })
+
   describe("destroy", () => {
     const canvas = new InteractiveInkCanvas(document.createElement("div"), CanvasOptions)
     canvas.eraser.detach = jest.fn()
@@ -1153,6 +1989,22 @@ describe("CanvasOffscreen.ts", () => {
     test("should call client.destroy", async () => {
       canvas.destroy()
       await expect(canvas.client.destroy).toHaveBeenCalledTimes(1)
+    })
+
+    test("should remove all event listeners", async () => {
+      const rootElement = document.createElement("div")
+      const otherCanvas = new InteractiveInkCanvas(rootElement, CanvasOptions)
+      otherCanvas.event.removeAllListeners = jest.fn()
+      await otherCanvas.destroy()
+      expect(otherCanvas.event.removeAllListeners).toHaveBeenCalledTimes(1)
+    })
+
+    test("should clear rootElement.iink so the element doesn't keep a reference to the destroyed canvas", async () => {
+      const rootElement = document.createElement("div")
+      const otherCanvas = new InteractiveInkCanvas(rootElement, CanvasOptions)
+      expect(rootElement.iink).toBe(otherCanvas)
+      await otherCanvas.destroy()
+      expect(rootElement.iink).toBeUndefined()
     })
   })
 
@@ -1246,7 +2098,7 @@ describe("CanvasOffscreen.ts", () => {
         const stroke2 = buildIIStroke()
         canvas.model.addSymbol(stroke1)
         canvas.model.addSymbol(stroke2)
-        canvas.model.selectedIds.add(stroke1.id)
+        canvas.model.selectSymbol(stroke1.id)
 
         canvas.copy()
 
@@ -1278,8 +2130,8 @@ describe("CanvasOffscreen.ts", () => {
         const decorator = buildIIDecorator(DecoratorKind.Highlight)
         canvas.model.addSymbol(stroke)
         canvas.model.addSymbol(decorator)
-        canvas.model.selectedIds.add(stroke.id)
-        canvas.model.selectedIds.add(decorator.id)
+        canvas.model.selectSymbol(stroke.id)
+        canvas.model.selectSymbol(decorator.id)
 
         canvas.copy()
 
@@ -1294,8 +2146,8 @@ describe("CanvasOffscreen.ts", () => {
         solverStroke.isSolverOutput = true
         canvas.model.addSymbol(stroke)
         canvas.model.addSymbol(solverStroke)
-        canvas.model.selectedIds.add(stroke.id)
-        canvas.model.selectedIds.add(solverStroke.id)
+        canvas.model.selectSymbol(stroke.id)
+        canvas.model.selectSymbol(solverStroke.id)
 
         canvas.copy()
 
@@ -1334,9 +2186,16 @@ describe("CanvasOffscreen.ts", () => {
 
         const drawn = (canvas.renderer.drawSymbol as jest.Mock).mock.calls[0][0] as TStroke
         const offset = InteractiveInkCanvas.PASTE_OFFSET
+        // `#cloneSymbolForPaste` goes through `transform.translate.applyToSymbol`, which composes
+        // the offset onto the clone's matrix rather than moving its raw pointers — so the pasted
+        // clone's own `pointers` stay identical to the original, and only `SymbolGeometry` (which
+        // applies the matrix) reports the offset position.
+        expect(drawn.pointers).toEqual(stroke.pointers)
+        expect(drawn.transform).toEqual({ xx: 1, yx: 0, xy: 0, yy: 1, tx: offset, ty: offset })
         drawn.pointers.forEach((p, i) => {
-          expect(p.x).toBeCloseTo(stroke.pointers[i].x + offset)
-          expect(p.y).toBeCloseTo(stroke.pointers[i].y + offset)
+          const drawnPoint = SymbolGeometry.verticesOf(drawn)[i]
+          expect(drawnPoint.x).toBeCloseTo(p.x + offset)
+          expect(drawnPoint.y).toBeCloseTo(p.y + offset)
         })
       })
 
@@ -1372,7 +2231,7 @@ describe("CanvasOffscreen.ts", () => {
       test("should remove selected symbols", async () => {
         const stroke = buildIIStroke()
         canvas.model.addSymbol(stroke)
-        canvas.model.selectedIds.add(stroke.id)
+        canvas.model.selectSymbol(stroke.id)
 
         await canvas.cut()
 
@@ -1383,7 +2242,7 @@ describe("CanvasOffscreen.ts", () => {
       test("should copy symbols before removing", async () => {
         const stroke = buildIIStroke()
         canvas.model.addSymbol(stroke)
-        canvas.model.selectedIds.add(stroke.id)
+        canvas.model.selectSymbol(stroke.id)
 
         await canvas.cut()
 

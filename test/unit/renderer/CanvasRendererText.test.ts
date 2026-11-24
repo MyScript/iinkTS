@@ -1,4 +1,4 @@
-import { CanvasRendererText, DefaultPenStyle, TCanvasTextSymbol, TCanvasTextUnderlineSymbol } from "@/iink"
+import { CanvasRendererText, DefaultPenStyle, MatrixTransform, TCanvasTextSymbol, TCanvasTextUnderlineSymbol } from "@/iink"
 
 describe("CanvasRendererText.ts", () => {
   const canvas: HTMLCanvasElement = document.createElement("canvas")
@@ -24,6 +24,7 @@ describe("CanvasRendererText.ts", () => {
       label: "a",
       style: DefaultPenStyle,
       type: canvasRendererText.symbols.char,
+      transform: MatrixTransform.identity(),
     }
     canvasRendererText.draw(canvasContext, text)
     expect(canvasContext.fillText).toHaveBeenCalledTimes(1)
@@ -49,6 +50,7 @@ describe("CanvasRendererText.ts", () => {
       label: "hello",
       style: DefaultPenStyle,
       type: canvasRendererText.symbols.string,
+      transform: MatrixTransform.identity(),
     }
     canvasRendererText.draw(canvasContext, text)
     expect(canvasContext.fillText).toHaveBeenCalledTimes(1)
@@ -85,8 +87,10 @@ describe("CanvasRendererText.ts", () => {
           },
           style: DefaultPenStyle,
           type: "pouet",
+          transform: MatrixTransform.identity(),
         },
       ],
+      transform: MatrixTransform.identity(),
     }
     canvasRendererText.draw(canvasContext, text)
     expect(canvasContext.fillText).toHaveBeenCalledTimes(1)

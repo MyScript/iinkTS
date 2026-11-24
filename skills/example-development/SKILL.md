@@ -16,18 +16,22 @@ All examples follow a consistent pattern in `examples/` directory.
 ```
 examples/
 ├── index.html                 # Example gallery/landing page
+├── dev-env-loader.js          # loads .env.local credentials into localStorage on localhost (generated part: dev-env-loader.generated.js)
 ├── assets/                    # Shared assets
-│   ├── img/                   # Icons, gestures/ subfolder, logos
-│   ├── style/                 # Shared CSS (reset, components, examples, inputs, panel)
-│   └── js/                    # theme.js (dark/light toggle)
+│   ├── img/                   # Icons, gestures/ and gallery/ subfolders, logos
+│   ├── style/                 # Shared CSS (reset, components, examples, inputs, panel, home, …)
+│   ├── js/                    # theme.js / theme-init.js (dark/light toggle), connection.js
+│   └── datas/, desmos/, renderjson/  # sample data and third-party helpers
 ├── components/
 │   ├── modal/                 # modalCanvasOptions.js — ModalCanvasOptions class + modal.css
-│   └── code-viewer/            # code-viewer.js — inline source viewer widget
-├── interactive-canvas/        # WebSocket (InteractiveInkCanvas) examples — 19 files
-├── interactive-canvas-ssr/    # WebSocket SSR (InteractiveInkSSRCanvas) examples — 28 files
-├── canvas/                    # HTTP (InkCanvas v2, InkCanvasDeprecated v1) examples — 16 files
-├── non-specific/              # Configuration demos — 2 files
-├── custom-rendering/          # Third-party integrations (tldraw-websocket-client/)
+│   ├── code-viewer/           # code-viewer.js — inline source viewer widget
+│   └── ink-overlay/           # ink-overlay.js
+├── interactive-canvas/        # WebSocket (InteractiveInkCanvas) examples — 31 pages (+ showcase.js, math_tutor/)
+├── interactive-canvas-ssr/    # WebSocket SSR (InteractiveInkSSRCanvas) examples — 28 pages
+├── canvas/                    # HTTP (InkCanvas v2, InkCanvasDeprecated v1) examples — 18 pages
+├── non-specific/              # Configuration demos — 2 pages
+├── server-signing/            # HMAC signed by a server: server.js + server_signing.html (no credential in the page)
+├── custom-rendering/          # Third-party integrations (tldraw-websocket-client/, excalidraw-websocket-client/)
 └── dev/                       # Development utilities (the only example still using the UMD build)
 ```
 
@@ -35,18 +39,18 @@ Matching E2E specs live in `test/examples/{same-subdir}/*.test.js` (real extensi
 
 ### Example Categories
 
-**Interactive Canvas Examples** (`interactive-canvas/` — 19 files, pattern `interactive_canvas_{feature}.html`)
+**Interactive Canvas Examples** (`interactive-canvas/` — 31 pages, pattern `interactive_canvas_{feature}.html`)
 
-Real-time recognition using WebSocket protocol (`InteractiveInkCanvas`): `interactive_canvas_get_started.html`, `_connection_status`, `_create_symbols`, `_default_options`, `_gestures`, `_keyboard_shortcuts`, `_live_monitor`, `_math_computation_modes`, `_math_context_menu`, `_math_dependencies`, `_math_variables`, `_menu_config`, `_minimap`, `_override_menu`, `_selection`, `_showcase`, `_stroke_playback`, `_style`, `_zoom_pan`.
+Real-time recognition using WebSocket protocol (`InteractiveInkCanvas`): `interactive_canvas_get_started.html`, `_connection_status`, `_create_symbols`, `_default_options`, `_diagram_connections`, `_diagram_flowchart_runner`, `_diagram_inspector`, `_export`, `_export_llm`, `_export_markdown`, `_export_mermaid`, `_export_pdf`, `_export_plantuml`, `_gestures`, `_keyboard_shortcuts`, `_live_monitor`, `_math_computation_modes`, `_math_context_menu`, `_math_dependencies`, `_math_tutor`, `_math_variables`, `_menu_config`, `_menu_layout`, `_menu_override`, `_minimap`, `_pen_nibs`, `_selection`, `_showcase`, `_stroke_playback`, `_style`, `_zoom_pan`.
 
-**Interactive Canvas SSR Examples** (`interactive-canvas-ssr/` — 28 files)
+**Interactive Canvas SSR Examples** (`interactive-canvas-ssr/` — 28 pages)
 
 Server-side-rendered WebSocket variant (`InteractiveInkSSRCanvas`).
 
-**Canvas (HTTP) Examples** (`canvas/` — 16 files)
+**Canvas (HTTP) Examples** (`canvas/` — 18 pages)
 
 Batch recognition using HTTP API:
-- **v2 (current, `InkCanvas`)**: `canvas_v2_text.html`, `_math`, `_shape`, `_raw_content`, `_text_vertical_japanese`, `_multi_canvas_exam`, `_multi_canvas_grading`
+- **v2 (current, `InkCanvas`)**: `canvas_v2_text.html`, `_math`, `_math_with_graph`, `_shape`, `_raw_content`, `_text_import_strokes`, `_text_vertical_japanese`, `_multi_canvas_exam`, `_multi_canvas_grading`
 - **v1 (deprecated, `InkCanvasDeprecated`)**: `canvas_v1_text.html`, `_math`, `_diagram`, `_diagram_import`, `_text_styling`, `_raw_content`, `_no_ui`, `_custom_client`, `_custom_grabber`
 
 **Non-Specific Examples** (`non-specific/` — 2 files)
@@ -56,6 +60,8 @@ Batch recognition using HTTP API:
 **Custom Rendering** (`custom-rendering/`)
 
 `tldraw-websocket-client/index.html` — third-party integration with the tldraw canvas library.
+
+`excalidraw-websocket-client/index.html` — the same with Excalidraw. Excalidraw draws on a `<canvas>`, so its E2E test reads the scene through `window.excalidrawAPI` instead of the DOM.
 
 ## Example Template
 
@@ -249,32 +255,32 @@ Or the typed wrapper: `canvas.event.addExportedListener((exports) => { ... })`.
 ### Import Content
 
 There is no generic `import(jiix, mimeType)` on `InteractiveInkCanvas`/`InkCanvas`. Real options:
-- `canvas.importPointEvents(strokes: TPartialDeep<TStroke>[])` — replays raw point/stroke data (see `examples/canvas/canvas_v1_diagram_import.html`).
+- `canvas.importPointEvents(strokes)` — replays raw point/stroke data, on `InteractiveInkCanvas`, `InteractiveInkSSRCanvas` and `InkCanvasDeprecated` (see `examples/canvas/canvas_v1_diagram_import.html`).
+- `InkCanvas.importStrokes(strokes: TPartialDeep<TStroke>[])` — the `INK_V2` equivalent, returns the recognition (see `examples/canvas/canvas_v2_text_import_strokes.html`).
+- `InteractiveInkCanvas.addSymbols(symbols)` — add already-built symbols (see `interactive_canvas_create_symbols.html`).
 - `InteractiveInkSSRCanvas.import(data: Blob | string | TJIIXExport, mimeType?: string)` — JIIX/content import, unique to the SSR variant.
 
 ### Custom Styling
 
 ```javascript
+// INK_V2 / INK_V1: initial pen style in the configuration
 const canvasOptions = {
   configuration: {
     recognition: { /* ... */ },
-  },
-  penStyle: {
-    color: '#2E7D32',
-    width: 2,
-    '-myscript-pen-width': 2,
-    '-myscript-pen-fill-style': 'none',
-    '-myscript-pen-fill-color': '#FFFFFF00',
+    penStyle: { color: '#2E7D32', width: 2 },
   },
 }
+
+// Any variant, after load: style of the next strokes (TStyle: color, width, opacity, pen, …)
+canvas.penStyle = { color: '#2E7D32', width: 2, pen: 'fountain' }
 ```
 
-See `examples/canvas/canvas_v1_text_styling.html` for a full example. `canvas.penStyle = { ... }` can also be set after load to restyle at runtime.
+`INK_V1` also accepts the legacy `-myscript-pen-*` properties (`TPenStyle`), see `examples/canvas/canvas_v1_text_styling.html`. Pen nibs: `interactive_canvas_pen_nibs.html`.
 
 ### Tool Switching
 
 ```javascript
-import { CanvasTool } from '../../dist/iink.esm.js'  // enum defined in src/Constants.ts
+import { CanvasTool } from '../../dist/iink.esm.js'  // enum defined in src/manager/base/CanvasTool.ts
 
 canvas.tool = CanvasTool.Erase
 canvas.tool = CanvasTool.Write
@@ -292,13 +298,14 @@ const canvasOptions = {
     recognition: {
       type: 'MATH',
       math: {
-        customGrammarContent: '<grammar>...</grammar>',
-        customResources: ['customSymbol1', 'customSymbol2'],
+        customGrammarContent: '<grammar>...</grammar>',  // or customGrammarId
       },
     },
   },
 }
 ```
+
+Text recognition takes `text.customResources: string[]` and `text.customLexicon` instead.
 
 ## Development Workflow
 
@@ -326,7 +333,7 @@ Edit `examples/index.html` and add a card linking to the new page (see existing 
 yarn dev
 
 # E2E testing — add a spec under the matching test/examples/{category}/ dir
-yarn test:examples -- interactive-canvas-my-feature.test.js
+PROJECT="Desktop Chrome" yarn test:examples interactive-canvas-my-feature
 ```
 
 ## Debugging Examples
@@ -337,7 +344,7 @@ yarn test:examples -- interactive-canvas-my-feature.test.js
 2. Open DevTools (F12)
 3. Check Console for errors
 4. Network tab for WebSocket/HTTP traffic
-5. Sources tab for debugging (sources under webpack://)
+5. Sources tab for debugging (`yarn dev` builds with source maps, the TS sources show under `src/`)
 
 ### Common Issues
 
@@ -396,7 +403,7 @@ ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
 
 ### Shared Styles
 
-`examples/assets/style/`: `reset.css`, `components.css`, `examples.css`, `inputs.css`, `panel.css`.
+`examples/assets/style/`: `reset.css`, `components.css`, `examples.css`, `inputs.css`, `panel.css`, `home.css` (index page), `my-custom-classes.css`, `renderjson.css`.
 
 ## Mobile Considerations
 
@@ -420,7 +427,7 @@ Test on actual devices or Chrome DevTools device emulation.
 ✅ **Do** `await canvas?.destroy()` before creating a new one
 ✅ **Do** add meaningful titles and descriptions
 
-❌ **Don't** hardcode credentials (use `ModalCanvasOptions` for testing)
+❌ **Don't** hardcode credentials (`.env.local` + `dev-env-loader.js` locally, `ModalCanvasOptions` otherwise; `server.sign` in production)
 ❌ **Don't** forget mobile viewport meta tags
 ❌ **Don't** invent methods not present on the target canvas variant (e.g. generic `import()` on `InteractiveInkCanvas`)
 ❌ **Don't** create duplicate functionality (reuse `components/`)

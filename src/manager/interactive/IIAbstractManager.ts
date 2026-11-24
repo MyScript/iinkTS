@@ -1,5 +1,4 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import type { InteractiveInkCanvasConfiguration } from "@/canvas/variants/InteractiveInkCanvasConfiguration"
+import type { TInteractiveInkCanvas } from "@/canvas"
 import type { WebSocketClient } from "@/client"
 import type { Logger, LoggerCategory } from "@/logger"
 import { LoggerManager } from "@/logger"
@@ -103,7 +102,7 @@ export abstract class IIAbstractManager {
    * Get the configuration from the canvas
    * Convenience getter to avoid accessing canvas.configuration everywhere
    */
-  get configuration(): InteractiveInkCanvasConfiguration {
+  get configuration(): TInteractiveInkCanvas["configuration"] {
     return this.canvas.configuration
   }
 

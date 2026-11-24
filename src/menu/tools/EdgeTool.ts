@@ -1,10 +1,11 @@
 import lineIcon from "@/assets/svg/linear.svg"
 import arrowIcon from "@/assets/svg/linear-arrow.svg"
 import doubleArrowIcon from "@/assets/svg/linear-double-arrow.svg"
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import { CanvasTool, CanvasWriteTool } from "@/Constants"
-import type { TMenuItemBase } from "@/menu/items/BaseMenuItem"
-import { BaseMenuItem } from "@/menu/items/BaseMenuItem"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import { CanvasTool, CanvasWriteTool } from "@/manager"
+
+import type { TMenuItemBase } from "../items/BaseMenuItem"
+import { BaseMenuItem } from "../items/BaseMenuItem"
 
 type TEdgeToolConfig = TMenuItemBase & {
   type: "edge"
@@ -49,7 +50,7 @@ export class EdgeTool extends BaseMenuItem<HTMLDivElement> {
       }
       button.classList.add("active")
 
-      const subMenuContent = this.element?.querySelector(".sub-menu-content-edge")
+      const subMenuContent = this.element?.querySelector(".sub-menu-content")
       subMenuContent?.classList.remove("open")
     })
 
@@ -73,7 +74,7 @@ export class EdgeTool extends BaseMenuItem<HTMLDivElement> {
     subMenuContent.appendChild(this.createEdgeButton(doubleArrowIcon, CanvasWriteTool.DoubleArrow, "Double Arrow"))
 
     const content = this.dom.div({
-      className: ["sub-menu-content", "top"],
+      className: ["sub-menu-content", this.openPosition ?? "top"],
     })
     content.appendChild(subMenuContent)
 
@@ -84,7 +85,10 @@ export class EdgeTool extends BaseMenuItem<HTMLDivElement> {
     wrapper.appendChild(content)
 
     // Event listeners
-    this.triggerButton.addEventListener("pointerdown", () => content.classList.toggle("open"))
+    this.triggerButton.addEventListener("pointerdown", () => {
+      this.canvas.tool = CanvasTool.Write
+      content.classList.toggle("open")
+    })
     this.#documentPointerdownHandler = (e: PointerEvent) => {
       if (!wrapper.contains(e.target as HTMLElement)) {
         content.classList.remove("open")
@@ -112,13 +116,14 @@ export class EdgeTool extends BaseMenuItem<HTMLDivElement> {
       this.canvas.tool === CanvasTool.Write &&
       [CanvasWriteTool.Line, CanvasWriteTool.Arrow, CanvasWriteTool.DoubleArrow].includes(this.canvas.writer.tool)
 
+    this.subMenuButtons.forEach((btn) => btn.classList.remove("active"))
+
     if (isEdgeTool) {
       this.triggerButton.classList.add("active")
       const activeButton = this.subMenuButtons.get(this.canvas.writer.tool)
       activeButton?.classList.add("active")
     } else {
       this.triggerButton.classList.remove("active")
-      this.subMenuButtons.forEach((btn) => btn.classList.remove("active"))
     }
 
     this.updateDisabled()

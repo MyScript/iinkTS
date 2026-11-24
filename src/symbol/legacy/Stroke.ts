@@ -1,10 +1,9 @@
+import type { TPartialDeep, TPointer } from "@/core"
+import { createUUID, MatrixTransform, resolvePointerDelta, type TMatrixTransform } from "@/core"
 import type { TPenStyle } from "@/style"
 import { DefaultPenStyle } from "@/style"
-import type { TPartialDeep } from "@/utils"
-import { createUUID } from "@/utils"
 
-import type { TPointer } from "../primitives/Point"
-import type { TStrokeMinimal } from "../stroke"
+import type { TStrokeCapture } from "../stroke"
 import type { TBaseSymbol } from "../Symbol"
 import { SymbolType } from "../Symbol"
 
@@ -13,9 +12,8 @@ import { SymbolType } from "../Symbol"
  * @deprecated Use {@link TStroke} from stroke/ for new code
  */
 export type TLegacyStroke = TBaseSymbol &
-  TStrokeMinimal & {
+  TStrokeCapture & {
     style: TPenStyle
-    length: number
   }
 
 /**
@@ -30,7 +28,7 @@ export class Stroke implements TLegacyStroke {
   style: TPenStyle
   pointerType: string
   pointers: TPointer[]
-  length: number
+  transform: TMatrixTransform
 
   constructor(style: TPenStyle, pointerType = "pen") {
     this.id = `${this.type}-${createUUID()}`
@@ -39,7 +37,7 @@ export class Stroke implements TLegacyStroke {
     this.style = style
     this.pointerType = pointerType
     this.pointers = []
-    this.length = 0
+    this.transform = MatrixTransform.identity()
   }
 
   clone(): Stroke {
@@ -48,14 +46,14 @@ export class Stroke implements TLegacyStroke {
     clone.creationTime = this.creationTime
     clone.modificationDate = this.modificationDate
     clone.pointers = structuredClone(this.pointers)
-    clone.length = this.length
+    clone.transform = { ...this.transform }
     return clone
   }
 }
 
 /**
  * @group Symbol
- * @deprecated Use {@link StrokeOps.createFromPartial} from stroke/ for new code
+ * @deprecated Use {@link StrokeUtil.createFromPartial} from stroke/ for new code
  */
 export function convertPartialStrokesToStrokes(json: TPartialDeep<TLegacyStroke>[]): Stroke[] {
   const errors: string[] = []
@@ -71,7 +69,8 @@ export function convertPartialStrokesToStrokes(json: TPartialDeep<TLegacyStroke>
       flag = false
       return
     }
-    j.pointers?.forEach((pp, pIndex) => {
+    const sourcePointers = j.pointers ?? []
+    sourcePointers.forEach((pp, pIndex) => {
       if (!pp) {
         errors.push(`stroke ${ji + 1} has no pointer at ${pIndex}`)
         flag = false
@@ -79,7 +78,7 @@ export function convertPartialStrokesToStrokes(json: TPartialDeep<TLegacyStroke>
       }
       const pointer: TPointer = {
         p: pp.p || 1,
-        t: pp.t || pIndex,
+        dt: resolvePointerDelta(sourcePointers, pIndex),
         x: 0,
         y: 0,
       }

@@ -1,12 +1,12 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import type { TInteractiveInkCanvas } from "@/canvas"
 import type { TIIHistoryChanges } from "@/history"
-import { GestureHandler } from "@/manager/interactive/gestures/GestureHandler"
-import type { GestureHelpers } from "@/manager/interactive/gestures/GestureHelpers"
-import type { TGesture } from "@/manager/interactive/gestures/GestureTypes"
 import type { TStroke, TText } from "@/symbol"
 import { SymbolType, type TSymbol } from "@/symbol"
-import { StrokeOps } from "@/symbol/stroke/Stroke"
-import { TextOps } from "@/symbol/text/Text"
+import { StrokeUtil, TextUtil } from "@/symbol-utils"
+
+import { GestureHandler } from "../GestureHandler"
+import type { GestureHelpers } from "../GestureHelpers"
+import type { TGesture } from "../GestureTypes"
 
 /**
  * Handler for SCRATCH gesture type
@@ -30,16 +30,16 @@ export class ScratchGestureHandler extends GestureHandler {
     const newStrokes: TStroke[] = []
     const partPointersToRemove = gesture.subStrokes?.find((ss) => ss.fullStrokeId === stroke.id)
     if (partPointersToRemove) {
-      const strokePartToErase = StrokeOps.create()
+      const strokePartToErase = StrokeUtil.createEmpty()
       partPointersToRemove.x.forEach((x, i) =>
-        StrokeOps.addPointer(strokePartToErase, {
+        StrokeUtil.addPointer(strokePartToErase, {
           x,
           y: partPointersToRemove.y[i],
           p: 1,
-          t: 1,
+          dt: 1,
         })
       )
-      const subStrokes = StrokeOps.substract(stroke, strokePartToErase)
+      const subStrokes = StrokeUtil.substract(stroke, strokePartToErase)
       if (subStrokes.before && subStrokes.before.pointers.length > 1) {
         newStrokes.push(subStrokes.before)
       }
@@ -57,17 +57,17 @@ export class ScratchGestureHandler extends GestureHandler {
    * @returns Updated text symbol, or undefined if all characters removed
    */
   computeScratchOnText(gestureStroke: TStroke, textSymbol: TText): TText | undefined {
-    const charsToRemove = TextOps.getChildrenOverlaps(textSymbol, gestureStroke.pointers)
+    const charsToRemove = TextUtil.getChildrenOverlaps(textSymbol, gestureStroke.pointers)
     if (textSymbol.chars.length == charsToRemove.length) {
       return
-    } else {
-      charsToRemove.forEach((c) => {
-        const cIndex = textSymbol.chars.findIndex((c1) => c1.id === c.id)
-        textSymbol.chars.splice(cIndex, 1)
-      })
-      this.typeset.updateBounds(textSymbol)
-      return textSymbol
     }
+    // A copy, not the text itself: the committed record is frozen by the store, and it is also
+    // what history keeps as the "before" of this replace, so undo needs it untouched.
+    const scratched = structuredClone(textSymbol)
+    const removedIds = new Set(charsToRemove.map((c) => c.id))
+    scratched.chars = scratched.chars.filter((c) => !removedIds.has(c.id))
+    this.typeset.updateBounds(scratched)
+    return scratched
   }
 
   /**
@@ -145,7 +145,7 @@ export class ScratchGestureHandler extends GestureHandler {
     } = { oldSymbols: [], newSymbols: [] }
 
     gesture.strokeIds.forEach((id) => {
-      const sym = this.model.getRootSymbol(id)
+      const sym = this.model.getSymbol(id)
       if (
         sym &&
         !symbolsToErase.some((s) => s.id === sym.id) &&
@@ -179,7 +179,7 @@ export class ScratchGestureHandler extends GestureHandler {
       promises.push(this.canvas.replaceSymbols(symbolsToReplace.oldSymbols, symbolsToReplace.newSymbols, false))
     }
 
-    this.history.push(this.model, changes)
+    this.history.push(changes)
     await Promise.all(promises)
   }
 }

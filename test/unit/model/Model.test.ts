@@ -48,7 +48,7 @@ describe("Model.ts", () => {
     test("should add point to x, y, p & t array", () => {
       const stroke = new Stroke(DefaultPenStyle)
       const point: TPointer = {
-        t: 1,
+        dt: 1,
         p: 0.5,
         x: 1,
         y: 1,
@@ -59,13 +59,13 @@ describe("Model.ts", () => {
       expect(stroke.pointers[0].x).toBe(point.x)
       expect(stroke.pointers[0].y).toBe(point.y)
       expect(stroke.pointers[0].p).toBe(point.p)
-      expect(stroke.pointers[0].t).toBe(point.t)
+      expect(stroke.pointers[0].dt).toBe(point.dt)
     })
 
     test("should not add point if x is too close", () => {
       const stroke = new Stroke(DefaultPenStyle)
       const point: TPointer = {
-        t: 10,
+        dt: 10,
         p: 10,
         x: 1,
         y: 10,
@@ -79,7 +79,7 @@ describe("Model.ts", () => {
     test("should not add point if y is too close", () => {
       const stroke = new Stroke(DefaultPenStyle)
       const point: TPointer = {
-        t: 10,
+        dt: 10,
         p: 10,
         x: 10,
         y: 1,
@@ -98,7 +98,7 @@ describe("Model.ts", () => {
       for (let index = 0; index < 10; index++) {
         stroke.pointers.push({
           p: 1,
-          t: index,
+          dt: index,
           x: index,
           y: index,
         })
@@ -108,7 +108,7 @@ describe("Model.ts", () => {
       expect(model.symbols[0]).toStrictEqual(stroke)
       const strokeUpdated = new Stroke(DefaultPenStyle)
       strokeUpdated.id = stroke.id
-      strokeUpdated.pointers.push({ p: 0.5, t: 0.5, x: 100, y: 27 })
+      strokeUpdated.pointers.push({ p: 0.5, dt: 0.5, x: 100, y: 27 })
       model.updateStroke(strokeUpdated)
       expect(model.symbols).toHaveLength(1)
       expect(model.symbols[0]).toStrictEqual(strokeUpdated)
@@ -119,7 +119,7 @@ describe("Model.ts", () => {
       for (let index = 0; index < 10; index++) {
         stroke.pointers.push({
           p: 1,
-          t: index,
+          dt: index,
           x: index,
           y: index,
         })
@@ -129,7 +129,7 @@ describe("Model.ts", () => {
       expect(model.symbols[0]).toStrictEqual(stroke)
       const strokeUpdated = new Stroke(DefaultPenStyle)
       strokeUpdated.id = "pouette"
-      strokeUpdated.pointers.push({ p: 0.5, t: 0.5, x: 100, y: 27 })
+      strokeUpdated.pointers.push({ p: 0.5, dt: 0.5, x: 100, y: 27 })
       model.updateStroke(strokeUpdated)
       expect(model.symbols).toHaveLength(1)
       expect(model.symbols[0]).not.toStrictEqual(strokeUpdated)
@@ -144,7 +144,7 @@ describe("Model.ts", () => {
       for (let index = 0; index < 10; index++) {
         stroke.pointers.push({
           p: 1,
-          t: index,
+          dt: index,
           x: index,
           y: index,
         })
@@ -161,7 +161,7 @@ describe("Model.ts", () => {
       for (let index = 0; index < 10; index++) {
         stroke.pointers.push({
           p: 1,
-          t: index,
+          dt: index,
           x: index,
           y: index,
         })
@@ -183,6 +183,16 @@ describe("Model.ts", () => {
       expect(model.symbols[0]).toStrictEqual(stroke)
     })
 
+    test("should not addStroke if id already exist", () => {
+      const model = new Model(width, height, rowHeight)
+      const stroke1 = new Stroke(DefaultPenStyle)
+      const stroke2 = new Stroke(DefaultPenStyle)
+      stroke2.id = stroke1.id
+      model.addStroke(stroke1)
+      expect(() => model.addStroke(stroke2)).toThrow(`Stroke id already exist: ${stroke1.id}`)
+      expect(model.symbols).toHaveLength(1)
+    })
+
     test("should extractUnsentStrokes", () => {
       const model = new Model(width, height, rowHeight)
       const stroke = new Stroke(DefaultPenStyle)
@@ -200,7 +210,7 @@ describe("Model.ts", () => {
     test("should initCurrentStroke", async () => {
       expect(model.currentSymbol).toBeUndefined()
       const point: TPointer = {
-        t: 1,
+        dt: 1,
         p: 0.5,
         x: 1,
         y: 1,
@@ -218,13 +228,13 @@ describe("Model.ts", () => {
       expect(model.currentSymbol?.pointers).toHaveLength(1)
       expect(model.currentSymbol?.pointers[0].x).toBe(point.x)
       expect(model.currentSymbol?.pointers[0].y).toBe(point.y)
-      expect(model.currentSymbol?.pointers[0].t).toBe(point.t)
+      expect(model.currentSymbol?.pointers[0].dt).toBe(point.dt)
       expect(model.currentSymbol?.pointers[0].p).toBe(point.p)
     })
     test("should initCurrentStroke with -myscript-pen-width", async () => {
       const _model = new Model(width, height, rowHeight)
       const point: TPointer = {
-        t: 1,
+        dt: 1,
         p: 0.5,
         x: 1,
         y: 1,
@@ -244,14 +254,14 @@ describe("Model.ts", () => {
       expect(model.currentSymbol?.pointers).toHaveLength(1)
       expect(model.currentSymbol?.pointers[0].x).toBe(point.x)
       expect(model.currentSymbol?.pointers[0].y).toBe(point.y)
-      expect(model.currentSymbol?.pointers[0].t).toBe(point.t)
+      expect(model.currentSymbol?.pointers[0].dt).toBe(point.dt)
       expect(model.currentSymbol?.pointers[0].p).toBe(point.p)
     })
 
     test("should appendToCurrentStroke", () => {
       expect(model.currentSymbol).toBeDefined()
       const point: TPointer = {
-        t: 15,
+        dt: 15,
         p: 15,
         x: 15,
         y: 15,
@@ -265,7 +275,7 @@ describe("Model.ts", () => {
       expect(model.currentSymbol?.pointers).toHaveLength(2)
       expect(model.currentSymbol?.pointers[1].x).toBe(point.x)
       expect(model.currentSymbol?.pointers[1].y).toBe(point.y)
-      expect(model.currentSymbol?.pointers[1].t).toBe(point.t)
+      expect(model.currentSymbol?.pointers[1].dt).toBe(point.dt)
       expect(model.currentSymbol?.pointers[1].p).toBe(point.p)
     })
 
@@ -275,7 +285,7 @@ describe("Model.ts", () => {
       expect(model.currentSymbol).toBeDefined()
       const currentSymbol = { ...model.currentSymbol }
       const point: TPointer = {
-        t: 25,
+        dt: 25,
         p: 25,
         x: 25,
         y: 25,
@@ -297,7 +307,7 @@ describe("Model.ts", () => {
       for (let index = 0; index < 20; index++) {
         stroke1.pointers.push({
           p: 1,
-          t: index,
+          dt: index,
           x: index,
           y: index,
         })
@@ -308,7 +318,7 @@ describe("Model.ts", () => {
       for (let index = 30; index < 40; index++) {
         stroke2.pointers.push({
           p: 1,
-          t: index,
+          dt: index,
           x: index,
           y: index,
         })
@@ -328,7 +338,7 @@ describe("Model.ts", () => {
       for (let index = 0; index < 20; index++) {
         stroke1.pointers.push({
           p: 1,
-          t: index,
+          dt: index,
           x: index,
           y: index,
         })
@@ -339,7 +349,7 @@ describe("Model.ts", () => {
       for (let index = 30; index < 40; index++) {
         stroke2.pointers.push({
           p: 1,
-          t: index,
+          dt: index,
           x: index,
           y: index,
         })
@@ -359,7 +369,7 @@ describe("Model.ts", () => {
       for (let index = 0; index < 20; index++) {
         stroke1.pointers.push({
           p: 1,
-          t: index,
+          dt: index,
           x: index,
           y: index,
         })
@@ -370,7 +380,7 @@ describe("Model.ts", () => {
       for (let index = 30; index < 40; index++) {
         stroke2.pointers.push({
           p: 1,
-          t: index,
+          dt: index,
           x: index,
           y: index,
         })
@@ -403,7 +413,7 @@ describe("Model.ts", () => {
     const model = new Model(27, 5)
     const stroke = buildStroke()
     model.addStroke(stroke)
-    model.initCurrentStroke({ p: 27, t: 5, x: 1989, y: 42 }, "pen", DefaultPenStyle)
+    model.initCurrentStroke({ p: 27, dt: 5, x: 1989, y: 42 }, "pen", DefaultPenStyle)
     model.exports = { "text/plain": "M" }
     test("should clone", () => {
       const clone = structuredClone(model)
@@ -429,9 +439,9 @@ describe("Model.ts", () => {
   describe("clear", () => {
     test("should clear model", () => {
       const model = new Model(width, height, rowHeight)
-      const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
-      const p2: TPointer = { t: 10, p: 10, x: 10, y: 10 }
-      const p3: TPointer = { t: 10, p: 10, x: 10, y: 10 }
+      const p1: TPointer = { dt: 1, p: 1, x: 1, y: 1 }
+      const p2: TPointer = { dt: 10, p: 10, x: 10, y: 10 }
+      const p3: TPointer = { dt: 10, p: 10, x: 10, y: 10 }
 
       model.initCurrentStroke(p1, "mouse", DefaultPenStyle)
       model.endCurrentStroke(p2)

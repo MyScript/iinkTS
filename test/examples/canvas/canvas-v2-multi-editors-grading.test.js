@@ -19,7 +19,7 @@ async function writeStrokesInField(page, fieldId, strokes) {
   }
 }
 
-test.describe("Ink Canvas v2 Multiple Canvas (Grading table)", () => {
+test.describe("Ink Canvas v2 Multiple Canvas (Grading table)", { tag: "@slow" }, () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/canvas/canvas_v2_multi_canvas_grading.html`)
     await passModalKey(page, false)

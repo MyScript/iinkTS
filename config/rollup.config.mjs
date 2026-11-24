@@ -1,12 +1,13 @@
 import terser from "@rollup/plugin-terser"
 import resolve from "@rollup/plugin-node-resolve"
 import alias from "@rollup/plugin-alias"
-import typescript from "rollup-plugin-typescript2"
+import swc from "@rollup/plugin-swc"
 import postcss from "rollup-plugin-postcss"
 import dts from "rollup-plugin-dts"
 import commonjs from "@rollup/plugin-commonjs"
 import svg from "rollup-plugin-svg-import"
 import webWorkerLoader from "rollup-plugin-web-worker-loader"
+import injectVersion from "./rollup-plugin-version.mjs"
 import { fileURLToPath } from "url"
 import path from "path"
 
@@ -33,12 +34,22 @@ export default [
           { find: "@", replacement: path.resolve(configDir, "../src") }
         ]
       }),
-      typescript({
-        tsconfig: "./tsconfig.json",
-        clean: true,
-        include: ["src/**/*.ts", "src/**/*.tsx"]
+      // Transpile only: types are checked by `yarn typecheck`, with TypeScript 7.
+      // The plugin defaults to legacy decorators and loose mode: legacy decorators drop the class
+      // fields that have no initializer, which TypeScript keeps for an ESNext target.
+      swc({
+        include: ["src/**/*.ts"],
+        swc: {
+          jsc: {
+            parser: { syntax: "typescript", decorators: false },
+            target: "esnext",
+            loose: false,
+            transform: { legacyDecorator: false, decoratorMetadata: false },
+          },
+        },
       }),
-      resolve({ browser: true }),
+      injectVersion(),
+      resolve({ browser: true, extensions: [".ts", ".mjs", ".js", ".json"] }),
       commonjs({
         include: ["node_modules/json-css/**"],
         defaultIsModuleExports: true

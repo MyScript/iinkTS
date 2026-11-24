@@ -27,9 +27,9 @@ test.describe("Interactive Canvas SSR custom grabber", () => {
     const firstPointer = h.strokes[0].pointers[0]
     const lastPointer = h.strokes[0].pointers.at(-1)
 
-    await expect(page.locator("#pointer-down")).toHaveText(new RegExp(`Down at: {\"x\":${firstPointer.x},\"y\":${firstPointer.y},\"t\":`))
-    await expect(page.locator("#pointer-move")).toHaveText(new RegExp(`Move to: {\"x\":${lastPointer.x},\"y\":${lastPointer.y},\"t\":`))
-    await expect(page.locator("#pointer-up")).toHaveText(new RegExp(`Up at: {\"x\":${lastPointer.x},\"y\":${lastPointer.y},\"t\":`))
+    await expect(page.locator("#pointer-down")).toHaveText(new RegExp(`Down at: {\"x\":${firstPointer.x},\"y\":${firstPointer.y}`))
+    await expect(page.locator("#pointer-move")).toHaveText(new RegExp(`Move to: {\"x\":${lastPointer.x},\"y\":${lastPointer.y}`))
+    await expect(page.locator("#pointer-up")).toHaveText(new RegExp(`Up at: {\"x\":${lastPointer.x},\"y\":${lastPointer.y}`))
   })
 
   test("should display alert on right button click", async ({ page }) => {

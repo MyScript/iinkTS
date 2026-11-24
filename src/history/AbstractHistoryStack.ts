@@ -1,9 +1,16 @@
-import type { CanvasEvent } from "@/canvas/CanvasEvent"
 import { LoggerCategory, LoggerManager } from "@/logger"
 
 import type { THistoryConfiguration } from "./HistoryConfiguration"
 import type { THistoryContext } from "./HistoryContext"
 import { getInitialHistoryContext } from "./HistoryContext"
+
+/**
+ * @group History
+ * @remarks the only part of the canvas events the history uses; `CanvasEvent` satisfies it.
+ */
+export type THistoryEvent = {
+  emitChanged(context: THistoryContext): void
+}
 
 /**
  * @group History
@@ -14,11 +21,11 @@ export abstract class AbstractHistoryStack<TStackItem> {
   protected logger = LoggerManager.getLogger(LoggerCategory.HISTORY)
 
   configuration: THistoryConfiguration
-  event: CanvasEvent
+  event: THistoryEvent
   context: THistoryContext
   stack: TStackItem[]
 
-  constructor(configuration: THistoryConfiguration, event: CanvasEvent) {
+  constructor(configuration: THistoryConfiguration, event: THistoryEvent) {
     this.logger.info("constructor", {
       configuration,
     })
@@ -34,6 +41,7 @@ export abstract class AbstractHistoryStack<TStackItem> {
     this.context.canRedo = this.stack.length - 1 > this.context.stackIndex
     this.context.canUndo = this.context.stackIndex > 0
     this.context.empty = this.isStackItemEmpty(this.stack[this.context.stackIndex])
+    this.context.possibleUndoCount = this.context.stackIndex
   }
 
   protected initStack(item: TStackItem): void {

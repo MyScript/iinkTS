@@ -1,548 +1,109 @@
 ---
 name: rendering-system
 description: >
-  Guide to the rendering architecture (SVG vs Canvas, drawing strokes/symbols, custom styling).
-  Use when modifying rendering logic, debugging visual issues, or implementing custom renderers.
+  Guide to the rendering architecture (SVGRenderer, per-type SVG through symbol utils, transforms,
+  virtualization, styling). Use when modifying rendering logic, debugging visual issues, or
+  implementing custom renderers.
 ---
 
 # Rendering System Architecture
 
-## Overview
+## Which renderer
 
-The rendering system draws digital ink and recognized content to screen. Two renderer implementations:
+The renderer is fixed by the canvas variant — there is no configuration option to switch it:
 
-| Renderer | Technology | Performance | Use Case |
-|----------|-----------|-------------|----------|
-| `SVGRenderer` | SVG DOM | Better quality | Default for most editors |
-| `CanvasRenderer` | Canvas 2D | Better performance | High stroke count scenarios |
+| Variant | Renderer | File |
+|---|---|---|
+| `INTERACTIVE_INK` (`InteractiveInkCanvas`) | `SVGRenderer` | [src/renderer/svg/SVGRenderer.ts](src/renderer/svg/SVGRenderer.ts) |
+| `INK_V2` (`InkCanvas`) | `SVGRenderer` | same |
+| `INTERACTIVE_INK_SSR` | `InteractiveInkSSRSVGRenderer` (applies server SVG patches) | [src/renderer/ssr/SVGSSRenderer.ts](src/renderer/ssr/SVGSSRenderer.ts) |
+| `INK_V1` (deprecated) | `CanvasRenderer` (Canvas 2D) + `CanvasRendererStroke/Shape/Text` | [src/renderer/canvas/](src/renderer/canvas/) |
 
-**Base abstraction**: `BaseRenderer` ([src/renderer/BaseRenderer.ts](src/renderer/BaseRenderer.ts))
+`SVGRenderer` and `CanvasRenderer` extend `BaseRenderer` ([src/renderer/base/BaseRenderer.ts](src/renderer/base/BaseRenderer.ts)); the SSR renderer is standalone. New rendering work targets `SVGRenderer`. Renderer configuration (`configuration.rendering`) only holds `minHeight`, `minWidth` and `guides` (`enable`, `gap`, and `type: "line" | "grid" | "point"` on the interactive variant).
 
-## Renderer Selection
+## Per-type rendering — registry dispatch
 
-Configured via editor options:
-
-```typescript
-const options = {
-  configuration: {
-    rendering: {
-      type: 'svg',  // or 'canvas'
-    },
-  },
-}
-```
-
-**Default**: SVG for all editors.
-
-## SVG Renderer Architecture
-
-### Component Structure — registry dispatch, not per-type fields
-
-Per-type SVG rendering is NOT hardcoded on `SVGRenderer` as private fields — it's dispatched through the same plugin registry used for symbol behavior everywhere else:
+`SVGRenderer` never switches on the symbol type. It asks the registry:
 
 ```typescript
-import { symbolRegistry } from "@/symbol-utils/SymbolRegistry"
-
-class SVGRenderer extends BaseRenderer {
-  #layerCapture: SVGSVGElement   // Stroke capture layer
-  #layerModel: SVGGElement       // Recognized symbols layer
-
-  #buildElement(symbol: TSymbol): SVGGraphicsElement | undefined {
-    const util = symbolRegistry.getUtil(symbol.type)
-    return util?.getSVGElement?.(symbol)
-  }
-}
+// SVGRenderer.buildElementFromSymbol
+const util = symbolRegistry.getUtil(symbol.type)
+const element = util.getSVGElement(symbol)
 ```
 
-**Per-type rendering** lives in each type's `*Util` class (`src/symbol-utils/{type}/{Type}Util.ts`): `StrokeUtil`, `TextUtil`, `MathUtil`, `ShapeUtil`, `EdgeUtil`, `DecoratorUtil` — each implements `getSVGElement(symbol)`. See the `symbol-system` skill for the full `*Ops`/`*Util` layering. Adding a new renderable type means adding a `getSVGElement()` to its `*Util`, not touching `SVGRenderer`.
+Each type's util builds its element: `StrokeUtil`, `TextUtil`, `MathUtil`, `ShapeUtil`, `EdgeUtil`, `DecoratorUtil` (`src/symbol-utils/{type}/`). A single-`<path>` type extends `PathSymbolUtil` and implements `getPathData` + `getPathAttributes` instead. Adding a renderable type = adding a util (see `add-symbol-type`), never touching `SVGRenderer`.
 
-**Other renderer pieces**:
-- `SVGRendererConst` ([src/renderer/svg/utils/SVGRendererConst.ts](src/renderer/svg/utils/SVGRendererConst.ts)) — SVG constants/attr presets
-- `SVGBuilder` — real implementation in [src/symbol-utils/SVGBuilder.ts](src/symbol-utils/SVGBuilder.ts); `src/renderer/svg/utils/SVGBuilder.ts` is a re-export shim
-- `SVGStroker` ([src/renderer/svg/SVGStroker.ts](src/renderer/svg/SVGStroker.ts)) — stroke path generation
-- `SVGSSRenderer` ([src/renderer/svg/SVGSSRenderer.ts](src/renderer/svg/SVGSSRenderer.ts)) — server-side rendering support
+- Strokes are drawn as filled outlines shaped by the pen nib (`style.pen`: `ballpoint`, `pencil`, `fountain`, `brush` — `PEN_NIBS` in [src/style/PenNib.ts](src/style/PenNib.ts)), using pressure and speed
+- Decorators are the recognized annotations on text (highlight, underline, strikethrough, surround) — not selection UI
+- Selection, handles, snap lines, math badges and other overlays are drawn by managers (`IISelectionManager`, `IIOverlayManager`, `IISnapManager`…) with `SVGBuilder`; handle groups carry an `SvgElementRole` (`translate`, `resize`, `rotate`, `interact-elements-group`, `guide`)
 
-**Implementation**: [src/renderer/svg/SVGRenderer.ts](src/renderer/svg/SVGRenderer.ts)
+**Building blocks**:
+- `SVGBuilder` — element factory (`createPath`, `createLayer`, groups…); real implementation in [src/symbol-utils/SVGBuilder.ts](src/symbol-utils/SVGBuilder.ts), `src/renderer/svg/utils/SVGBuilder.ts` re-exports it
+- `SVGRendererConst`, `GUIDE_PATH_ATTRS`, `SUB_GUIDE_PATH_ATTRS` — [src/renderer/svg/utils/SVGRendererConst.ts](src/renderer/svg/utils/SVGRendererConst.ts) (class names `ms-selected`, `ms-selection-halo`, `ms-deleting`, guide attributes)
 
-### Rendering Flow
+## SVGRenderer structure
 
-1. **Capture Phase**: User draws → strokes added to `#layerCapture`
-2. **Recognition Phase**: Backend responds → symbols rendered to `#layerModel`
-3. **Clear Capture**: Recognized strokes removed from capture layer
-4. **Update Model**: Symbols updated in model layer
+- `layer: SVGSVGElement` — the document: one element per symbol, plus `definitionGroup` (`<defs>`) and the guides group
+- a separate current-symbol overlay (`drawCurrentSymbol` / `clearCurrentSymbolLayer`, `data-layer="CAPTURE"`) — the stroke being drawn is redrawn there every frame so the rest of the scene is not repainted
+- viewport: `getZoom`/`setZoom`, `getViewBox`/`setViewBox`, `pan`, `ensurePointVisible`, `resize`
 
-### SVG Element Structure
+Main operations: `drawSymbol(symbol)`, `replaceSymbol(id, symbols)`, `removeSymbol(id)`, `changeOrderSymbol(symbol, position)`, `setSymbolTransform(symbol)`, `updateSelectedState(symbol, bool)`, `updateDeletingState(symbol, bool)`, `clear()`, `destroy()`. Drawing helpers for overlays: `drawCircle`, `drawRect`, `drawLine`, `drawConnectionBetweenBox`.
 
-```xml
-<svg id="editor-svg" class="ms-editor">
-  <!-- Capture layer (temporary strokes) -->
-  <svg id="capture-layer">
-    <path id="stroke-1" d="M 0 0 L 10 10 ..." />
-    <path id="stroke-2" d="M 20 20 L 30 30 ..." />
-  </svg>
-  
-  <!-- Model layer (recognized symbols) -->
-  <g id="model-layer">
-    <g id="group-1" class="symbol-group">
-      <text id="text-1" x="0" y="20">Hello</text>
-      <circle id="shape-1" cx="50" cy="50" r="20" />
-    </g>
-    
-    <!-- Decorators (selection, resize handles) -->
-    <g id="decorator-layer">
-      <rect class="selection-box" />
-      <circle class="resize-handle" />
-    </g>
-  </g>
-</svg>
-```
+### Transforms
 
-### Symbol-Specific Renderers
+A transform writes `symbol.transform` (a `TMatrixTransform`) and nothing else: raw coordinates never move after creation. The renderer applies it by rewriting the element's `transform` attribute (`setSymbolTransform`, `MatrixTransform.toCssString`) instead of rebuilding the element — that is what keeps drags cheap and undo exact.
 
-#### Stroke Rendering
+`MatrixTransform` ([src/core/geometry/Matrix.ts](src/core/geometry/Matrix.ts)) fields are `xx, yx, xy, yy, tx, ty`. Builders are instance methods returning a new matrix: `MatrixTransform.identity().translate(tx, ty).rotate(radian, center?).scale(x, y, center?)`, `multiply(m)`, `applyToPoint(point)`, `toCssString()`. Statics: `identity()`, `applyToPoint(mat, point)`, `rotation(mat)`, `toCssString(mat)`.
 
-**`StrokeUtil.getSVGElement()`** ([src/symbol-utils/stroke/StrokeUtil.ts](src/symbol-utils/stroke/StrokeUtil.ts)) — illustrative shape, see the real file for exact attrs:
+### Virtualization
+
+Every drawn symbol is tracked with its element and bounds. Symbols outside the view box keep their built element out of the DOM; pan/zoom reconciles what is attached, and a symbol changed while off screen is rebuilt when it comes back into view. Don't assume `document.getElementById(symbol.id)` finds an off-screen symbol — use `renderer.getElementById`, or check the model.
+
+## Bounds and geometry
+
+A box is a plain record and its operations are free functions — there is no `Box` class ([src/core/geometry/Box.ts](src/core/geometry/Box.ts)):
 
 ```typescript
-getSVGElement(stroke: TStroke): SVGPathElement {
-  const path = document.createElementNS(SVG_NS, 'path')
-  
-  // Convert points to SVG path data
-  const d = this.#buildPathData(stroke.points)
-  path.setAttribute('d', d)
-  
-  // Apply style
-  path.setAttribute('stroke', stroke.style.color)
-  path.setAttribute('stroke-width', stroke.style.width)
-  path.setAttribute('fill', 'none')
-  
-  return path
-}
+type TBox = { x: number; y: number; width: number; height: number }
 
-#buildPathData(points: TPoint[]): string {
-  if (points.length === 0) return ''
-  
-  let d = `M ${points[0].x} ${points[0].y}`
-  for (let i = 1; i < points.length; i++) {
-    d += ` L ${points[i].x} ${points[i].y}`
-  }
-  
-  return d
-}
+BoxOps.createFromPoints(points)        // and createFromBoxes(boxes) — the union
+BoxOps.containsPoint(box, point)       // contains(box, child), isContained(box, wrapper)
+BoxOps.overlaps(box1, box2)
+BoxOps.getCorners(box) / getSides(box) / getCenter(box) / getSnapPoints(box)
+BoxOps.nearestBoundaryPoint(box, point)
 ```
 
-**Pressure support**: Variable stroke width via path interpolation.
+A **symbol's** bounds do not come from here: ask its geometry, which is tight and knows about the transform — `SymbolGeometry.boundsOf(symbol)` returns a `TOBB`, and `OBBOps.toBox` flattens it to a `TBox` when a caller needs axis-aligned numbers.
 
-#### Shape Rendering
+## Styling
 
-**`ShapeUtil.getSVGElement()`** ([src/symbol-utils/shape/ShapeUtil.ts](src/symbol-utils/shape/ShapeUtil.ts)) — illustrative shape:
+- **Per symbol**: `symbol.style` is a `TStyle` (`color`, `width`, `opacity`, `fill`, `pen`, `penAngle`, `penSmoothing`, `penSpeed`); `mergeSymbolStyle` fills defaults. Change it through the canvas (`updateSymbolsStyle` on `InkCanvas`, `updateSymbols(ids, { style })` on `InteractiveInkCanvas`), never by editing the element
+- **Next strokes**: `canvas.penStyle = { color, width, pen }`
+- **Theme / UI**: [src/iink.css](src/iink.css) is injected at runtime; on `InteractiveInkCanvas`, `configuration.cssVars` / `canvas.setCssVars(vars)` override the `--ms-ink-*` custom properties on the root element. Prefer CSS classes and variables over inline attributes
+- **Legacy (`INK_V1`)**: `StyleManager` holds `penStyle` and `TTheme` (`ink`, `.math`, `.math-solved`, `.text`); `StyleHelper` ([src/style-css/StyleHelper.ts](src/style-css/StyleHelper.ts)) converts them between JSON and CSS (`themeToCSS`, `penStyleToCSS`, …)
 
-```typescript
-getSVGElement(shape: TShape): SVGElement {
-  switch (shape.kind) {
-    case 'circle':
-      return this.#drawCircle(shape)
-    case 'ellipse':
-      return this.#drawEllipse(shape)
-    case 'polygon':
-      return this.#drawPolygon(shape)
-    // ... other shapes
-  }
-}
-
-#drawCircle(shape: TShapeCircle): SVGCircleElement {
-  const circle = document.createElementNS(SVG_NS, 'circle')
-  circle.setAttribute('cx', shape.center.x)
-  circle.setAttribute('cy', shape.center.y)
-  circle.setAttribute('r', shape.radius)
-  
-  this.#applyStyle(circle, shape.style)
-  
-  return circle
-}
-```
-
-**Supported shapes**: Circle, Ellipse, Polygon.
-
-#### Text Rendering
-
-**`TextUtil.getSVGElement()`** ([src/symbol-utils/text/TextUtil.ts](src/symbol-utils/text/TextUtil.ts)) — illustrative shape:
-
-```typescript
-getSVGElement(text: TText): SVGTextElement {
-  const textElement = document.createElementNS(SVG_NS, 'text')
-  
-  // Position
-  textElement.setAttribute('x', text.baseline.x)
-  textElement.setAttribute('y', text.baseline.y)
-  
-  // Content
-  textElement.textContent = text.label
-  
-  // Style (font, size, color)
-  textElement.setAttribute('font-family', text.style.fontFamily)
-  textElement.setAttribute('font-size', text.style.fontSize)
-  textElement.setAttribute('fill', text.style.color)
-  
-  return textElement
-}
-```
-
-**Math rendering**: Uses MathML or LaTeX → SVG conversion (server-side).
-
-#### Edge Rendering
-
-**Lines, arcs, polylines** rendered as SVG paths with specific `d` attributes, via `EdgeUtil.getSVGElement()`.
-
-### Decorator Rendering
-
-**`DecoratorUtil.getSVGElement()`** ([src/symbol-utils/decorator/DecoratorUtil.ts](src/symbol-utils/decorator/DecoratorUtil.ts)) renders UI overlays:
-
-- **Selection box**: Rectangle around selected symbols
-- **Resize handles**: Circles at corners/edges
-- **Rotation handle**: Circle above selection
-- **Guides**: Smart guides for alignment
-
-```typescript
-drawSelectionBox(bounds: Box): SVGRectElement {
-  const rect = document.createElementNS(SVG_NS, 'rect')
-  rect.setAttribute('x', bounds.x)
-  rect.setAttribute('y', bounds.y)
-  rect.setAttribute('width', bounds.width)
-  rect.setAttribute('height', bounds.height)
-  rect.classList.add('selection-box')
-  return rect
-}
-```
-
-**Styling**: Applied via CSS classes (`.selection-box`, `.resize-handle`).
-
-## Canvas Renderer Architecture
-
-### Component Structure
-
-```typescript
-class CanvasRenderer extends BaseRenderer {
-  #canvas: HTMLCanvasElement
-  #context: CanvasRenderingContext2D
-  
-  // Helper renderers
-  #strokeRenderer: CanvasRendererStroke
-  #shapeRenderer: CanvasRendererShape
-  #textRenderer: CanvasRendererText
-}
-```
-
-**Canvas Helper Classes** (all in [src/renderer/canvas/](src/renderer/canvas/)):
-1. `CanvasRenderer` - Main canvas renderer
-2. `CanvasRendererStroke` - Stroke rendering with pressure
-3. `CanvasRendererShape` - Shape rendering (circles, polygons, etc.)
-4. `CanvasRendererText` - Text rendering using Canvas text API
-
-**Implementation**: [src/renderer/canvas/CanvasRenderer.ts](src/renderer/canvas/CanvasRenderer.ts)
-
-### Rendering Flow
-
-1. **Clear Canvas**: `context.clearRect(0, 0, width, height)`
-2. **Draw Model**: Iterate all symbols, draw each
-3. **Draw Capture**: Draw temporary strokes
-4. **Draw Decorators**: Selection, handles
-
-**Performance**: Uses `requestAnimationFrame` for smooth updates.
-
-### Canvas Drawing
-
-#### Stroke Drawing
-
-```typescript
-drawStroke(stroke: Stroke) {
-  const ctx = this.#context
-  const points = stroke.points
-  
-  ctx.beginPath()
-  ctx.moveTo(points[0].x, points[0].y)
-  
-  for (let i = 1; i < points.length; i++) {
-    ctx.lineTo(points[i].x, points[i].y)
-  }
-  
-  ctx.strokeStyle = stroke.style.color
-  ctx.lineWidth = stroke.style.width
-  ctx.lineCap = 'round'
-  ctx.lineJoin = 'round'
-  ctx.stroke()
-}
-```
-
-**Pressure**: Varies line width along stroke path.
-
-#### Shape Drawing
-
-```typescript
-drawCircle(circle: IICircle) {
-  const ctx = this.#context
-  
-  ctx.beginPath()
-  ctx.arc(circle.center.x, circle.center.y, circle.radius, 0, 2 * Math.PI)
-  
-  ctx.fillStyle = circle.style.fillColor
-  ctx.fill()
-  
-  ctx.strokeStyle = circle.style.color
-  ctx.lineWidth = circle.style.width
-  ctx.stroke()
-}
-```
-
-#### Text Drawing
-
-```typescript
-drawText(text: IIText) {
-  const ctx = this.#context
-  
-  ctx.font = `${text.style.fontSize}px ${text.style.fontFamily}`
-  ctx.fillStyle = text.style.color
-  ctx.textBaseline = 'alphabetic'
-  
-  ctx.fillText(text.label, text.baseline.x, text.baseline.y)
-}
-```
-
-**Limitation**: No native MathML support → rendered as plain text or images.
-
-## Style System
-
-### Pen Style
-
-**TPenStyle** ([src/style/Types.ts](src/style/Types.ts)):
-
-```typescript
-type TPenStyle = {
-  color: string                    // Hex color: '#000000'
-  width: number                    // Stroke width in pixels
-  '-myscript-pen-width'?: number   // MyScript-specific width
-  '-myscript-pen-fill-style'?: 'none' | 'solid'
-  '-myscript-pen-fill-color'?: string
-}
-```
-
-**Usage**:
-```typescript
-const options = {
-  penStyle: {
-    color: '#2E7D32',
-    width: 2,
-  },
-}
-```
-
-### Theme System
-
-**TTheme** for UI element styling:
-
-```typescript
-type TTheme = {
-  ink: {
-    color: string
-    width: number
-  }
-  guides: {
-    enable: boolean
-    color: string
-    width: number
-  }
-  // ... more theme properties
-}
-```
-
-**Application**: Injected as CSS variables.
-
-### Style Helpers
-
-**StyleHelper** ([src/style/StyleHelper.ts](src/style/StyleHelper.ts)):
-
-- `rgbToHex(r, g, b)` - Color conversion
-- `hexToRgb(hex)` - Reverse conversion
-- `computeStyleFromCss(element)` - Extract computed styles
-
-## Transform System
-
-Symbols can be transformed (translate, rotate, resize) via **MatrixTransform**.
-
-### Matrix Transform
-
-**MatrixTransform** ([src/transform/MatrixTransform.ts](src/transform/MatrixTransform.ts)):
-
-```typescript
-class MatrixTransform {
-  constructor(
-    public a: number,  // Horizontal scaling
-    public b: number,  // Vertical skewing
-    public c: number,  // Horizontal skewing
-    public d: number,  // Vertical scaling
-    public tx: number, // Horizontal translation
-    public ty: number  // Vertical translation
-  ) {}
-  
-  static translate(x: number, y: number): MatrixTransform
-  static rotate(angle: number): MatrixTransform
-  static scale(sx: number, sy: number): MatrixTransform
-  
-  applyToPoint(point: TPoint): TPoint
-  multiply(other: MatrixTransform): MatrixTransform
-}
-```
-
-**Usage**:
-```typescript
-// Rotate symbol 45 degrees
-const rotation = MatrixTransform.rotate(Math.PI / 4)
-const transformed = rotation.applyToPoint(symbol.center)
-
-// Apply to SVG element
-element.setAttribute('transform', rotation.toSVGString())
-```
-
-### Symbol Bounds
-
-**Box** class ([src/model/Box.ts](src/model/Box.ts)) for bounding boxes:
-
-```typescript
-class Box {
-  constructor(
-    public x: number,
-    public y: number,
-    public width: number,
-    public height: number
-  ) {}
-  
-  contains(point: TPoint): boolean
-  overlaps(other: Box): boolean
-  union(other: Box): Box
-}
-```
-
-**Usage**: Selection, hit testing, clipping.
-
-## Custom CSS Integration
-
-iinkTS injects CSS at runtime via style element.
-
-### Default Styles
-
-**iink.css** ([src/iink.css](src/iink.css)):
-
-```css
-.ms-editor {
-  width: 100%;
-  height: 100%;
-  touch-action: none;
-  user-select: none;
-}
-
-.ms-editor .capture-layer {
-  pointer-events: none;
-}
-
-.selection-box {
-  fill: none;
-  stroke: #1976D2;
-  stroke-width: 2;
-  stroke-dasharray: 5 5;
-}
-
-.resize-handle {
-  fill: #1976D2;
-  stroke: #FFFFFF;
-  cursor: nwse-resize;
-}
-```
-
-### Override Styles
-
-Via `override.cssClass` option:
-
-```typescript
-const options = {
-  override: {
-    cssClass: 'my-custom-editor',
-  },
-}
-```
-
-Add custom CSS:
-```css
-.my-custom-editor .selection-box {
-  stroke: #FF5722;
-}
-```
-
-## Performance Optimization
-
-### SVG Optimization
-
-1. **Group symbols**: Reduce DOM nodes via `<g>` grouping
-2. **Debounce updates**: Batch DOM mutations
-3. **Use transforms**: Prefer `transform` over changing `x`/`y`
-4. **Remove hidden elements**: Cull off-screen symbols
-
-### Canvas Optimization
-
-1. **Dirty regions**: Only redraw changed areas
-2. **Layer caching**: Cache static content to offscreen canvas
-3. **Request animation frame**: Throttle redraws
-4. **Path batching**: Combine multiple paths before stroke
-
-## Debugging Rendering
-
-### Inspect SVG
+## Debugging rendering
 
 ```javascript
-const svg = document.querySelector('.ms-editor svg')
-console.log(svg.outerHTML)  // Full SVG structure
+// The SVG document of an interactive canvas
+console.log(canvas.renderer.layer.outerHTML)
+
+// Rendering follows model changes
+canvas.event.addChangedListener((context) => console.log("changed", context))
 ```
 
-### Canvas Screenshot
-
-```javascript
-const canvas = document.querySelector('.ms-editor canvas')
-const dataURL = canvas.toDataURL('image/png')
-console.log(dataURL)  // Data URL for download
-```
-
-### Renderer Events
-
-```javascript
-// Not exposed directly, debug via model changes
-editor.event.addChangedListener((evt) => {
-  console.log('Model updated, renderer should redraw')
-})
-```
-
-## Common Issues
-
-**Issue**: Strokes disappear after recognition  
-**Cause**: Capture layer cleared before model rendered  
-**Fix**: Ensure model update before clearing capture
-
-**Issue**: Selection handles misaligned  
-**Cause**: Transform not applied to decorators  
-**Fix**: Apply same transform to decorator layer
-
-**Issue**: Canvas blurry on high-DPI  
-**Cause**: Canvas size doesn't match device pixel ratio  
-**Fix**: Scale canvas by `window.devicePixelRatio`
+- Symbol not visible → check `canvas.model.getSymbol(id)`, then `canvas.renderer.getElementById(id)` (it may be virtualized out of the view box), then its `transform` attribute
+- Wrong shape after a move/rotate/resize → the bug is in the util's geometry or in `symbol.transform`, not in the element
+- `IDebugSVGManager` (`src/manager/debug/`) draws recognition boxes on `InkCanvas`
+- WebKit: SVG `filter: url(#…)` on strokes can crash the web process — use CSS filter classes
 
 ## Best Practices
 
-✅ **Do** use SVG for default scenarios  
-✅ **Do** switch to Canvas for >1000 strokes  
-✅ **Do** batch DOM updates in SVG  
-✅ **Do** use transforms for animations  
-✅ **Do** clean up unused elements
+✅ Put per-type drawing in the util, overlays in the manager that owns them
+✅ Apply moves through `symbol.transform`, not by rewriting coordinates
+✅ Build elements with `SVGBuilder`, style with CSS classes/variables
+✅ Clean up overlay elements and listeners in the manager's `onDestroy()`
 
-❌ **Don't** mix SVG and Canvas in same editor  
-❌ **Don't** manipulate renderer internals directly  
-❌ **Don't** style via inline attributes (use CSS)  
-❌ **Don't** create new elements on every render  
-❌ **Don't** forget to clear canvas before redraw
+❌ Don't `switch` on `symbol.type` in the renderer or a manager
+❌ Don't mutate a rendered element's geometry by hand — it is rebuilt from the symbol
+❌ Don't target `CanvasRenderer` for new features (deprecated `INK_V1` only)

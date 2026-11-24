@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+    <title>Server Signing</title>
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <script src="../assets/js/theme-init.js"></script>
+    <style>
+      .signing-help {
+        align-self: flex-start;
+        max-width: 640px;
+        margin: var(--ex-space-xl) auto;
+        padding: var(--ex-space-xl);
+        background: var(--ex-surface);
+        color: var(--ex-text);
+        border: 1px solid var(--ex-border);
+        border-left: 4px solid var(--ex-error);
+        border-radius: var(--ex-radius-lg);
+        box-shadow: var(--ex-shadow-sm);
+        line-height: 1.5;
+      }
+      .signing-help[hidden] {
+        display: none;
+      }
+      .signing-help h2 {
+        margin-bottom: var(--ex-space-md);
+        font-size: 1.1rem;
+      }
+      .signing-help ol {
+        margin: var(--ex-space-md) 0;
+        padding-left: var(--ex-space-xl);
+        list-style: decimal;
+      }
+      .signing-help li {
+        margin-bottom: var(--ex-space-sm);
+      }
+      .signing-help pre {
+        margin-top: var(--ex-space-xs);
+        padding: var(--ex-space-sm) var(--ex-space-md);
+        background: var(--ex-surface-alt);
+        border-radius: var(--ex-radius-sm);
+        overflow-x: auto;
+      }
+      .signing-help .signing-help-detail {
+        margin-bottom: var(--ex-space-lg);
+        color: var(--ex-text-muted);
+        font-size: 0.9rem;
+      }
+      .signing-help button {
+        padding: var(--ex-space-sm) var(--ex-space-lg);
+        background: var(--ex-primary);
+        color: #ffffff;
+        border: none;
+        border-radius: var(--ex-radius-md);
+        cursor: pointer;
+      }
+      .signing-help button:hover {
+        background: var(--ex-primary-dark);
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <h1 class="header-title">Server Signing</h1>
+    </header>
+
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">HMAC signature on your server</p>
+        <p class="ex-panel-intro">The HMAC key never reaches the browser. The page sets <code>server.sign</code>, which sends each message to sign (the WebSocket challenge, or an HTTP request body) to a server that holds the key.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Start the signing server first: <code>node --env-file=.env.local examples/server-signing/server.js</code>. It reads <code>APPLICATION_KEY</code>, <code>HMAC_KEY</code>, <code>HOST</code> and <code>SCHEME</code>.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">The page fetches the public part of the configuration (host, application key) from the same server, so it holds no credential at all.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">In production, put <code>/sign</code> behind your own authentication and rate-limit it.</div>
+        </div>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc" id="status">Connecting to the signing server…</div>
+        </div>
+      </aside>
+      <div id="rootEl"></div>
+      <section id="signingHelp" class="signing-help" role="alert" hidden>
+        <h2>The signing server does not answer</h2>
+        <p>This page holds no credential: it asks a local server for the configuration and for every signature. Start it:</p>
+        <ol>
+          <li>At the root of the repository, put your keys in <code>.env.local</code>:
+            <pre>APPLICATION_KEY=&lt;your application key&gt;
+HMAC_KEY=&lt;your HMAC key&gt;
+HOST=cloud.myscript.com
+SCHEME=https</pre>
+          </li>
+          <li>Start the signing server, and leave it running:
+            <pre>node --env-file=.env.local examples/server-signing/server.js</pre>
+          </li>
+          <li>Open this page from <code>http://localhost:8000</code>: the server only answers that origin (set <code>ALLOWED_ORIGIN</code> to change it).</li>
+        </ol>
+        <p class="signing-help-detail" id="signingHelpDetail"></p>
+        <button id="retryBtn" type="button">Retry</button>
+      </section>
+    </div>
+
+    <script type="module">
+      import { Canvas } from "../../dist/iink.esm.js"
+
+      const SIGNING_SERVER = "http://localhost:8787"
+
+      const panelToggleBtn = document.getElementById("panelToggleBtn")
+      const infoPanel = document.getElementById("info-panel")
+      panelToggleBtn.addEventListener("click", () => {
+        const open = infoPanel.classList.toggle("open")
+        panelToggleBtn.setAttribute("aria-expanded", String(open))
+      })
+      const rootElement = document.getElementById("rootEl")
+      const status = document.getElementById("status")
+
+      async function requestJson(path, body) {
+        const response = await fetch(`${SIGNING_SERVER}${path}`, {
+          method: body ? "POST" : "GET",
+          headers: body ? { "Content-Type": "application/json" } : undefined,
+          body: body ? JSON.stringify(body) : undefined,
+        })
+        if (!response.ok) {
+          throw new Error(`${path}: ${response.status}`)
+        }
+        return response.json()
+      }
+
+      /**
+       * Signs on the server: the applicationKey argument is not sent, the server uses its own
+       * @param {string} message
+       * @returns {Promise<string>}
+       */
+      async function sign(message) {
+        const { signature } = await requestJson("/sign", { message })
+        return signature
+      }
+
+      const signingHelp = document.getElementById("signingHelp")
+      const signingHelpDetail = document.getElementById("signingHelpDetail")
+
+      function showSigningHelp(error) {
+        rootElement.hidden = true
+        signingHelp.hidden = false
+        signingHelpDetail.textContent = `${SIGNING_SERVER} — ${error.message}`
+        status.textContent = "Signing server unreachable: see the instructions on the page."
+      }
+
+      async function loadCanvas() {
+        let configuration
+        try {
+          configuration = await requestJson("/configuration")
+        } catch (error) {
+          return showSigningHelp(error)
+        }
+        signingHelp.hidden = true
+        rootElement.hidden = false
+        const { scheme, host, applicationKey } = configuration
+        try {
+          window.canvas = await Canvas.load(rootElement, "INTERACTIVE_INK", {
+            configuration: {
+              server: { scheme, host, applicationKey, hmacKey: "", sign },
+            },
+          })
+          status.textContent = `Signed by ${SIGNING_SERVER}, connected to ${host}.`
+        } catch (error) {
+          status.textContent = `Connection to ${host} failed: ${error.message}`
+        }
+      }
+
+      document.getElementById("retryBtn").addEventListener("click", loadCanvas)
+      await loadCanvas()
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+  </body>
+</html>

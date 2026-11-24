@@ -1,7 +1,9 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import type { TMenuColorList } from "@/menu/items"
-import { CollapsibleWrapper, ColorListMenuItem } from "@/menu/items"
-import { BaseMenuItem } from "@/menu/items/BaseMenuItem"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import { CanvasTool, CanvasWriteTool } from "@/manager"
+
+import type { TMenuColorList } from "../items"
+import { CollapsibleWrapper, ColorListMenuItem } from "../items"
+import { BaseMenuItem } from "../items/BaseMenuItem"
 
 /**
  * @group Menu
@@ -16,6 +18,17 @@ export class FillColorStyle extends BaseMenuItem<HTMLDivElement> {
       type: "fillcolor" as const,
       id: `${idPrefix}-fill`,
       label: "Fill Color",
+      visible: (canvas: TInteractiveInkCanvas) => {
+        const writeShape = [
+          CanvasWriteTool.Rectangle,
+          CanvasWriteTool.Rhombus,
+          CanvasWriteTool.Circle,
+          CanvasWriteTool.Ellipse,
+          CanvasWriteTool.Triangle,
+          CanvasWriteTool.Parallelogram,
+        ].includes(canvas.writer.tool)
+        return CanvasTool.Select === canvas.tool || (CanvasTool.Write === canvas.tool && writeShape)
+      },
     }
     super(config, canvas)
     this.colors = colors
@@ -35,9 +48,9 @@ export class FillColorStyle extends BaseMenuItem<HTMLDivElement> {
       initValue: color,
       onChange: (fill, canvas) => {
         canvas.penStyle = { fill }
-        canvas.updateSymbolsStyle(
+        canvas.updateSymbols(
           canvas.model.symbolsSelected.map((s) => s.id),
-          { fill }
+          { style: { fill } }
         )
       },
     }

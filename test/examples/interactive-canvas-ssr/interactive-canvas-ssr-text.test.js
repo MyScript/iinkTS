@@ -15,7 +15,7 @@ import TextNavActions from '../_partials/text-nav-actions'
 import h from '../__dataset__/h'
 import helloStrike from '../__dataset__/helloStrike'
 
-test.describe('Interactive Canvas SSR Text', () => {
+test.describe('Interactive Canvas SSR Text', { tag: "@minimal" }, () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/interactive-canvas-ssr/interactive_canvas_ssr_text.html`)
     await passModalKey(page)

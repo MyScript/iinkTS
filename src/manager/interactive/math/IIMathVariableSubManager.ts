@@ -1,13 +1,18 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import type { TMathVariable, TMathVariableDefinition, TMathVariableDefinitions } from "@/client"
-import { SOURCE_TYPE_COLORS, SOURCE_TYPE_LABELS } from "@/components/IIMathVariableInputList"
+import type { TInteractiveInkCanvas } from "@/canvas"
+import type {
+  TJIIXMathElement,
+  TJIIXMathExpression,
+  TMathVariable,
+  TMathVariableDefinition,
+  TMathVariableDefinitions,
+} from "@/client"
+import { SOURCE_TYPE_COLORS, SOURCE_TYPE_LABELS } from "@/components"
+import type { TBox } from "@/core"
+import { BoxOps, convertBoundingBoxMillimeterToPixel, getBoxConnectionPoint, OBBOps } from "@/core"
 import { LoggerCategory } from "@/logger"
-import type { TJIIXMathElement, TJIIXMathExpression } from "@/model/ExportMath"
-import type { TBox, TStroke } from "@/symbol"
+import type { TStroke } from "@/symbol"
 import { isRecognizedMath, isStroke } from "@/symbol"
-import { BoxOps } from "@/symbol/primitives/Box"
-import { OBBOps } from "@/symbol/primitives/OBB"
-import { convertBoundingBoxMillimeterToPixel, getBoxConnectionPoint } from "@/utils"
+import { SymbolGeometry } from "@/symbol-utils"
 
 import { ColorPaletteManager } from "../../base"
 import { IIAbstractManager } from "../IIAbstractManager"
@@ -127,7 +132,7 @@ export class IIMathVariableSubManager extends IIAbstractManager {
     if (!strokes.length) {
       return null
     }
-    return BoxOps.createFromBoxes(strokes.map((s) => OBBOps.toBox(s.bounds)))
+    return BoxOps.createFromBoxes(strokes.map((s) => OBBOps.toBox(SymbolGeometry.boundsOf(s))))
   }
 
   private getAllMathBlockIds(): string[] {
@@ -437,8 +442,11 @@ export class IIMathVariableSubManager extends IIAbstractManager {
       const definition = await this.canvas.client.asVariableDefinition(jiixBlockId)
       this.#variableDefinitionCache.set(jiixBlockId, definition)
       return definition
-    } catch {
-      this.#variableDefinitionCache.set(jiixBlockId, null)
+    } catch (error) {
+      // Deliberately not cached: the success path above already caches a legitimately absent
+      // definition, so caching here only ever pinned a transient failure for the whole session —
+      // and the bare `catch` meant it did so without leaving a trace anywhere.
+      this.logger.error("asVariableDefinition", { jiixBlockId, error })
       return null
     }
   }

@@ -1,5 +1,4 @@
-import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import { LoggerCategory } from "@/logger"
+import type { TInteractiveInkCanvas } from "@/canvas"
 import type {
   TJIIXEdgeElement,
   TJIIXElement,
@@ -9,12 +8,13 @@ import type {
   TJIIXNodeElement,
   TJIIXStrokeItem,
   TJIIXTextElement,
-} from "@/model"
-import { JIIXElementType } from "@/model"
-import type { TBox, TStroke, TSymbol } from "@/symbol"
-import { BoxOps } from "@/symbol/primitives/Box"
-import { OBBOps } from "@/symbol/primitives/OBB"
-import { convertBoundingBoxMillimeterToPixel, convertMillimeterToPixel } from "@/utils"
+} from "@/client"
+import { JIIXElementType } from "@/client"
+import type { TBox } from "@/core"
+import { BoxOps, convertBoundingBoxMillimeterToPixel, convertMillimeterToPixel, OBBOps } from "@/core"
+import { LoggerCategory } from "@/logger"
+import type { TStroke, TSymbol } from "@/symbol"
+import { SymbolGeometry } from "@/symbol-utils"
 
 import { IIAbstractManager } from "./IIAbstractManager"
 
@@ -112,6 +112,17 @@ export class IIJiixQueryManager extends IIAbstractManager {
   }
 
   /**
+   * Both the index and the text metadata hold references into the document — strokes and JIIX
+   * elements — so leaving them populated retains the whole graph for as long as this manager is
+   * reachable. Unlike {@link invalidateIndex}, this does not rebuild.
+   */
+  protected onDestroy(): void {
+    this.logger.info("onDestroy", this.managerName)
+    this.#index = null
+    this.#textMetadata.clear()
+  }
+
+  /**
    * Build or rebuild the JIIX index
    * Called automatically when index is stale
    */
@@ -179,20 +190,15 @@ export class IIJiixQueryManager extends IIAbstractManager {
     // Index by words and chars for precise labels
     if (element.words) {
       element.words.forEach((word, wordIndex) => {
-        if (word.items) {
-          word.items.forEach((item: TJIIXStrokeItem) => {
-            const strokeId = item["full-id"] || item.id
-            if (strokeId) {
-              elementStrokes.push(strokeId)
-              index.strokeToElement.set(strokeId, element)
-              index.strokeToLabel.set(strokeId, word.label)
-              index.strokeToContext.set(strokeId, {
-                word: {
-                  label: word.label,
-                  index: wordIndex,
-                },
-              })
-            }
+        for (const strokeId of this.#strokeIdsFromItems(word.items)) {
+          elementStrokes.push(strokeId)
+          index.strokeToElement.set(strokeId, element)
+          index.strokeToLabel.set(strokeId, word.label)
+          index.strokeToContext.set(strokeId, {
+            word: {
+              label: word.label,
+              index: wordIndex,
+            },
           })
         }
       })
@@ -201,37 +207,29 @@ export class IIJiixQueryManager extends IIAbstractManager {
     // Index chars for character-level labels
     if (element.chars) {
       element.chars.forEach((char, charIndex) => {
-        if (char.items) {
-          char.items.forEach((item: TJIIXStrokeItem) => {
-            const strokeId = item["full-id"] || item.id
-            if (strokeId) {
-              const existingContext = index.strokeToContext.get(strokeId)
-              index.strokeToContext.set(strokeId, {
-                ...existingContext,
-                char: {
-                  label: char.label,
-                  index: charIndex,
-                  wordIndex: char.word,
-                },
-              })
-              // Update label to char label (more precise)
-              index.strokeToLabel.set(strokeId, char.label)
-            }
+        for (const strokeId of this.#strokeIdsFromItems(char.items)) {
+          const existingContext = index.strokeToContext.get(strokeId)
+          index.strokeToContext.set(strokeId, {
+            ...existingContext,
+            char: {
+              label: char.label,
+              index: charIndex,
+              wordIndex: char.word,
+            },
           })
+          // Update label to char label (more precise)
+          index.strokeToLabel.set(strokeId, char.label)
         }
       })
     }
 
     // Fallback: index items directly from element
-    if (element.items && (!element.words || element.words.length === 0)) {
-      element.items.forEach((item: TJIIXStrokeItem) => {
-        const strokeId = item["full-id"] || item.id
-        if (strokeId) {
-          elementStrokes.push(strokeId)
-          index.strokeToElement.set(strokeId, element)
-          index.strokeToLabel.set(strokeId, element.label)
-        }
-      })
+    if (!element.words || element.words.length === 0) {
+      for (const strokeId of this.#strokeIdsFromItems(element.items)) {
+        elementStrokes.push(strokeId)
+        index.strokeToElement.set(strokeId, element)
+        index.strokeToLabel.set(strokeId, element.label)
+      }
     }
   }
 
@@ -247,15 +245,12 @@ export class IIJiixQueryManager extends IIAbstractManager {
     }
 
     // Fallback: index items directly from element
-    if (element.items && (!element.expressions || element.expressions.length === 0)) {
-      element.items.forEach((item: TJIIXStrokeItem) => {
-        const strokeId = item["full-id"] || item.id
-        if (strokeId) {
-          elementStrokes.push(strokeId)
-          index.strokeToElement.set(strokeId, element)
-          index.strokeToLabel.set(strokeId, element.label || "")
-        }
-      })
+    if (!element.expressions || element.expressions.length === 0) {
+      for (const strokeId of this.#strokeIdsFromItems(element.items)) {
+        elementStrokes.push(strokeId)
+        index.strokeToElement.set(strokeId, element)
+        index.strokeToLabel.set(strokeId, element.label || "")
+      }
     }
   }
 
@@ -272,22 +267,19 @@ export class IIJiixQueryManager extends IIAbstractManager {
     const exprRecord = expression as Record<string, unknown>
 
     // Index items in this expression
-    if (exprRecord.items && Array.isArray(exprRecord.items)) {
-      exprRecord.items.forEach((item: TJIIXStrokeItem) => {
-        const strokeId = item["full-id"] || item.id
-        if (strokeId) {
-          elementStrokes.push(strokeId)
-          index.strokeToElement.set(strokeId, element)
-          index.strokeToLabel.set(strokeId, (exprRecord.label as string) || expression.type)
-          index.strokeToContext.set(strokeId, {
-            expression: {
-              type: expression.type,
-              label: exprRecord.label as string,
-              expressionPath: path,
-            },
-          })
-        }
-      })
+    if (Array.isArray(exprRecord.items)) {
+      for (const strokeId of this.#strokeIdsFromItems(exprRecord.items)) {
+        elementStrokes.push(strokeId)
+        index.strokeToElement.set(strokeId, element)
+        index.strokeToLabel.set(strokeId, (exprRecord.label as string) || expression.type)
+        index.strokeToContext.set(strokeId, {
+          expression: {
+            type: expression.type,
+            label: exprRecord.label as string,
+            expressionPath: path,
+          },
+        })
+      }
     }
 
     // Recurse into operands
@@ -308,15 +300,10 @@ export class IIJiixQueryManager extends IIAbstractManager {
     index: TJiixIndex,
     elementStrokes: string[]
   ): void {
-    if (element.items) {
-      element.items.forEach((item: TJIIXStrokeItem) => {
-        const strokeId = item["full-id"] || item.id
-        if (strokeId) {
-          elementStrokes.push(strokeId)
-          index.strokeToElement.set(strokeId, element)
-          index.strokeToLabel.set(strokeId, element.id)
-        }
-      })
+    for (const strokeId of this.#strokeIdsFromItems(element.items)) {
+      elementStrokes.push(strokeId)
+      index.strokeToElement.set(strokeId, element)
+      index.strokeToLabel.set(strokeId, element.id)
     }
   }
 
@@ -326,7 +313,7 @@ export class IIJiixQueryManager extends IIAbstractManager {
    * preserve it rather than overwriting with an empty rebuild.
    */
   protected ensureIndexValid(): void {
-    const currentVersion = this.model.modificationDate
+    const currentVersion = this.model.version
 
     if (!this.#index || this.#modelVersion !== currentVersion) {
       if (!this.model.exports?.["application/vnd.myscript.jiix"]?.elements && this.#index) {
@@ -349,7 +336,7 @@ export class IIJiixQueryManager extends IIAbstractManager {
     this.#index = null
     const jiixExport = this.model.exports?.["application/vnd.myscript.jiix"]
     if (jiixExport?.elements) {
-      this.#modelVersion = this.model.modificationDate
+      this.#modelVersion = this.model.version
       this.buildIndex()
     }
   }
@@ -429,7 +416,7 @@ export class IIJiixQueryManager extends IIAbstractManager {
     if (!word) {
       return null
     }
-    const allStrokeIds = (word.items || []).map((item) => item["full-id"] || item.id).filter((id): id is string => !!id)
+    const allStrokeIds = this.#strokeIdsFromItems(word.items)
     const wordBounds = word["bounding-box"] ? convertBoundingBoxMillimeterToPixel(word["bounding-box"]) : null
 
     // Find the line containing this word via first-char/last-char indices
@@ -527,6 +514,29 @@ export class IIJiixQueryManager extends IIAbstractManager {
   }
 
   /**
+   * Resolve a text element through the index instead of re-scanning `model.exports`.
+   * {@link ensureIndexValid} deliberately keeps the existing index when exports are cleared
+   * transiently, so scanning the exports here defeated that and returned nothing.
+   */
+  #resolveTextElement(elementId: string): TJIIXTextElement | null {
+    this.ensureIndexValid()
+
+    if (!this.#index?.elementToStrokes.has(elementId)) {
+      return null
+    }
+    const element = this.#index.elementById.get(elementId)
+    if (!element || element.type !== JIIXElementType.Text) {
+      return null
+    }
+    return element as TJIIXTextElement
+  }
+
+  /** Stroke ids referenced by a JIIX item list, preferring `full-id` over the element-local `id`. */
+  #strokeIdsFromItems(items?: TJIIXStrokeItem[]): string[] {
+    return (items || []).map((item) => item["full-id"] || item.id).filter((id): id is string => !!id)
+  }
+
+  /**
    * Get all strokes grouped by word (for text elements)
    * @param elementId - The text element ID
    * @returns Array of word groups, each containing stroke IDs and label
@@ -535,44 +545,20 @@ export class IIJiixQueryManager extends IIAbstractManager {
     label: string
     strokeIds: string[]
   }> {
-    this.ensureIndexValid()
-
-    const element = this.#index?.elementToStrokes.get(elementId)
-    if (!element) {
+    const textElement = this.#resolveTextElement(elementId)
+    if (!textElement) {
       return []
     }
 
-    const jiixElement = this.model.exports?.["application/vnd.myscript.jiix"]?.elements?.find(
-      (el) => el.id === elementId
-    )
-
-    if (!jiixElement || jiixElement.type !== JIIXElementType.Text) {
-      return []
-    }
-
-    const textElement = jiixElement as TJIIXTextElement
     const groups: Array<{
       label: string
       strokeIds: string[]
     }> = []
 
-    if (textElement.words) {
-      for (const word of textElement.words) {
-        const strokeIds: string[] = []
-        if (word.items) {
-          word.items.forEach((item: TJIIXStrokeItem) => {
-            const strokeId = item["full-id"] || item.id
-            if (strokeId) {
-              strokeIds.push(strokeId)
-            }
-          })
-        }
-        if (strokeIds.length > 0) {
-          groups.push({
-            label: word.label,
-            strokeIds,
-          })
-        }
+    for (const word of textElement.words || []) {
+      const strokeIds = this.#strokeIdsFromItems(word.items)
+      if (strokeIds.length > 0) {
+        groups.push({ label: word.label, strokeIds })
       }
     }
 
@@ -589,46 +575,21 @@ export class IIJiixQueryManager extends IIAbstractManager {
     strokeIds: string[]
     wordIndex: number
   }> {
-    this.ensureIndexValid()
-
-    const element = this.#index?.elementToStrokes.get(elementId)
-    if (!element) {
+    const textElement = this.#resolveTextElement(elementId)
+    if (!textElement) {
       return []
     }
 
-    const jiixElement = this.model.exports?.["application/vnd.myscript.jiix"]?.elements?.find(
-      (el) => el.id === elementId
-    )
-
-    if (!jiixElement || jiixElement.type !== JIIXElementType.Text) {
-      return []
-    }
-
-    const textElement = jiixElement as TJIIXTextElement
     const groups: Array<{
       label: string
       strokeIds: string[]
       wordIndex: number
     }> = []
 
-    if (textElement.chars) {
-      for (const char of textElement.chars) {
-        const strokeIds: string[] = []
-        if (char.items) {
-          char.items.forEach((item: TJIIXStrokeItem) => {
-            const strokeId = item["full-id"] || item.id
-            if (strokeId) {
-              strokeIds.push(strokeId)
-            }
-          })
-        }
-        if (strokeIds.length > 0) {
-          groups.push({
-            label: char.label,
-            strokeIds,
-            wordIndex: char.word,
-          })
-        }
+    for (const char of textElement.chars || []) {
+      const strokeIds = this.#strokeIdsFromItems(char.items)
+      if (strokeIds.length > 0) {
+        groups.push({ label: char.label, strokeIds, wordIndex: char.word })
       }
     }
 
@@ -881,7 +842,7 @@ export class IIJiixQueryManager extends IIAbstractManager {
       } else if (level === "word" && textEl.words) {
         for (const word of textEl.words) {
           if (word["bounding-box"] && word.items) {
-            const strokeIds = word.items.map((i) => i["full-id"] || i.id).filter((id): id is string => !!id)
+            const strokeIds = this.#strokeIdsFromItems(word.items)
             if (strokeIds.length > 0) {
               groups.push({
                 strokeIds,
@@ -893,7 +854,7 @@ export class IIJiixQueryManager extends IIAbstractManager {
       } else if (level === "char" && textEl.chars) {
         for (const char of textEl.chars) {
           if (char["bounding-box"] && char.items) {
-            const strokeIds = char.items.map((i) => i["full-id"] || i.id).filter((id): id is string => !!id)
+            const strokeIds = this.#strokeIdsFromItems(char.items)
             if (strokeIds.length > 0) {
               groups.push({
                 strokeIds,
@@ -947,7 +908,7 @@ export class IIJiixQueryManager extends IIAbstractManager {
               if (!strokes.length) {
                 continue
               }
-              bounds = BoxOps.createFromBoxes(strokes.map((s) => OBBOps.toBox(s.bounds)))
+              bounds = BoxOps.createFromBoxes(strokes.map((s) => OBBOps.toBox(SymbolGeometry.boundsOf(s))))
             }
             groups.push({ strokeIds, bounds })
           }
@@ -1024,7 +985,7 @@ export class IIJiixQueryManager extends IIAbstractManager {
       const items = exprRecord.items as TJIIXStrokeItem[] | undefined
 
       if (bbox && items) {
-        const strokeIds = items.map((i) => i["full-id"] || i.id).filter((id): id is string => !!id)
+        const strokeIds = this.#strokeIdsFromItems(items)
         if (strokeIds.length > 0) {
           groups.push({
             strokeIds,
