@@ -1,0 +1,590 @@
+<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>IIResizeManager | iink-ts - v5.0.0</title><meta name="description" content="Documentation for iink-ts"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><link rel="stylesheet" href="../assets/custom.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><script async src="../assets/hierarchy.js" id="tsd-hierarchy-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
+<div class="tsd-toolbar-contents container"><a href="../index.html" class="title">iink-ts - v5.0.0</a>
+<div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/>
+<ul role="listbox" id="tsd-search-results"></ul>
+<div id="tsd-search-status" aria-live="polite" aria-atomic="true">
+<div>Preparing search index...</div></div></dialog><a href="#" class="tsd-widget menu" id="tsd-toolbar-menu-trigger" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-menu"></use></svg></a></div></header>
+<div class="container container-main">
+<div class="col-content">
+<div class="tsd-page-title">
+<ul class="tsd-breadcrumb" aria-label="Breadcrumb">
+<li><a href="" aria-current="page">IIResizeManager</a></li></ul>
+<h1>Class IIResizeManager</h1></div>
+<section class="tsd-panel tsd-hierarchy" data-refl="11588">
+<h4>Hierarchy (<a href="../hierarchy.html#IIResizeManager">View Summary</a>)</h4>
+<ul class="tsd-hierarchy">
+<li class="tsd-hierarchy-item"><a href="IIAbstractTransformManager.html" class="tsd-signature-type tsd-kind-class">IIAbstractTransformManager</a>
+<ul class="tsd-hierarchy">
+<li class="tsd-hierarchy-item"><span class="tsd-hierarchy-target">IIResizeManager</span></li></ul></li></ul></section><aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/transform/IIResizeManager.ts:28</li></ul></aside>
+<section class="tsd-panel-group tsd-index-group">
+<section class="tsd-panel tsd-index-panel">
+<details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h5 class="tsd-index-heading uppercase">Index</h5></summary>
+<div class="tsd-accordion-details">
+<section class="tsd-index-section">
+<h3 class="tsd-index-heading tsd-anchor-link" id="accessors">Accessors<a href="#accessors" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-index-list"><a href="#client" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Accessor"><use href="../assets/icons.svg#icon-262144"></use></svg><span>client</span></a>
+<a href="#configuration" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Accessor"><use href="../assets/icons.svg#icon-262144"></use></svg><span>configuration</span></a>
+<a href="#model" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Accessor"><use href="../assets/icons.svg#icon-262144"></use></svg><span>model</span></a>
+<a href="#renderer" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Accessor"><use href="../assets/icons.svg#icon-262144"></use></svg><span>renderer</span></a>
+</div></section>
+<section class="tsd-index-section">
+<h3 class="tsd-index-heading tsd-anchor-link" id="constructors">Constructors<a href="#constructors" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-index-list"><a href="#constructor" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Constructor"><use href="../assets/icons.svg#icon-512"></use></svg><span>constructor</span></a>
+</div></section>
+<section class="tsd-index-section">
+<h3 class="tsd-index-heading tsd-anchor-link" id="methods">Methods<a href="#methods" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-index-list"><a href="#applyanddraw" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>apply<wbr/>And<wbr/>Draw</span></a>
+<a href="#applymatrix" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>apply<wbr/>Matrix</span></a>
+<a href="#applythroughutil" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>apply<wbr/>Through<wbr/>Util</span></a>
+<a href="#applytosymbol" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>apply<wbr/>To<wbr/>Symbol</span></a>
+<a href="#applytransformtoghoststrokesforselectedmath" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>apply<wbr/>Transform<wbr/>To<wbr/>Ghost<wbr/>Strokes<wbr/>For<wbr/>Selected<wbr/>Math</span></a>
+<a href="#continue" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>continue</span></a>
+<a href="#destroy" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>destroy</span></a>
+<a href="#end" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>end</span></a>
+<a href="#finalizetransform" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>finalize<wbr/>Transform</span></a>
+<a href="#getghoststrokeidsforselectedmath" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Ghost<wbr/>Stroke<wbr/>Ids<wbr/>For<wbr/>Selected<wbr/>Math</span></a>
+<a href="#ondestroy" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>on<wbr/>Destroy?</span></a>
+<a href="#oninit" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>on<wbr/>Init?</span></a>
+<a href="#previewdecorators" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>preview<wbr/>Decorators</span></a>
+<a href="#previewelementtransform" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>preview<wbr/>Element<wbr/>Transform</span></a>
+<a href="#previewtransform" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>preview<wbr/>Transform</span></a>
+<a href="#recordtransformed" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>record<wbr/>Transformed</span></a>
+<a href="#replacegradientfollowedstrokes" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>replace<wbr/>Gradient<wbr/>Followed<wbr/>Strokes</span></a>
+<a href="#resolvefollowedsymbols" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>resolve<wbr/>Followed<wbr/>Symbols</span></a>
+<a href="#resolveinteractgroup" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>resolve<wbr/>Interact<wbr/>Group</span></a>
+<a href="#start" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>start</span></a>
+</div></section>
+<section class="tsd-index-section">
+<h3 class="tsd-index-heading tsd-anchor-link" id="properties">Properties<a href="#properties" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-index-list"><a href="#boundingbox" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>bounding<wbr/>Box</span></a>
+<a href="#canvas" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>canvas</span></a>
+<a href="#direction" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>direction</span></a>
+<a href="#interactelementsgroup" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>interact<wbr/>Elements<wbr/>Group?</span></a>
+<a href="#keepratio" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>keep<wbr/>Ratio</span></a>
+<a href="#logger" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>logger</span></a>
+<a href="#managername" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>manager<wbr/>Name</span></a>
+<a href="#transformorigin" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>transform<wbr/>Origin</span></a>
+</div></section></div></details></section></section>
+<details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Accessors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h2 class="tsd-anchor-link" id="accessors-1">Accessors<a href="#accessors-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
+<section>
+<section class="tsd-panel tsd-member tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="client"><span>client</span><a href="#client" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-inherited">
+<li>
+<div class="tsd-signature" id="clientclient"><span class="tsd-signature-keyword">get</span> <span class="tsd-kind-get-signature">client</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <a href="WebSocketClient.html" class="tsd-signature-type tsd-kind-class">WebSocketClient</a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Get the client from the canvas
+Convenience getter to avoid accessing canvas.client everywhere</p>
+</div>
+<h4 class="tsd-returns-title">Returns <a href="WebSocketClient.html" class="tsd-signature-type tsd-kind-class">WebSocketClient</a></h4><aside class="tsd-sources">
+<p>Inherited from IIAbstractTransformManager.client</p>
+<ul>
+<li>Defined in manager/interactive/IIAbstractManager.ts:97</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="configuration"><span>configuration</span><a href="#configuration" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-inherited">
+<li>
+<div class="tsd-signature" id="configurationconfiguration"><span class="tsd-signature-keyword">get</span> <span class="tsd-kind-get-signature">configuration</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <a href="InteractiveInkCanvasConfiguration.html" class="tsd-signature-type tsd-kind-class">InteractiveInkCanvasConfiguration</a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Get the configuration from the canvas
+Convenience getter to avoid accessing canvas.configuration everywhere</p>
+</div>
+<h4 class="tsd-returns-title">Returns <a href="InteractiveInkCanvasConfiguration.html" class="tsd-signature-type tsd-kind-class">InteractiveInkCanvasConfiguration</a></h4><aside class="tsd-sources">
+<p>Inherited from IIAbstractTransformManager.configuration</p>
+<ul>
+<li>Defined in manager/interactive/IIAbstractManager.ts:105</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="model"><span>model</span><a href="#model" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-inherited">
+<li>
+<div class="tsd-signature" id="modelmodel"><span class="tsd-signature-keyword">get</span> <span class="tsd-kind-get-signature">model</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <a href="IIModel.html" class="tsd-signature-type tsd-kind-class">IIModel</a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Get the model from the canvas
+Convenience getter to avoid accessing canvas.model everywhere</p>
+</div>
+<h4 class="tsd-returns-title">Returns <a href="IIModel.html" class="tsd-signature-type tsd-kind-class">IIModel</a></h4><aside class="tsd-sources">
+<p>Inherited from IIAbstractTransformManager.model</p>
+<ul>
+<li>Defined in manager/interactive/IIAbstractManager.ts:81</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="renderer"><span>renderer</span><a href="#renderer" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-inherited">
+<li>
+<div class="tsd-signature" id="rendererrenderer"><span class="tsd-signature-keyword">get</span> <span class="tsd-kind-get-signature">renderer</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <a href="SVGRenderer.html" class="tsd-signature-type tsd-kind-class">SVGRenderer</a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Get the renderer from the canvas
+Convenience getter to avoid accessing canvas.renderer everywhere</p>
+</div>
+<h4 class="tsd-returns-title">Returns <a href="SVGRenderer.html" class="tsd-signature-type tsd-kind-class">SVGRenderer</a></h4><aside class="tsd-sources">
+<p>Inherited from IIAbstractTransformManager.renderer</p>
+<ul>
+<li>Defined in manager/interactive/IIAbstractManager.ts:89</li></ul></aside></div></li></ul></section></section></details>
+<details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Constructors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h2 class="tsd-anchor-link" id="constructors-1">Constructors<a href="#constructors-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
+<section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="constructor"><span>constructor</span><a href="#constructor" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="constructoriiresizemanager"><span class="tsd-signature-keyword">new</span> <span class="tsd-kind-constructor-signature">IIResizeManager</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">canvas</span><span class="tsd-signature-symbol">:</span> <a href="../types/TInteractiveInkCanvas.html" class="tsd-signature-type tsd-kind-type-alias">TInteractiveInkCanvas</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="" class="tsd-signature-type tsd-kind-class">IIResizeManager</a><a href="#constructoriiresizemanager" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">canvas</span>: <a href="../types/TInteractiveInkCanvas.html" class="tsd-signature-type tsd-kind-type-alias">TInteractiveInkCanvas</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="" class="tsd-signature-type tsd-kind-class">IIResizeManager</a></h4><aside class="tsd-sources">
+<p>Overrides <a href="IIAbstractTransformManager.html">IIAbstractTransformManager</a>.<a href="IIAbstractTransformManager.html#constructor">constructor</a></p>
+<ul>
+<li>Defined in manager/interactive/transform/IIResizeManager.ts:35</li></ul></aside></div></li></ul></section></section></details>
+<details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h2 class="tsd-anchor-link" id="methods-1">Methods<a href="#methods-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
+<section>
+<section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="applyanddraw"><code class="tsd-tag">Protected</code><span>apply<wbr/>And<wbr/>Draw</span><a href="#applyanddraw" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected tsd-is-inherited">
+<li class="tsd-is-inherited">
+<div class="tsd-signature tsd-anchor-link" id="applyanddraw-1"><span class="tsd-kind-call-signature">applyAndDraw</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">symbols</span><span class="tsd-signature-symbol">:</span> <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">matrix</span><span class="tsd-signature-symbol">:</span> <a href="MatrixTransform.html" class="tsd-signature-type tsd-kind-class">MatrixTransform</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TDecorator.html" class="tsd-signature-type tsd-kind-type-alias">TDecorator</a><span class="tsd-signature-symbol">[]</span><a href="#applyanddraw-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Returns the pre-transform records of the standalone decorators that followed <code>symbols</code>, for
+the caller to hand to <a href="IIAbstractTransformManager.html#recordtransformed" class="tsd-kind-method">recordTransformed</a>: they are moved here, outside the selection, so
+no caller snapshot holds them and undo would otherwise leave them where the gesture put them.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">symbols</span>: <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a><span class="tsd-signature-symbol">[]</span></span></li>
+<li><span><span class="tsd-kind-parameter">matrix</span>: <a href="MatrixTransform.html" class="tsd-signature-type tsd-kind-class">MatrixTransform</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="../types/TDecorator.html" class="tsd-signature-type tsd-kind-type-alias">TDecorator</a><span class="tsd-signature-symbol">[]</span></h4><aside class="tsd-sources">
+<p>Inherited from <a href="IIAbstractTransformManager.html">IIAbstractTransformManager</a>.<a href="IIAbstractTransformManager.html#applyanddraw">applyAndDraw</a></p>
+<ul>
+<li>Defined in manager/interactive/transform/AbstractTransformManager.ts:93</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="applymatrix"><span>apply<wbr/>Matrix</span><a href="#applymatrix" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-inherited">
+<li class="tsd-is-inherited">
+<div class="tsd-signature tsd-anchor-link" id="applymatrix-1"><span class="tsd-kind-call-signature">applyMatrix</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">symbols</span><span class="tsd-signature-symbol">:</span> <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">matrix</span><span class="tsd-signature-symbol">:</span> <a href="MatrixTransform.html" class="tsd-signature-type tsd-kind-class">MatrixTransform</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#applymatrix-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Applies a matrix transform locally (model + redraw) without touching the backend or
+history. Used by InteractiveInkCanvas's undo/redo replay dispatcher, which sends its own
+consolidated backend message separately.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">symbols</span>: <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a><span class="tsd-signature-symbol">[]</span></span></li>
+<li><span><span class="tsd-kind-parameter">matrix</span>: <a href="MatrixTransform.html" class="tsd-signature-type tsd-kind-class">MatrixTransform</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<p>Inherited from <a href="IIAbstractTransformManager.html">IIAbstractTransformManager</a>.<a href="IIAbstractTransformManager.html#applymatrix">applyMatrix</a></p>
+<ul>
+<li>Defined in manager/interactive/transform/AbstractTransformManager.ts:62</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected">
+<h3 class="tsd-anchor-link" id="applythroughutil"><code class="tsd-tag">Protected</code><span>apply<wbr/>Through<wbr/>Util</span><a href="#applythroughutil" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="applythroughutil-1"><span class="tsd-kind-call-signature">applyThroughUtil</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">symbol</span><span class="tsd-signature-symbol">:</span> <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">matrix</span><span class="tsd-signature-symbol">:</span> <a href="MatrixTransform.html" class="tsd-signature-type tsd-kind-class">MatrixTransform</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#applythroughutil-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>One hook, like the other two managers'. <code>transformOrigin</code> is passed here, which is
+what lets the ellipse and the arc scale their centre about it from inside their own util.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">symbol</span>: <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a></span></li>
+<li><span><span class="tsd-kind-parameter">matrix</span>: <a href="MatrixTransform.html" class="tsd-signature-type tsd-kind-class">MatrixTransform</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<p>Overrides <a href="IIAbstractTransformManager.html">IIAbstractTransformManager</a>.<a href="IIAbstractTransformManager.html#applythroughutil">applyThroughUtil</a></p>
+<ul>
+<li>Defined in manager/interactive/transform/IIResizeManager.ts:43</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="applytosymbol"><span>apply<wbr/>To<wbr/>Symbol</span><a href="#applytosymbol" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-inherited">
+<li class="tsd-is-inherited">
+<div class="tsd-signature tsd-anchor-link" id="applytosymbol-1"><span class="tsd-kind-call-signature">applyToSymbol</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">symbol</span><span class="tsd-signature-symbol">:</span> <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">matrix</span><span class="tsd-signature-symbol">:</span> <a href="MatrixTransform.html" class="tsd-signature-type tsd-kind-class">MatrixTransform</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a><a href="#applytosymbol-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">symbol</span>: <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a></span></li>
+<li><span><span class="tsd-kind-parameter">matrix</span>: <a href="MatrixTransform.html" class="tsd-signature-type tsd-kind-class">MatrixTransform</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a></h4><aside class="tsd-sources">
+<p>Inherited from <a href="IIAbstractTransformManager.html">IIAbstractTransformManager</a>.<a href="IIAbstractTransformManager.html#applytosymbol">applyToSymbol</a></p>
+<ul>
+<li>Defined in manager/interactive/transform/AbstractTransformManager.ts:279</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="applytransformtoghoststrokesforselectedmath"><code class="tsd-tag">Protected</code><span>apply<wbr/>Transform<wbr/>To<wbr/>Ghost<wbr/>Strokes<wbr/>For<wbr/>Selected<wbr/>Math</span><a href="#applytransformtoghoststrokesforselectedmath" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected tsd-is-inherited">
+<li class="tsd-is-inherited">
+<div class="tsd-signature tsd-anchor-link" id="applytransformtoghoststrokesforselectedmath-1"><span class="tsd-kind-call-signature">applyTransformToGhostStrokesForSelectedMath</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">symbols</span><span class="tsd-signature-symbol">:</span> <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">matrix</span><span class="tsd-signature-symbol">:</span> <a href="MatrixTransform.html" class="tsd-signature-type tsd-kind-class">MatrixTransform</a><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#applytransformtoghoststrokesforselectedmath-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Permanently applies the given transform matrix to the ghost previews attached to the
+selection's math blocks, so they stay visually attached once the drag settles.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">symbols</span>: <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a><span class="tsd-signature-symbol">[]</span></span></li>
+<li><span><span class="tsd-kind-parameter">matrix</span>: <a href="MatrixTransform.html" class="tsd-signature-type tsd-kind-class">MatrixTransform</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<p>Inherited from <a href="IIAbstractTransformManager.html">IIAbstractTransformManager</a>.<a href="IIAbstractTransformManager.html#applytransformtoghoststrokesforselectedmath">applyTransformToGhostStrokesForSelectedMath</a></p>
+<ul>
+<li>Defined in manager/interactive/transform/AbstractTransformManager.ts:248</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="continue"><span>continue</span><a href="#continue" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="continue-1"><span class="tsd-kind-call-signature">continue</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">point</span><span class="tsd-signature-symbol">:</span> <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">scaleX</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">scaleY</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">}</span><a href="#continue-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">point</span>: <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">scaleX</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">scaleY</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">}</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/transform/IIResizeManager.ts:73</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="destroy"><span>destroy</span><a href="#destroy" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-inherited">
+<li class="tsd-is-inherited">
+<div class="tsd-signature tsd-anchor-link" id="destroy-1"><span class="tsd-kind-call-signature">destroy</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#destroy-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Destroy the manager and cleanup resources
+Calls the onDestroy hook if defined</p>
+</div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<p>Inherited from <a href="IIAbstractTransformManager.html">IIAbstractTransformManager</a>.<a href="IIAbstractTransformManager.html#destroy">destroy</a></p>
+<ul>
+<li>Defined in manager/interactive/IIAbstractManager.ts:145</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="end"><span>end</span><a href="#end" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="end-1"><span class="tsd-kind-call-signature">end</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">point</span><span class="tsd-signature-symbol">:</span> <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><a href="#end-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">point</span>: <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/transform/IIResizeManager.ts:147</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="finalizetransform"><code class="tsd-tag">Protected</code><span>finalize<wbr/>Transform</span><a href="#finalizetransform" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected tsd-is-inherited">
+<li class="tsd-is-inherited">
+<div class="tsd-signature tsd-anchor-link" id="finalizetransform-1"><span class="tsd-kind-call-signature">finalizeTransform</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#finalizetransform-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<p>Inherited from <a href="IIAbstractTransformManager.html">IIAbstractTransformManager</a>.<a href="IIAbstractTransformManager.html#finalizetransform">finalizeTransform</a></p>
+<ul>
+<li>Defined in manager/interactive/transform/AbstractTransformManager.ts:216</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="getghoststrokeidsforselectedmath"><code class="tsd-tag">Protected</code><span>get<wbr/>Ghost<wbr/>Stroke<wbr/>Ids<wbr/>For<wbr/>Selected<wbr/>Math</span><a href="#getghoststrokeidsforselectedmath" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected tsd-is-inherited">
+<li class="tsd-is-inherited">
+<div class="tsd-signature tsd-anchor-link" id="getghoststrokeidsforselectedmath-1"><span class="tsd-kind-call-signature">getGhostStrokeIdsForSelectedMath</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">symbols</span><span class="tsd-signature-symbol">:</span> <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><a href="#getghoststrokeidsforselectedmath-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Element ids of the ghost previews attached to the given selection's math blocks —
+for live CSS-transform following while a translate/resize/rotate drag is in progress.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">symbols</span>: <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a><span class="tsd-signature-symbol">[]</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h4><aside class="tsd-sources">
+<p>Inherited from <a href="IIAbstractTransformManager.html">IIAbstractTransformManager</a>.<a href="IIAbstractTransformManager.html#getghoststrokeidsforselectedmath">getGhostStrokeIdsForSelectedMath</a></p>
+<ul>
+<li>Defined in manager/interactive/transform/AbstractTransformManager.ts:236</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="ondestroy"><code class="tsd-tag">Protected</code> <code class="tsd-tag">Optional</code><span>on<wbr/>Destroy</span><a href="#ondestroy" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected tsd-is-inherited">
+<li class="tsd-is-inherited">
+<div class="tsd-signature tsd-anchor-link" id="ondestroy-1"><span class="tsd-kind-call-signature">onDestroy</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#ondestroy-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Lifecycle hook called when the manager is being destroyed
+Override in subclasses to cleanup resources</p>
+</div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+<div class="tsd-comment tsd-typography">
+<div class="tsd-tag-example">
+<h4 class="tsd-anchor-link" id="example">Example<a href="#example" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="typescript"><span class="hl-12">protected</span><span class="hl-1"> </span><span class="hl-0">onDestroy</span><span class="hl-1">(): </span><span class="hl-10">void</span><span class="hl-1"> {</span><br/><span class="hl-1">  </span><span class="hl-10">this</span><span class="hl-1">.</span><span class="hl-12">logger</span><span class="hl-1">.</span><span class="hl-0">info</span><span class="hl-1">(</span><span class="hl-2">`</span><span class="hl-10">${</span><span class="hl-10">this</span><span class="hl-5">.</span><span class="hl-12">managerName</span><span class="hl-10">}</span><span class="hl-2"> destroyed`</span><span class="hl-1">)</span><br/><span class="hl-1">  </span><span class="hl-13">// Remove event listeners, clear intervals, etc.</span><br/><span class="hl-1">}</span>
+</code><button type="button">Copy</button></pre>
+
+</div></div><aside class="tsd-sources">
+<p>Inherited from <a href="IIAbstractTransformManager.html">IIAbstractTransformManager</a>.<a href="IIAbstractTransformManager.html#ondestroy">onDestroy</a></p>
+<ul>
+<li>Defined in manager/interactive/IIAbstractManager.ts:139</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="oninit"><code class="tsd-tag">Protected</code> <code class="tsd-tag">Optional</code><span>on<wbr/>Init</span><a href="#oninit" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected tsd-is-inherited">
+<li class="tsd-is-inherited">
+<div class="tsd-signature tsd-anchor-link" id="oninit-1"><span class="tsd-kind-call-signature">onInit</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#oninit-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Lifecycle hook called after manager initialization
+Override in subclasses if needed</p>
+<p>This is called at the end of the constructor, allowing subclasses
+to perform initialization that requires access to this.managerName
+or other properties set in the subclass constructor.</p>
+</div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+<div class="tsd-comment tsd-typography">
+<div class="tsd-tag-example">
+<h4 class="tsd-anchor-link" id="example-1">Example<a href="#example-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="typescript"><span class="hl-12">protected</span><span class="hl-1"> </span><span class="hl-0">onInit</span><span class="hl-1">(): </span><span class="hl-10">void</span><span class="hl-1"> {</span><br/><span class="hl-1">  </span><span class="hl-10">this</span><span class="hl-1">.</span><span class="hl-12">logger</span><span class="hl-1">.</span><span class="hl-0">info</span><span class="hl-1">(</span><span class="hl-2">`</span><span class="hl-10">${</span><span class="hl-10">this</span><span class="hl-5">.</span><span class="hl-12">managerName</span><span class="hl-10">}</span><span class="hl-2"> initialized`</span><span class="hl-1">)</span><br/><span class="hl-1">  </span><span class="hl-13">// Setup event listeners, etc.</span><br/><span class="hl-1">}</span>
+</code><button type="button">Copy</button></pre>
+
+</div></div><aside class="tsd-sources">
+<p>Inherited from <a href="IIAbstractTransformManager.html">IIAbstractTransformManager</a>.<a href="IIAbstractTransformManager.html#oninit">onInit</a></p>
+<ul>
+<li>Defined in manager/interactive/IIAbstractManager.ts:125</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="previewdecorators"><code class="tsd-tag">Protected</code><span>preview<wbr/>Decorators</span><a href="#previewdecorators" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected tsd-is-inherited">
+<li class="tsd-is-inherited">
+<div class="tsd-signature tsd-anchor-link" id="previewdecorators-1"><span class="tsd-kind-call-signature">previewDecorators</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">symbols</span><span class="tsd-signature-symbol">:</span> <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">live</span><span class="tsd-signature-symbol">:</span> <a href="MatrixTransform.html" class="tsd-signature-type tsd-kind-class">MatrixTransform</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#previewdecorators-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>The live gesture, previewed on the standalone decorators carried by <code>symbols</code>.</p>
+<p>Only those whose every target is in <code>symbols</code>: they are the ones the commit moves by the same
+matrix (see <code>updateDecoratorsForTargets</code>), so previewing them any other way would show a
+decoration that jumps on release. A decorator only partly moved has its box refitted at commit
+instead, which a matrix cannot preview.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">symbols</span>: <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a><span class="tsd-signature-symbol">[]</span></span></li>
+<li><span><span class="tsd-kind-parameter">live</span>: <a href="MatrixTransform.html" class="tsd-signature-type tsd-kind-class">MatrixTransform</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<p>Inherited from <a href="IIAbstractTransformManager.html">IIAbstractTransformManager</a>.<a href="IIAbstractTransformManager.html#previewdecorators">previewDecorators</a></p>
+<ul>
+<li>Defined in manager/interactive/transform/AbstractTransformManager.ts:122</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="previewelementtransform"><code class="tsd-tag">Protected</code><span>preview<wbr/>Element<wbr/>Transform</span><a href="#previewelementtransform" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected tsd-is-inherited">
+<li class="tsd-is-inherited">
+<div class="tsd-signature tsd-anchor-link" id="previewelementtransform-1"><span class="tsd-kind-call-signature">previewElementTransform</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">id</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">live</span><span class="tsd-signature-symbol">:</span> <a href="MatrixTransform.html" class="tsd-signature-type tsd-kind-class">MatrixTransform</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#previewelementtransform-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>The same, for an element with no symbol behind it — the interact-elements group, or a math
+ghost stroke. Nothing is composed because nothing is stored: these are drawn in document
+coordinates already.</p>
+<p>Note both preview methods write a full <code>matrix(...)</code>, carrying their own centre. The
+<code>transform-origin</code> attribute this class used to set cannot serve here: it applies to the whole
+transform list, so it would displace the stored matrix, which brings its own centre.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">id</span>: <span class="tsd-signature-type">string</span></span></li>
+<li><span><span class="tsd-kind-parameter">live</span>: <a href="MatrixTransform.html" class="tsd-signature-type tsd-kind-class">MatrixTransform</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<p>Inherited from <a href="IIAbstractTransformManager.html">IIAbstractTransformManager</a>.<a href="IIAbstractTransformManager.html#previewelementtransform">previewElementTransform</a></p>
+<ul>
+<li>Defined in manager/interactive/transform/AbstractTransformManager.ts:49</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="previewtransform"><code class="tsd-tag">Protected</code><span>preview<wbr/>Transform</span><a href="#previewtransform" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected tsd-is-inherited">
+<li class="tsd-is-inherited">
+<div class="tsd-signature tsd-anchor-link" id="previewtransform-1"><span class="tsd-kind-call-signature">previewTransform</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">symbol</span><span class="tsd-signature-symbol">:</span> <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">live</span><span class="tsd-signature-symbol">:</span> <a href="MatrixTransform.html" class="tsd-signature-type tsd-kind-class">MatrixTransform</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#previewtransform-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>The gesture's matrix, previewed on top of the one the symbol already carries.</p>
+<p>The live part multiplies onto the stored one rather than replacing it, so the SVG transform list
+reads outside-in: the symbol sits where its own matrix puts it, and the gesture moves it from
+there — the same order the commit will apply. Writing the live transform alone is what made an
+already-moved symbol snap back to its raw coordinates for the length of a drag and jump into
+place on release (IIC-1999). Before this epic only a rotated typeset carried a baked transform;
+now every moved symbol does, so the same overwrite would affect all of them.</p>
+<p>The stored matrix is untouched here. This is a preview: <code>applyAndDraw</code> is what settles it.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">symbol</span>: <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a></span></li>
+<li><span><span class="tsd-kind-parameter">live</span>: <a href="MatrixTransform.html" class="tsd-signature-type tsd-kind-class">MatrixTransform</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<p>Inherited from <a href="IIAbstractTransformManager.html">IIAbstractTransformManager</a>.<a href="IIAbstractTransformManager.html#previewtransform">previewTransform</a></p>
+<ul>
+<li>Defined in manager/interactive/transform/AbstractTransformManager.ts:36</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="recordtransformed"><code class="tsd-tag">Protected</code><span>record<wbr/>Transformed</span><a href="#recordtransformed" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected tsd-is-inherited">
+<li class="tsd-is-inherited">
+<div class="tsd-signature tsd-anchor-link" id="recordtransformed-1"><span class="tsd-kind-call-signature">recordTransformed</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">changes</span><span class="tsd-signature-symbol">:</span> <a href="../types/TIIHistoryChanges.html" class="tsd-signature-type tsd-kind-type-alias">TIIHistoryChanges</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">snapshots</span><span class="tsd-signature-symbol">:</span> <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#recordtransformed-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Records a transform as the before/after pair <code>updated</code> wants, resolving &quot;after&quot; from the
+document by id rather than from the caller.</p>
+<p>By id, because a transform commits a draft: the object the caller holds is the pre-transform
+snapshot, and reading the moved value off it would record no change at all. Resolving both
+sides here also keeps the two lists the same length — a symbol the document no longer holds is
+dropped from both rather than shifting every pair after it.</p>
+<p>Call after <code>applyAndDraw</code>, with the snapshots taken before it.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">changes</span>: <a href="../types/TIIHistoryChanges.html" class="tsd-signature-type tsd-kind-type-alias">TIIHistoryChanges</a></span></li>
+<li><span><span class="tsd-kind-parameter">snapshots</span>: <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a><span class="tsd-signature-symbol">[]</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<p>Inherited from <a href="IIAbstractTransformManager.html">IIAbstractTransformManager</a>.<a href="IIAbstractTransformManager.html#recordtransformed">recordTransformed</a></p>
+<ul>
+<li>Defined in manager/interactive/transform/AbstractTransformManager.ts:77</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="replacegradientfollowedstrokes"><code class="tsd-tag">Protected</code><span>replace<wbr/>Gradient<wbr/>Followed<wbr/>Strokes</span><a href="#replacegradientfollowedstrokes" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected tsd-is-inherited">
+<li class="tsd-is-inherited">
+<div class="tsd-signature tsd-anchor-link" id="replacegradientfollowedstrokes-1"><span class="tsd-kind-call-signature">replaceGradientFollowedStrokes</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">anchoredOldSymbols</span><span class="tsd-signature-symbol">:</span> <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">anchoredNewSymbols</span><span class="tsd-signature-symbol">:</span> <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><a href="#replacegradientfollowedstrokes-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Gradient-followed strokes were reshaped non-uniformly by the connector — their points did not
+all move by the same delta — so the backend cannot be asked to apply this transform to them.
+Their full new content has to be sent instead. Returns one <code>replaceStrokes</code> call per such
+stroke, to be spread into the transform's own <code>Promise.all</code>.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">anchoredOldSymbols</span>: <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a><span class="tsd-signature-symbol">[]</span></span></li>
+<li><span><span class="tsd-kind-parameter">anchoredNewSymbols</span>: <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a><span class="tsd-signature-symbol">[]</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></h4><aside class="tsd-sources">
+<p>Inherited from <a href="IIAbstractTransformManager.html">IIAbstractTransformManager</a>.<a href="IIAbstractTransformManager.html#replacegradientfollowedstrokes">replaceGradientFollowedStrokes</a></p>
+<ul>
+<li>Defined in manager/interactive/transform/AbstractTransformManager.ts:260</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="resolvefollowedsymbols"><code class="tsd-tag">Protected</code><span>resolve<wbr/>Followed<wbr/>Symbols</span><a href="#resolvefollowedsymbols" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected tsd-is-inherited">
+<li class="tsd-is-inherited">
+<div class="tsd-signature tsd-anchor-link" id="resolvefollowedsymbols-1"><span class="tsd-kind-call-signature">resolveFollowedSymbols</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">followedIds</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">alreadyIncluded</span><span class="tsd-signature-symbol">:</span> <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a><span class="tsd-signature-symbol">[]</span><a href="#resolvefollowedsymbols-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Live model symbols for the pre-convert edge strokes that rigidly follow a transform
+(see IIConnectorManager), minus any already present in <code>alreadyIncluded</code>.
+They are transformed outside <code>applyAndDraw</code>, so history entries and backend transform
+messages must list them explicitly or undo and the server's ink both drift out of sync.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">followedIds</span>: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></span></li>
+<li><span><span class="tsd-kind-parameter">alreadyIncluded</span>: <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a><span class="tsd-signature-symbol">[]</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="../types/TSymbol.html" class="tsd-signature-type tsd-kind-type-alias">TSymbol</a><span class="tsd-signature-symbol">[]</span></h4><aside class="tsd-sources">
+<p>Inherited from <a href="IIAbstractTransformManager.html">IIAbstractTransformManager</a>.<a href="IIAbstractTransformManager.html#resolvefollowedsymbols">resolveFollowedSymbols</a></p>
+<ul>
+<li>Defined in manager/interactive/transform/AbstractTransformManager.ts:205</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="resolveinteractgroup"><code class="tsd-tag">Protected</code><span>resolve<wbr/>Interact<wbr/>Group</span><a href="#resolveinteractgroup" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected tsd-is-inherited">
+<li class="tsd-is-inherited">
+<div class="tsd-signature tsd-anchor-link" id="resolveinteractgroup-1"><span class="tsd-kind-call-signature">resolveInteractGroup</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">target</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Element</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">SVGGElement</span><a href="#resolveinteractgroup-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">target</span>: <span class="tsd-signature-type">Element</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">SVGGElement</span></h4><aside class="tsd-sources">
+<p>Inherited from <a href="IIAbstractTransformManager.html">IIAbstractTransformManager</a>.<a href="IIAbstractTransformManager.html#resolveinteractgroup">resolveInteractGroup</a></p>
+<ul>
+<li>Defined in manager/interactive/transform/AbstractTransformManager.ts:53</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="start"><span>start</span><a href="#start" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="start-1"><span class="tsd-kind-call-signature">start</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">target</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Element</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">origin</span><span class="tsd-signature-symbol">:</span> <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#start-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">target</span>: <span class="tsd-signature-type">Element</span></span></li>
+<li><span><span class="tsd-kind-parameter">origin</span>: <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/transform/IIResizeManager.ts:48</li></ul></aside></div></li></ul></section></section></details>
+<details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h2 class="tsd-anchor-link" id="properties-1">Properties<a href="#properties-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
+<section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="boundingbox"><span>bounding<wbr/>Box</span><a href="#boundingbox" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">boundingBox</span><span class="tsd-signature-symbol">:</span> <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a></div><aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/transform/IIResizeManager.ts:31</li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="canvas"><code class="tsd-tag">Protected</code><span>canvas</span><a href="#canvas" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">canvas</span><span class="tsd-signature-symbol">:</span> <a href="../types/TInteractiveInkCanvas.html" class="tsd-signature-type tsd-kind-type-alias">TInteractiveInkCanvas</a></div>
+<div class="tsd-comment tsd-typography"><p>The Interactive Ink Canvas instance</p>
+</div><aside class="tsd-sources">
+<p>Inherited from <a href="IIAbstractTransformManager.html">IIAbstractTransformManager</a>.<a href="IIAbstractTransformManager.html#canvas">canvas</a></p>
+<ul>
+<li>Defined in manager/interactive/IIAbstractManager.ts:66</li></ul></aside></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="direction"><span>direction</span><a href="#direction" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">direction</span><span class="tsd-signature-symbol">:</span> <a href="../enums/ResizeDirection.html" class="tsd-signature-type tsd-kind-enum">ResizeDirection</a></div><aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/transform/IIResizeManager.ts:30</li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="interactelementsgroup"><code class="tsd-tag">Optional</code><span>interact<wbr/>Elements<wbr/>Group</span><a href="#interactelementsgroup" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">interactElementsGroup</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">SVGElement</span></div><aside class="tsd-sources">
+<p>Inherited from <a href="IIAbstractTransformManager.html">IIAbstractTransformManager</a>.<a href="IIAbstractTransformManager.html#interactelementsgroup">interactElementsGroup</a></p>
+<ul>
+<li>Defined in manager/interactive/transform/AbstractTransformManager.ts:18</li></ul></aside></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="keepratio"><span>keep<wbr/>Ratio</span><a href="#keepratio" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">keepRatio</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></div><aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/transform/IIResizeManager.ts:33</li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="logger"><code class="tsd-tag">Protected</code><span>logger</span><a href="#logger" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">logger</span><span class="tsd-signature-symbol">:</span> <a href="Logger.html" class="tsd-signature-type tsd-kind-class">Logger</a></div>
+<div class="tsd-comment tsd-typography"><p>Logger instance for this manager
+Automatically uses LoggerCategory.MANAGER</p>
+</div><aside class="tsd-sources">
+<p>Inherited from <a href="IIAbstractTransformManager.html">IIAbstractTransformManager</a>.<a href="IIAbstractTransformManager.html#logger">logger</a></p>
+<ul>
+<li>Defined in manager/interactive/IIAbstractManager.ts:51</li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-protected">
+<h3 class="tsd-anchor-link" id="managername"><code class="tsd-tag">Protected</code><span>manager<wbr/>Name</span><a href="#managername" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">managerName</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;IIResizeManager&quot;</span></div>
+<div class="tsd-comment tsd-typography"><p>Name of the manager for logging purposes
+Must be overridden in concrete classes</p>
+</div>
+<div class="tsd-comment tsd-typography">
+<div class="tsd-tag-example">
+<h4 class="tsd-anchor-link" id="example-2">Example<a href="#example-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="ts"><span class="hl-2">&quot;IITypesetManager&quot;</span><span class="hl-1">, </span><span class="hl-2">&quot;IIMathManager&quot;</span>
+</code><button type="button">Copy</button></pre>
+
+</div></div><aside class="tsd-sources">
+<p>Overrides <a href="IIAbstractTransformManager.html">IIAbstractTransformManager</a>.<a href="IIAbstractTransformManager.html#managername">managerName</a></p>
+<ul>
+<li>Defined in manager/interactive/transform/IIResizeManager.ts:29</li></ul></aside></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="transformorigin"><span>transform<wbr/>Origin</span><a href="#transformorigin" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">transformOrigin</span><span class="tsd-signature-symbol">:</span> <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a></div><aside class="tsd-sources">
+<ul>
+<li>Defined in manager/interactive/transform/IIResizeManager.ts:32</li></ul></aside></section></section></details></div>
+<div class="col-sidebar">
+<div class="page-menu">
+<div class="tsd-navigation settings">
+<details class="tsd-accordion"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h3>Settings</h3></summary>
+<div class="tsd-accordion-details">
+<div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span>
+<ul id="tsd-filter-options">
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-protected" name="protected"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Protected</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-alpha" name="alpha"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Alpha</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-beta" name="beta"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Beta</span></label></li></ul></div>
+<div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div>
+<details open class="tsd-accordion tsd-page-navigation"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h3>On This Page</h3></summary>
+<div class="tsd-accordion-details">
+<details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Accessors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Accessors</summary>
+<div><a href="#client" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Accessor"><use href="../assets/icons.svg#icon-262144"></use></svg><span>client</span></a><a href="#configuration" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Accessor"><use href="../assets/icons.svg#icon-262144"></use></svg><span>configuration</span></a><a href="#model" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Accessor"><use href="../assets/icons.svg#icon-262144"></use></svg><span>model</span></a><a href="#renderer" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Accessor"><use href="../assets/icons.svg#icon-262144"></use></svg><span>renderer</span></a></div></details>
+<details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Constructors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Constructors</summary>
+<div><a href="#constructor"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Constructor"><use href="../assets/icons.svg#icon-512"></use></svg><span>constructor</span></a></div></details>
+<details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Methods</summary>
+<div><a href="#applyanddraw" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>apply<wbr/>And<wbr/>Draw</span></a><a href="#applymatrix" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>apply<wbr/>Matrix</span></a><a href="#applythroughutil" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>apply<wbr/>Through<wbr/>Util</span></a><a href="#applytosymbol" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>apply<wbr/>To<wbr/>Symbol</span></a><a href="#applytransformtoghoststrokesforselectedmath" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>apply<wbr/>Transform<wbr/>To<wbr/>Ghost<wbr/>Strokes<wbr/>For<wbr/>Selected<wbr/>Math</span></a><a href="#continue"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>continue</span></a><a href="#destroy" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>destroy</span></a><a href="#end"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>end</span></a><a href="#finalizetransform" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>finalize<wbr/>Transform</span></a><a href="#getghoststrokeidsforselectedmath" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Ghost<wbr/>Stroke<wbr/>Ids<wbr/>For<wbr/>Selected<wbr/>Math</span></a><a href="#ondestroy" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>on<wbr/>Destroy</span></a><a href="#oninit" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>on<wbr/>Init</span></a><a href="#previewdecorators" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>preview<wbr/>Decorators</span></a><a href="#previewelementtransform" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>preview<wbr/>Element<wbr/>Transform</span></a><a href="#previewtransform" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>preview<wbr/>Transform</span></a><a href="#recordtransformed" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>record<wbr/>Transformed</span></a><a href="#replacegradientfollowedstrokes" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>replace<wbr/>Gradient<wbr/>Followed<wbr/>Strokes</span></a><a href="#resolvefollowedsymbols" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>resolve<wbr/>Followed<wbr/>Symbols</span></a><a href="#resolveinteractgroup" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>resolve<wbr/>Interact<wbr/>Group</span></a><a href="#start"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>start</span></a></div></details>
+<details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Properties</summary>
+<div><a href="#boundingbox"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>bounding<wbr/>Box</span></a><a href="#canvas" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>canvas</span></a><a href="#direction"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>direction</span></a><a href="#interactelementsgroup" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>interact<wbr/>Elements<wbr/>Group</span></a><a href="#keepratio"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>keep<wbr/>Ratio</span></a><a href="#logger" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>logger</span></a><a href="#managername" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>manager<wbr/>Name</span></a><a href="#transformorigin"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>transform<wbr/>Origin</span></a></div></details></div></details></div>
+<div class="site-menu">
+<nav class="tsd-navigation"><a href="../modules.html">iink-ts - v5.0.0</a>
+<ul class="tsd-small-nested-navigation" id="tsd-nav-container">
+<li>Loading...</li></ul></nav></div></div></div><footer>
+<p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer>
+<div class="overlay"></div></body></html>

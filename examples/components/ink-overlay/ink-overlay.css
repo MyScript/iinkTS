@@ -1,0 +1,11 @@
+/* Laid over the canvas: follows its pan and zoom, never catches the pen */
+.ink-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.ink-overlay > * {
+  position: absolute;
+}

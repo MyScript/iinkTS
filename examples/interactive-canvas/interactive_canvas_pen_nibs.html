@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+    <title>Pen nibs</title>
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <script src="../assets/js/theme-init.js"></script>
+  </head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="showModalBtn" class="btn-keys">API Keys</button>
+      <h1 class="header-title">Interactive Ink Canvas - Pen nibs</h1>
+    </header>
+
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">One captured stroke, four instruments</p>
+        <p class="ex-panel-intro">
+          A stroke stores where the pen went and when. How <strong>wide</strong> to draw it at each point is decided
+          when it is drawn, from that same data — so the nib can be changed after the fact and the stroke redraws.
+        </p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">
+            <strong>Ballpoint</strong> — one width from end to end, blunt ends. Nothing changes it.
+          </div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">
+            <strong>Pencil</strong> — the default. Width follows the pen's <em>speed</em>: full width where the hand
+            slows, thinner as it accelerates.
+          </div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">
+            <strong>Fountain pen</strong> — a broad edge held at a fixed angle. Width follows the
+            <em>direction of travel</em>, not the speed: pull across the edge and it lays down the full width, pull
+            along it and it lays down a hairline. Draw a circle to see it.
+          </div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">
+            <strong>Brush</strong> — the widest range, and the only one that swells <em>past</em> its nominal width
+            where the hand slows.
+          </div>
+        </div>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">
+            A pen that reports its own pressure overrides the estimate. A mouse reports a constant, which is read as
+            "no measurement" rather than as a flat one.
+          </div>
+        </div>
+      </aside>
+
+      <div class="page-content">
+        <nav class="flex-container wrap gap">
+          <div class="flex-container wrap gap" id="nibButtons">
+            <button class="classic-btn" id="nib-ballpoint" data-nib="ballpoint" aria-pressed="false">Ballpoint</button>
+            <button class="classic-btn primary" id="nib-pencil" data-nib="pencil" aria-pressed="true">Pencil</button>
+            <button class="classic-btn" id="nib-fountain" data-nib="fountain" aria-pressed="false">Fountain</button>
+            <button class="classic-btn" id="nib-brush" data-nib="brush" aria-pressed="false">Brush</button>
+          </div>
+          <div class="flex-container wrap gap">
+            <select id="nibAngle" title="Nib angle">
+              <option value="0">0°</option>
+              <option value="15">15°</option>
+              <option value="30">30°</option>
+              <option value="45" selected>45°</option>
+              <option value="60">60°</option>
+              <option value="75">75°</option>
+              <option value="90">90°</option>
+            </select>
+            <select id="nibSmoothing" title="Smoothing">
+              <option value="0">no smoothing</option>
+              <option value="1">smoothing 1</option>
+              <option value="2">smoothing 2</option>
+              <option value="3">smoothing 3</option>
+              <option value="4">smoothing 4</option>
+              <option value="6">smoothing 6</option>
+            </select>
+          </div>
+          <div class="flex-container wrap gap">
+            <button class="classic-btn" id="drawSamples">Draw one gesture per nib</button>
+            <button class="classic-btn" id="applyToAll">Apply nib to every stroke</button>
+          </div>
+        </nav>
+        <div id="rootEl"></div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { Canvas } from "../../dist/iink.esm.js"
+      import { ModalCanvasOptions } from "../components/modal/modalCanvasOptions.js"
+
+      const panelToggleBtn = document.getElementById("panelToggleBtn")
+      const infoPanel = document.getElementById("info-panel")
+      panelToggleBtn.addEventListener("click", () => {
+        const open = infoPanel.classList.toggle("open")
+        panelToggleBtn.setAttribute("aria-expanded", String(open))
+      })
+
+      const rootElement = document.getElementById("rootEl")
+      const showModalBtn = document.getElementById("showModalBtn")
+
+      let canvas
+
+      // Everything this page is not about is switched off, so the menus that are left are the ones
+      // that act on a stroke's look.
+      const canvasOptions = {
+        configuration: {
+          menu: {
+            action: {
+              gesture: false,
+              guide: false,
+              snap: false,
+              diagram: false,
+              math: false,
+            },
+          },
+        },
+      }
+
+      async function loadCanvas(options) {
+        canvas = await Canvas.load(rootElement, "INTERACTIVE_INK", options)
+        canvas.penStyle = { pen: "pencil" }
+        window.canvas = canvas
+      }
+
+      showModalBtn.addEventListener("click", () => {
+        ModalCanvasOptions.show(loadCanvas, canvasOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
+
+      // Selected by what a button *is* — a thing carrying a nib name — and not by where it sits.
+      // Keying off "every button inside the nib group" makes the toolbar's markup load-bearing: move
+      // an action button into that group and it silently becomes a nib, with no nib to give.
+      const nibButtons = () => document.querySelectorAll("button[data-nib]")
+
+      /** The nib the toolbar currently shows as chosen. */
+      function selectedNib() {
+        return document.querySelector('button[data-nib][aria-pressed="true"]').dataset.nib
+      }
+
+      nibButtons().forEach((button) => {
+        button.addEventListener("click", () => {
+          nibButtons().forEach((b) => {
+            b.setAttribute("aria-pressed", "false")
+            b.classList.remove("primary")
+          })
+          button.setAttribute("aria-pressed", "true")
+          button.classList.add("primary")
+          canvas.penStyle = { pen: button.dataset.nib }
+        })
+      })
+
+      document.getElementById("nibAngle").addEventListener("change", (event) => {
+        canvas.penStyle = { penAngle: Number(event.target.value) }
+      })
+
+      document.getElementById("nibSmoothing").addEventListener("change", (event) => {
+        canvas.penStyle = { penSmoothing: Number(event.target.value) }
+      })
+
+      /**
+       * One gesture, drawn four times with the same geometry and the same timing, once per nib.
+       *
+       * Hand-drawing four strokes would differ in speed every time, and speed is one of the things
+       * being compared — so the sample is generated instead, and only the nib changes between rows.
+       */
+      function sampleStroke(nib, row) {
+        const POINTS = 70
+        const pointers = []
+        // Accumulated, never `i * something`: the interval has to stay positive at every step. A
+        // formula that speeds up and slows down produces a `dt` that goes backwards, and the
+        // recognizer rejects the stroke outright — "Chronological error in array T".
+        let elapsed = 0
+        for (let i = 0; i < POINTS; i++) {
+          const u = i / (POINTS - 1)
+          const angle = u * Math.PI * 2
+          pointers.push({
+            x: 220 + Math.cos(angle) * 130,
+            y: 130 + row * 175 + Math.sin(angle) * 62,
+            dt: +elapsed.toFixed(2),
+            p: 0.5,
+          })
+          // slows through the middle of the loop, so the speed-driven nibs have something to show
+          elapsed += 7 * (1 + 2.5 * Math.sin(u * Math.PI))
+        }
+        return {
+          type: "stroke",
+          pointerType: "pen",
+          pointers,
+          // Staggered so the four read as written one after the other rather than all at once: a
+          // stroke's `dt` counts from its own `creationTime`, and that is what places it on the
+          // document's timeline against the others.
+          creationTime: Date.now() - (4 - row) * 2000,
+          // Drawn thick on purpose: at the default 2px the difference between two nibs is a
+          // fraction of a pixel, and this page exists to show that difference.
+          style: { ...canvas.penStyle, pen: nib, width: 8 },
+        }
+      }
+
+      const SAMPLE_NIBS = ["ballpoint", "pencil", "fountain", "brush"]
+      const LABEL_ID_PREFIX = "nib-label-"
+
+      /**
+       * Names each sample, in the canvas's own coordinate space.
+       *
+       * Appended to the rendering SVG rather than laid over the page in HTML: that SVG carries the
+       * pan and zoom transform, so the label stays with the stroke it names instead of sliding off
+       * it the moment the canvas moves.
+       */
+      function labelSamples(nibs) {
+        const svg = canvas.renderer.layer
+        svg.querySelectorAll(`[id^="${LABEL_ID_PREFIX}"]`).forEach((el) => el.remove())
+        nibs.forEach((nib, row) => {
+          const text = document.createElementNS("http://www.w3.org/2000/svg", "text")
+          text.setAttribute("id", `${LABEL_ID_PREFIX}${nib}`)
+          text.setAttribute("x", "60")
+          text.setAttribute("y", String(130 + row * 175 - 74))
+          text.setAttribute("font-size", "18")
+          text.setAttribute("font-family", "system-ui, sans-serif")
+          text.setAttribute("fill", "#8a8a8a")
+          text.textContent = nib
+          svg.appendChild(text)
+        })
+      }
+
+      document.getElementById("drawSamples").addEventListener("click", async () => {
+        await canvas.createSymbols(SAMPLE_NIBS.map((nib, row) => sampleStroke(nib, row)))
+        labelSamples(SAMPLE_NIBS)
+      })
+
+      document.getElementById("applyToAll").addEventListener("click", () => {
+        // The point of the example: a stroke already on the canvas takes a new nib and redraws,
+        // because what was captured is the path and not the thickness.
+        const ids = canvas.model.symbols.filter((s) => s.type === "stroke").map((s) => s.id)
+        if (ids.length) {
+          canvas.updateSymbols(ids, { style: { pen: selectedNib() } })
+        }
+      })
+
+      window.canvasOptions = canvasOptions
+      window.loadCanvas = loadCanvas
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+  </body>
+</html>

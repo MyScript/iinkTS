@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Changing configuration dynamically</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <link rel="stylesheet" href="../assets/style/renderjson.css" />
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css" integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X"
+      crossorigin="anonymous" />
+
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4"
+      crossorigin="anonymous"></script>
+
+    <script type="text/javascript" src="../assets/renderjson/renderjson.js"></script>
+
+    <style>
+      .wrapper {
+        height: calc(100dvh - 50px);
+        width: 100dvw;
+      }
+
+      #result {
+        border-bottom: 1px solid var(--ex-border);
+        display: block;
+        text-align: start;
+        padding: 12px;
+        cursor: zoom-in;
+      }
+
+      .content {
+        position: relative;
+        height: 100%;
+        flex: 1;
+      }
+
+      .ms-ink {
+        width: 100%;
+      }
+
+      #rootEl {
+        height: calc(100% - 100px);
+      }
+
+      .configuration-container {
+        background: var(--ex-surface);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        font-size: 13px;
+        overflow: hidden;
+        padding: 0;
+        gap: 0;
+      }
+
+      .configuration-title {
+        text-align: center;
+        padding: 12px 10px 8px;
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--ex-text);
+        flex-shrink: 0;
+      }
+
+      .configuration-container .params {
+        flex: 1;
+        overflow-y: auto;
+        min-height: 0;
+        padding: 0 10px;
+      }
+
+      /* Config section body starts collapsed — JS opens with display: "" */
+      #configuration-content .config-section-body {
+        display: none;
+      }
+
+      /* Form labels inside collapsible sections */
+      .configuration-container .config-section-body label:not(.toggle) {
+        display: block;
+        margin-top: 12px;
+        color: var(--ex-text);
+      }
+
+      .buttons-wrapper {
+        padding: 15px;
+        display: flex;
+        justify-content: space-around;
+        flex-shrink: 0;
+        border-top: 1px solid var(--ex-border);
+      }
+    </style>
+    <script src="../assets/js/theme-init.js"></script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="menu-button" class="btn-panel-toggle" aria-expanded="false" aria-controls="configuration-container">
+        ⚙ Config
+      </button>
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">
+        Changing configuration dynamically
+      </h1>
+    </header>
+    <div class="wrapper flex-container">
+      <div class="content">
+        <div id="result"></div>
+        <div id="rootEl" class="canvas"></div>
+      </div>
+      <div id="configuration-container" class="configuration-container ex-panel">
+        <h2 class="configuration-title">Configuration</h2>
+        <div class="config-section">
+          <div class="config-section-body">
+            <div class="config-row">
+              <label for="canvas-type" style="flex:1">Canvas type</label>
+              <select id="canvas-type" name="server-protocol" class="input-inline" style="width:auto"></select>
+            </div>
+          </div>
+        </div>
+        <div id="configuration-content" class="params"></div>
+        <div class="buttons-wrapper">
+          <button class="classic-btn" id="export-btn">
+            Export
+          </button>
+          <button class="classic-btn reset" id="reset-btn">
+            Reset
+          </button>
+          <button class="classic-btn success" id="valid-btn">
+            Valid
+          </button>
+        </div>
+      </div>
+    </div>
+    <script>
+      const menuButton = document.getElementById('menu-button')
+      const mainMenu = document.getElementById('configuration-container')
+
+      menuButton.addEventListener('click', () => {
+        const open = mainMenu.classList.toggle('open')
+        menuButton.setAttribute('aria-expanded', open)
+      })
+    </script>
+    <script src="./change_configuration.js" type="module"></script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>

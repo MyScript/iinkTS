@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Ink Canvas v2 Shape</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <link rel="stylesheet" href="../assets/style/renderjson.css" />
+    <script type="text/javascript" src="../assets/renderjson/renderjson.js"></script>
+    <style>
+      #result {
+        display: block;
+        height: auto;
+        text-align: left;
+      }
+      #export-jiix {
+        display: block;
+        text-align: start;
+        padding: 12px;
+        cursor: zoom-in;
+        height: auto;
+        text-align: left;
+      }
+    </style>
+
+    <script type="text/javascript" src="../assets/renderjson/renderjson.js"></script>
+    <script src="../assets/js/theme-init.js"></script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">
+        Ink Canvas v2 Shape
+      </h1>
+    </header>
+
+    <nav class="flex-container wrap gap between">
+      <div class="flex-container wrap gap">
+        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/clear.svg" />
+        </button>
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/undo.svg" />
+        </button>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/redo.svg" />
+        </button>
+      </div>
+      <div class="flex-container wrap gap">
+        <button id="pen" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/pen.svg" />
+        </button>
+        <button id="eraser" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/eraser.svg" />
+        </button>
+      </div>
+    </nav>
+
+    <div class="ex-page-layout">
+      <aside id="shape-recognition-panel" class="ex-panel">
+        <p class="ex-panel-heading">Shape recognition</p>
+        <p class="ex-panel-intro">
+          This example shows how iinkTS can recognize hand-drawn shapes. Draw shapes naturally
+          on the canvas and see how they are recognized and converted into digital shapes.
+        </p>
+
+        <div class="ex-panel-divider"></div>
+
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">
+            Draw common geometric shapes such as circles, rectangles, triangles, or lines.
+            The recognition engine analyzes your strokes and identifies the corresponding
+            digital shape.
+          </div>
+        </div>
+
+        <div class="ex-panel-hint">
+          Try drawing different shapes on the canvas, from simple geometric figures to more
+          complex combinations, and observe how they are recognized.
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <p class="ex-panel-subtitle">Recognized shapes</p>
+        <div id="result" class="result"></div>
+
+        <div class="ex-panel-divider"></div>
+
+        <p class="ex-panel-subtitle">Global Recognition export</p>
+        <div id="export-jiix" class="result"></div>
+      </aside>
+
+      <div id="rootEl"></div>
+    </div>
+
+    <script type="module">
+      import { Canvas, CanvasTool } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from "../components/modal/modalCanvasOptions.js"
+      const rootElement = document.getElementById("rootEl");
+      const resultElement = document.getElementById("result");
+      const jiixElement = document.getElementById("export-jiix");
+      const clearElement = document.getElementById("clear");
+      const undoElement = document.getElementById("undo");
+      const redoElement = document.getElementById("redo");
+      const eraserElement = document.getElementById("eraser");
+      const penElement = document.getElementById("pen");
+      const showModalBtn = document.getElementById("showModalBtn");
+      
+      const panelToggleBtn = document.getElementById('panelToggleBtn');
+      const shapeRecognitionPanel = document.getElementById('shape-recognition-panel');
+      panelToggleBtn.addEventListener('click', () => {
+        const open = shapeRecognitionPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      });
+
+      let canvas;
+
+      const canvasOptions = {
+        configuration: {
+          recognition: {
+            export: {
+              jiix: {
+                ranges: true,
+              },
+            },
+            type: "SHAPE"
+          }
+        }
+      };
+
+      jiixElement.addEventListener('click', () => {
+        jiixElement.classList.toggle('open')
+      })
+
+      function displayReconizedShape(jiix) {
+        resultElement.innerHTML = ""
+        if (!jiix?.elements?.length) {
+          return
+        }
+        jiix.elements.forEach(el => {
+          const item = document.createElement("p")
+          item.innerHTML = `${el.shape.kind} candidates:`
+          const candidates = document.createElement("ul")
+          el.candidates.forEach(c => {
+            const ci = document.createElement("li")
+            ci.innerText = c.kind
+            candidates.appendChild(ci)
+          })
+          resultElement.appendChild(item)
+          resultElement.appendChild(candidates)
+        })
+      }
+
+      async function loadCanvas(options) {
+        resultElement.innerHTML = ""
+        jiixElement.innerHTML = ""
+        await canvas?.destroy()
+
+        /**
+         * get canvas instance from type
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Canvas parameters
+         */
+        canvas = await Canvas.load(rootElement, "INK_V2", options);
+
+        canvas.event.addEventListener("changed", (event) => {
+          undoElement.disabled = !event.detail.canUndo;
+          redoElement.disabled = !event.detail.canRedo;
+          clearElement.disabled = !event.detail.canClear;
+          eraserElement.disabled = !event.detail.canClear || canvas.tool === CanvasTool.Erase;
+        });
+
+        canvas.event.addEventListener("exported", (evt) => {
+          while (jiixElement.firstChild) {
+            jiixElement.firstChild.remove()
+          }
+          if (evt.detail) {
+            jiixElement.appendChild(renderjson(evt.detail))
+          }
+          displayReconizedShape(evt.detail?.["application/vnd.myscript.jiix"])
+        });
+      };
+
+      clearElement.addEventListener("click", () => {
+        canvas?.clear();
+      });
+
+      undoElement.addEventListener("click", () => {
+        canvas?.undo();
+      });
+
+      redoElement.addEventListener("click", () => {
+        canvas?.redo();
+      });
+
+      eraserElement.addEventListener("click", () => {
+        if (!canvas) return;
+        eraserElement.disabled = true;
+        penElement.disabled = false;
+        rootElement.iink.tool = CanvasTool.Erase;
+        eraserElement.disabled = true;
+        eraserElement.classList.add("active");
+        penElement.disabled = false;
+        penElement.classList.remove("active");
+      });
+
+      penElement.addEventListener("click", () => {
+        if (!canvas) return;
+        eraserElement.disabled = false;
+        penElement.disabled = true;
+        rootElement.iink.tool = CanvasTool.Write;
+        eraserElement.disabled = false;
+        eraserElement.classList.remove("active");
+        penElement.disabled = true;
+        penElement.classList.add("active");
+      });
+
+      showModalBtn.addEventListener("click", () => {
+        ModalCanvasOptions.show(loadCanvas, canvasOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.canvasOptions = canvasOptions
+      window.loadCanvas = loadCanvas
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>

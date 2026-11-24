@@ -1,0 +1,232 @@
+/* Header, side panels, loader and theme come from the shared examples stylesheets (see main.tsx) */
+
+body {
+	overscroll-behavior: none;
+	touch-action: none;
+	overflow: hidden;
+}
+
+#root {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.canvas-area {
+	position: relative;
+	flex: 1;
+	min-width: 0;
+	/* Keeps the whiteboard's own layers (style panel, menus) under the side panel overlays */
+	isolation: isolate;
+}
+
+#results-panel {
+	width: 320px;
+	border-right: none;
+	border-left: 1px solid var(--ex-border);
+}
+
+/* The whiteboards need the width: the side panels turn into overlays sooner than panel.css does */
+@media (max-width: 1200px) {
+	.btn-panel-toggle {
+		display: flex;
+	}
+
+	.ex-panel {
+		position: fixed;
+		left: 0;
+		top: var(--ex-header-height, 50px);
+		bottom: 0;
+		width: min(320px, 90vw);
+		z-index: 200;
+		transform: translateX(-100%);
+		transition: transform 280ms ease, box-shadow 280ms ease;
+	}
+
+	.ex-panel.open {
+		transform: translateX(0);
+		box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+	}
+
+	#results-panel {
+		left: auto;
+		right: 0;
+		width: min(320px, 90vw);
+		transform: translateX(100%);
+	}
+
+	#results-panel.open {
+		transform: translateX(0);
+		box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+	}
+}
+
+.loading-overlay {
+	position: absolute;
+	inset: 0;
+	z-index: 999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--ex-surface);
+	opacity: 0.75;
+}
+
+.recognition-elements {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--ex-space-xs);
+}
+
+.recognition-elements .ex-panel-item:hover {
+	border-color: var(--ex-primary);
+	background: var(--ex-hover);
+}
+
+.recognition-jiix {
+	margin: 0;
+	overflow: auto;
+	white-space: pre;
+}
+
+.keys-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 1001;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0, 0, 0, 0.5);
+}
+
+.modal {
+	position: absolute;
+	z-index: 999;
+	top: 50%;
+	left: 50%;
+	max-width: 50%;
+	overflow: auto;
+	transform: translate(-50%, -50%);
+	background-color: var(--ex-surface);
+	color: var(--ex-text);
+	padding: 12px;
+	box-shadow: var(--ex-shadow-md);
+	border-radius: 12px;
+}
+.modal .modal-header {
+	border-bottom: 1px solid var(--ex-border);
+	margin-top: 0px;
+	padding-bottom: 8px;
+}
+.modal.error .modal-header  {
+	color: var(--ex-error);
+}
+.modal .modal-footer {
+	padding-top: 12px;
+}
+.modal .modal-footer .close-btn {
+	background-color: var(--ex-surface-alt);
+	color: var(--ex-text);
+	border: none;
+	float: right;
+	text-align: center;
+	text-decoration: none;
+	font-size: 16px;
+	padding: 12px 24px;
+	border-radius: 12px;
+}
+
+.key-forms {
+	width: min(420px, calc(100vw - 32px));
+	margin: 40px auto;
+	padding: 24px;
+	color: var(--ex-text);
+	background-color: var(--ex-surface);
+	border-radius: var(--ex-radius-lg);
+	box-shadow: var(--ex-shadow-lg);
+}
+
+.form-group {
+	display: flex;
+	flex-direction: column;
+	margin-bottom: 16px;
+}
+
+.form-group label {
+	font-size: 14px;
+	font-weight: 500;
+	margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group select {
+	padding: 10px 12px;
+	font-size: 14px;
+	color: var(--ex-text);
+	border: 1px solid var(--ex-border);
+	border-radius: var(--ex-radius-md);
+	outline: none;
+	background-color: var(--ex-bg);
+	transition: border-color 0.2s ease;
+}
+
+.form-group input::placeholder {
+	color: var(--ex-text-muted);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+	border-color: var(--ex-primary);
+}
+
+.key-forms button {
+	width: 100%;
+	padding: 12px;
+	margin-top: 8px;
+	font-size: 14px;
+	font-weight: 600;
+	color: #ffffff;
+	background-color: var(--ex-primary);
+	border: none;
+	border-radius: var(--ex-radius-md);
+	cursor: pointer;
+}
+
+.key-forms button:hover {
+	background-color: var(--ex-primary-dark);
+}
+
+.form-a {
+	display: block;
+	font-size: 15px;
+	color: var(--ex-primary);
+	margin-top: 24px;
+	margin-bottom: 15px;
+	text-align: center;
+	text-decoration: none;
+}
+.form-a:hover {
+	text-decoration: underline;
+}
+
+.convert-btn {
+	padding: 8px 16px;
+	font-size: 14px;
+	font-weight: 600;
+	color: #ffffff;
+	background-color: var(--ex-primary);
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+}
+.convert-btn:hover {
+	background-color: var(--ex-primary-dark);
+}
+.convert-btn:disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+}

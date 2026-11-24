@@ -1,0 +1,38 @@
+{
+  "name": "iink-ts-with-tldraw",
+  "private": true,
+  "homepage": "https://myscript.github.io/iinkTS/",
+  "repository": "git://github.com/MyScript/iinkTS.git",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@reduxjs/toolkit": "^2.11.2",
+    "iink-ts": "5.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-portal": "^4.3.0",
+    "react-redux": "^9.2.0",
+    "tldraw": "^3.15.6"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.17.24",
+    "@types/react": "^18.3.28",
+    "@types/react-dom": "^18.3.7",
+    "@types/react-portal": "^4.0.7",
+    "@typescript-eslint/eslint-plugin": "^8.58.2",
+    "@typescript-eslint/parser": "^8.58.2",
+    "@vitejs/plugin-react-swc": "^3.11.0",
+    "buffer": "^6.0.3",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.26",
+    "typescript": "^5.9.3",
+    "vite": "^6.4.2"
+  }
+}

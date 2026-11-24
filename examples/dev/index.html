@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+    <title>iinkTS Example</title>
+    <style>
+      #result {
+        height: 100px;
+      }
+      #rootEl {
+        margin: auto;
+        width: calc(100vw - 24px);
+        height: calc(100dvh - 120px);
+        border: 1px solid #898888;
+      }
+    </style>
+    <script type="text/javascript" src="node_modules/iink-ts/dist/iink.min.js"></script>
+  </head>
+
+  <body>
+    <div id="result"></div>
+
+    <div id="rootEl"></div>
+
+    <script>
+      const rootElement = document.getElementById("rootEl");
+
+      let canvas
+
+      const options = {
+        configuration: {
+          server: {
+            scheme: "https",
+            host: "cloud.myscript.com",
+            applicationKey: "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+            hmacKey: "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+          },
+        }
+      };
+
+      /**
+       * we use an asynchronous function to be able to wait for the end of the initialization of the canvas
+       * before connecting the different event listeners
+       */
+      async function loadCanvas(options) {
+        /**
+         * get canvas instance from type
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {String} Canvas type [INTERACTIVE_INK", "INTERACTIVE_INK_SSR", "INK_V1", "INK_V2"]
+         * @param {Object} Canvas options depend on canvas type
+         * - {@link https://myscript.github.io/iinkTS/types/TInteractiveInkCanvasConfiguration.html}
+         * - {@link https://myscript.github.io/iinkTS/docs/types/TInteractiveInkSSRCanvasConfiguration.html}
+         * - {@link https://myscript.github.io/iinkTS/docs/types/TInkCanvasOptions.html}
+         * - {@link https://myscript.github.io/iinkTS/docs/types/TInkCanvasDeprecatedConfiguration.html}
+         *
+         * @return {Object} Canvas (the type of canvas depends on the second parameter pass to the "load" function)
+         * - {@link https://myscript.github.io/iinkTS/docs/classes/InteractiveInkCanvas.html}
+         * - {@link https://myscript.github.io/iinkTS/docs/classes/InteractiveInkSSRCanvas.html}
+         * - {@link https://myscript.github.io/iinkTS/docs/classes/InkCanvasDeprecated.html}
+         * - {@link https://myscript.github.io/iinkTS/docs/classes/InkCanvas.html}
+         */
+        canvas = await iink.Canvas.load(rootElement, "INTERACTIVE_INK", options);
+
+        /**
+         * You can use `canvas.event` or directly `rootElement` to add event listener
+         */
+        canvas.event.addEventListener("changed", (event) => {
+          undoElement.disabled = !event.detail.canUndo;
+          redoElement.disabled = !event.detail.canRedo;
+          clearElement.disabled = !event.detail.canClear;
+        });
+
+        canvas.event.addEventListener("exported", (event) => {
+          resultElement.innerHTML = event.detail && event.detail["application/vnd.myscript.jiix"] ? event.detail["application/vnd.myscript.jiix"].label : "";
+        });
+      }
+
+      loadCanvas(options).catch((error) => console.error(error));
+    </script>
+  </body>
+
+</html>

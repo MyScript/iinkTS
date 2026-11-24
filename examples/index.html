@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="icon" type="image/x-icon" href="./favicon.ico" />
+  <title>iinkTS — Examples</title>
+  <link rel="stylesheet" href="./assets/style/home.css" />
+
+  <script type="module">
+    try { await import('./dev-env-loader.generated.js'); } catch (e) {}
+  </script>
+  <script src="assets/js/theme-init.js"></script>
+</head>
+
+<body class="home">
+
+<!-- ===== SVG icon defs ===== -->
+<svg style="display:none">
+  <symbol id="icn-play" viewBox="0 0 16 16">
+    <path d="M13.15 8.59c.61-.33.6-.86 0-1.18L4.87 2.97C4.39 2.71 4 2.95 4 3.5v9c0 .55.39.79.87.53l8.28-4.44z" fill="currentColor"/>
+  </symbol>
+  <symbol id="icn-github" viewBox="0 0 16 16">
+    <path d="M8 1a7 7 0 0 0-2.21 13.64c.35.06.48-.15.48-.34 0-.17-.01-.6-.01-1.19-1.95.42-2.36-.94-2.36-.94-.32-.81-.78-1.02-.78-1.02-.64-.43.05-.43.05-.43.7.05 1.07.72 1.07.72.63 1.07 1.64.76 2.04.58.06-.45.24-.76.44-.93-1.55-.18-3.19-.78-3.19-3.46 0-.76.27-1.39.72-1.88-.07-.18-.31-.89.07-1.85 0 0 .59-.19 1.92.72A6.7 6.7 0 0 1 8 4.38c.6.003 1.19.08 1.75.24 1.34-.91 1.92-.72 1.92-.72.38.96.14 1.67.07 1.85.45.49.72 1.12.72 1.88 0 2.69-1.64 3.28-3.2 3.45.25.22.47.64.47 1.3 0 .93-.01 1.69-.01 1.92 0 .19.13.41.48.34A7 7 0 0 0 8 1" fill="currentColor"/>
+  </symbol>
+  <symbol id="icn-search" viewBox="0 0 16 16">
+    <path d="M11.74 10.33l2.93 2.93-1.41 1.41-2.93-2.93A6 6 0 1 1 11.74 10.33zm-4.74.67a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" fill="currentColor"/>
+  </symbol>
+</svg>
+
+<!-- ===== Header ===== -->
+<header class="home-header">
+  <button class="home-menu-toggle" id="menu-toggle" aria-label="Toggle navigation" onclick="toggleSidebar()">
+    <img src="./assets/img/menu.svg" alt="" />
+  </button>
+  <a class="home-header-brand" href="http://www.myscript.com/" target="_blank" rel="noopener">
+    <span class="home-header-logo" role="img" aria-label="MyScript"></span>
+  </a>
+  <span class="home-header-sep"></span>
+  <span class="home-header-label">iinkTS Examples</span>
+  <span class="home-header-spacer"></span>
+  <button id="theme-toggle" class="home-theme-toggle" aria-label="Toggle dark mode" onclick="toggleTheme()">
+    <span class="ico-sun">&#x2600;&#xFE0F;</span>
+    <span class="ico-moon">&#x1F319;</span>
+  </button>
+  <a class="home-header-legacy" href="./legacy.html">Legacy Examples →</a>
+</header>
+
+<!-- ===== Hero ===== -->
+<section class="home-hero">
+  <h1>iinkTS Examples</h1>
+  <p>Explore handwriting recognition demos — text, math, diagrams, export and whiteboard integrations — grouped by use case, then by feature.</p>
+  <div class="home-hero-stats">
+    <div class="hero-stat" data-count-for="ii-all"><strong>23</strong><span>Interactive Ink Canvas</span></div>
+    <div class="hero-stat" data-count-for="ink-v2"><strong>9</strong><span>Ink Canvas v2</span></div>
+    <div class="hero-stat" data-count-for="config"><strong>1</strong><span>Configuration</span></div>
+  </div>
+</section>
+
+<!-- ===== Search ===== -->
+<div class="home-search-wrap">
+  <div class="home-search-inner">
+    <span class="home-search-ico" aria-hidden="true">
+      <svg><use href="#icn-search"/></svg>
+    </span>
+    <input id="search-input" class="home-search-input" type="search" placeholder="Search examples…" autocomplete="off" />
+  </div>
+</div>
+
+<!-- ===== Layout ===== -->
+<div class="home-layout">
+
+  <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+
+  <!-- Sidebar -->
+  <nav class="home-sidebar" id="home-sidebar" aria-label="Examples navigation">
+    <p class="sidebar-heading">Use cases</p>
+    <ul>
+      <li><a href="#uc-education"><span class="dot" style="background:#6C63FF"></span>Education</a></li>
+      <li><a href="#uc-documents"><span class="dot" style="background:#00b859"></span>Notes &amp; documents</a></li>
+      <li><a href="#uc-diagrams"><span class="dot" style="background:#FF9800"></span>Diagrams &amp; whiteboards</a></li>
+    </ul>
+    <hr class="sidebar-divider" />
+    <p class="sidebar-heading">Interactive Ink</p>
+    <ul>
+      <li><a href="#ii-start"><span class="dot" style="background:#1A9FFF"></span>Getting started</a></li>
+      <li><a href="#ii-math"><span class="dot" style="background:#6C63FF"></span>Math</a></li>
+      <li><a href="#ii-diagram"><span class="dot" style="background:#FF9800"></span>Diagram</a></li>
+      <li><a href="#ii-export"><span class="dot" style="background:#00b859"></span>Export</a></li>
+      <li><a href="#ii-input"><span class="dot" style="background:#00B8D9"></span>Input &amp; gestures</a></li>
+      <li><a href="#ii-customization"><span class="dot" style="background:#E91E63"></span>Customization</a></li>
+      <li><a href="#ii-api"><span class="dot" style="background:#8E44AD"></span>Programmatic API</a></li>
+      <li><a href="#ii-navigation"><span class="dot" style="background:#F5A623"></span>Navigation</a></li>
+      <li><a href="#ii-events"><span class="dot" style="background:#607D8B"></span>Events &amp; diagnostics</a></li>
+      <li><a href="#ii-integration"><span class="dot" style="background:#795548"></span>Integrations</a></li>
+    </ul>
+    <hr class="sidebar-divider" />
+    <p class="sidebar-heading">Ink Canvas v2</p>
+    <ul>
+      <li><a href="#ink-v2-text"><span class="dot" style="background:#00b859"></span>Text</a></li>
+      <li><a href="#ink-v2-math"><span class="dot" style="background:#6C63FF"></span>Math</a></li>
+      <li><a href="#ink-v2-shape"><span class="dot" style="background:#00B894"></span>Shape</a></li>
+      <li><a href="#ink-v2-raw-content"><span class="dot" style="background:#00B894"></span>Raw content</a></li>
+    </ul>
+    <hr class="sidebar-divider" />
+    <p class="sidebar-heading">Utilities</p>
+    <ul>
+      <li><a href="#config"><span class="dot" style="background:#718096"></span>Configuration</a></li>
+    </ul>
+    <hr class="sidebar-divider" />
+    <div class="sidebar-legacy">
+      <a href="./legacy.html">⚠ Legacy Examples</a>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <main class="home-main" id="main-content">
+
+    <!-- ============================================
+         SECTION: Use cases
+    ============================================= -->
+    <section class="home-section" id="use-cases">
+      <div class="section-header">
+        <div class="section-icon">
+          <img src="./assets/img/home-offscreen.svg" alt="" />
+        </div>
+        <div class="section-meta">
+          <h2>Use cases</h2>
+          <p>Start from what you are building: the most complete demos, grouped by use case. Every feature has its own example in the sections below.</p>
+        </div>
+      </div>
+
+      <!-- Education -->
+      <div class="subsection" id="uc-education">
+        <div class="subsection-title">Education</div>
+        <div class="card-grid">
+
+          <article class="card" data-search="use case education math tutor workbook exercise edtech">
+            <img class="card-thumb" src="./assets/img/gallery/math-tutor.png" alt="" loading="lazy" />
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">Math</span>
+            </div>
+            <h3>Math Tutor</h3>
+            <p>Solve equations by hand, one step per line: each line is read as you write, and the first wrong one is flagged with a hint on the mistake.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_math_tutor.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_math_tutor.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="use case education math solver compute variables dependencies">
+            <img class="card-thumb" src="./assets/img/gallery/math.png" alt="" loading="lazy" />
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">Math</span>
+            </div>
+            <h3>Math Solver</h3>
+            <p>Write <code>x = 2</code>, then <code>3x + 2 =</code>: the result is computed and written next to your ink, and recomputed when the variable changes.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_math_dependencies.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_math_dependencies.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="use case education exam quiz form multiple canvas">
+            <img class="card-thumb" src="./assets/img/gallery/v2-multi-canvas-exam.png" alt="" loading="lazy" />
+            <div class="card-top">
+              <span class="badge badge-rest">InkCanvas-v2</span>
+              <span class="badge badge-rest">Multiple canvas</span>
+            </div>
+            <h3>Exam form</h3>
+            <p>One independent <code>InkCanvas</code> instance per question field — validate each answer via export and tally a score.</p>
+            <div class="card-actions">
+              <a href="canvas/canvas_v2_multi_canvas_exam.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/canvas/canvas_v2_multi_canvas_exam.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+        </div>
+      </div>
+
+      <!-- Notes &amp; documents -->
+      <div class="subsection" id="uc-documents">
+        <div class="subsection-title">Notes &amp; documents</div>
+        <div class="card-grid">
+
+          <article class="card" data-search="use case notes document pdf typeset print">
+            <img class="card-thumb" src="./assets/img/gallery/live-pdf.png" alt="" loading="lazy" />
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Live PDF Document</h3>
+            <p>Write on the left, watch a typeset A4 document build itself on the right — underlined titles, lists, equations and figures — then print it as PDF.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_export_pdf.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_export_pdf.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="use case notes markdown export">
+            <img class="card-thumb" src="./assets/img/gallery/export-markdown.png" alt="" loading="lazy" />
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">Text</span>
+              <span class="badge badge-primary">Math</span>
+            </div>
+            <h3>Markdown Export</h3>
+            <p>Convert recognized text and math to Markdown, with a live rendered preview beside the source.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_export_markdown.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_export_markdown.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+        </div>
+      </div>
+
+      <!-- Diagrams &amp; whiteboards -->
+      <div class="subsection" id="uc-diagrams">
+        <div class="subsection-title">Diagrams &amp; whiteboards</div>
+        <div class="card-grid">
+
+          <article class="card" data-search="use case diagram graph node edge inspector">
+            <img class="card-thumb" src="./assets/img/gallery/diagram.png" alt="" loading="lazy" />
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">Shape</span>
+            </div>
+            <h3>Diagram Inspector</h3>
+            <p>See the graph the server recognized: nodes with their kind and inner label, edges with the shapes they join, dangling ends flagged.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_diagram_inspector.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_diagram_inspector.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+
+          <article class="card" data-search="use case whiteboard tldraw react integration">
+            <img class="card-thumb" src="./assets/img/gallery/tldraw.png" alt="" loading="lazy" />
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>TLDraw Integration</h3>
+            <p>Handwriting recognition embedded inside a TLDraw canvas (React), with a live recognition panel: hover an element to outline its strokes.</p>
+            <div class="card-actions">
+              <a href="custom-rendering/tldraw-websocket-client/dist/index.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/custom-rendering/tldraw-websocket-client/src/App.tsx" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="use case whiteboard excalidraw react integration">
+            <img class="card-thumb" src="./assets/img/gallery/excalidraw.png" alt="" loading="lazy" />
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Excalidraw Integration</h3>
+            <p>Handwriting recognition, gestures and conversion inside an Excalidraw whiteboard (React), with a live recognition panel: hover an element to highlight its strokes.</p>
+            <div class="card-actions">
+              <a href="custom-rendering/excalidraw-websocket-client/dist/index.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/custom-rendering/excalidraw-websocket-client/src/App.tsx" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+        </div>
+      </div>
+
+
+
+    </section>
+
+    <!-- ============================================
+         SECTION: Interactive Ink Canvas
+    ============================================= -->
+    <section class="home-section" id="ii-all">
+      <div class="section-header">
+        <div class="section-icon">
+          <img src="./assets/img/home-offscreen.svg" alt="" />
+        </div>
+        <div class="section-meta">
+          <h2>Interactive Ink Canvas</h2>
+          <p>Full interactive ink editing with real-time recognition — text, math, shapes, and mixed content, with advanced menus, minimap, and third-party integrations.</p>
+          <div class="section-badges">
+            <span class="badge badge-primary">INTERACTIVITY</span>
+            <span class="badge badge-primary">Text</span>
+            <span class="badge badge-primary">Math</span>
+            <span class="badge badge-primary">Shape</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Getting started -->
+      <div class="subsection" id="ii-start">
+        <div class="subsection-title">Getting started</div>
+        <div class="card-grid">
+
+          <article class="card" data-search="get started interactive ink advanced all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Get Started</h3>
+            <p>Get started with the Interactive Ink Canvas — draw, edit and recognize text, math and shapes.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_get_started.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_get_started.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="debug visualization all options diagnostics">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Showcase</h3>
+            <p>Interactive Ink Canvas feature tour — inspect symbols, history, selection and backend rendering.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_showcase.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_showcase.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+        </div>
+      </div>
+
+      <!-- Math -->
+      <div class="subsection" id="ii-math">
+        <div class="subsection-title">Math</div>
+        <div class="card-grid">
+
+          <article class="card" data-search="math computation modes evaluate symbolic solve interactive ink">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">Math</span>
+            </div>
+            <h3>Computation Modes</h3>
+            <p>Switch between numeric evaluation and symbolic computation modes.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_math_computation_modes.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_math_computation_modes.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="math dependencies variables tracking linked blocks interactive ink">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">Math</span>
+            </div>
+            <h3>Dependencies</h3>
+            <p>Track variables across linked math blocks for dependency-aware computation.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_math_dependencies.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_math_dependencies.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="math context menu surround gesture compute function evaluate diagnostic capabilities interactive ink">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">Math</span>
+            </div>
+            <h3>Context Menu</h3>
+            <p>Surround a math expression to compute, evaluate functions, set variables, or check the solver diagnostic.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_math_context_menu.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_math_context_menu.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="math variables block api global fallback substitution priority edit interactive ink">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">Math</span>
+            </div>
+            <h3>Variables</h3>
+            <p>Declare variables as ink expressions, substitute them across blocks, and manage global fallbacks via the variable canvas.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_math_variables.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_math_variables.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="math tutor workbook exercise equation solve step line check mistake hint education edtech game interactive ink">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">Math</span>
+            </div>
+            <h3>Math Tutor</h3>
+            <p>Solve equations by hand, one step per line: each line is read as you write, and the first wrong one is flagged with a hint on the mistake.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_math_tutor.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_math_tutor.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+        </div>
+      </div>
+
+      <div class="subsection" id="ii-diagram">
+        <div class="subsection-title">Diagram</div>
+        <div class="card-grid">
+
+          <article class="card" data-search="diagram shape edge connection line arc attach follow convert interactive ink">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">Diagram</span>
+            </div>
+            <h3>Shape-Edge Connections</h3>
+            <p>Draw a shape and an edge touching it — see the connection tracked live in ink, preserved through Convert, and followed on move, resize, and rotate.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_diagram_connections.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_diagram_connections.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="diagram inspector jiix node edge graph structure label dangling ports connected strokes query">
+            <div class="card-top">
+              <span class="badge badge-primary">JIIX</span>
+              <span class="badge badge-primary">Diagram</span>
+            </div>
+            <h3>Diagram Inspector</h3>
+            <p>See the graph the server recognized: nodes with their kind and inner label, edges with the shapes they join, dangling ends flagged — hover a row to light up the ink behind it.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_diagram_inspector.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_diagram_inspector.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="diagram flowchart runner graph walk execute branch decision arrow direction trace node edge">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">Diagram</span>
+            </div>
+            <h3>Flowchart Runner</h3>
+            <p>Draw a flowchart, then run it — the current step is outlined on your own ink, branches are picked from their <em>yes</em>/<em>no</em> labels, and the path taken is traced.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_diagram_flowchart_runner.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_diagram_flowchart_runner.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+        </div>
+      </div>
+
+      <!-- Export -->
+      <div class="subsection" id="ii-export">
+        <div class="subsection-title">Export</div>
+        <div class="card-grid">
+
+          <article class="card" data-search="export download json svg png text jiix pdf print files formats filename scope selection">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">Interactive Ink</span>
+            </div>
+            <h3>Export Files</h3>
+            <p>Download the content as JSON, SVG, PNG, Text, JIIX or PDF through the single <code>download()</code> entry point.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_export.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_export.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="markdown export text math paragraphs render preview marked">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">Text</span>
+            </div>
+            <h3>Markdown Export</h3>
+            <p>Convert recognized text and math to Markdown, with a live rendered preview beside the source.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_export_markdown.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_export_markdown.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="mermaid export diagram flowchart shape edge node render preview">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">Shape</span>
+            </div>
+            <h3>Mermaid Export</h3>
+            <p>Turn a hand-drawn diagram into a Mermaid <code>flowchart TD</code>, rendered live as you draw.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_export_mermaid.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_export_mermaid.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="plantuml export diagram startuml shape edge node">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">Shape</span>
+            </div>
+            <h3>PlantUML Export</h3>
+            <p>Turn a hand-drawn diagram into a PlantUML block — source only, nothing leaves the browser.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_export_plantuml.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_export_plantuml.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="llm export json blocks prompt text math diagram structured">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>LLM Export</h3>
+            <p>Flatten the recognized content into ordered prompt-ready blocks (text, math, diagram).</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_export_llm.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_export_llm.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="pdf live document typeset a4 page print title heading list math katex diagram figure jiix">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Live PDF Document</h3>
+            <p>Write on the left, watch a typeset A4 document build itself on the right — underlined titles, lists, equations and figures — then print it as PDF.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_export_pdf.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_export_pdf.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+        </div>
+      </div>
+
+      <!-- Input & gestures -->
+      <div class="subsection" id="ii-input">
+        <div class="subsection-title">Input &amp; gestures</div>
+        <div class="card-grid">
+
+          <article class="card" data-search="gestures scratch surround strikethrough underline insert join interactive ink">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Gestures</h3>
+            <p>All 6 gesture types with visual reference and gesture menu configuration.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_gestures.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_gestures.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="keyboard shortcuts hotkeys navigation accessibility all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Keyboard Shortcuts</h3>
+            <p>Keyboard navigation and shortcut bindings for hands-free editing.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_keyboard_shortcuts.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_keyboard_shortcuts.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+        </div>
+      </div>
+
+      <!-- Customization & overrides -->
+      <div class="subsection" id="ii-customization">
+        <div class="subsection-title">Customization &amp; overrides</div>
+        <div class="card-grid">
+
+          <article class="card" data-search="override default options configuration settings all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Override Default Options</h3>
+            <p>Configure canvas defaults, behavior overrides, and initial settings.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_default_options.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_default_options.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="menu configuration activate deactivate all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVEINK</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Override Theme</h3>
+            <p>Customize background, menu panels, and input appearance via <code>cssVars</code> CSS custom properties.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_style.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_style.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="menu configuration activate deactivate all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Configure Menu Visibility</h3>
+            <p>Show or hide specific menus and toolbar actions without custom code.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_menu_config.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_menu_config.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="override menu custom class replace add item button toolbar context implementation all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Menu Items &amp; Overrides</h3>
+            <p>Add your own buttons to any menu, or replace a menu with your own class.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_menu_override.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_menu_override.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="menu layout slot position toolbar side bottom move menus custom occupant all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Menu Layout</h3>
+            <p>Place the menus in the slots of the canvas: stack them, stand the tools up on a side, add your own occupant.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_menu_layout.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_menu_layout.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+        </div>
+      </div>
+
+      <!-- Programmatic API -->
+      <div class="subsection" id="ii-api">
+        <div class="subsection-title">Programmatic API</div>
+        <div class="card-grid">
+
+          <article class="card" data-search="create symbol programmatic ink stroke shape all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Create Symbols</h3>
+            <p>Programmatically create and inject ink symbols into the canvas.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_create_symbols.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_create_symbols.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="selection select all symbols programmatic api ids event all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Selection API</h3>
+            <p>Programmatic symbol selection — select all, select by ID, react to selection events, zoom to selection.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_selection.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_selection.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="pen nib nibs ballpoint pencil fountain brush width thickness pressure speed calligraphy stroke style ink all types">
+            <div class="card-top">
+              <span class="badge badge-primary">STYLE</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Pen nibs</h3>
+            <p>One captured gesture drawn with four instruments — ballpoint, pencil, fountain pen and brush — and the nib changed on strokes already written.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_pen_nibs.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_pen_nibs.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="import pointers stroke playback animation replay timing load existing strokes ink all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Stroke Playback</h3>
+            <p>Replay a recorded set of strokes on the canvas with its original timing, with play/pause/speed control.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_stroke_playback.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_stroke_playback.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+        </div>
+      </div>
+
+      <!-- Navigation & viewport -->
+      <div class="subsection" id="ii-navigation">
+        <div class="subsection-title">Navigation &amp; viewport</div>
+        <div class="card-grid">
+
+          <article class="card" data-search="zoom pan viewport fit navigation programmatic api all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Zoom &amp; Pan</h3>
+            <p>Programmatic zoom and pan — set zoom level, fit to content, and shift the viewport via the API.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_zoom_pan.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_zoom_pan.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="minimap overview bird eye canvas navigation thumbnail all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Minimap</h3>
+            <p>Bird's-eye overview panel for navigating large ink canvases.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_minimap.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_minimap.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+        </div>
+      </div>
+
+      <!-- Events & diagnostics -->
+      <div class="subsection" id="ii-events">
+        <div class="subsection-title">Events &amp; diagnostics</div>
+        <div class="card-grid">
+
+          <article class="card" data-search="live monitor status events log symbols undo redo zoom clipboard all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Live Monitor</h3>
+            <p>Real-time canvas state snapshot and timestamped action log — symbols, selection, undo/redo, zoom, and clipboard.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_live_monitor.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_live_monitor.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="live monitor status events log symbols undo redo zoom clipboard all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Connection Status</h3>
+            <p>Live connection state indicator with automatic reconnect handling.</p>
+            <div class="card-actions">
+              <a href="interactive-canvas/interactive_canvas_connection_status.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas/interactive_canvas_connection_status.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+        </div>
+      </div>
+
+      <!-- Integrations -->
+      <div class="subsection" id="ii-integration">
+        <div class="subsection-title">Integrations</div>
+        <div class="card-grid">
+
+          <article class="card" data-search="tldraw integration whiteboard react drawing canvas third-party all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>TLDraw Integration</h3>
+            <p>Handwriting recognition embedded inside a TLDraw canvas (React), with a live recognition panel: hover an element to outline its strokes.</p>
+            <div class="card-actions">
+              <a href="custom-rendering/tldraw-websocket-client/dist/index.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/custom-rendering/tldraw-websocket-client/src/App.tsx" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="excalidraw integration whiteboard react drawing canvas third-party gestures conversion all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Excalidraw Integration</h3>
+            <p>Handwriting recognition, gestures and conversion inside an Excalidraw whiteboard (React), with a live recognition panel: hover an element to highlight its strokes.</p>
+            <div class="card-actions">
+              <a href="custom-rendering/excalidraw-websocket-client/dist/index.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/custom-rendering/excalidraw-websocket-client/src/App.tsx" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+        </div>
+      </div>
+
+
+    </section>
+
+    <section class="home-section" id="ink-v2">
+      <div class="section-header">
+        <div class="section-icon section-icon--rest">
+          <img src="./assets/img/home-offscreen.svg" alt="" />
+        </div>
+        <div class="section-meta">
+          <h2>Ink Canvas v2</h2>
+          <p>Batch recognition via REST v2 API — text, math, shapes, and raw content without a persistent WebSocket connection.</p>
+          <div class="section-badges">
+            <span class="badge badge-rest">InkCanvas-v2</span>
+            <span class="badge badge-rest">Math</span>
+            <span class="badge badge-rest">Text</span>
+            <span class="badge badge-rest">Shapes</span>
+            <span class="badge badge-rest">Raw Content</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="subsection" id="ink-v2-text">
+        <div class="subsection-title">Text</div>
+        <div class="card-grid">
+          <article class="card" data-search="ink canvas v2 rest text batch recognition">
+            <div class="card-top">
+              <span class="badge badge-rest">InkCanvas-v2</span>
+              <span class="badge badge-rest">Text</span>
+            </div>
+            <h3>Text</h3>
+            <p>Text recognition using the REST v2 API — simple batch handwriting to text.</p>
+            <div class="card-actions">
+              <a href="canvas/canvas_v2_text.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/canvas/canvas_v2_text.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="ink canvas v2 rest japanese vertical text 日本縦型 asian">
+            <div class="card-top">
+              <span class="badge badge-rest">InkCanvas-v2</span>
+              <span class="badge badge-rest">Text</span>
+            </div>
+            <h3>Import strokes</h3>
+            <p>Import a set of previously written strokes into the canvas. using REST v2 APi</p>
+            <div class="card-actions">
+              <a href="canvas/canvas_v2_text_import_strokes.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/canvas/canvas_v2_text_import_strokes.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="ink canvas v2 rest japanese vertical text 日本縦型 asian">
+            <div class="card-top">
+              <span class="badge badge-rest">InkCanvas-v2</span>
+              <span class="badge badge-rest">Text</span>
+            </div>
+            <h3>Japanese Vertical (日本縦型)</h3>
+            <p>Vertical Japanese text recognition — tategumi layout with REST v2.</p>
+            <div class="card-actions">
+              <a href="canvas/canvas_v2_text_vertical_japanese.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/canvas/canvas_v2_text_vertical_japanese.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="subsection" id="ink-v2-math">
+        <div class="subsection-title">Math</div>
+        <div class="card-grid">
+          <article class="card" data-search="ink canvas v2 rest math equation batch">
+            <div class="card-top">
+              <span class="badge badge-rest">InkCanvas-v2</span>
+              <span class="badge badge-rest">Math</span>
+            </div>
+            <h3>Math</h3>
+            <p>Math equation recognition with the new REST v2 API — no WebSocket needed.</p>
+            <div class="card-actions">
+              <a href="canvas/canvas_v2_math.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/canvas/canvas_v2_math.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="ink canvas v2 rest math equation batch">
+            <div class="card-top">
+              <span class="badge badge-rest">InkCanvas-v2</span>
+              <span class="badge badge-rest">Math</span>
+            </div>
+            <h3>Draw Graph</h3>
+            <p>Plot recognized math functions live using Desmos graph integration.</p>
+            <div class="card-actions">
+              <a href="canvas/canvas_v2_math_with_graph.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/canvas/canvas_v2_math_with_graph.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="subsection" id="ink-v2-shape">
+        <div class="subsection-title">Shape</div>
+        <div class="card-grid">
+          <article class="card" data-search="ink canvas v2 rest shape detect geometry">
+            <div class="card-top">
+              <span class="badge badge-rest">InkCanvas-v2</span>
+              <span class="badge badge-rest">Shape</span>
+            </div>
+            <h3>Shape</h3>
+            <p>Shape detection and vectorization — circles, arrows, polygons, and more.</p>
+            <div class="card-actions">
+              <a href="canvas/canvas_v2_shape.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/canvas/canvas_v2_shape.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+        </div>
+      </div>
+
+      <div class="subsection" id="ink-v2-raw-content">
+        <div class="subsection-title">Raw Content</div>
+        <div class="card-grid">
+          <article class="card" data-search="ink canvas v2 rest raw content digital ink">
+            <div class="card-top">
+              <span class="badge badge-rest">InkCanvas-v2</span>
+              <span class="badge badge-rest">Raw Content</span>
+            </div>
+            <h3>Raw Content</h3>
+            <p>Raw digital ink recognition — no explicit content type segmentation.</p>
+            <div class="card-actions">
+              <a href="canvas/canvas_v2_raw_content.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/canvas/canvas_v2_raw_content.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+        </div>
+      </div>
+
+      <div class="subsection" id="ink-v2-multiple">
+        <div class="subsection-title">Multiple canvas</div>
+        <div class="card-grid">
+          <article class="card" data-search="ink canvas v2 rest multiple canvas form fields exam quiz">
+            <div class="card-top">
+              <span class="badge badge-rest">InkCanvas-v2</span>
+              <span class="badge badge-rest">Multiple canvas</span>
+            </div>
+            <h3>Multiple Canvas — Exam form</h3>
+            <p>One independent <code>InkCanvas</code> instance per question field — validate each answer via export and tally a score.</p>
+            <div class="card-actions">
+              <a href="canvas/canvas_v2_multi_canvas_exam.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/canvas/canvas_v2_multi_canvas_exam.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="ink canvas v2 rest multiple canvas grading table grid participants criteria">
+            <div class="card-top">
+              <span class="badge badge-rest">InkCanvas-v2</span>
+              <span class="badge badge-rest">Multiple canvas</span>
+            </div>
+            <h3>Multiple Canvas — Grading table</h3>
+            <p>A grid of independent <code>InkCanvas</code> instances — one participant per row, one grade per criterion column, plus a text comment.</p>
+            <div class="card-actions">
+              <a href="canvas/canvas_v2_multi_canvas_grading.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/canvas/canvas_v2_multi_canvas_grading.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="card-grid">
+
+
+      </div>
+    </section>
+
+    <!-- ============================================
+         SECTION: Configuration
+    ============================================= -->
+    <section class="home-section" id="config">
+      <div class="section-header">
+        <div class="section-icon section-icon--config">
+          <img src="./assets/img/home-not-specific.svg" alt="" />
+        </div>
+        <div class="section-meta">
+          <h2>Configuration</h2>
+          <p>Dynamic canvas type switching across all recognition variants.</p>
+          <div class="section-badges">
+            <span class="badge badge-primary">Multi-variant</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-grid">
+
+        <article class="card" data-search="change configuration switch canvas type dynamic variant">
+          <div class="card-top"><span class="badge badge-primary">Multi-variant</span></div>
+          <h3>Change Configuration</h3>
+          <p>Dynamically switch between canvas types and recognition configurations at runtime.</p>
+          <div class="card-actions">
+            <a href="non-specific/change_configuration.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/non-specific/change_configuration.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+          </div>
+        </article>
+
+        <article class="card" data-search="server signing hmac key security sign production authentication">
+          <div class="card-top"><span class="badge badge-primary">Security</span></div>
+          <h3>Server Signing</h3>
+          <p>Keep the HMAC key on your server: <code>server.sign</code> sends each message to sign to a small Node signing server.</p>
+          <div class="card-actions">
+            <a href="server-signing/server_signing.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/server-signing/server_signing.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ============================================
+         Legacy banner
+    ============================================= -->
+    <div class="legacy-banner">
+      <div class="legacy-banner-text">
+        <h3>Looking for WebSocket or INKV1 examples?</h3>
+        <p>Text recognition, math recognition, and other WebSocket-based INTERACTIVITY examples — plus deprecated INKV1 REST examples — are available on the legacy page.</p>
+      </div>
+      <a href="./legacy.html" class="legacy-banner-btn">View Legacy Examples →</a>
+    </div>
+
+    <p id="no-results" class="home-no-results" style="display:none">No examples match your search.</p>
+
+    <footer id="build-info" class="home-build-info" hidden></footer>
+
+  </main>
+</div>
+<!-- /home-layout -->
+
+<button class="back-to-top-btn" id="back-to-top" aria-label="Back to top" onclick="scrollToTop()">↑</button>
+
+<script>
+  function toggleSidebar() {
+    document.getElementById('home-sidebar').classList.toggle('open');
+    document.getElementById('sidebar-backdrop').classList.toggle('open');
+  }
+
+  document.getElementById('sidebar-backdrop').addEventListener('click', () => {
+    document.getElementById('home-sidebar').classList.remove('open');
+    document.getElementById('sidebar-backdrop').classList.remove('open');
+  });
+
+  function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  window.addEventListener('scroll', () => {
+    document.getElementById('back-to-top').classList.toggle('visible', window.scrollY > 300);
+  });
+
+  function openHash() {
+    const id = location.hash.slice(1);
+    if (!id) return;
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  window.addEventListener('hashchange', openHash);
+  document.addEventListener('DOMContentLoaded', openHash);
+
+  // Hero counters are derived from the sections themselves; the numbers in the
+  // markup are only a no-JS fallback.
+  document.querySelectorAll('.hero-stat[data-count-for]').forEach(stat => {
+    const section = document.getElementById(stat.dataset.countFor);
+    const value = stat.querySelector('strong');
+    if (section && value) value.textContent = section.querySelectorAll('.card').length;
+  });
+
+  document.getElementById('search-input').addEventListener('input', function () {
+    const query = this.value.trim().toLowerCase();
+    const cards = document.querySelectorAll('.card');
+    let visible = 0;
+    cards.forEach(card => {
+      const text = (card.dataset.search || '') + ' ' + card.textContent.toLowerCase();
+      const match = !query || text.includes(query);
+      card.classList.toggle('hidden', !match);
+      if (match) visible++;
+    });
+    document.querySelectorAll('.subsection').forEach(sub => {
+      const anyVisible = [...sub.querySelectorAll('.card')].some(c => !c.classList.contains('hidden'));
+      sub.style.display = anyVisible ? '' : 'none';
+    });
+    document.querySelectorAll('.home-section').forEach(section => {
+      const anyVisible = [...section.querySelectorAll('.card')].some(c => !c.classList.contains('hidden'));
+      section.style.display = anyVisible ? '' : 'none';
+    });
+    document.getElementById('no-results').style.display = (visible === 0 && query) ? 'block' : 'none';
+  });
+
+  const navLinks = document.querySelectorAll('.home-sidebar a[href^="#"]');
+  const sections = [...navLinks]
+    .map(a => document.getElementById(a.getAttribute('href').slice(1)))
+    .filter(Boolean);
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + entry.target.id));
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+<script src="assets/js/theme.js"></script>
+<script type="module">
+  import { renderBuildInfo } from "./assets/js/build-info.js"
+  renderBuildInfo(document.getElementById("build-info"))
+</script>
+
+</body>
+</html>

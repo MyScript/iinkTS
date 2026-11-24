@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+    <title>Math Tutor</title>
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <link rel="stylesheet" href="../components/ink-overlay/ink-overlay.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css" integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>
+    <script src="../assets/js/theme-init.js"></script>
+    <style>
+      :root {
+        --tutor-margin-width: 260px;
+        --tutor-correct: var(--ex-success);
+        --tutor-wrong: var(--ex-error);
+        --tutor-muted: var(--ex-text-muted);
+        /* The canvas stacks its own layers: everything drawn over the ink sits above them */
+        --tutor-over-ink: 50;
+      }
+
+      .tutor { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+      .tutor-bar {
+        display: flex;
+        align-items: center;
+        gap: var(--ex-space-lg);
+        padding: var(--ex-space-sm) var(--ex-space-lg);
+        background: var(--ex-surface);
+        border-bottom: 1px solid var(--ex-border);
+      }
+      .tutor-levels { display: flex; gap: var(--ex-space-md); }
+      .tutor-track { display: flex; align-items: center; gap: var(--ex-space-xs); }
+      .tutor-track-title {
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--tutor-muted);
+      }
+      .tutor-level {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: var(--ex-space-xs) var(--ex-space-md);
+        border: 1px solid var(--ex-border);
+        border-radius: var(--ex-radius-md);
+        background: var(--ex-surface-alt);
+        color: var(--ex-text);
+        cursor: pointer;
+      }
+      .tutor-level span { font-size: 11px; color: var(--tutor-muted); }
+      .tutor-level.is-active { border-color: var(--ex-primary); background: var(--ex-hover); }
+
+      .tutor-exercise { flex: 1; min-width: 0; text-align: center; }
+      /* On a tablet the levels and actions leave the statement a sliver: it wrapped one word per
+         line and the bar pushed the sheet off screen. The statement takes its own row instead. */
+      @media (max-width: 1280px) {
+        .tutor-bar { flex-wrap: wrap; row-gap: var(--ex-space-xs); }
+        .tutor-actions { margin-left: auto; }
+        .tutor-exercise { order: 3; flex-basis: 100%; }
+        /* The sheet needs the width: panel.css only folds the info panel under 900px, a tablet
+           in landscape is 1024–1194px. Same drawer, opened by the Info button, from 1280px down. */
+        :root { --tutor-margin-width: 200px; }
+        .btn-panel-toggle { display: flex; }
+        .ex-panel {
+          position: fixed;
+          left: 0;
+          top: var(--ex-header-height, 50px);
+          bottom: 0;
+          width: min(320px, 90vw);
+          z-index: 200;
+          transform: translateX(-100%);
+          transition: transform 280ms ease;
+        }
+        .ex-panel.open { transform: translateX(0); box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15); }
+      }
+      .tutor-prompt { margin: 0; font-size: 13px; color: var(--tutor-muted); }
+      .tutor-statement { font-size: 22px; color: var(--ex-text); }
+      .tutor-statement .katex-display { margin: 2px 0; }
+      .tutor-given-figure { display: block; margin: 2px auto 0; overflow: visible; }
+      .tutor-given-shape { fill: color-mix(in srgb, var(--ex-primary) 10%, transparent); stroke: var(--ex-text); stroke-width: 1.5; stroke-linejoin: round; }
+      polyline.tutor-given-shape { fill: none; }
+      .tutor-given-dot { fill: var(--ex-text); }
+      .tutor-given-right-angle { fill: none; stroke: var(--tutor-correct); stroke-width: 1.5; }
+      .tutor-given-label { fill: var(--ex-text); font-size: 13px; font-weight: 600; }
+
+      .tutor-actions { display: flex; align-items: center; gap: var(--ex-space-sm); }
+      .tutor-stars { font-weight: 600; color: var(--ex-accent-orange); white-space: nowrap; }
+      .tutor-actions button {
+        height: 36px;
+        padding: 0 var(--ex-space-md);
+        border-radius: var(--ex-radius-md);
+        border: 1px solid var(--ex-border);
+        background: var(--ex-surface-alt);
+        color: var(--ex-text);
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .tutor-actions #nextBtn.is-ready {
+        background: var(--tutor-correct);
+        border-color: var(--tutor-correct);
+        color: #fff;
+        animation: tutor-pulse 1.2s ease-in-out infinite;
+      }
+      @keyframes tutor-pulse { 50% { transform: scale(1.06); } }
+      /* No pulse nor fade-in for those who asked for less motion; it also keeps the buttons still enough to be clicked by automation */
+      @media (prefers-reduced-motion: reduce) {
+        .tutor *, .tutor-overlay > * { animation: none !important; transition: none !important; }
+      }
+
+      .tutor-sheet { flex: 1; min-height: 0; position: relative; display: flex; }
+      .tutor-sheet #rootEl { flex: 1; min-width: 0; }
+      .tutor-margin {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: var(--tutor-margin-width);
+        border-left: 2px dashed var(--ex-border);
+        background: color-mix(in srgb, var(--ex-surface) 70%, transparent);
+        /* Catches the pen so nothing gets written in the margin; a stroke dragged into it ends at its edge */
+        touch-action: none;
+        z-index: var(--tutor-over-ink);
+      }
+      .tutor-margin-title {
+        margin: var(--ex-space-sm);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--tutor-muted);
+      }
+
+      .tutor-overlay { z-index: var(--tutor-over-ink); }
+      .tutor-mark {
+        transform: translate(-100%, -50%);
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--tutor-muted);
+      }
+      .tutor-mark.is-correct { color: var(--tutor-correct); }
+      .tutor-mark.is-wrong { color: var(--tutor-wrong); }
+      .tutor-highlight {
+        border-radius: var(--ex-radius-sm);
+        background: color-mix(in srgb, var(--tutor-wrong) 14%, transparent);
+        outline: 2px solid color-mix(in srgb, var(--tutor-wrong) 40%, transparent);
+        outline-offset: 4px;
+      }
+      .tutor-hint {
+        max-width: 360px;
+        padding: var(--ex-space-sm) var(--ex-space-md);
+        border-radius: var(--ex-radius-lg);
+        background: var(--tutor-wrong);
+        color: #fff;
+        font-size: 14px;
+        box-shadow: var(--ex-shadow-sm);
+        animation: tutor-appear 0.25s ease-out;
+      }
+      /* On a line that holds but is not finished: a nudge, not an error */
+      .tutor-hint.is-correct { background: var(--ex-primary); }
+      .tutor-reading {
+        right: var(--ex-space-sm);
+        width: calc(var(--tutor-margin-width) - 2 * var(--ex-space-sm));
+        transform: translateY(-50%);
+        font-size: 16px;
+        color: var(--tutor-muted);
+        text-align: left;
+        overflow: hidden;
+      }
+      .tutor-reading.is-correct { color: var(--tutor-correct); }
+      .tutor-reading.is-wrong { color: var(--tutor-wrong); }
+      @keyframes tutor-appear { from { opacity: 0; transform: translateY(-4px); } }
+
+
+      .tutor-connection {
+        padding: 2px var(--ex-space-sm);
+        border-radius: var(--ex-radius-full);
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+        color: #fff;
+        background: var(--tutor-muted);
+      }
+      .tutor-connection[data-tone="ok"] { background: var(--tutor-correct); }
+      .tutor-connection[data-tone="warn"] { background: var(--ex-warning); color: var(--ex-text); }
+      .tutor-connection[data-tone="error"] { background: var(--tutor-wrong); }
+      .tutor-notice {
+        position: absolute;
+        left: 50%;
+        bottom: 72px;
+        transform: translateX(-50%);
+        max-width: 520px;
+        padding: var(--ex-space-sm) var(--ex-space-lg);
+        border-radius: var(--ex-radius-lg);
+        background: var(--ex-warning);
+        color: var(--ex-text);
+        font-size: 15px;
+        text-align: center;
+        box-shadow: var(--ex-shadow-sm);
+        pointer-events: none;
+        z-index: var(--tutor-over-ink);
+      }
+
+      .tutor-banner {
+        position: absolute;
+        left: 50%;
+        top: var(--ex-space-lg);
+        transform: translateX(-50%);
+        padding: var(--ex-space-md) var(--ex-space-xl);
+        border-radius: var(--ex-radius-full);
+        background: var(--tutor-correct);
+        color: #fff;
+        font-size: 18px;
+        font-weight: 700;
+        box-shadow: var(--ex-shadow-sm);
+        animation: tutor-appear 0.3s ease-out;
+        pointer-events: none;
+        z-index: var(--tutor-over-ink);
+      }
+
+      .tutor-rotate { display: none; }
+      @media (orientation: portrait) and (pointer: coarse) {
+        .tutor-rotate {
+          position: fixed;
+          inset: 0;
+          z-index: 2000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: var(--ex-space-xl);
+          background: var(--ex-bg);
+          color: var(--ex-text);
+          font-size: 20px;
+          text-align: center;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="showModalBtn" class="btn-keys">API Keys</button>
+      <h1 class="header-title">Interactive Ink Canvas - Math Tutor</h1>
+    </header>
+
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">Math Tutor — handwritten workbook</p>
+        <p class="ex-panel-intro">Solve the exercise by hand, one step per line. The canvas reads every line as you write and tells you which one goes wrong, and why.</p>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc"><strong>Algebra</strong>: one-step, then two-step equations. <strong>Geometry</strong>: the perimeter, then the area of a shape. A reasoning only counts once it ends on the result: <code>P = 20</code>, not <code>P = (4 + 6) × 2</code>.</div>
+        </div>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">The right margin shows what the machine reads on each line: if a line turns red, check there first whether it read you right.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">A line is judged once you start the next one. The last line is judged when you pause, or press <strong>Check</strong>.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">With a pen, your palm is ignored (<code>grabber.inputMode: "auto"</code>).</div>
+        </div>
+      </aside>
+
+      <main class="tutor">
+        <section class="tutor-bar">
+          <nav id="levels" class="tutor-levels"></nav>
+          <div class="tutor-exercise">
+            <p id="prompt" class="tutor-prompt"></p>
+            <div id="statement" class="tutor-statement"></div>
+          </div>
+          <div class="tutor-actions">
+            <span id="connection" class="tutor-connection"></span>
+            <span id="stars" class="tutor-stars"></span>
+            <button id="restartBtn">Start over</button>
+            <button id="checkBtn">Check</button>
+            <button id="nextBtn">Next exercise</button>
+          </div>
+        </section>
+        <section class="tutor-sheet" id="sheet">
+          <div id="rootEl"></div>
+          <div class="tutor-margin"><p id="marginTitle" class="tutor-margin-title"></p></div>
+          <div id="overlay" class="ink-overlay tutor-overlay"></div>
+          <div id="banner" class="tutor-banner" hidden></div>
+          <div id="notice" class="tutor-notice" hidden></div>
+        </section>
+      </main>
+    </div>
+    <div id="rotate" class="tutor-rotate"></div>
+
+    <script type="module">
+      import { Canvas } from "../../dist/iink.esm.js"
+      import { ModalCanvasOptions } from "../components/modal/modalCanvasOptions.js"
+      import { TutorOverlay } from "./interactive_canvas_math_tutor/overlay.js"
+      import { UI } from "./interactive_canvas_math_tutor/strings.js"
+      import { MATH_RECOGNITION, Tutor } from "./interactive_canvas_math_tutor/tutor.js"
+
+      const panelToggleBtn = document.getElementById("panelToggleBtn")
+      const infoPanel = document.getElementById("info-panel")
+      panelToggleBtn.addEventListener("click", () => {
+        const open = infoPanel.classList.toggle("open")
+        panelToggleBtn.setAttribute("aria-expanded", String(open))
+      })
+
+      const rootElement = document.getElementById("rootEl")
+      document.getElementById("marginTitle").textContent = UI.margin
+      document.getElementById("banner").textContent = UI.solved
+      document.getElementById("rotate").textContent = UI.rotate
+      document.getElementById("restartBtn").textContent = UI.restart
+      document.getElementById("checkBtn").textContent = UI.check
+      document.getElementById("nextBtn").textContent = UI.next
+
+      const overlay = new TutorOverlay(document.getElementById("overlay"), rootElement, window.katex)
+      const tutor = new Tutor(
+        {
+          rootElement,
+          statement: document.getElementById("statement"),
+          prompt: document.getElementById("prompt"),
+          levels: document.getElementById("levels"),
+          stars: document.getElementById("stars"),
+          banner: document.getElementById("banner"),
+          checkButton: document.getElementById("checkBtn"),
+          nextButton: document.getElementById("nextBtn"),
+          restartButton: document.getElementById("restartBtn"),
+          connection: document.getElementById("connection"),
+          notice: document.getElementById("notice"),
+        },
+        overlay,
+        window.katex
+      )
+
+      let canvas
+
+      const canvasOptions = {
+        configuration: {
+          recognition: MATH_RECOGNITION,
+          // A palm resting on the tablet must not ink: pen only once a pen is seen
+          grabber: { inputMode: "auto" },
+          menu: {
+            style: { enable: false },
+            context: { enable: false },
+            tool: { write: true, move: false, select: false, erase: true, shape: false, edge: false },
+            action: {
+              clear: false,
+              language: false,
+              undoRedo: true,
+              zoom: false,
+              convert: false,
+              gesture: false,
+              guide: false,
+              snap: false,
+              math: false,
+              overlay: false,
+              selection: false,
+              export: false,
+              import: false,
+              minimap: false,
+              pen: false,
+              diagram: false,
+            },
+          },
+          // The tutor judges the student's own answer: an auto-computed result would give it away
+          math: { computation: { autoCompute: false } },
+        },
+      }
+
+      async function loadCanvas(options) {
+        await canvas?.destroy()
+        canvas = await Canvas.load(rootElement, "INTERACTIVE_INK", options)
+        tutor.attach(canvas)
+      }
+
+      document.getElementById("showModalBtn").addEventListener("click", () => {
+        ModalCanvasOptions.show(loadCanvas, canvasOptions)
+      })
+      window.addEventListener("resize", () => canvas?.resize())
+
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.canvasOptions = canvasOptions
+      window.loadCanvas = loadCanvas
+      window.tutor = tutor
+      Object.defineProperty(window, "canvas", { get: () => canvas })
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+  </body>
+</html>

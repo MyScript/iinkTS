@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+    <title>Japanese Vertical (日本縦型)</title>
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <script src="../assets/js/theme-init.js"></script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">
+        Japanese Vertical (日本縦型)
+      </h1>
+    </header>
+
+    <nav class="flex-container wrap gap between">
+      <div class="flex-container wrap gap">
+        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/clear.svg" />
+        </button>
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/undo.svg" />
+        </button>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/redo.svg" />
+        </button>
+      </div>
+    </nav>
+
+    <div class="ex-page-layout">
+      <aside id="japanese-vertical-panel" class="ex-panel">
+        <p class="ex-panel-heading">Vertical Japanese handwriting recognition</p>
+        <p class="ex-panel-intro">
+          This example shows how iinkTS can recognize Japanese handwriting written vertically.
+          Write naturally on the canvas and see the recognized Japanese text displayed in its
+          vertical writing direction.
+        </p>
+
+        <div class="ex-panel-divider"></div>
+
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">
+            Write Japanese characters naturally from top to bottom. The handwriting recognition
+            engine processes the strokes and converts them into digital Japanese text while
+            preserving the vertical writing layout.
+          </div>
+        </div>
+
+        <div class="ex-panel-hint">
+          Try writing several Japanese characters or sentences vertically on the canvas and
+          observe how the recognition follows the writing direction.
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <p class="ex-panel-subtitle">Recognized text</p>
+        <div id="result"></div>
+      </aside>
+      <div id="rootEl"></div>
+    </div>
+
+    <script type="module">
+      import { Canvas } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from "../components/modal/modalCanvasOptions.js"
+      const rootElement = document.getElementById("rootEl")
+      const resultElement = document.getElementById("result")
+      const clearElement = document.getElementById("clear")
+      const undoElement = document.getElementById("undo")
+      const redoElement = document.getElementById("redo")
+      const showModalBtn = document.getElementById("showModalBtn")
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+
+      const japaneseVerticalPanel = document.getElementById('japanese-vertical-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = japaneseVerticalPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+      let canvas
+
+      clearElement.addEventListener("click", async () => {
+        canvas?.clear()
+      })
+
+      undoElement.addEventListener("click", () => {
+        canvas?.undo()
+      })
+
+      redoElement.addEventListener("click", () => {
+        canvas?.redo()
+      })
+      const canvasOptions = {
+        configuration: {
+          rendering: {
+            guides: {
+              enable: false,
+            },
+          },
+          recognition: {
+            type: "TEXT",
+            lang: "ja_JP",
+            text: {
+              configuration: {
+                name: "vertical",
+              },
+              mimeTypes: ["text/plain"],
+            },
+          },
+        },
+      }
+
+      async function loadCanvas(options) {
+        resultElement.innerHTML = ""
+        await canvas?.destroy()
+
+        /**
+         * get canvas instance from type
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Canvas parameters
+         */
+        canvas = await Canvas.load(rootElement, "INK_V2", options)
+
+        canvas.event.addEventListener("changed", (event) => {
+          undoElement.disabled = !event.detail.canUndo
+          redoElement.disabled = !event.detail.canRedo
+          clearElement.disabled = !event.detail.canClear
+        })
+
+        canvas.event.addEventListener("exported", (event) => {
+          resultElement.innerHTML = event.detail?.["text/plain"]?.replace(/\n/g, "<br>") || ""
+        })
+      }
+
+      showModalBtn.addEventListener("click", () => {
+        ModalCanvasOptions.show(loadCanvas, canvasOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.canvasOptions = canvasOptions
+      window.loadCanvas = loadCanvas
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+</html>

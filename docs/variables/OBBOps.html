@@ -1,0 +1,376 @@
+<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>OBBOps | iink-ts - v5.0.0</title><meta name="description" content="Documentation for iink-ts"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><link rel="stylesheet" href="../assets/custom.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><script async src="../assets/hierarchy.js" id="tsd-hierarchy-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
+<div class="tsd-toolbar-contents container"><a href="../index.html" class="title">iink-ts - v5.0.0</a>
+<div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/>
+<ul role="listbox" id="tsd-search-results"></ul>
+<div id="tsd-search-status" aria-live="polite" aria-atomic="true">
+<div>Preparing search index...</div></div></dialog><a href="#" class="tsd-widget menu" id="tsd-toolbar-menu-trigger" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-menu"></use></svg></a></div></header>
+<div class="container container-main">
+<div class="col-content">
+<div class="tsd-page-title">
+<ul class="tsd-breadcrumb" aria-label="Breadcrumb">
+<li><a href="" aria-current="page">OBBOps</a></li></ul>
+<h1>Variable OBBOps<code class="tsd-tag">Const</code></h1></div>
+<div class="tsd-signature"><span class="tsd-kind-variable">OBBOps</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{</span><br/>    <span class="tsd-kind-call-signature">contains</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">a</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">b</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-call-signature">containsPoint</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">obb</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">point</span><span class="tsd-signature-symbol">:</span> <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-call-signature">create</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">center</span><span class="tsd-signature-symbol">:</span> <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">width</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">height</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">angle</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-call-signature">createFromOBBs</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">obbs</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-call-signature">createFromPoints</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">points</span><span class="tsd-signature-symbol">:</span> <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-call-signature">createFromPointsAtAngle</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">points</span><span class="tsd-signature-symbol">:</span> <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">angle</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-call-signature">fromBox</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">box</span><span class="tsd-signature-symbol">:</span> <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-call-signature">fromCorners</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">corners</span><span class="tsd-signature-symbol">:</span> <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">angle</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-call-signature">getCorners</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">obb</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-call-signature">getSides</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">obb</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TSegment.html" class="tsd-signature-type tsd-kind-type-alias">TSegment</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-call-signature">getSnapPoints</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">obb</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-call-signature">isContained</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">obb</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">box</span><span class="tsd-signature-symbol">:</span> <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-call-signature">overlaps</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">a</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">b</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-call-signature">overlapsBox</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">obb</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">box</span><span class="tsd-signature-symbol">:</span> <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-call-signature">polygonOverlapsBox</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">bounds</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">edges</span><span class="tsd-signature-symbol">:</span> <a href="../types/TSegment.html" class="tsd-signature-type tsd-kind-type-alias">TSegment</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">box</span><span class="tsd-signature-symbol">:</span> <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-call-signature">polygonOverlapsQuad</span><span class="tsd-signature-symbol">(</span><br/>        <span class="tsd-kind-parameter">vertices</span><span class="tsd-signature-symbol">:</span> <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span><br/>        <span class="tsd-kind-parameter">edges</span><span class="tsd-signature-symbol">:</span> <a href="../types/TSegment.html" class="tsd-signature-type tsd-kind-type-alias">TSegment</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span><br/>        <span class="tsd-kind-parameter">query</span><span class="tsd-signature-symbol">:</span> <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-call-signature">quadContainsPoint</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">query</span><span class="tsd-signature-symbol">:</span> <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">point</span><span class="tsd-signature-symbol">:</span> <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-call-signature">toBox</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">obb</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-call-signature">toCorners</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">obb</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-call-signature">toUnrotatedBox</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">obb</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol"> = ...</span></div>
+<div class="tsd-type-declaration">
+<h4>Type Declaration</h4>
+<ul class="tsd-parameters">
+<li class="tsd-parameter">
+<h5 id="contains"><span class="tsd-kind-method">contains</span><span class="tsd-signature-symbol">:</span> function</h5>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="contains-1"><span class="tsd-kind-call-signature">contains</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">a</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">b</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><a href="#contains-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">a</span>: <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a></span></li>
+<li><span><span class="tsd-kind-parameter">b</span>: <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in core/geometry/OBB.ts:390</li></ul></aside></div></li></ul></li>
+<li class="tsd-parameter">
+<h5 id="containspoint"><span class="tsd-kind-method">containsPoint</span><span class="tsd-signature-symbol">:</span> function</h5>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="containspoint-1"><span class="tsd-kind-call-signature">containsPoint</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">obb</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">point</span><span class="tsd-signature-symbol">:</span> <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><a href="#containspoint-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">obb</span>: <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a></span></li>
+<li><span><span class="tsd-kind-parameter">point</span>: <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in core/geometry/OBB.ts:286</li></ul></aside></div></li></ul></li>
+<li class="tsd-parameter">
+<h5 id="create"><span class="tsd-kind-method">create</span><span class="tsd-signature-symbol">:</span> function</h5>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="create-1"><span class="tsd-kind-call-signature">create</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">center</span><span class="tsd-signature-symbol">:</span> <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">width</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">height</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">angle</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><a href="#create-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">center</span>: <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a></span></li>
+<li><span><span class="tsd-kind-parameter">width</span>: <span class="tsd-signature-type">number</span></span></li>
+<li><span><span class="tsd-kind-parameter">height</span>: <span class="tsd-signature-type">number</span></span></li>
+<li><span><span class="tsd-kind-parameter">angle</span>: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in core/geometry/OBB.ts:63</li></ul></aside></div></li></ul></li>
+<li class="tsd-parameter">
+<h5 id="createfromobbs"><span class="tsd-kind-method">createFromOBBs</span><span class="tsd-signature-symbol">:</span> function</h5>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="createfromobbs-1"><span class="tsd-kind-call-signature">createFromOBBs</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">obbs</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><a href="#createfromobbs-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">obbs</span>: <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">[]</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in core/geometry/OBB.ts:167</li></ul></aside></div></li></ul></li>
+<li class="tsd-parameter">
+<h5 id="createfrompoints"><span class="tsd-kind-method">createFromPoints</span><span class="tsd-signature-symbol">:</span> function</h5>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="createfrompoints-1"><span class="tsd-kind-call-signature">createFromPoints</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">points</span><span class="tsd-signature-symbol">:</span> <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><a href="#createfrompoints-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">points</span>: <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">[]</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in core/geometry/OBB.ts:117</li></ul></aside></div></li></ul></li>
+<li class="tsd-parameter">
+<h5 id="createfrompointsatangle"><span class="tsd-kind-method">createFromPointsAtAngle</span><span class="tsd-signature-symbol">:</span> function</h5>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="createfrompointsatangle-1"><span class="tsd-kind-call-signature">createFromPointsAtAngle</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">points</span><span class="tsd-signature-symbol">:</span> <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">angle</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><a href="#createfrompointsatangle-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>The tightest box at <code>angle</code> containing every point.</p>
+<p><a href="#createfrompoints" class="tsd-kind-method">OBBOps.createFromPoints</a> is this with <code>angle</code> 0. The general form exists because a shape
+carried through a rotation still has a tight box — the same box, turned — and describing it with
+an axis-aligned one instead inflates it by up to a factor of sqrt(2) on the diagonal, which a
+selection outline shows and a containment test then gets wrong.</p>
+<p>Not <a href="#fromcorners" class="tsd-kind-method">OBBOps.fromCorners</a>: that takes the <strong>centroid</strong> of what it is given as the box's
+centre, which is the centre only when the points are the four corners of a rectangle — the one
+case it is ever called with. Fed a shape's vertices it would pull the box towards whichever side
+carries more of them. Here the centre comes from the extents, so any point list works.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">points</span>: <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">[]</span></span></li>
+<li><span><span class="tsd-kind-parameter">angle</span>: <span class="tsd-signature-type">number</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in core/geometry/OBB.ts:134</li></ul></aside></div></li></ul></li>
+<li class="tsd-parameter">
+<h5 id="frombox"><span class="tsd-kind-method">fromBox</span><span class="tsd-signature-symbol">:</span> function</h5>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="frombox-1"><span class="tsd-kind-call-signature">fromBox</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">box</span><span class="tsd-signature-symbol">:</span> <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><a href="#frombox-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">box</span>: <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in core/geometry/OBB.ts:72</li></ul></aside></div></li></ul></li>
+<li class="tsd-parameter">
+<h5 id="fromcorners"><span class="tsd-kind-method">fromCorners</span><span class="tsd-signature-symbol">:</span> function</h5>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="fromcorners-1"><span class="tsd-kind-call-signature">fromCorners</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">corners</span><span class="tsd-signature-symbol">:</span> <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">angle</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><a href="#fromcorners-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Fits an OBB to four corners at a known angle — the fitting counterpart to <a href="#tocorners" class="tsd-kind-method">toCorners</a>.</p>
+<p>Takes the angle rather than solving for it (which a PCA or minimal-bounding-rectangle search
+would have to) because every caller already knows it: it is the original box's own angle, plus
+whatever rotation a matrix carried. That keeps this O(1) per call instead of O(points).</p>
+<p>The four corners are expected to form a box or, after a non-uniform scale applied to a rotated
+box, a parallelogram. Projecting onto the given angle's axes and taking the extent along each
+fits the <em>enclosing</em> OBB in the parallelogram case — exact for any similarity, an accepted
+over-approximation otherwise (see <code>SymbolGeometry</code>'s <code>applyMatrix</code>, the only caller that can
+produce a parallelogram here).</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">corners</span>: <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">[]</span></span></li>
+<li><span><span class="tsd-kind-parameter">angle</span>: <span class="tsd-signature-type">number</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in core/geometry/OBB.ts:233</li></ul></aside></div></li></ul></li>
+<li class="tsd-parameter">
+<h5 id="getcorners"><span class="tsd-kind-method">getCorners</span><span class="tsd-signature-symbol">:</span> function</h5>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="getcorners-1"><span class="tsd-kind-call-signature">getCorners</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">obb</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">[]</span><a href="#getcorners-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">obb</span>: <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">[]</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in core/geometry/OBB.ts:175</li></ul></aside></div></li></ul></li>
+<li class="tsd-parameter">
+<h5 id="getsides"><span class="tsd-kind-method">getSides</span><span class="tsd-signature-symbol">:</span> function</h5>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="getsides-1"><span class="tsd-kind-call-signature">getSides</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">obb</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TSegment.html" class="tsd-signature-type tsd-kind-type-alias">TSegment</a><span class="tsd-signature-symbol">[]</span><a href="#getsides-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">obb</span>: <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="../types/TSegment.html" class="tsd-signature-type tsd-kind-type-alias">TSegment</a><span class="tsd-signature-symbol">[]</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in core/geometry/OBB.ts:255</li></ul></aside></div></li></ul></li>
+<li class="tsd-parameter">
+<h5 id="getsnappoints"><span class="tsd-kind-method">getSnapPoints</span><span class="tsd-signature-symbol">:</span> function</h5>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="getsnappoints-1"><span class="tsd-kind-call-signature">getSnapPoints</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">obb</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">[]</span><a href="#getsnappoints-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">obb</span>: <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">[]</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in core/geometry/OBB.ts:263</li></ul></aside></div></li></ul></li>
+<li class="tsd-parameter">
+<h5 id="iscontained"><span class="tsd-kind-method">isContained</span><span class="tsd-signature-symbol">:</span> function</h5>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="iscontained-1"><span class="tsd-kind-call-signature">isContained</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">obb</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">box</span><span class="tsd-signature-symbol">:</span> <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><a href="#iscontained-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">obb</span>: <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a></span></li>
+<li><span><span class="tsd-kind-parameter">box</span>: <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in core/geometry/OBB.ts:326</li></ul></aside></div></li></ul></li>
+<li class="tsd-parameter">
+<h5 id="overlaps"><span class="tsd-kind-method">overlaps</span><span class="tsd-signature-symbol">:</span> function</h5>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="overlaps-1"><span class="tsd-kind-call-signature">overlaps</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">a</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">b</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><a href="#overlaps-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">a</span>: <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a></span></li>
+<li><span><span class="tsd-kind-parameter">b</span>: <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in core/geometry/OBB.ts:299</li></ul></aside></div></li></ul></li>
+<li class="tsd-parameter">
+<h5 id="overlapsbox"><span class="tsd-kind-method">overlapsBox</span><span class="tsd-signature-symbol">:</span> function</h5>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="overlapsbox-1"><span class="tsd-kind-call-signature">overlapsBox</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">obb</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">box</span><span class="tsd-signature-symbol">:</span> <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><a href="#overlapsbox-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">obb</span>: <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a></span></li>
+<li><span><span class="tsd-kind-parameter">box</span>: <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in core/geometry/OBB.ts:322</li></ul></aside></div></li></ul></li>
+<li class="tsd-parameter">
+<h5 id="polygonoverlapsbox"><span class="tsd-kind-method">polygonOverlapsBox</span><span class="tsd-signature-symbol">:</span> function</h5>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="polygonoverlapsbox-1"><span class="tsd-kind-call-signature">polygonOverlapsBox</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">bounds</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">edges</span><span class="tsd-signature-symbol">:</span> <a href="../types/TSegment.html" class="tsd-signature-type tsd-kind-type-alias">TSegment</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">box</span><span class="tsd-signature-symbol">:</span> <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><a href="#polygonoverlapsbox-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Whether a polygon-like symbol (its <code>bounds</code> OBB and own <code>edges</code>) overlaps <code>box</code> — contained
+OBB is an early-out, otherwise any edge crossing any side of <code>box</code> counts as an overlap.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">bounds</span>: <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a></span></li>
+<li><span><span class="tsd-kind-parameter">edges</span>: <a href="../types/TSegment.html" class="tsd-signature-type tsd-kind-type-alias">TSegment</a><span class="tsd-signature-symbol">[]</span></span></li>
+<li><span><span class="tsd-kind-parameter">box</span>: <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in core/geometry/OBB.ts:337</li></ul></aside></div></li></ul></li>
+<li class="tsd-parameter">
+<h5 id="polygonoverlapsquad"><span class="tsd-kind-method">polygonOverlapsQuad</span><span class="tsd-signature-symbol">:</span> function</h5>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="polygonoverlapsquad-1"><span class="tsd-kind-call-signature">polygonOverlapsQuad</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">vertices</span><span class="tsd-signature-symbol">:</span> <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">edges</span><span class="tsd-signature-symbol">:</span> <a href="../types/TSegment.html" class="tsd-signature-type tsd-kind-type-alias">TSegment</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">query</span><span class="tsd-signature-symbol">:</span> <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><a href="#polygonoverlapsquad-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Whether a polygon-like symbol (its own <code>vertices</code> and <code>edges</code>) overlaps <code>query</code>, an arbitrary
+convex quadrilateral given as its four corners in order.</p>
+<p>Generalizes <a href="#polygonoverlapsbox" class="tsd-kind-method">polygonOverlapsBox</a> to a query a <code>TBox</code> cannot express: the image of an
+axis-aligned box under the inverse of a rotated (and possibly also sheared) matrix is a rotated
+rectangle or a genuine parallelogram, neither of which fits a <code>TBox</code>, and the latter does not fit
+a <code>TOBB</code> either (which assumes right angles).</p>
+<p>The containment early-out tests the symbol's own <code>vertices</code>, not an axis-aligned <code>bounds</code> box —
+<code>bounds</code> is the <em>raw</em> frame's AABB, which for anything but a plain rectangle reaches further out
+on the diagonal than the shape itself (a circle of radius r has corners at r·√2). Once <code>query</code> is
+rotated relative to that raw frame, a <code>query</code> that fully encloses the true shape can still miss
+those corners, which is a real regression this fixes rather than a hypothetical: a query built
+from <code>bounds</code> reported a rotated circle or a rotated diagonal line as unselected while a selection
+box plainly surrounded it. <code>vertices</code> is what every geometry already tessellates a curve
+into (or, for a straight-edged type, already is the exact boundary) — a polygon is contained in a
+convex region iff all its vertices are, whether or not the polygon itself is convex.</p>
+<p>Same as <code>polygonOverlapsBox</code> otherwise: any of the symbol's own edges crossing a side of <code>query</code>
+counts as an overlap. Neither branch catches <code>query</code> sitting entirely inside the shape without
+crossing its boundary — <code>polygonOverlapsBox</code> has never caught that case either; it is a
+pre-existing gap, not one this generalization introduces.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">vertices</span>: <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">[]</span></span></li>
+<li><span><span class="tsd-kind-parameter">edges</span>: <a href="../types/TSegment.html" class="tsd-signature-type tsd-kind-type-alias">TSegment</a><span class="tsd-signature-symbol">[]</span></span></li>
+<li><span><span class="tsd-kind-parameter">query</span>: <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">[]</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in core/geometry/OBB.ts:368</li></ul></aside></div></li></ul></li>
+<li class="tsd-parameter">
+<h5 id="quadcontainspoint"><span class="tsd-kind-method">quadContainsPoint</span><span class="tsd-signature-symbol">:</span> function</h5>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="quadcontainspoint-1"><span class="tsd-kind-call-signature">quadContainsPoint</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">query</span><span class="tsd-signature-symbol">:</span> <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">point</span><span class="tsd-signature-symbol">:</span> <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><a href="#quadcontainspoint-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Whether <code>point</code> lies inside (or on the boundary of) the convex quadrilateral <code>query</code> describes
+by its four corners in order — the same test <a href="#polygonoverlapsquad" class="tsd-kind-method">polygonOverlapsQuad</a> uses for its own
+vertices, exposed here for a type whose true overlap test is itself point-based (a stroke: &quot;is
+any raw pointer inside the query&quot;) rather than a bounds/edges polygon test. Using the generic
+edges-crossing test for such a type would over-approximate: a query side can cross the segment
+<em>between</em> two consecutive pointers without any pointer itself being inside the query, which is a
+true overlap for a polygon but not for a stroke, whose own definition of &quot;overlaps&quot; was never
+&quot;the drawn line crosses the box&quot; to begin with.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">query</span>: <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">[]</span></span></li>
+<li><span><span class="tsd-kind-parameter">point</span>: <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in core/geometry/OBB.ts:386</li></ul></aside></div></li></ul></li>
+<li class="tsd-parameter">
+<h5 id="tobox"><span class="tsd-kind-method">toBox</span><span class="tsd-signature-symbol">:</span> function</h5>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="tobox-1"><span class="tsd-kind-call-signature">toBox</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">obb</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a><a href="#tobox-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">obb</span>: <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in core/geometry/OBB.ts:84</li></ul></aside></div></li></ul></li>
+<li class="tsd-parameter">
+<h5 id="tocorners"><span class="tsd-kind-method">toCorners</span><span class="tsd-signature-symbol">:</span> function</h5>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="tocorners-1"><span class="tsd-kind-call-signature">toCorners</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">obb</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">[]</span><a href="#tocorners-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>The four corners, named for the round trip with <a href="#fromcorners" class="tsd-kind-method">fromCorners</a>.</p>
+<p>Same computation as <a href="#getcorners" class="tsd-kind-method">getCorners</a> — kept as its own name because a caller fitting a box
+back from transformed corners thinks in &quot;to/from corners&quot; pairs, and <code>getCorners</code> predates that
+pairing by naming itself after the shape instead.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">obb</span>: <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="../types/TPoint.html" class="tsd-signature-type tsd-kind-type-alias">TPoint</a><span class="tsd-signature-symbol">[]</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in core/geometry/OBB.ts:216</li></ul></aside></div></li></ul></li>
+<li class="tsd-parameter">
+<h5 id="tounrotatedbox"><span class="tsd-kind-method">toUnrotatedBox</span><span class="tsd-signature-symbol">:</span> function</h5>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="tounrotatedbox-1"><span class="tsd-kind-call-signature">toUnrotatedBox</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">obb</span><span class="tsd-signature-symbol">:</span> <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a><a href="#tounrotatedbox-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>The box the OBB describes <em>before</em> its own rotation — centre, width and height, angle ignored.</p>
+<p><a href="#tobox" class="tsd-kind-method">toBox</a> cannot serve this: for a non-zero angle it returns the axis-aligned <strong>envelope</strong>
+of the rotated box, which is strictly larger. Both are wanted, for different questions — the
+envelope for &quot;what area does this cover on screen&quot;, this one for &quot;what box is being rotated&quot;.
+Conflating them was IIC-1999's sibling: a typeset symbol's derived vertices were built from the
+envelope and then rotated again, so the rotation was counted twice.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">obb</span>: <a href="../types/TOBB.html" class="tsd-signature-type tsd-kind-type-alias">TOBB</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="../types/TBox.html" class="tsd-signature-type tsd-kind-type-alias">TBox</a></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in core/geometry/OBB.ts:108</li></ul></aside></div></li></ul></li></ul></div><aside class="tsd-sources">
+<ul>
+<li>Defined in core/geometry/OBB.ts:62</li></ul></aside></div>
+<div class="col-sidebar">
+<div class="page-menu">
+<div class="tsd-navigation settings">
+<details class="tsd-accordion"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h3>Settings</h3></summary>
+<div class="tsd-accordion-details">
+<div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span>
+<ul id="tsd-filter-options">
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-protected" name="protected"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Protected</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-alpha" name="alpha"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Alpha</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-beta" name="beta"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Beta</span></label></li></ul></div>
+<div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div></div>
+<div class="site-menu">
+<nav class="tsd-navigation"><a href="../modules.html">iink-ts - v5.0.0</a>
+<ul class="tsd-small-nested-navigation" id="tsd-nav-container">
+<li>Loading...</li></ul></nav></div></div></div><footer>
+<p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer>
+<div class="overlay"></div></body></html>

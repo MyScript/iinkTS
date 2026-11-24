@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+    <title>Ink Canvas v2 Import</title>
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+    <style>
+      #result {
+        display: block;
+        text-align: left;
+      }
+      #strokesToImportElement {
+        position: absolute;
+        z-index: 99;
+        display: none;
+        width: 320px;
+        height: calc(100dvh - 166px);
+        resize: none;
+      }
+
+      #strokesToImportElement.open {
+        display: block;
+      }
+      #rootEl {
+        width: 100%;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">
+        Ink Canvas v2 Text
+      </h1>
+    </header>
+
+    <nav class="flex-container gap between">
+      <div class="flex-container wrap gap">
+        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/clear.svg" />
+        </button>
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/undo.svg" />
+        </button>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/redo.svg" />
+        </button>
+        <button class="classic-btn" id="toggleStrokes">
+          Show strokes
+        </button>
+        <button class="classic-btn" id="importStrokes">
+          Import
+        </button>
+      </div>
+    </nav>
+
+    <div class="ex-page-layout">
+      <aside id="stroke-import-panel" class="ex-panel">
+        <p class="ex-panel-heading">Import and resume handwriting</p>
+        <p class="ex-panel-intro">
+          This example shows how previously recorded strokes can be imported into iinkTS.
+          Restore handwritten content from an earlier session and continue writing from where
+          you left off.
+        </p>
+
+        <div class="ex-panel-divider"></div>
+
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">
+            Import a set of previously written strokes into the canvas. The imported content
+            is restored as handwriting, allowing you to continue editing or adding new strokes
+            without starting over.
+          </div>
+        </div>
+
+        <div class="ex-panel-hint">
+          Import previously saved strokes and continue writing on the canvas to see how iinkTS
+          can resume an existing handwriting session.
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <p class="ex-panel-subtitle">Recognized strokes</p>
+        <div id="result"></div>
+
+        <p class="ex-panel-subtitle">Model strokes</p>
+        <div id="model-strokes"></div>
+      </aside>
+
+      <div class="page-content">
+        <textarea id="strokesToImportElement"></textarea>
+        <div id="rootEl"></div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { Canvas } from "../../dist/iink.esm.js"
+      import { ModalCanvasOptions } from "../components/modal/modalCanvasOptions.js"
+      import strokes from '../assets/datas/myscript.json' with { type: 'json' }
+
+      const rootElement = document.getElementById("rootEl")
+      const resultElement = document.getElementById("result")
+      const clearElement = document.getElementById("clear")
+      const undoElement = document.getElementById("undo")
+      const redoElement = document.getElementById("redo")
+      const showModalBtn = document.getElementById("showModalBtn")
+
+      const strokesToImportElement = document.getElementById("strokesToImportElement");
+
+      const modelStrokesEl = document.getElementById("model-strokes");
+      const importStrokesBtn = document.getElementById("importStrokes");
+      const toggleStrokesBtn = document.getElementById("toggleStrokes");
+      toggleStrokesBtn.addEventListener("click", () => {
+        const open = strokesToImportElement.classList.toggle("open");
+        toggleStrokesBtn.textContent = open ? "Hide strokes" : "Show strokes";
+      });
+
+      const panelToggleBtn = document.getElementById('panelToggleBtn');
+      const naturalWritingPanel = document.getElementById('natural-writing-panel');
+      panelToggleBtn.addEventListener('click', () => {
+        const open = naturalWritingPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      let canvas
+
+      clearElement.addEventListener("click", async () => {
+        canvas?.clear()
+      })
+
+      undoElement.addEventListener("click", () => {
+        canvas?.undo()
+      })
+
+      redoElement.addEventListener("click", () => {
+        canvas?.redo()
+      })
+      const canvasOptions = {
+        configuration: {
+          recognition: {
+            type: "TEXT",
+            lang: "en_US",
+            export: {
+              jiix: {
+                ranges: true,
+                "bounding-box": true,
+              },
+            },
+            text: {
+              mimeTypes: ["text/plain"],
+            },
+          },
+        },
+      }
+      showModalBtn.addEventListener("click", () => {
+        ModalCanvasOptions.show(loadCanvas, canvasOptions)
+      })
+
+      async function loadCanvas(options) {
+
+
+        strokesToImportElement.value = JSON.stringify(strokes, null, 2);
+
+        resultElement.innerHTML = ""
+        await canvas?.destroy()
+
+        /**
+         * get canvas instance from type
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Canvas parameters
+         */
+        canvas = await Canvas.load(rootElement, "INK_V2", options)
+
+        canvas.event.addEventListener("changed", (event) => {
+          undoElement.disabled = !event.detail.canUndo
+          redoElement.disabled = !event.detail.canRedo
+          clearElement.disabled = !event.detail.canClear
+          modelStrokesEl.innerHTML = JSON.stringify(canvas.model.strokes, null, 2);
+        })
+
+        canvas.event.addEventListener("exported", (event) => {
+          resultElement.innerHTML = event.detail?.["text/plain"] || ""
+        })
+
+        importStrokesBtn.addEventListener("click", () => {
+          if (!canvas) return;
+          let editedStrokes;
+          try {
+            editedStrokes = JSON.parse(strokesToImportElement.value);
+          } catch (error) {
+            alert(`Invalid strokes JSON: ${error.message}`);
+            return;
+          }
+          canvas.importStrokes(editedStrokes)
+            .then(ex => {
+              resultElement.innerHTML = ex?.["text/plain"] || ""
+            })
+            .catch(err => alert(err?.message || err))
+        })
+      }
+
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.canvasOptions = canvasOptions
+      window.loadCanvas = loadCanvas
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+</html>

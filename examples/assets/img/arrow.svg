@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" viewBox="0 0 18 18" preserveAspectRatio="xMinYMin meet">
+  <marker id="arrow-head-end" markerWidth="4" markerHeight="4" refX="0" refY="2" orient="auto">
+    <polygon points="0,0,4,2,0,4" fill="context-stroke"></polygon>
+  </marker>
+  <line
+    x1="2"
+    y1="16"
+    x2="12"
+    y2="4"
+    fill="transparent"
+    stroke="currentColor"
+    stroke-width="2px"
+    marker-end="url(#arrow-head-end)"
+  />
+</svg>

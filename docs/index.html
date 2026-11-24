@@ -1,0 +1,293 @@
+<!DOCTYPE html><html class="default" lang="en" data-base="./"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>iink-ts - v5.0.0</title><meta name="description" content="Documentation for iink-ts"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="assets/style.css"/><link rel="stylesheet" href="assets/highlight.css"/><link rel="stylesheet" href="assets/custom.css"/><script defer src="assets/main.js"></script><script async src="assets/icons.js" id="tsd-icons-script"></script><script async src="assets/search.js" id="tsd-search-script"></script><script async src="assets/navigation.js" id="tsd-nav-script"></script><script async src="assets/hierarchy.js" id="tsd-hierarchy-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
+<div class="tsd-toolbar-contents container"><a href="index.html" class="title">iink-ts - v5.0.0</a>
+<div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/>
+<ul role="listbox" id="tsd-search-results"></ul>
+<div id="tsd-search-status" aria-live="polite" aria-atomic="true">
+<div>Preparing search index...</div></div></dialog><a href="#" class="tsd-widget menu" id="tsd-toolbar-menu-trigger" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="assets/icons.svg#icon-menu"></use></svg></a></div></header>
+<div class="container container-main">
+<div class="col-content">
+<div class="tsd-page-title">
+<h1>iink-ts - v5.0.0</h1></div>
+<div class="tsd-panel tsd-typography"><h1 id="iinkts" class="tsd-anchor-link">iinkTS<a href="#iinkts" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h1>
+<p><a href="https://badge.fury.io/js/iink-ts"><img src="https://badge.fury.io/js/iink-ts.svg" alt="npm version"></a>
+<a href="https://myscript.github.io/iinkTS/examples/"><img src="https://img.shields.io/badge/Link%20to-examples-blue.svg" alt="Examples"></a>
+<a href="https://developer.myscript.com/docs/cloud/latest/iinkts/get-started/"><img src="https://img.shields.io/badge/Link%20to-documentation-green.svg" alt="Documentation"></a></p>
+<blockquote>
+<p>The fastest way to integrate rich <strong>handwriting</strong> features in your webapp.</p>
+<p>:point_right: <a href="https://myscript.github.io/iinkTS/examples/">Examples</a>:point_left:</p>
+</blockquote>
+<div align="center">
+  <img src="https://raw.githubusercontent.com/MyScript/iinkTS/master/preview.gif">
+</div>
+<p>iinkTS is a TypeScript library that can be used in every web application to bring handwriting recognition: text, math and diagrams.</p>
+<p>It integrates all you need:</p>
+<ul>
+<li>Signal capture for all devices,</li>
+<li>Digital ink rendering,</li>
+<li>Link to MyScript Cloud to bring handwriting recognition,</li>
+<li>Editing, conversion and export of what was written.</li>
+</ul>
+<h2 id="table-of-contents" class="tsd-anchor-link">Table of contents<a href="#table-of-contents" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<ul>
+<li><a href="#features">Features</a></li>
+<li><a href="#gallery">Gallery</a></li>
+<li><a href="#examples-by-use-case">Examples by use case</a></li>
+<li><a href="#requirements">Requirements</a></li>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#usage">Usage</a></li>
+<li><a href="#documentation">Documentation</a></li>
+<li><a href="#architecture">Architecture</a></li>
+<li><a href="#migration">Migration</a></li>
+<li><a href="#development">Development</a></li>
+<li><a href="#getting-support">Support</a></li>
+<li><a href="#sharing-your-feedback">Feedback</a></li>
+<li><a href="#contributing">Contributing</a></li>
+<li><a href="#troubleshooting">Troubleshooting</a></li>
+<li><a href="#license">License</a></li>
+</ul>
+<h2 id="features" class="tsd-anchor-link">Features<a href="#features" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<ul>
+<li><strong>Text</strong>: real-time recognition in 72 languages, vertical Japanese included.</li>
+<li><strong>Math</strong>: more than 200 symbols, a solver that evaluates and solves what you write, variables shared between blocks, and results that recompute when a variable changes.</li>
+<li><strong>Diagrams</strong>: shapes and connectors are recognized as you draw, connectors stay attached when you move a shape, and the whole diagram converts to clean typeset shapes.</li>
+<li><strong>Editing gestures</strong>: scratch-out, strike-through, surround, underline, insert and join.</li>
+<li><strong>Pen nibs</strong>: ballpoint, pencil, fountain pen and brush, from the same captured stroke.</li>
+<li><strong>Export</strong>: JIIX, text, JSON, SVG, PNG, Markdown, Mermaid, PlantUML, prompt-ready blocks for LLMs, and PDF.</li>
+<li><strong>Integrations</strong>: runs inside <a href="https://tldraw.dev">tldraw</a> and <a href="https://excalidraw.com">Excalidraw</a> whiteboards.</li>
+<li><strong>Customizable</strong>: themes and styles, menus you can extend or replace, keyboard shortcuts, minimap, zoom and pan.</li>
+<li><strong>Resilient</strong>: reconnects on its own after a network drop and replays what was written offline.</li>
+</ul>
+<p>You can discover all the features on our Developer website for <a href="https://developer.myscript.com/docs/cloud/latest/recognition-capabilities/text-languages/">Text</a> and <a href="https://developer.myscript.com/docs/cloud/latest/interactivity-integration/math-features/">Math</a>.</p>
+<h2 id="gallery" class="tsd-anchor-link">Gallery<a href="#gallery" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://myscript.github.io/iinkTS/examples/interactive-canvas/interactive_canvas_math_tutor.html"><img src="media/math-tutor.png" alt="Math tutor: each line of the reasoning is checked"></a><br><strong>Math tutor</strong>: each line of the reasoning is checked</td>
+<td><a href="https://myscript.github.io/iinkTS/examples/interactive-canvas/interactive_canvas_math_dependencies.html"><img src="media/math.png" alt="Math solver: the result is written next to the expression"></a><br><strong>Math solver</strong>: <code>x = 2</code> feeds <code>3x + 2 =</code></td>
+</tr>
+<tr>
+<td><a href="https://myscript.github.io/iinkTS/examples/interactive-canvas/interactive_canvas_diagram_inspector.html"><img src="media/diagram.png" alt="Diagram: shapes and connectors read as a graph"></a><br><strong>Diagrams</strong>: shapes and connectors read as a graph</td>
+<td><a href="https://myscript.github.io/iinkTS/examples/interactive-canvas/interactive_canvas_export_pdf.html"><img src="media/live-pdf.png" alt="Live PDF: handwriting becomes a typeset document"></a><br><strong>Live PDF</strong>: handwriting becomes a typeset document</td>
+</tr>
+<tr>
+<td><a href="https://myscript.github.io/iinkTS/examples/interactive-canvas/interactive_canvas_pen_nibs.html"><img src="media/pen-nibs.png" alt="Pen nibs: ballpoint, pencil, fountain pen and brush"></a><br><strong>Pen nibs</strong>: one stroke, four instruments</td>
+<td><a href="https://myscript.github.io/iinkTS/examples/custom-rendering/tldraw-websocket-client/dist/index.html"><img src="media/tldraw.png" alt="tldraw: handwriting recognition inside a whiteboard"></a><br><strong>tldraw</strong>: recognition inside a whiteboard</td>
+</tr>
+</tbody>
+</table>
+<h2 id="examples-by-use-case" class="tsd-anchor-link">Examples by use case<a href="#examples-by-use-case" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>All examples run live on the <a href="https://myscript.github.io/iinkTS/examples/">examples page</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Use case</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Education</strong></td>
+<td><a href="https://myscript.github.io/iinkTS/examples/interactive-canvas/interactive_canvas_math_tutor.html">Math tutor</a>, <a href="https://myscript.github.io/iinkTS/examples/interactive-canvas/interactive_canvas_math_computation_modes.html">math solver</a>, <a href="https://myscript.github.io/iinkTS/examples/canvas/canvas_v2_multi_canvas_exam.html">exam and grading forms</a></td>
+</tr>
+<tr>
+<td><strong>Note-taking and documents</strong></td>
+<td><a href="https://myscript.github.io/iinkTS/examples/interactive-canvas/interactive_canvas_export_pdf.html">Live PDF document</a>, <a href="https://myscript.github.io/iinkTS/examples/interactive-canvas/interactive_canvas_export_markdown.html">Markdown export</a>, <a href="https://myscript.github.io/iinkTS/examples/interactive-canvas/interactive_canvas_gestures.html">gestures</a></td>
+</tr>
+<tr>
+<td><strong>Diagrams and whiteboards</strong></td>
+<td><a href="https://myscript.github.io/iinkTS/examples/interactive-canvas/interactive_canvas_diagram_inspector.html">Diagram inspector</a>, <a href="https://myscript.github.io/iinkTS/examples/interactive-canvas/interactive_canvas_export_mermaid.html">Mermaid</a> and <a href="https://myscript.github.io/iinkTS/examples/interactive-canvas/interactive_canvas_export_plantuml.html">PlantUML</a> export, <a href="https://myscript.github.io/iinkTS/examples/custom-rendering/tldraw-websocket-client/dist/index.html">tldraw</a>, <a href="https://myscript.github.io/iinkTS/examples/custom-rendering/excalidraw-websocket-client/dist/index.html">Excalidraw</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="requirements" class="tsd-anchor-link">Requirements<a href="#requirements" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<ol>
+<li>Have <a href="https://www.npmjs.com/get-npm">npm</a>, <a href="https://yarnpkg.com/en/docs/install">yarn</a>.</li>
+<li>Have a MyScript developer account. You can create one <a href="https://developer.myscript.com/support/cloud/registering-myscript-cloud/">here</a>.</li>
+<li>Get your keys and the free monthly quota to access MyScript Cloud at <a href="https://developer.myscript.com/#getting-started">developer.myscript.com</a></li>
+</ol>
+<h2 id="installation" class="tsd-anchor-link">Installation<a href="#installation" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>iinkTS can be installed with the well known package managers <code>npm</code>, <code>yarn</code>.</p>
+<p>If you want to use <code>npm</code> or <code>yarn</code> you first have to init a project (or use an existing one).</p>
+<pre><code class="shell"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">init</span><br/><span class="hl-0">OR</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-2">init</span>
+</code><button type="button">Copy</button></pre>
+
+<p>You can then install iinkTS and use it as showed in the <a href="#usage">Usage</a> section.</p>
+<pre><code class="shell"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">install</span><span class="hl-1"> </span><span class="hl-2">iink-ts</span><br/><span class="hl-0">OR</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-2">add</span><span class="hl-1"> </span><span class="hl-2">iink-ts</span>
+</code><button type="button">Copy</button></pre>
+
+<h2 id="usage" class="tsd-anchor-link">Usage<a href="#usage" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<h3 id="universal-module-definition-umd" class="tsd-anchor-link">Universal Module Definition (UMD)<a href="#universal-module-definition-umd" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ol>
+<li>
+<p>Create an <code>index.html</code> file in the same directory.</p>
+</li>
+<li>
+<p>Add the following lines in the <code>head</code> section of your file to use iinkTS and the css :</p>
+</li>
+</ol>
+<pre><code class="html"><span class="hl-3">&lt;</span><span class="hl-4">script</span><span class="hl-5"> </span><span class="hl-6">src</span><span class="hl-5">=</span><span class="hl-7">&quot;node_modules/iink-ts/dist/iink.min.js&quot;</span><span class="hl-3">&gt;&lt;/</span><span class="hl-4">script</span><span class="hl-3">&gt;</span>
+</code><button type="button">Copy</button></pre>
+
+<ol start="3">
+<li>Still in the <code>head</code> section, add a <code>style</code> and specify the height and the width of your canvas:</li>
+</ol>
+<pre><code class="html"><span class="hl-3">&lt;</span><span class="hl-4">style</span><span class="hl-3">&gt;</span><br/><span class="hl-5">  </span><span class="hl-8">#canvas</span><span class="hl-5"> {</span><br/><span class="hl-5">    </span><span class="hl-6">width</span><span class="hl-5">: </span><span class="hl-9">100%</span><span class="hl-5">;</span><br/><span class="hl-5">    </span><span class="hl-6">height</span><span class="hl-5">: </span><span class="hl-9">100%</span><span class="hl-5">;</span><br/><span class="hl-5">  }</span><br/><span class="hl-3">&lt;/</span><span class="hl-4">style</span><span class="hl-3">&gt;</span>
+</code><button type="button">Copy</button></pre>
+
+<ol start="4">
+<li>In the <code>body</code> tag, create a <code>div</code> tag that will contain the drawing area:</li>
+</ol>
+<pre><code class="html"><span class="hl-3">&lt;</span><span class="hl-4">div</span><span class="hl-1"> </span><span class="hl-6">id</span><span class="hl-1">=</span><span class="hl-7">&quot;canvas&quot;</span><span class="hl-3">&gt;&lt;/</span><span class="hl-4">div</span><span class="hl-3">&gt;</span>
+</code><button type="button">Copy</button></pre>
+
+<ol start="5">
+<li>In JavaScript and within a <code>&lt;script&gt;</code> tag placed before the closing <code>&lt;/body&gt;</code> tag, create the canvas using the <code>load</code> function, your HTML element, the desired type and the possible options depending on the type, then initialize it:</li>
+</ol>
+<pre><code class="javascript"><span class="hl-1">    </span><span class="hl-10">const</span><span class="hl-1"> </span><span class="hl-11">canvasElement</span><span class="hl-1"> = </span><span class="hl-12">document</span><span class="hl-1">.</span><span class="hl-0">getElementById</span><span class="hl-1">(</span><span class="hl-2">&#39;canvas&#39;</span><span class="hl-1">);</span><br/><span class="hl-1">    </span><span class="hl-10">const</span><span class="hl-1"> </span><span class="hl-11">options</span><span class="hl-1"> = {</span><br/><span class="hl-1">      </span><span class="hl-12">configuration:</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-12">server:</span><span class="hl-1"> {</span><br/><span class="hl-1">          </span><span class="hl-12">scheme:</span><span class="hl-1"> </span><span class="hl-2">&quot;https&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">          </span><span class="hl-12">host:</span><span class="hl-1"> </span><span class="hl-2">&quot;cloud.myscript.com&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">          </span><span class="hl-12">applicationKey:</span><span class="hl-1"> </span><span class="hl-2">&quot;&lt;YOU-APPLICATION-KEY&gt;&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">          </span><span class="hl-12">hmacKey:</span><span class="hl-1"> </span><span class="hl-2">&quot;&lt;YOUR-HMAC-KEY&gt;&quot;</span><span class="hl-1">, </span><span class="hl-13">// development only: in production, use sign (see Authentication)</span><br/><span class="hl-1">        }</span><br/><span class="hl-1">      }</span><br/><span class="hl-1">    }</span><br/><span class="hl-1">    </span><span class="hl-10">const</span><span class="hl-1"> </span><span class="hl-11">canvasType</span><span class="hl-1"> = </span><span class="hl-2">&quot;INTERACTIVE_INK&quot;</span><span class="hl-1"> </span><span class="hl-13">/* or INTERACTIVE_INK_SSR or INK_V1 or INK_V2 */</span><br/><span class="hl-1">    </span><span class="hl-10">const</span><span class="hl-1"> </span><span class="hl-11">canvas</span><span class="hl-1"> = </span><span class="hl-12">iink</span><span class="hl-1">.</span><span class="hl-12">Canvas</span><span class="hl-1">.</span><span class="hl-0">load</span><span class="hl-1">(</span><span class="hl-12">canvasElement</span><span class="hl-1">, </span><span class="hl-12">canvasType</span><span class="hl-1">, </span><span class="hl-12">options</span><span class="hl-1">);</span>
+</code><button type="button">Copy</button></pre>
+
+<ol start="6">
+<li>Your <code>index.html</code> file should look like this:</li>
+</ol>
+<pre><code class="html"><span class="hl-3">&lt;</span><span class="hl-4">html</span><span class="hl-3">&gt;</span><br/><span class="hl-1">  </span><span class="hl-3">&lt;</span><span class="hl-4">head</span><span class="hl-3">&gt;</span><br/><span class="hl-1">    </span><span class="hl-3">&lt;</span><span class="hl-4">script</span><span class="hl-5"> </span><span class="hl-6">src</span><span class="hl-5">=</span><span class="hl-7">&quot;node_modules/iink-ts/dist/iink.min.js&quot;</span><span class="hl-3">&gt;&lt;/</span><span class="hl-4">script</span><span class="hl-3">&gt;</span><br/><span class="hl-1">    </span><span class="hl-3">&lt;</span><span class="hl-4">style</span><span class="hl-3">&gt;</span><br/><span class="hl-5">      </span><span class="hl-8">#canvas</span><span class="hl-5"> {</span><br/><span class="hl-5">        </span><span class="hl-6">width</span><span class="hl-5">: </span><span class="hl-9">100%</span><span class="hl-5">;</span><br/><span class="hl-5">        </span><span class="hl-6">height</span><span class="hl-5">: </span><span class="hl-9">100%</span><span class="hl-5">;</span><br/><span class="hl-5">      }</span><br/><span class="hl-5">    </span><span class="hl-3">&lt;/</span><span class="hl-4">style</span><span class="hl-3">&gt;</span><br/><span class="hl-1">  </span><span class="hl-3">&lt;/</span><span class="hl-4">head</span><span class="hl-3">&gt;</span><br/><span class="hl-1">  </span><span class="hl-3">&lt;</span><span class="hl-4">body</span><span class="hl-3">&gt;</span><br/><span class="hl-1">    </span><span class="hl-3">&lt;</span><span class="hl-4">div</span><span class="hl-1"> </span><span class="hl-6">id</span><span class="hl-1">=</span><span class="hl-7">&quot;canvas&quot;</span><span class="hl-3">&gt;&lt;/</span><span class="hl-4">div</span><span class="hl-3">&gt;</span><br/><span class="hl-1">    </span><span class="hl-3">&lt;</span><span class="hl-4">script</span><span class="hl-3">&gt;</span><br/><span class="hl-5">      </span><span class="hl-10">const</span><span class="hl-5"> </span><span class="hl-11">canvasElement</span><span class="hl-5"> </span><span class="hl-1">=</span><span class="hl-5"> </span><span class="hl-12">document</span><span class="hl-5">.</span><span class="hl-0">getElementById</span><span class="hl-5">(</span><span class="hl-2">&quot;canvas&quot;</span><span class="hl-5">)</span><br/><span class="hl-5">      </span><span class="hl-10">const</span><span class="hl-5"> </span><span class="hl-11">options</span><span class="hl-5"> </span><span class="hl-1">=</span><span class="hl-5"> {</span><br/><span class="hl-5">        </span><span class="hl-12">configuration:</span><span class="hl-5"> {</span><br/><span class="hl-5">          </span><span class="hl-12">server:</span><span class="hl-5"> {</span><br/><span class="hl-5">            </span><span class="hl-12">scheme:</span><span class="hl-5"> </span><span class="hl-2">&quot;https&quot;</span><span class="hl-5">,</span><br/><span class="hl-5">            </span><span class="hl-12">host:</span><span class="hl-5"> </span><span class="hl-2">&quot;cloud.myscript.com&quot;</span><span class="hl-5">,</span><br/><span class="hl-5">            </span><span class="hl-12">applicationKey:</span><span class="hl-5"> </span><span class="hl-2">&quot;&lt;YOU-APPLICATION-KEY&gt;&quot;</span><span class="hl-5">,</span><br/><span class="hl-5">            </span><span class="hl-12">hmacKey:</span><span class="hl-5"> </span><span class="hl-2">&quot;&lt;YOUR-HMAC-KEY&gt;&quot;</span><span class="hl-5">, </span><span class="hl-13">// development only: in production, use sign (see Authentication)</span><br/><span class="hl-5">          },</span><br/><span class="hl-5">        }</span><br/><span class="hl-5">      }</span><br/><span class="hl-5">      </span><span class="hl-10">const</span><span class="hl-5"> </span><span class="hl-11">canvasType</span><span class="hl-5"> </span><span class="hl-1">=</span><span class="hl-5"> </span><span class="hl-2">&quot;INTERACTIVE_INK&quot;</span><span class="hl-5"> </span><span class="hl-13">/* or INTERACTIVE_INK_SSR or INK_V1 or INK_V2 */</span><br/><span class="hl-5">      </span><span class="hl-10">const</span><span class="hl-5"> </span><span class="hl-11">canvas</span><span class="hl-5"> </span><span class="hl-1">=</span><span class="hl-5"> </span><span class="hl-12">iink</span><span class="hl-5">.</span><span class="hl-12">Canvas</span><span class="hl-5">.</span><span class="hl-0">load</span><span class="hl-5">(</span><span class="hl-12">canvasElement</span><span class="hl-5">, </span><span class="hl-12">canvasType</span><span class="hl-5">, </span><span class="hl-12">options</span><span class="hl-5">)</span><br/><span class="hl-5">    </span><span class="hl-3">&lt;/</span><span class="hl-4">script</span><span class="hl-3">&gt;</span><br/><span class="hl-1">  </span><span class="hl-3">&lt;/</span><span class="hl-4">body</span><span class="hl-3">&gt;</span><br/><span class="hl-3">&lt;/</span><span class="hl-4">html</span><span class="hl-3">&gt;</span>
+</code><button type="button">Copy</button></pre>
+
+<ol start="7">
+<li>Open <code>index.html</code> in your browser or serve your folder content using any web server.</li>
+</ol>
+<p>You can find this guide, and a more complete example on the <a href="https://developer.myscript.com/docs/cloud/latest/iinkts/get-started/">MyScript Developer website</a>.</p>
+<h3 id="ecmascript-module-esm" class="tsd-anchor-link">ECMAScript module (ESM)<a href="#ecmascript-module-esm" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ol>
+<li>
+<p>Create an <code>index.html</code> file in the same directory.</p>
+</li>
+<li>
+<p>Add the following lines in the <code>body</code> section of your file to use iinkTS and the css :</p>
+</li>
+</ol>
+<pre><code class="html"><span class="hl-3">&lt;</span><span class="hl-4">body</span><span class="hl-3">&gt;</span><br/><span class="hl-1">  </span><span class="hl-3">&lt;</span><span class="hl-4">div</span><span class="hl-1"> </span><span class="hl-6">id</span><span class="hl-1">=</span><span class="hl-7">&quot;canvasEl&quot;</span><span class="hl-3">&gt;&lt;/</span><span class="hl-4">div</span><span class="hl-3">&gt;</span><br/><br/><span class="hl-1">  </span><span class="hl-3">&lt;</span><span class="hl-4">script</span><span class="hl-5"> </span><span class="hl-6">type</span><span class="hl-5">=</span><span class="hl-7">&quot;module&quot;</span><span class="hl-3">&gt;</span><br/><span class="hl-5">    </span><span class="hl-14">import</span><span class="hl-5"> { </span><span class="hl-12">Canvas</span><span class="hl-5">, </span><span class="hl-12">getAvailableLanguageList</span><span class="hl-5"> } </span><span class="hl-14">from</span><span class="hl-5"> </span><span class="hl-2">&quot;../../dist/iink.esm.js&quot;</span><br/><span class="hl-5">    </span><span class="hl-10">const</span><span class="hl-5"> </span><span class="hl-11">canvasElement</span><span class="hl-5"> </span><span class="hl-1">=</span><span class="hl-5"> </span><span class="hl-12">document</span><span class="hl-5">.</span><span class="hl-0">getElementById</span><span class="hl-5">(</span><span class="hl-2">&quot;canvasEl&quot;</span><span class="hl-5">)</span><br/><br/><span class="hl-5">    </span><span class="hl-10">const</span><span class="hl-5"> </span><span class="hl-11">options</span><span class="hl-5"> </span><span class="hl-1">=</span><span class="hl-5"> {</span><br/><span class="hl-5">      </span><span class="hl-12">configuration :</span><span class="hl-5"> {</span><br/><span class="hl-5">        </span><span class="hl-12">server:</span><span class="hl-5"> {</span><br/><span class="hl-5">          </span><span class="hl-12">scheme:</span><span class="hl-5"> </span><span class="hl-2">&quot;https&quot;</span><span class="hl-5">,</span><br/><span class="hl-5">          </span><span class="hl-12">host:</span><span class="hl-5"> </span><span class="hl-2">&quot;cloud.myscript.com&quot;</span><span class="hl-5">,</span><br/><span class="hl-5">          </span><span class="hl-12">applicationKey:</span><span class="hl-5"> </span><span class="hl-2">&quot;&lt;YOU-APPLICATION-KEY&gt;&quot;</span><span class="hl-5">,</span><br/><span class="hl-5">          </span><span class="hl-12">hmacKey:</span><span class="hl-5"> </span><span class="hl-2">&quot;&lt;YOUR-HMAC-KEY&gt;&quot;</span><span class="hl-5">, </span><span class="hl-13">// development only: in production, use sign (see Authentication)</span><br/><span class="hl-5">        },</span><br/><span class="hl-5">      }</span><br/><span class="hl-5">    }</span><br/><br/><span class="hl-5">    </span><span class="hl-10">const</span><span class="hl-5"> </span><span class="hl-11">canvasType</span><span class="hl-5"> </span><span class="hl-1">=</span><br/><span class="hl-5">      </span><span class="hl-2">&quot;INTERACTIVE_INK&quot;</span><span class="hl-5"> </span><span class="hl-13">/* or INTERACTIVE_INK_SSR or INK_V1 or INK_V2 */</span><br/><span class="hl-5">    </span><span class="hl-12">const</span><span class="hl-5"> </span><span class="hl-12">canvas</span><span class="hl-5"> </span><span class="hl-1">=</span><span class="hl-5"> </span><span class="hl-14">await</span><span class="hl-5"> </span><span class="hl-12">Canvas</span><span class="hl-5">.</span><span class="hl-0">load</span><span class="hl-5">(</span><span class="hl-12">canvasElement</span><span class="hl-5">, </span><span class="hl-12">canvasType</span><span class="hl-5">, </span><span class="hl-12">options</span><span class="hl-5">)</span><br/><span class="hl-5">  </span><span class="hl-3">&lt;/</span><span class="hl-4">script</span><span class="hl-3">&gt;</span><br/><span class="hl-3">&lt;/</span><span class="hl-4">body</span><span class="hl-3">&gt;</span>
+</code><button type="button">Copy</button></pre>
+
+<ol start="3">
+<li>Your <code>index.html</code> file should look like this:</li>
+</ol>
+<pre><code class="html"><span class="hl-3">&lt;</span><span class="hl-4">html</span><span class="hl-3">&gt;</span><br/><span class="hl-1">  </span><span class="hl-3">&lt;</span><span class="hl-4">head</span><span class="hl-3">&gt;</span><br/><span class="hl-1">    </span><span class="hl-3">&lt;</span><span class="hl-4">style</span><span class="hl-3">&gt;</span><br/><span class="hl-5">      </span><span class="hl-8">#canvasEl</span><span class="hl-5"> {</span><br/><span class="hl-5">        </span><span class="hl-6">width</span><span class="hl-5">: </span><span class="hl-9">100%</span><span class="hl-5">;</span><br/><span class="hl-5">        </span><span class="hl-6">height</span><span class="hl-5">: </span><span class="hl-9">100%</span><span class="hl-5">;</span><br/><span class="hl-5">      }</span><br/><span class="hl-5">    </span><span class="hl-3">&lt;/</span><span class="hl-4">style</span><span class="hl-3">&gt;</span><br/><span class="hl-1">  </span><span class="hl-3">&lt;/</span><span class="hl-4">head</span><span class="hl-3">&gt;</span><br/><span class="hl-1">  </span><span class="hl-3">&lt;</span><span class="hl-4">body</span><span class="hl-3">&gt;</span><br/><span class="hl-1">    </span><span class="hl-3">&lt;</span><span class="hl-4">div</span><span class="hl-1"> </span><span class="hl-6">id</span><span class="hl-1">=</span><span class="hl-7">&quot;canvasEl&quot;</span><span class="hl-3">&gt;&lt;/</span><span class="hl-4">div</span><span class="hl-3">&gt;</span><br/><span class="hl-1">    </span><span class="hl-3">&lt;</span><span class="hl-4">script</span><span class="hl-5"> </span><span class="hl-6">type</span><span class="hl-5">=</span><span class="hl-7">&quot;module&quot;</span><span class="hl-3">&gt;</span><br/><span class="hl-5">      </span><span class="hl-14">import</span><span class="hl-5"> { </span><span class="hl-12">Canvas</span><span class="hl-5">, </span><span class="hl-12">getAvailableLanguageList</span><span class="hl-5"> } </span><span class="hl-14">from</span><span class="hl-5"> </span><span class="hl-2">&#39;../../dist/iink.esm.js&#39;</span><br/><span class="hl-5">      </span><span class="hl-10">const</span><span class="hl-5"> </span><span class="hl-11">canvasElement</span><span class="hl-5"> </span><span class="hl-1">=</span><span class="hl-5"> </span><span class="hl-12">document</span><span class="hl-5">.</span><span class="hl-0">getElementById</span><span class="hl-5">(</span><span class="hl-2">&#39;canvasEl&#39;</span><span class="hl-5">)</span><br/><br/><span class="hl-5">      </span><span class="hl-10">const</span><span class="hl-5"> </span><span class="hl-11">options</span><span class="hl-5"> </span><span class="hl-1">=</span><span class="hl-5"> {</span><br/><span class="hl-5">        </span><span class="hl-12">configuration:</span><span class="hl-5"> {</span><br/><span class="hl-5">          </span><span class="hl-12">server:</span><span class="hl-5"> {</span><br/><span class="hl-5">            </span><span class="hl-12">scheme:</span><span class="hl-5"> </span><span class="hl-2">&quot;https&quot;</span><span class="hl-5">,</span><br/><span class="hl-5">            </span><span class="hl-12">host:</span><span class="hl-5"> </span><span class="hl-2">&quot;cloud.myscript.com&quot;</span><span class="hl-5">,</span><br/><span class="hl-5">            </span><span class="hl-12">applicationKey:</span><span class="hl-5"> </span><span class="hl-2">&quot;&lt;YOU-APPLICATION-KEY&gt;&quot;</span><span class="hl-5">,</span><br/><span class="hl-5">            </span><span class="hl-12">hmacKey:</span><span class="hl-5"> </span><span class="hl-2">&quot;&lt;YOUR-HMAC-KEY&gt;&quot;</span><span class="hl-5">, </span><span class="hl-13">// development only: in production, use sign (see Authentication)</span><br/><span class="hl-5">          }</span><br/><span class="hl-5">        }</span><br/><span class="hl-5">      }</span><br/><br/><span class="hl-5">      </span><span class="hl-10">const</span><span class="hl-5"> </span><span class="hl-11">canvas</span><span class="hl-5"> </span><span class="hl-1">=</span><span class="hl-5"> </span><span class="hl-14">await</span><span class="hl-5"> </span><span class="hl-12">Canvas</span><span class="hl-5">.</span><span class="hl-0">load</span><span class="hl-5">(</span><span class="hl-12">canvasElement</span><span class="hl-5">, </span><span class="hl-2">&#39;INTERACTIVE_INK_SSR&#39;</span><span class="hl-5">, </span><span class="hl-12">options</span><span class="hl-5">)</span><br/><span class="hl-5">    </span><span class="hl-3">&lt;/</span><span class="hl-4">script</span><span class="hl-3">&gt;</span><br/><span class="hl-1">  </span><span class="hl-3">&lt;/</span><span class="hl-4">body</span><span class="hl-3">&gt;</span><br/><span class="hl-3">&lt;/</span><span class="hl-4">html</span><span class="hl-3">&gt;</span>
+</code><button type="button">Copy</button></pre>
+
+<h2 id="authentication" class="tsd-anchor-link">Authentication<a href="#authentication" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>The MyScript server checks an HMAC signature computed with your HMAC key. <strong>Do not ship the HMAC key to
+the browser</strong>: anyone can read it there and use your quota. Keep it on a server you own and let the
+canvas ask that server for each signature with <code>server.sign</code>:</p>
+<pre><code class="javascript"><span class="hl-10">const</span><span class="hl-1"> </span><span class="hl-11">options</span><span class="hl-1"> = {</span><br/><span class="hl-1">  </span><span class="hl-12">configuration:</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-12">server:</span><span class="hl-1"> {</span><br/><span class="hl-1">      </span><span class="hl-12">scheme:</span><span class="hl-1"> </span><span class="hl-2">&quot;https&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">      </span><span class="hl-12">host:</span><span class="hl-1"> </span><span class="hl-2">&quot;cloud.myscript.com&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">      </span><span class="hl-12">applicationKey:</span><span class="hl-1"> </span><span class="hl-2">&quot;&lt;YOU-APPLICATION-KEY&gt;&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">      </span><span class="hl-12">hmacKey:</span><span class="hl-1"> </span><span class="hl-2">&quot;&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">      </span><span class="hl-0">sign</span><span class="hl-12">:</span><span class="hl-1"> </span><span class="hl-10">async</span><span class="hl-1"> (</span><span class="hl-12">message</span><span class="hl-1">) </span><span class="hl-10">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-10">const</span><span class="hl-1"> </span><span class="hl-11">response</span><span class="hl-1"> = </span><span class="hl-14">await</span><span class="hl-1"> </span><span class="hl-0">fetch</span><span class="hl-1">(</span><span class="hl-2">&quot;/sign&quot;</span><span class="hl-1">, {</span><br/><span class="hl-1">          </span><span class="hl-12">method:</span><span class="hl-1"> </span><span class="hl-2">&quot;POST&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">          </span><span class="hl-12">headers:</span><span class="hl-1"> { </span><span class="hl-2">&quot;Content-Type&quot;</span><span class="hl-12">:</span><span class="hl-1"> </span><span class="hl-2">&quot;application/json&quot;</span><span class="hl-1"> },</span><br/><span class="hl-1">          </span><span class="hl-12">body:</span><span class="hl-1"> </span><span class="hl-11">JSON</span><span class="hl-1">.</span><span class="hl-0">stringify</span><span class="hl-1">({ </span><span class="hl-12">message</span><span class="hl-1"> }),</span><br/><span class="hl-1">        })</span><br/><span class="hl-1">        </span><span class="hl-14">return</span><span class="hl-1"> (</span><span class="hl-14">await</span><span class="hl-1"> </span><span class="hl-12">response</span><span class="hl-1">.</span><span class="hl-0">json</span><span class="hl-1">()).</span><span class="hl-12">signature</span><br/><span class="hl-1">      },</span><br/><span class="hl-1">    },</span><br/><span class="hl-1">  },</span><br/><span class="hl-1">}</span>
+</code><button type="button">Copy</button></pre>
+
+<p><code>message</code> is the WebSocket HMAC challenge, or the body of an HTTP recognition request. The server
+returns HMAC-SHA512 of it, keyed by the application key followed by the HMAC key, as lowercase hex. In
+Node:</p>
+<pre><code class="javascript"><span class="hl-14">import</span><span class="hl-1"> { </span><span class="hl-12">createHmac</span><span class="hl-1"> } </span><span class="hl-14">from</span><span class="hl-1"> </span><span class="hl-2">&quot;node:crypto&quot;</span><br/><br/><span class="hl-10">const</span><span class="hl-1"> </span><span class="hl-11">signature</span><span class="hl-1"> = </span><span class="hl-0">createHmac</span><span class="hl-1">(</span><span class="hl-2">&quot;sha512&quot;</span><span class="hl-1">, </span><span class="hl-11">APPLICATION_KEY</span><span class="hl-1"> + </span><span class="hl-11">HMAC_KEY</span><span class="hl-1">).</span><span class="hl-0">update</span><span class="hl-1">(</span><span class="hl-12">message</span><span class="hl-1">).</span><span class="hl-0">digest</span><span class="hl-1">(</span><span class="hl-2">&quot;hex&quot;</span><span class="hl-1">)</span>
+</code><button type="button">Copy</button></pre>
+
+<p>Put the signing route behind your own authentication and rate-limit it: whoever can call it can get
+messages signed. <a href="media/server.js"><code>examples/server-signing/server.js</code></a> is a complete, dependency-free
+signing server with a page that holds no credential at all:</p>
+<pre><code class="shell"><span class="hl-0">node</span><span class="hl-1"> </span><span class="hl-10">--env-file=.env.local</span><span class="hl-1"> </span><span class="hl-2">examples/server-signing/server.js</span>
+</code><button type="button">Copy</button></pre>
+
+<p><code>hmacKey</code> as a string remains for development and prototypes.</p>
+<h2 id="documentation" class="tsd-anchor-link">Documentation<a href="#documentation" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>You can find a complete documentation with the following sections on our Developer website:</p>
+<ul>
+<li><strong>Get Started</strong>: <a href="https://developer.myscript.com/docs/cloud/latest/iinkts/get-started/">how to use iinkTS with a full example</a>,</li>
+<li><strong>Editing</strong>: <a href="https://developer.myscript.com/docs/cloud/latest/iinkts/interactive-ink-canvas/interactive-ink-canvas/">how to interact with content</a>,</li>
+<li><strong>Conversion</strong>: <a href="https://developer.myscript.com/docs/cloud/latest/iinkts/interactive-ink-canvas/interactive-ink-canvas/">how to convert your handwritten content</a>,</li>
+<li><strong>Import and Export</strong>: <a href="https://developer.myscript.com/docs/cloud/latest/interactivity-integration/import-and-export-formats/">how to import and export your content</a>,</li>
+<li><strong>Styling</strong>: <a href="https://developer.myscript.com/docs/cloud/latest/iinkts/reference/configuration-iinkts/">how to style content</a>.</li>
+</ul>
+<p>We also provide a complete <a href="https://myscript.github.io/iinkTS/docs/">API Reference</a>.</p>
+<h2 id="architecture" class="tsd-anchor-link">Architecture<a href="#architecture" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>If you're integrating iinkTS or rebuilding your own client from scratch, these diagrams cover the class organization and the WebSocket protocol:</p>
+<ul>
+<li><a href="media/interactive-ink-canvas.md">architecture/interactive-ink-canvas.md</a> — class diagram of the <code>INTERACTIVE_INK</code> (WebSocket, real-time) variant and its managers.</li>
+<li><a href="media/ink-canvas.md">architecture/ink-canvas.md</a> — class diagram of the <code>INK_V2</code> (HTTP batch) variant and the deprecated <code>INK_V1</code>.</li>
+<li><a href="media/websocket-protocol.md">architecture/websocket-protocol.md</a> — sequence diagram of the messages exchanged between the WebSocket client and the MyScript backend (auth, session, strokes, recognition, export, undo/redo, errors/reconnection).</li>
+</ul>
+<h2 id="migration" class="tsd-anchor-link">Migration<a href="#migration" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>Upgrading from an earlier major version? See <a href="media/MIGRATION.md">MIGRATION.md</a> for breaking changes and step-by-step instructions.</p>
+<p>iinkTS follows <a href="https://semver.org">semantic versioning</a> for the API the guides on the Developer website describe: <code>Canvas.load</code>, the configuration, the canvas methods and events, and the classes <code>options.override</code> accepts. The <a href="https://myscript.github.io/iinkTS/docs/">API Reference</a> lists everything the package exports; the rest of it (managers, renderers, internal helpers) may change in a minor release, and so may subclassing a class <code>options.override</code> does not accept.</p>
+<h2 id="development" class="tsd-anchor-link">Development<a href="#development" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>Instructions to help you build the project and develop are available in the <a href="media/SETUP.md">SETUP.md</a> file.</p>
+<h2 id="getting-support" class="tsd-anchor-link">Getting support<a href="#getting-support" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>You can get support and ask your questions on the <a href="https://developer-support.myscript.com/support/discussions/forums/16000096760">dedicated section</a> of MyScript Developer website.</p>
+<h2 id="sharing-your-feedback" class="tsd-anchor-link">Sharing your feedback<a href="#sharing-your-feedback" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>Made a cool app with iinkTS? We would love to hear about you!
+We’re planning to showcase apps using it so let us know by sending a quick mail to <a href="mailto:myapp@myscript.com">myapp@myscript.com</a>.</p>
+<h2 id="contributing" class="tsd-anchor-link">Contributing<a href="#contributing" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>We welcome your contributions: if you would like to extend iinkTS for your needs, feel free to fork it!</p>
+<p>Please take a look at our <a href="media/CONTRIBUTING.md">contributing</a> guidelines before submitting your pull request.</p>
+<p>To report a bug or ask for a feature, <a href="https://github.com/MyScript/iinkTS/issues/new/choose">open an issue</a>.</p>
+<h2 id="troubleshooting" class="tsd-anchor-link">Troubleshooting<a href="#troubleshooting" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>If you encounter the error: <code>Unrecognized property: convert.force</code>, this means your server version is lower than 2.3.0.
+To correct the problem, you have 2 options:</p>
+<ul>
+<li>either update your server</li>
+<li>either add in the iink-ts configuration <code>configuration.server.version = &quot;2.2.0&quot;</code></li>
+</ul>
+<p>If you encounter the error: <code>Unrecognized property: configuration.export.jiix.text.lines</code>, this means your server version is lower than 3.2.0.
+To correct the problem, you have 2 options:</p>
+<ul>
+<li>either update your server</li>
+<li>either add in the iink-ts configuration <code>configuration.server.version = &quot;3.1.0&quot;</code></li>
+</ul>
+<h2 id="license" class="tsd-anchor-link">License<a href="#license" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>This library is licensed under the <a href="http://opensource.org/licenses/Apache-2.0">Apache 2.0</a>.</p>
+</div></div>
+<div class="col-sidebar">
+<div class="page-menu">
+<div class="tsd-navigation settings">
+<details class="tsd-accordion"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="assets/icons.svg#icon-chevronDown"></use></svg>
+<h3>Settings</h3></summary>
+<div class="tsd-accordion-details">
+<div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span>
+<ul id="tsd-filter-options">
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-protected" name="protected"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Protected</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-alpha" name="alpha"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Alpha</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-beta" name="beta"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Beta</span></label></li></ul></div>
+<div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div>
+<details open class="tsd-accordion tsd-page-navigation"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="assets/icons.svg#icon-chevronDown"></use></svg>
+<h3>On This Page</h3></summary>
+<div class="tsd-accordion-details"><a href="#iinkts"><span>iink<wbr/>TS</span></a>
+<ul>
+<li><a href="#table-of-contents"><span>Table of contents</span></a></li>
+<li><a href="#features"><span>Features</span></a></li>
+<li><a href="#gallery"><span>Gallery</span></a></li>
+<li><a href="#examples-by-use-case"><span>Examples by use case</span></a></li>
+<li><a href="#requirements"><span>Requirements</span></a></li>
+<li><a href="#installation"><span>Installation</span></a></li>
+<li><a href="#usage"><span>Usage</span></a></li>
+<li>
+<ul>
+<li><a href="#universal-module-definition-umd"><span>Universal <wbr/>Module <wbr/>Definition (<wbr/>UMD)</span></a></li>
+<li><a href="#ecmascript-module-esm"><span>ECMA<wbr/>Script module (<wbr/>ESM)</span></a></li></ul></li>
+<li><a href="#authentication"><span>Authentication</span></a></li>
+<li><a href="#documentation"><span>Documentation</span></a></li>
+<li><a href="#architecture"><span>Architecture</span></a></li>
+<li><a href="#migration"><span>Migration</span></a></li>
+<li><a href="#development"><span>Development</span></a></li>
+<li><a href="#getting-support"><span>Getting support</span></a></li>
+<li><a href="#sharing-your-feedback"><span>Sharing your feedback</span></a></li>
+<li><a href="#contributing"><span>Contributing</span></a></li>
+<li><a href="#troubleshooting"><span>Troubleshooting</span></a></li>
+<li><a href="#license"><span>License</span></a></li></ul></div></details></div>
+<div class="site-menu">
+<nav class="tsd-navigation"><a href="modules.html">iink-ts - v5.0.0</a>
+<ul class="tsd-small-nested-navigation" id="tsd-nav-container">
+<li>Loading...</li></ul></nav></div></div></div><footer>
+<p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer>
+<div class="overlay"></div></body></html>

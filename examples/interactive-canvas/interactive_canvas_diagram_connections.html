@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Diagram Connections Example</title>
+
+  <link rel="stylesheet" href="../assets/style/reset.css" />
+  <link rel="stylesheet" href="../assets/style/components.css" />
+  <link rel="stylesheet" href="../assets/style/examples.css" />
+  <link rel="stylesheet" href="../assets/style/panel.css" />
+  <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+
+  <style>
+    #rootEl {
+      flex: 1;
+      min-width: 0;
+    }
+
+    #connections {
+      --ex-side-panel-width: 260px;
+      padding: 12px;
+      background: var(--ex-surface-alt);
+      font-family: monospace;
+      font-size: 12px;
+    }
+
+    #connections strong {
+      color: #1976D2;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .connection-info {
+      margin: 4px 0;
+      padding: 4px;
+      background: var(--ex-surface);
+      border-left: 3px solid #2196F3;
+    }
+
+    .connection-info.converted { border-left-color: #4CAF50; cursor: pointer; }
+    .connection-info.ink { border-left-color: #FF9800; cursor: pointer; }
+
+    .connection-end {
+      margin: 2px 0 2px 8px;
+    }
+
+    .connection-end.connected { color: #2E7D32; }
+    .connection-end.free { color: #9E9E9E; }
+    .connection-target-kind { color: inherit; opacity: 0.75; font-style: italic; }
+
+    /* Applied to the canvas DOM element(s) of whatever a hovered panel entry refers to. */
+    .connection-hover-highlight {
+      outline: 3px dashed #E91E63 !important;
+      outline-offset: 2px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) #connections strong { color: #90caf9; }
+      :root:not([data-theme="light"]) .connection-end.connected { color: #81c784; }
+    }
+    :root[data-theme="dark"] #connections strong { color: #90caf9; }
+    :root[data-theme="dark"] .connection-end.connected { color: #81c784; }
+  </style>
+  <script src="../assets/js/theme-init.js"></script>
+</head>
+
+<body>
+  <header class="header-main">
+    <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+      💡 Info
+    </button>
+    <button id="showModalBtn" class="btn-keys">API Keys</button>
+    <h1 class="header-title">Diagram Connections Example</h1>
+    <button id="sidePanelToggleBtn" class="btn-panel-toggle btn-side-panel-toggle" aria-expanded="false" aria-controls="connections">
+      🔗 Connections
+    </button>
+  </header>
+
+  <div class="ex-page-layout">
+    <aside id="info-panel" class="ex-panel">
+      <p class="ex-panel-heading">How do shape-edge connections work?</p>
+      <p class="ex-panel-intro">When a line, polyline, or arc touches a shape in your diagram, the recognition server detects the connection — and iinkTS keeps the edge attached to that shape as you keep editing.</p>
+      <div class="ex-panel-divider"></div>
+      <div class="ex-panel-item">
+        <div class="ex-panel-item-desc"><strong>While writing</strong>, a connection is tracked directly on the ink strokes — no need to convert first.</div>
+      </div>
+      <div class="ex-panel-item">
+        <div class="ex-panel-item-desc"><strong>After Convert</strong>, the same connection is preserved on the resulting vector shapes and edges.</div>
+      </div>
+      <div class="ex-panel-item">
+        <div class="ex-panel-item-desc">Moving, resizing, or rotating a connected shape drags its connected edges along with it — before <em>and</em> after Convert.</div>
+      </div>
+      <div class="ex-panel-item">
+        <div class="ex-panel-item-desc">Erasing a connected shape automatically clears the connection on the edge that pointed to it.</div>
+      </div>
+      <div class="ex-panel-item">
+        <div class="ex-panel-item-desc">Don't want edges to follow their connected shape? Open the <span class="highlight">☰ menu</span> at the top of the canvas → <span class="highlight">Diagram</span> → untick <em>Follow connected edges</em>. The connection itself (and its survival across Convert) is unaffected — this only turns off the drag-follow behavior.</div>
+      </div>
+      <div class="ex-panel-divider"></div>
+      <div class="ex-panel-item">
+        <div class="ex-panel-item-desc"><strong>Try it:</strong><br>
+          1. Draw a shape (rectangle, circle, ...) with the <span class="highlight">Shape</span> tool<br>
+          2. Draw a line or arc with one end touching that shape, using the <span class="highlight">Edge</span> tool<br>
+          3. Watch the <span class="highlight">Connections</span> panel — the edge should report itself connected<br>
+          4. Select and move the shape — the edge follows, even before converting<br>
+          5. Hit <span class="highlight">Convert</span> — the shape and edge become vector symbols, the connection carries over<br>
+          6. Move, resize, or rotate the shape again — the edge keeps following<br>
+          7. Erase the shape — the edge's connection clears automatically<br>
+          8. Toggle <span class="highlight">☰ menu → Diagram → Follow connected edges</span> off, then move the shape again — the edge stays put this time
+        </div>
+      </div>
+    </aside>
+    <div class="main-layout">
+      <div id="rootEl"></div>
+      <div id="connections" class="ex-side-panel">
+        <strong>Connections:</strong><br>
+        <span id="connections-list">No edges yet</span>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    const panelToggleBtn = document.getElementById('panelToggleBtn')
+    const infoPanel = document.getElementById('info-panel')
+    panelToggleBtn.addEventListener('click', () => {
+      const open = infoPanel.classList.toggle('open')
+      panelToggleBtn.setAttribute('aria-expanded', open)
+    })
+
+    const sidePanelToggleBtn = document.getElementById('sidePanelToggleBtn')
+    const sidePanel = document.getElementById('connections')
+    sidePanelToggleBtn.addEventListener('click', () => {
+      const open = sidePanel.classList.toggle('open')
+      sidePanelToggleBtn.setAttribute('aria-expanded', open)
+    })
+
+    import { Canvas, SymbolType } from '../../dist/iink.esm.js'
+    import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
+
+    const rootElement = document.getElementById('rootEl')
+    const showModalBtn = document.getElementById('showModalBtn')
+    const connectionsList = document.getElementById('connections-list')
+
+    let canvas
+
+    // No special recognition config needed — INTERACTIVE_INK recognizes mixed
+    // shape/edge/text/math content by default, and connection tracking is
+    // automatic whenever an edge touches a shape.
+    const canvasOptions = {
+      configuration: {},
+    }
+
+    async function loadCanvas(options) {
+      await canvas?.destroy()
+
+      canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK', options)
+
+      canvas.event.addSynchronizedListener(updateConnectionsDisplay)
+      canvas.event.addChangedListener(updateConnectionsDisplay)
+      updateConnectionsDisplay()
+      return canvas
+    }
+
+    // Groups pre-convert ink strokes by jiixBlockId — a multi-stroke edge (e.g. a two-stroke
+    // arrow) is one logical edge, so it must render as one panel entry, not one per stroke.
+    // Converted edges are already exactly one symbol, so no grouping is needed for those.
+    function collectConnectionEntries() {
+      const symbols = canvas.model.symbols
+      const entries = []
+      const seenBlockIds = new Set()
+
+      symbols.forEach((symbol) => {
+        const isConvertedEdge = symbol.type === SymbolType.Edge
+        const isInkEdge = symbol.type === SymbolType.Stroke && symbol.jiixBlockType === 'Edge'
+        if (!isConvertedEdge && !isInkEdge) {
+          return
+        }
+
+        if (isConvertedEdge) {
+          entries.push({
+            kindLabel: `${symbol.kind} (converted)`,
+            elementIds: [symbol.id],
+            startAnchor: symbol.startAnchor,
+            endAnchor: symbol.endAnchor,
+          })
+          return
+        }
+
+        const blockId = symbol.jiixBlockId
+        if (!blockId || seenBlockIds.has(blockId)) {
+          return
+        }
+        seenBlockIds.add(blockId)
+        const blockStrokes = symbols.filter((s) => s.jiixBlockId === blockId && s.jiixBlockType === 'Edge')
+        entries.push({
+          kindLabel: 'ink',
+          elementIds: blockStrokes.map((s) => s.id),
+          // Sync writes the identical anchor to every stroke in the block, so any one
+          // representative stroke's anchors describe the whole group.
+          startAnchor: symbol.startAnchor,
+          endAnchor: symbol.endAnchor,
+        })
+      })
+
+      return entries
+    }
+
+    // Resolves what an anchor's symbolId points at: a real symbol post-convert, or a
+    // jiixBlockId (a group of raw strokes, described by the live JIIX export) pre-convert.
+    function resolveTarget(symbolId) {
+      const liveSymbol = canvas.model.symbols.find((s) => s.id === symbolId)
+      if (liveSymbol) {
+        return { kind: liveSymbol.kind || 'shape', elementIds: [liveSymbol.id] }
+      }
+      const jiix = canvas.model.exports?.['application/vnd.myscript.jiix']
+      const element = jiix?.elements?.find((e) => e.id === symbolId)
+      const blockStrokes = canvas.model.symbols.filter((s) => s.jiixBlockId === symbolId)
+      return { kind: element?.kind || 'shape', elementIds: blockStrokes.map((s) => s.id) }
+    }
+
+    function describeAnchor(anchor) {
+      if (!anchor) {
+        return { html: '<span class="connection-end free">○ free end</span>', elementIds: [] }
+      }
+      const target = resolveTarget(anchor.symbolId)
+      const x = Math.round(anchor.normalizedX * 100)
+      const y = Math.round(anchor.normalizedY * 100)
+      const html =
+        '<span class="connection-end connected">● connected to ' +
+        `<span class="connection-target-kind">${target.kind}</span> (${x}%, ${y}%)</span>`
+      return { html, elementIds: target.elementIds }
+    }
+
+    function updateConnectionsDisplay() {
+      const entries = collectConnectionEntries()
+      if (entries.length === 0) {
+        connectionsList.innerHTML = 'No edges yet — draw a shape, then a line or arc touching it.'
+        return
+      }
+
+      let html = ''
+      entries.forEach((entry, index) => {
+        const start = describeAnchor(entry.startAnchor)
+        const end = describeAnchor(entry.endAnchor)
+        const hoverIds = [...entry.elementIds, ...start.elementIds, ...end.elementIds]
+        const cssClass = entry.kindLabel === 'ink' ? 'ink' : 'converted'
+        html += `<div class="connection-info ${cssClass}" data-hover-ids="${hoverIds.join(',')}">`
+        html += `<strong>Edge ${index + 1} — ${entry.kindLabel}</strong>`
+        html += `<div>Start: ${start.html}</div>`
+        html += `<div>End: ${end.html}</div>`
+        html += `</div>`
+      })
+
+      connectionsList.innerHTML = html
+    }
+
+    // Hovering a panel entry highlights the edge's own canvas element(s) plus whatever
+    // shape(s) it's connected to, via event delegation since innerHTML rebuilds the DOM.
+    function toggleHoverHighlight(event, add) {
+      const item = event.target.closest('.connection-info')
+      if (!item) {
+        return
+      }
+      const ids = (item.dataset.hoverIds || '').split(',').filter(Boolean)
+      ids.forEach((id) => document.getElementById(id)?.classList.toggle('connection-hover-highlight', add))
+    }
+    connectionsList.addEventListener('mouseover', (event) => toggleHoverHighlight(event, true))
+    connectionsList.addEventListener('mouseout', (event) => toggleHoverHighlight(event, false))
+
+    showModalBtn.addEventListener('click', () => {
+      ModalCanvasOptions.show(loadCanvas, canvasOptions)
+    })
+
+    ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
+  </script>
+  <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+  <script src="../assets/js/theme.js"></script>
+</body>
+</html>

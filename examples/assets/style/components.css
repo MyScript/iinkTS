@@ -1,0 +1,327 @@
+/* ─── Keyboard key (kbd) ─────────────────────────────────────────────────── */
+
+kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 5px;
+  font-size: 11px;
+  font-family: monospace;
+  background: var(--ex-surface-alt, #f5f5f5);
+  border: 1px solid var(--ex-border);
+  border-bottom: 2px solid var(--ex-border);
+  border-radius: 3px;
+  color: var(--ex-text);
+  min-width: 22px;
+  white-space: nowrap;
+}
+
+
+/* ─── Classic button ─────────────────────────────────────────────────────── */
+
+.classic-btn {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ex-text);
+  background: var(--ex-surface);
+  border: 2px solid var(--ex-border);
+  border-radius: var(--ex-radius-sm);
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+  text-decoration: none;
+  user-select: none;
+  touch-action: manipulation;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.classic-btn:hover {
+  background: var(--ex-hover);
+  border-color: var(--ex-text-muted);
+}
+
+.classic-btn:active {
+  background: var(--ex-hover);
+  border-color: var(--ex-primary);
+  color: var(--ex-primary);
+}
+
+.classic-btn:disabled {
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+.classic-btn.success {
+  border-color: var(--ex-success);
+  color: var(--ex-success);
+}
+
+.classic-btn.primary {
+  border-color: var(--ex-primary);
+  color: var(--ex-primary);
+}
+
+.classic-btn.reset {
+  border-color: var(--ex-accent-orange);
+  color: var(--ex-accent-orange);
+}
+
+.classic-btn > img {
+  height: 24px;
+  margin-right: var(--ex-space-md);
+}
+
+
+/* ─── Menu button ────────────────────────────────────────────────────────── */
+
+.menu-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  width: 36px;
+  background: var(--ex-surface);
+  border: 1px solid var(--ex-border);
+  border-radius: var(--ex-radius-md);
+  box-shadow: var(--ex-shadow-sm);
+  cursor: pointer;
+  transition: box-shadow var(--ex-transition);
+}
+
+.menu-button.active {
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.menu-button img {
+  width: 24px;
+  height: 24px;
+}
+
+
+/* ─── Close button ───────────────────────────────────────────────────────── */
+
+.close-btn {
+  margin-left: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  border: none;
+  aspect-ratio: 1;
+  height: 100%;
+  padding: 7px;
+  cursor: pointer;
+  background: transparent;
+}
+
+
+/* ─── FAB / nav button ───────────────────────────────────────────────────── */
+
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  height: 35px;
+  padding: 0 1.5rem;
+  color: #424242;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border: none;
+  border-radius: var(--ex-radius-sm);
+  user-select: none;
+  box-shadow: var(--ex-shadow-sm);
+  transition: background var(--ex-transition), box-shadow var(--ex-transition);
+}
+
+.nav-btn > img {
+  display: block;
+  width: 50%;
+  margin: 0 auto;
+}
+
+.nav-btn.btn-fab,
+.nav-btn.btn-fab-mini {
+  overflow: hidden;
+  padding: 0;
+  border-radius: 50%;
+  box-shadow: var(--ex-shadow-sm);
+}
+
+.nav-btn.btn-fab {
+  width: 56px;
+  height: 56px;
+  font-size: 28px;
+}
+
+.nav-btn.btn-fab-mini {
+  width: 40px;
+  height: 40px;
+  font-size: 24px;
+}
+
+.nav-btn.btn-lightBlue {
+  color: #fff;
+  background: var(--ex-primary);
+}
+
+.nav-btn.btn-lightBlue:hover {
+  background: var(--ex-primary-dark);
+}
+
+.nav-btn.btn-lightBlue:active {
+  background: var(--ex-primary-dark);
+  box-shadow: var(--ex-shadow-md);
+}
+
+.nav-btn:disabled,
+.nav-btn[disabled] {
+  pointer-events: none;
+  background: var(--ex-disabled);
+  box-shadow: none;
+}
+
+
+
+.switch-container {
+  display: flex;
+  align-items: center;
+  gap: var(--ex-space-sm);
+}
+
+.switch-label {
+  font-size: 13px;
+  color: var(--ex-text);
+}
+
+
+/* ─── Dropdown menu ──────────────────────────────────────────────────────── */
+
+.dropdown-menu {
+  height: 36px;
+  width: 36px;
+  margin: 0;
+  z-index: 99;
+  position: relative;
+  border-radius: var(--ex-radius-md);
+  transition: background var(--ex-transition);
+}
+
+.dropdown-menu.full-width {
+  width: 100%;
+}
+
+.dropdown-menu:hover,
+.dropdown-menu:focus,
+.dropdown-menu:focus-within {
+  background: var(--ex-hover);
+}
+
+.dropdown-menu ul {
+  position: absolute;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  right: 0;
+  top: 100%;
+  display: none;
+  min-width: max-content;
+  border-radius: var(--ex-radius-xl);
+  box-shadow: var(--ex-shadow-md);
+  background: var(--ex-surface-alt);
+  overflow: hidden;
+}
+
+.dropdown-menu:hover ul,
+.dropdown-menu:focus ul,
+.dropdown-menu:focus-within ul {
+  display: block;
+}
+
+.dropdown-menu.horizontal ul {
+  right: 100%;
+  top: 0;
+}
+
+.dropdown-menu.horizontal.left ul {
+  right: auto;
+  top: 0;
+}
+
+.dropdown-menu ul li {
+  background: var(--ex-surface);
+  padding: 5px 10px;
+}
+
+.dropdown-menu:hover ul.horizontal,
+.dropdown-menu:focus ul.horizontal,
+.dropdown-menu:focus-within ul.horizontal {
+  display: flex;
+  flex-direction: row;
+  transform: translateX(calc(50% - 12px));
+}
+
+.dropdown-menu ul.horizontal li {
+  width: auto;
+  padding: 5px;
+}
+
+.dropdown-menu ul li .label {
+  color: var(--ex-text-muted);
+  font-size: larger;
+  height: 100%;
+  margin-right: auto;
+  white-space: nowrap;
+  padding-right: var(--ex-space-md);
+}
+
+.dropdown-menu ul li .label img {
+  height: 18px;
+  width: 18px;
+}
+
+
+/* ─── Flex utilities ─────────────────────────────────────────────────────── */
+
+.flex-container {
+  display: flex;
+  align-items: center;
+  padding: var(--ex-space-sm);
+}
+
+.flex-container.column  { flex-direction: column; }
+.flex-container.wrap    { flex-wrap: wrap; }
+.flex-container.between { justify-content: space-between; }
+.flex-container.start   { justify-content: flex-start; }
+.flex-container.center  { justify-content: center; }
+.flex-container.gap     { gap: var(--ex-space-md); }
+
+/* ─── Separators ─────────────────────────────────────────────────────────── */
+
+.separator.vertical {
+  align-self: stretch;
+  width: 1px;
+  min-width: 1px;
+  margin: 0 var(--ex-space-md);
+  border: none;
+  border-left: 1px solid var(--ex-border);
+}
+
+.separator.horizontal {
+  height: 1px;
+  min-height: 1px;
+  width: 100%;
+  margin: var(--ex-space-md) 0;
+  border: none;
+  border-top: 1px solid var(--ex-border);
+}
